@@ -29,7 +29,7 @@
 
   <!-- Auth Screen -->
   <div id="authSection" class="container d-flex justify-content-center align-items-center min-vh-100">
-    <div class="card p-4 shadow-lg" style="max-width: 420px; width: 100%;">
+    <div class="card p-4 shadow-lg" style="max-width: 440px; width: 100%;">
       <div class="text-center mb-4">
         <i class="fa-solid fa-mosque fa-3x text-success mb-2"></i>
         <h3 class="fw-bold">Smart Madrasa</h3>
@@ -56,6 +56,10 @@
 
       <!-- Madrasa Sign Up Form -->
       <form id="signupForm" class="d-none" onsubmit="handleSignUp(event)">
+        <div class="mb-2">
+          <label class="form-label">മദ്റസാ നമ്പർ / കോഡ് (Madrasa Reg No.)</label>
+          <input type="text" id="regInstCode" class="form-control" placeholder="ഉദാ: MDR-1045" required>
+        </div>
         <div class="mb-2">
           <label class="form-label">മദ്റസയുടെ പേര്</label>
           <input type="text" id="regInstName" class="form-control" required>
@@ -212,7 +216,7 @@
             </div>
           </div>
 
-          <!-- 3. Attendance Module (Simplified Checkbox & Role Locking) -->
+          <!-- 3. Attendance Module (Dynamic Class Selection & Tick Box) -->
           <div id="attendanceTab" class="content-tab d-none">
             <div class="card p-4">
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-calendar-check"></i> ദിവസേന ഹാജർ രേഖപ്പെടുത്തൽ</h5>
@@ -225,10 +229,6 @@
                   <label class="form-label">ക്ലാസ് തിരഞ്ഞെടുക്കുക</label>
                   <select id="attClassSelect" class="form-select" onchange="loadAttendanceSheet()">
                     <option value="">-- ക്ലാസ് തിരഞ്ഞെടുക്കുക --</option>
-                    <option value="1">ക്ലാസ് 1</option><option value="2">ക്ലാസ് 2</option><option value="3">ക്ലാസ് 3</option>
-                    <option value="4">ക്ലാസ് 4</option><option value="5">ക്ലാസ് 5</option><option value="6">ക്ലാസ് 6</option>
-                    <option value="7">ക്ലാസ് 7</option><option value="8">ക്ലാസ് 8</option><option value="9">ക്ലാസ് 9</option>
-                    <option value="10">ക്ലാസ് 10</option>
                   </select>
                 </div>
               </div>
@@ -259,7 +259,7 @@
             </div>
           </div>
 
-          <!-- 4. Marks Tab -->
+          <!-- 4. Marks Tab (Dynamic Class Selection) -->
           <div id="marksTab" class="content-tab d-none">
             <div class="card p-4">
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-award"></i> പരീക്ഷാ മാർക്ക് എൻട്രി</h5>
@@ -272,10 +272,6 @@
                   <label class="form-label">ക്ലാസ്</label>
                   <select id="markClassSelect" class="form-select" onchange="loadMarksEntrySheet()">
                     <option value="">-- ക്ലാസ് തിരഞ്ഞെടുക്കുക --</option>
-                    <option value="1">ക്ലാസ് 1</option><option value="2">ക്ലാസ് 2</option><option value="3">ക്ലാസ് 3</option>
-                    <option value="4">ക്ലാസ് 4</option><option value="5">ക്ലാസ് 5</option><option value="6">ക്ലാസ് 6</option>
-                    <option value="7">ക്ലാസ് 7</option><option value="8">ക്ലാസ് 8</option><option value="9">ക്ലാസ് 9</option>
-                    <option value="10">ക്ലാസ് 10</option>
                   </select>
                 </div>
               </div>
@@ -312,10 +308,6 @@
                   <label class="form-label">ക്ലാസ് തിരഞ്ഞെടുക്കുക</label>
                   <select id="feeClassSelect" class="form-select" onchange="loadStudentsForFees()">
                     <option value="">-- ക്ലാസ് തിരഞ്ഞെടുക്കുക --</option>
-                    <option value="1">ക്ലാസ് 1</option><option value="2">ക്ലാസ് 2</option><option value="3">ക്ലാസ് 3</option>
-                    <option value="4">ക്ലാസ് 4</option><option value="5">ക്ലാസ് 5</option><option value="6">ക്ലാസ് 6</option>
-                    <option value="7">ക്ലാസ് 7</option><option value="8">ക്ലാസ് 8</option><option value="9">ക്ലാസ് 9</option>
-                    <option value="10">ക്ലാസ് 10</option>
                   </select>
                 </div>
                 <div class="col-md-8">
@@ -345,7 +337,7 @@
             </div>
           </div>
 
-          <!-- 6. Teachers Management Tab (Principal Only) -->
+          <!-- 6. Teachers Management Tab (Multiple Classes Assignment) -->
           <div id="teachersTab" class="content-tab d-none">
             <div class="card p-4">
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-chalkboard-user"></i> മുഅല്ലിം മാനേജ്‌മെന്റ് (അധ്യാപകരെ ചേർക്കൽ)</h5>
@@ -355,23 +347,29 @@
                   <div class="col-md-4"><label class="form-label">മൊബൈൽ നമ്പർ</label><input type="tel" id="tPhone" class="form-control" required></div>
                   <div class="col-md-4"><label class="form-label">ഇമെയിൽ</label><input type="email" id="tEmail" class="form-control" required></div>
                   <div class="col-md-4"><label class="form-label">പാസ്‌വേഡ്</label><input type="password" id="tPassword" class="form-control" required></div>
-                  <div class="col-md-4">
-                    <label class="form-label">ചുമതലയുള്ള ക്ലാസ് (Assigned Class)</label>
-                    <select id="tAssignedClass" class="form-select">
-                      <option value="1">ക്ലാസ് 1</option><option value="2">ക്ലാസ് 2</option><option value="3">ക്ലാസ് 3</option>
-                      <option value="4">ക്ലാസ് 4</option><option value="5">ക്ലാസ് 5</option><option value="6">ക്ലാസ് 6</option>
-                      <option value="7">ക്ലാസ് 7</option><option value="8">ക്ലാസ് 8</option><option value="9">ക്ലാസ് 9</option>
-                      <option value="10">ക്ലാസ് 10</option>
-                    </select>
+                  
+                  <!-- Multiple Class Selection Checkboxes -->
+                  <div class="col-md-8">
+                    <label class="form-label d-block">ചുമതലയുള്ള ക്ലാസുകൾ (Assigned Classes):</label>
+                    <div class="d-flex flex-wrap gap-3">
+                      <div class="form-check"><input class="form-check-input t-class-cb" type="checkbox" value="1" id="tc1"><label class="form-check-label" for="tc1">ക്ലാസ് 1</label></div>
+                      <div class="form-check"><input class="form-check-input t-class-cb" type="checkbox" value="2" id="tc2"><label class="form-check-label" for="tc2">ക്ലാസ് 2</label></div>
+                      <div class="form-check"><input class="form-check-input t-class-cb" type="checkbox" value="3" id="tc3"><label class="form-check-label" for="tc3">ക്ലാസ് 3</label></div>
+                      <div class="form-check"><input class="form-check-input t-class-cb" type="checkbox" value="4" id="tc4"><label class="form-check-label" for="tc4">ക്ലാസ് 4</label></div>
+                      <div class="form-check"><input class="form-check-input t-class-cb" type="checkbox" value="5" id="tc5"><label class="form-check-label" for="tc5">ക്ലാസ് 5</label></div>
+                      <div class="form-check"><input class="form-check-input t-class-cb" type="checkbox" value="6" id="tc6"><label class="form-check-label" for="tc6">ക്ലാസ് 6</label></div>
+                      <div class="form-check"><input class="form-check-input t-class-cb" type="checkbox" value="7" id="tc7"><label class="form-check-label" for="tc7">ക്ലാസ് 7</label></div>
+                    </div>
                   </div>
-                  <div class="col-md-4 d-flex align-items-end"><button type="submit" class="btn btn-madrassa w-100">മുഅല്ലിമിനെ ചേർക്കുക</button></div>
+
+                  <div class="col-12"><button type="submit" class="btn btn-madrassa px-4">മുഅല്ലിമിനെ ചേർക്കുക</button></div>
                 </div>
               </form>
 
               <h6 class="fw-bold mt-4 mb-2">രജിസ്റ്റർ ചെയ്ത മുഅല്ലിംകൾ</h6>
               <div class="table-responsive">
                 <table class="table table-bordered">
-                  <thead class="table-light"><tr><th>പേര്</th><th>ഇമെയിൽ</th><th>ഫോൺ</th><th>ചുമതലയുള്ള ക്ലാസ്</th></tr></thead>
+                  <thead class="table-light"><tr><th>പേര്</th><th>ഇമെയിൽ</th><th>ഫോൺ</th><th>ചുമതലയുള്ള ക്ലാസുകൾ</th></tr></thead>
                   <tbody id="teachersTableBody"></tbody>
                 </table>
               </div>
@@ -505,8 +503,8 @@
     const db = getFirestore(app);
 
     let currentInstitutionId = "";
-    let currentUserRole = "teacher";
-    let currentUserAssignedClass = "";
+    let currentUserRole = "admin";
+    let currentUserAssignedClasses = [];
     let localStudentsCache = [];
     let currentPage = 1;
     const pageSize = 50;
@@ -517,15 +515,18 @@
         if (userDoc.exists()) {
           const userData = userDoc.data();
           currentInstitutionId = userData.institutionId;
-          currentUserRole = userData.role || "teacher";
-          currentUserAssignedClass = userData.assignedClass || "";
+          currentUserRole = userData.role || (userData.email === "chembrasseri1@gmail.com" ? "admin" : "teacher");
+          currentUserAssignedClasses = userData.assignedClasses || (userData.assignedClass ? [userData.assignedClass] : []);
 
           document.getElementById("displayMadrassaName").innerText = userData.institutionName || "Smart Madrasa";
           document.getElementById("displayUserName").innerHTML = `<i class="fa-solid fa-user"></i> ${userData.name}`;
-          document.getElementById("displayUserRole").innerText = currentUserRole === "admin" ? "സ്വദർ മുഅല്ലിം" : `ഉസ്താദ് (ക്ലാസ് ${currentUserAssignedClass})`;
-
-          // Hide Admin Only Menus for Normal Teachers
-          if (currentUserRole !== "admin") {
+          
+          if (currentUserRole === "admin") {
+            document.getElementById("displayUserRole").innerText = "സ്വദർ മുഅല്ലിം";
+            document.getElementById("teachersMenuBtn").classList.remove("d-none");
+            document.getElementById("promotionMenuBtn").classList.remove("d-none");
+          } else {
+            document.getElementById("displayUserRole").innerText = `ഉസ്താദ് (${currentUserAssignedClasses.map(c=>'ക്ലാസ് '+c).join(', ')})`;
             document.getElementById("teachersMenuBtn").classList.add("d-none");
             document.getElementById("promotionMenuBtn").classList.add("d-none");
           }
@@ -534,12 +535,7 @@
           document.getElementById("appSection").classList.remove("d-none");
           document.getElementById("attDate").valueAsDate = new Date();
 
-          // Auto Set Teacher Class
-          if (currentUserRole !== "admin" && currentUserAssignedClass) {
-            document.getElementById("attClassSelect").value = currentUserAssignedClass;
-            document.getElementById("attClassSelect").disabled = true;
-          }
-
+          populateClassDropdowns();
           loadStudentsByClass();
           if (currentUserRole === "admin") loadTeachersList();
         }
@@ -548,6 +544,21 @@
         document.getElementById("appSection").classList.add("d-none");
       }
     });
+
+    // Populate Dynamic Class Dropdowns according to Teacher Permissions
+    function populateClassDropdowns() {
+      const allClasses = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
+      const allowedClasses = (currentUserRole === "admin") ? allClasses : currentUserAssignedClasses;
+
+      const dropdowns = ["attClassSelect", "markClassSelect", "feeClassSelect"];
+      dropdowns.forEach(id => {
+        const select = document.getElementById(id);
+        select.innerHTML = `<option value="">-- ക്ലാസ് തിരഞ്ഞെടുക്കുക --</option>`;
+        allowedClasses.forEach(c => {
+          select.innerHTML += `<option value="${c}">ക്ലാസ് ${c}</option>`;
+        });
+      });
+    }
 
     window.handleLogin = async (e) => {
       e.preventDefault();
@@ -559,12 +570,13 @@
     window.handleSignUp = async (e) => {
       e.preventDefault();
       try {
+        const instCode = document.getElementById("regInstCode").value.trim().toUpperCase();
         const instName = document.getElementById("regInstName").value;
         const userName = document.getElementById("regUserName").value;
         const phone = document.getElementById("regPhone").value;
         const email = document.getElementById("regEmail").value;
         const pwd = document.getElementById("regPassword").value;
-        const instId = "MDR_" + Date.now();
+        const instId = "MDR_" + instCode;
 
         const cred = await createUserWithEmailAndPassword(auth, email, pwd);
         await setDoc(doc(db, "users", cred.user.uid), {
@@ -573,22 +585,31 @@
           phone: phone,
           email: email,
           institutionId: instId,
+          institutionCode: instCode,
           institutionName: instName,
-          role: "admin"
+          role: "admin",
+          assignedClasses: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+          createdAt: serverTimestamp()
         });
       } catch (err) { alert("രജിസ്ട്രേഷൻ പരാജയപ്പെട്ടു: " + err.message); }
     };
 
     window.handleLogout = () => signOut(auth);
 
-    // Register Teacher (Admin Action)
+    // Register Teacher with Multi-Classes
     window.registerNewTeacher = async (e) => {
       e.preventDefault();
       const name = document.getElementById("tName").value;
       const phone = document.getElementById("tPhone").value;
       const email = document.getElementById("tEmail").value;
       const password = document.getElementById("tPassword").value;
-      const assignedClass = document.getElementById("tAssignedClass").value;
+      
+      const selectedClasses = [];
+      document.querySelectorAll(".t-class-cb:checked").forEach(cb => selectedClasses.push(cb.value));
+
+      if (!selectedClasses.length) {
+        return alert("ദയവായി കുറഞ്ഞത് ഒരു ക്ലാസെങ്കിലും തിരഞ്ഞെടുക്കുക.");
+      }
 
       try {
         const cred = await createUserWithEmailAndPassword(auth, email, password);
@@ -600,7 +621,7 @@
           institutionId: currentInstitutionId,
           institutionName: document.getElementById("displayMadrassaName").innerText,
           role: "teacher",
-          assignedClass: assignedClass,
+          assignedClasses: selectedClasses,
           createdAt: serverTimestamp()
         });
 
@@ -619,7 +640,8 @@
       let html = "";
       snap.forEach(d => {
         const t = d.data();
-        html += `<tr><td><b>${t.name}</b></td><td>${t.email}</td><td>${t.phone}</td><td><span class="badge bg-success">ക്ലാസ് ${t.assignedClass}</span></td></tr>`;
+        const classesBadges = (t.assignedClasses || []).map(c => `<span class="badge bg-success me-1">ക്ലാസ് ${c}</span>`).join(' ');
+        html += `<tr><td><b>${t.name}</b></td><td>${t.email}</td><td>${t.phone}</td><td>${classesBadges}</td></tr>`;
       });
       tbody.innerHTML = html || `<tr><td colspan="4" class="text-center text-muted">മുഅല്ലിംകളെ ചേർത്തിട്ടില്ല.</td></tr>`;
     }
@@ -758,7 +780,10 @@
     // --- ATTENDANCE (Checkbox & Select All) ---
     window.loadAttendanceSheet = async () => {
       const selClass = document.getElementById("attClassSelect").value;
-      if (!selClass) return;
+      if (!selClass) {
+        document.getElementById("attendanceSheetArea").classList.add("d-none");
+        return;
+      }
 
       const area = document.getElementById("attendanceSheetArea");
       const tbody = document.getElementById("attendanceTableBody");
@@ -830,7 +855,10 @@
     // --- MARKS MODULE ---
     window.loadMarksEntrySheet = async () => {
       const selClass = document.getElementById("markClassSelect").value;
-      if (!selClass) return;
+      if (!selClass) {
+        document.getElementById("marksSheetArea").classList.add("d-none");
+        return;
+      }
 
       const area = document.getElementById("marksSheetArea");
       const tbody = document.getElementById("marksTableBody");
@@ -905,6 +933,10 @@
     window.loadStudentsForFees = async () => {
       const selClass = document.getElementById("feeClassSelect").value;
       const select = document.getElementById("feeStudentSelect");
+      if (!selClass) {
+        select.innerHTML = `<option value="">-- ആദ്യം ക്ലാസ് തിരഞ്ഞെടുക്കുക --</option>`;
+        return;
+      }
       select.innerHTML = `<option value="">ലോഡ് ചെയ്യുന്നു...</option>`;
 
       const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", selClass));
@@ -948,7 +980,6 @@
           timestamp: serverTimestamp()
         });
 
-        // Setup Printable Receipt
         document.getElementById("recMadrassaName").innerText = document.getElementById("displayMadrassaName").innerText;
         document.getElementById("recNo").innerText = "#" + recNo;
         document.getElementById("recDate").innerText = new Date().toLocaleDateString();
