@@ -295,7 +295,7 @@
                       <th data-i18n="th_guardian">Parent / Guardian</th>
                       <th data-i18n="th_place">Place</th>
                       <th data-i18n="th_phone">Phone</th>
-                      <th style="width: 110px;" class="text-center" id="actionHeaderCol" data-i18n="th_actions">Actions</th>
+                      <th style="width: 120px;" class="text-center" id="actionHeaderCol" data-i18n="th_actions">Actions</th>
                     </tr>
                   </thead>
                   <tbody id="studentsTableBody">
@@ -619,6 +619,46 @@
     </div>
   </div>
 
+  <!-- Student Edit Modal -->
+  <div class="modal fade" id="studentEditModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-madrassa text-white">
+          <h5 class="modal-title fw-bold">Edit Student Details (വിവരങ്ങൾ തിരുത്തുക)</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <form onsubmit="saveEditedStudent(event)">
+            <input type="hidden" id="editDocId">
+            <div class="row g-3">
+              <div class="col-md-3"><label class="form-label">Reg No. *</label><input type="number" id="editRegNo" class="form-control" required></div>
+              <div class="col-md-3"><label class="form-label">ID No.</label><input type="text" id="editIdNo" class="form-control"></div>
+              <div class="col-md-6"><label class="form-label">Student Name *</label><input type="text" id="editName" class="form-control" required></div>
+              <div class="col-md-3">
+                <label class="form-label">Class *</label>
+                <select id="editCurrentClass" class="form-select" required>
+                  <option value="1">Class 1</option><option value="2">Class 2</option><option value="3">Class 3</option>
+                  <option value="4">Class 4</option><option value="5">Class 5</option><option value="6">Class 6</option>
+                  <option value="7">Class 7</option><option value="8">Class 8</option><option value="9">Class 9</option>
+                  <option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option>
+                </select>
+              </div>
+              <div class="col-md-3"><label class="form-label">Date of Birth</label><input type="text" id="editDob" class="form-control"></div>
+              <div class="col-md-3"><label class="form-label">Phone Number</label><input type="tel" id="editPhone" class="form-control"></div>
+              <div class="col-md-3"><label class="form-label">Father / Guardian</label><input type="text" id="editFatherName" class="form-control"></div>
+              <div class="col-md-6"><label class="form-label">Place</label><input type="text" id="editPlace" class="form-control"></div>
+              <div class="col-md-6"><label class="form-label">Address</label><input type="text" id="editAddress" class="form-control"></div>
+              <div class="col-12 mt-4 text-end">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-madrassa px-4">Update Details</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal: Custom Task -->
   <div class="modal fade" id="customTaskModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -694,221 +734,6 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-  <!-- Internationalization (i18n) Scripts -->
-  <script>
-    let currentLang = 'en';
-    const translations = {
-      en: {
-        portal_sub: "Digital Madrasa Management Suite",
-        tab_teacher: "Teacher Login",
-        tab_parent: "Parent",
-        tab_signup: "Register",
-        lbl_email: "Email Address",
-        lbl_pwd: "Password",
-        btn_signin: "Sign In",
-        parent_login_hint: "Enter student's Reg No. and registered mobile number.",
-        lbl_regno: "Student Reg No.",
-        lbl_phone: "Registered Mobile Number",
-        btn_viewdetails: "View Student Details",
-        lbl_instcode: "Madrasa Reg / Code",
-        lbl_instname: "Madrasa Name",
-        lbl_principal: "Principal / Secretary Name",
-        btn_createrecord: "Create Madrasa Account",
-        btn_exit: "Exit",
-        lbl_father: "Father:",
-        lbl_totalpoints: "Total Points",
-        nav_fees: "Fee Receipts",
-        nav_perf: "Performance Tasks",
-        th_receiptno: "Receipt No",
-        th_date: "Date",
-        th_item: "Item",
-        th_amount: "Amount",
-        msg_nofees: "No fee records found",
-        th_task: "Task / Category",
-        th_points: "Points",
-        msg_nopoints: "No points awarded yet",
-        btn_logout: "Logout",
-        nav_home: "Home",
-        nav_students: "Students",
-        nav_attendance: "Attendance",
-        nav_marks: "Marks Entry",
-        nav_staff: "Staff Management",
-        nav_promotion: "Class Promotion",
-        home_card_att_sub: "Record daily attendance",
-        home_card_perf_sub: "Tasks & Star Points",
-        home_card_mark_sub: "Exam scores & evaluations",
-        home_leaderboard_title: "Top Performers Leaderboard",
-        star_today: "Today's Star",
-        star_week: "Weekly Star",
-        star_month: "Monthly Star",
-        students_list_title: "Student Directory",
-        btn_newadm: "New Admission",
-        btn_bulkimport: "Bulk Import",
-        btn_reload: "Reload",
-        th_name: "Name",
-        th_class: "Class",
-        th_guardian: "Parent / Guardian",
-        th_place: "Place",
-        th_actions: "Actions",
-        msg_loading: "Loading data...",
-        adm_form_title: "Student Admission Form",
-        btn_backtolist: "Back to List",
-        lbl_idno: "ID No.",
-        lbl_fullname: "Full Name *",
-        lbl_currentclass: "Class *",
-        lbl_dob: "Date of Birth",
-        lbl_joineddate: "Joined Date",
-        lbl_joinedclass: "Joined Class",
-        lbl_mother: "Mother Name",
-        lbl_guardian: "Guardian Name",
-        lbl_whatsapp: "WhatsApp Number *",
-        lbl_place: "Place",
-        lbl_address: "Address / House Name",
-        btn_save: "Save Admission",
-        lbl_date: "Date",
-        lbl_selectclass: "Select Class",
-        lbl_selectall: "Select All",
-        th_status: "Status (Present)",
-        btn_saveatt: "Save Attendance",
-        lbl_selectexam: "Select Exam *",
-        btn_savemarks: "Save Marks",
-        btn_addtask: "Add Custom Task",
-        lbl_selecttask: "Select Task *",
-        th_award: "Award (Tick)",
-        btn_savepoints: "Save Points",
-        lbl_selectstudent: "Select Student",
-        lbl_amount: "Amount (₹) *",
-        lbl_feetype: "Fee Type",
-        lbl_manualno: "Manual Receipt No (Book)",
-        btn_saveprint: "Save & Print Receipt",
-        btn_whatsapp: "Send via WhatsApp",
-        lbl_role: "Role",
-        lbl_assignedclasses: "Assigned Classes",
-        btn_addstaff: "Register Staff",
-        staff_list_title: "Registered Staff Directory",
-        th_role: "Role",
-        th_email: "Email",
-        th_assigned: "Classes",
-        lbl_promoteto: "Promote To",
-        btn_promote: "Promote Class",
-        lbl_taskname: "Task Name *",
-        lbl_points: "Points (+ or -) *",
-        btn_cancel: "Cancel",
-        btn_add: "Add Task"
-      },
-      ml: {
-        portal_sub: "സ്മാർട്ട് മദ്റസാ മാനേജ്‌മെന്റ് പോർട്ടൽ",
-        tab_teacher: "ഉസ്താദ് ലോഗിൻ",
-        tab_parent: "രക്ഷിതാവ്",
-        tab_signup: "രജിസ്ട്രേഷൻ",
-        lbl_email: "ഇമെയിൽ വിലാസം",
-        lbl_pwd: "പാസ്‌വേഡ്",
-        btn_signin: "പ്രവേശിക്കുക",
-        parent_login_hint: "കുട്ടിയുടെ Reg No. വും രജിസ്റ്റർ ചെയ്ത മൊബൈൽ നമ്പറും നൽകുക.",
-        lbl_regno: "വിദ്യാർത്ഥിയുടെ Reg No.",
-        lbl_phone: "രജിസ്റ്റർ ചെയ്ത മൊബൈൽ നമ്പർ",
-        btn_viewdetails: "വിവരങ്ങൾ കാണുക",
-        lbl_instcode: "മദ്റസാ നമ്പർ / കോഡ്",
-        lbl_instname: "മദ്റസയുടെ പേര്",
-        lbl_principal: "സ്വദർ മുഅല്ലിം / സെക്രട്ടറിയുടെ പേര്",
-        btn_createrecord: "മദ്റസ അക്കൗണ്ട് ഉണ്ടാക്കുക",
-        btn_exit: "പുറത്തുകടക്കുക",
-        lbl_father: "പിതാവ്:",
-        lbl_totalpoints: "ആകെ പോയിന്റുകൾ",
-        nav_fees: "ഫീസ് & രസീത്",
-        nav_perf: "പെർഫോമൻസ് ടാസ്കുകൾ",
-        th_receiptno: "രസീത് No",
-        th_date: "തീയതി",
-        th_item: "ഇനം",
-        th_amount: "തുക",
-        msg_nofees: "ഫീസ് വിവരങ്ങൾ ലഭ്യമല്ല",
-        th_task: "ടാസ്ക് / വിഷയം",
-        th_points: "പോയിന്റ്",
-        msg_nopoints: "പോയിന്റുകൾ നൽകിയിട്ടില്ല",
-        btn_logout: "ലോഗ് ഔട്ട്",
-        nav_home: "ഹോം",
-        nav_students: "വിദ്യാർത്ഥികൾ",
-        nav_attendance: "ഹാജർ",
-        nav_marks: "മാർക്ക് എൻട്രി",
-        nav_staff: "മുഅല്ലിം മാനേജ്‌മെന്റ്",
-        nav_promotion: "ക്ലാസ് കയറ്റം",
-        home_card_att_sub: "ദിവസേനയുള്ള ഹാജർ രേഖപ്പെടുത്തുക",
-        home_card_perf_sub: "പോയിന്റുകളും ക്ലാസ് താരങ്ങളും",
-        home_card_mark_sub: "പരീക്ഷാ മാർക്കുകൾ എന്റർ ചെയ്യുക",
-        home_leaderboard_title: "മദ്റസാ പ്രതിഭാ ലീഡർബോർഡ്",
-        star_today: "ഇന്നത്തെ താരം",
-        star_week: "ഈ ആഴ്ചയിലെ താരം",
-        star_month: "മാസത്തിലെ താരം",
-        students_list_title: "വിദ്യാർത്ഥി ലിസ്റ്റ്",
-        btn_newadm: "പുതിയ അഡ്മിഷൻ",
-        btn_bulkimport: "ബൾക്ക് ഇമ്പോർട്ട്",
-        btn_reload: "റീലോഡ്",
-        th_name: "പേര്",
-        th_class: "ക്ലാസ്",
-        th_guardian: "പിതാവ് / രക്ഷാകർത്താവ്",
-        th_place: "സ്ഥലം",
-        th_actions: "നടപടികൾ",
-        msg_loading: "ഡാറ്റ ലോഡ് ചെയ്യുന്നു...",
-        adm_form_title: "പുതിയ അഡ്മിഷൻ ഫോം",
-        btn_backtolist: "ലിസ്റ്റിലേക്ക് തിരികെ",
-        lbl_idno: "ID No.",
-        lbl_fullname: "വിദ്യാർത്ഥിയുടെ പേര് *",
-        lbl_currentclass: "നിലവിലെ ക്ലാസ് *",
-        lbl_dob: "ജനന തീയതി",
-        lbl_joineddate: "ചേർന്ന തീയതി",
-        lbl_joinedclass: "ചേർന്ന ക്ലാസ്",
-        lbl_mother: "മാതാവിന്റെ പേര്",
-        lbl_guardian: "രക്ഷാകർത്താവ്",
-        lbl_whatsapp: "WhatsApp ഫോൺ നമ്പർ *",
-        lbl_place: "സ്ഥലം",
-        lbl_address: "വീട്ടുപേര് / വിലാസം",
-        btn_save: "സേവ് ചെയ്യുക",
-        lbl_date: "തീയതി",
-        lbl_selectclass: "ക്ലാസ് തിരഞ്ഞെടുക്കുക",
-        lbl_selectall: "മുഴുവൻ പേർക്കും (Select All)",
-        th_status: "ഹാജർ നില (Tick)",
-        btn_saveatt: "ഹാജർ സേവ് ചെയ്യുക",
-        lbl_selectexam: "പരീക്ഷ തിരഞ്ഞെടുക്കുക *",
-        btn_savemarks: "മാർക്കുകൾ സേവ് ചെയ്യുക",
-        btn_addtask: "പുതിയ ടാസ്ക് ചേർക്കുക",
-        lbl_selecttask: "ടാസ്ക് തിരഞ്ഞെടുക്കുക *",
-        th_award: "ടാസ്ക് നൽകുക (Tick)",
-        btn_savepoints: "പോയിന്റുകൾ സേവ് ചെയ്യുക",
-        lbl_selectstudent: "വിദ്യാർത്ഥിയെ തിരഞ്ഞെടുക്കുക",
-        lbl_amount: "തുക (₹) *",
-        lbl_feetype: "ഫീസ് ഇനം",
-        lbl_manualno: "മാനുവൽ രസീത് നമ്പർ (Book No)",
-        btn_saveprint: "രസീത് സേവ് & പ്രിന്റ്",
-        btn_whatsapp: "WhatsApp-ൽ അയക്കുക",
-        lbl_role: "സ്ഥാനം",
-        lbl_assignedclasses: "ചുമതലയുള്ള ക്ലാസുകൾ",
-        btn_addstaff: "മുഅല്ലിമിനെ രജിസ്റ്റർ ചെയ്യുക",
-        staff_list_title: "രജിസ്റ്റർ ചെയ്ത മുഅല്ലിംകളുടെ ലിസ്റ്റ്",
-        th_role: "സ്ഥാനം",
-        th_email: "ഇമെയിൽ",
-        th_assigned: "ക്ലാസുകൾ",
-        lbl_promoteto: "മാറേണ്ട ക്ലാസ്",
-        btn_promote: "ക്ലാസ് മാറ്റുക",
-        lbl_taskname: "ടാസ്കിന്റെ പേര് *",
-        lbl_points: "പോയിന്റ് (+ അല്ലെങ്കിൽ -) *",
-        btn_cancel: "റദ്ദാക്കുക",
-        btn_add: "ചേർക്കുക"
-      }
-    };
-
-    window.toggleLanguage = () => {
-      currentLang = currentLang === 'en' ? 'ml' : 'en';
-      document.getElementById('langSwitchLabel').innerText = currentLang === 'en' ? 'മലയാളം' : 'English';
-      
-      document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        if (translations[currentLang][key]) {
-          el.innerText = translations[currentLang][key];
-        }
-      });
-    };
-  </script>
 
   <!-- Firebase Modular Scripts -->
   <script type="module">
@@ -1049,7 +874,6 @@
       });
     }
 
-    // Login
     window.handleLogin = async (e) => {
       e.preventDefault();
       try {
@@ -1057,7 +881,6 @@
       } catch (err) { alert("Sign-in failed: " + err.message); }
     };
 
-    // Parent Login
     window.handleParentLogin = async (e) => {
       e.preventDefault();
       const reg = Number(document.getElementById("parentRegNo").value);
@@ -1082,7 +905,7 @@
       document.getElementById("parentViewSection").classList.remove("d-none");
 
       document.getElementById("pvStudentName").innerText = matchedStudent.name;
-      document.getElementById("pvClass").innerText = "Class " + matchedStudent.currentClass;
+      document.getElementById("pvClass").innerText = "Class " + (matchedStudent.currentClass || '').replace(/Class\s*/i, "");
       document.getElementById("pvRegNo").innerText = matchedStudent.regNo;
       document.getElementById("pvFather").innerText = matchedStudent.fatherName || matchedStudent.guardianName || '-';
 
@@ -1116,7 +939,202 @@
 
     window.handleLogout = () => signOut(auth);
 
-    // Save Performance Points
+    // Save Admission Form
+    window.saveDetailedStudent = async (e) => {
+      e.preventDefault();
+      try {
+        await addDoc(collection(db, "students"), {
+          institutionId: currentInstitutionId,
+          regNo: Number(document.getElementById("regNo").value) || 0,
+          idNo: document.getElementById("idNo").value,
+          name: document.getElementById("studentName").value,
+          currentClass: (document.getElementById("currentClass").value || "1").replace(/Class\s*/i, "").trim(),
+          dob: document.getElementById("dob").value,
+          joinedDate: document.getElementById("joinedDate").value,
+          joinedClass: document.getElementById("joinedClass").value,
+          fatherName: document.getElementById("fatherName").value,
+          motherName: document.getElementById("motherName").value,
+          guardianName: document.getElementById("guardianName").value,
+          phone: document.getElementById("parentPhone").value,
+          place: document.getElementById("place").value,
+          address: document.getElementById("address").value,
+          status: "active",
+          createdAt: serverTimestamp()
+        });
+        alert("Student registered successfully.");
+        e.target.reset();
+        loadStudentsByClass(true);
+        showTab('studentsListTab');
+      } catch (err) { alert("Error: " + err.message); }
+    };
+
+    // Open Edit Modal for Student
+    window.openEditStudentModal = (docId) => {
+      const s = localStudentsCache.find(x => x.id === docId);
+      if (!s) return;
+      document.getElementById("editDocId").value = docId;
+      document.getElementById("editRegNo").value = s.regNo || '';
+      document.getElementById("editIdNo").value = s.idNo || '';
+      document.getElementById("editName").value = s.name || '';
+      document.getElementById("editCurrentClass").value = (s.currentClass || '1').replace(/Class\s*/i, "").trim();
+      document.getElementById("editDob").value = s.dob || '';
+      document.getElementById("editPhone").value = s.phone || '';
+      document.getElementById("editFatherName").value = s.fatherName || s.guardianName || '';
+      document.getElementById("editPlace").value = s.place || '';
+      document.getElementById("editAddress").value = s.address || '';
+      new bootstrap.Modal(document.getElementById('studentEditModal')).show();
+    };
+
+    // Save Edited Student
+    window.saveEditedStudent = async (e) => {
+      e.preventDefault();
+      const docId = document.getElementById("editDocId").value;
+      try {
+        await updateDoc(doc(db, "students", docId), {
+          regNo: Number(document.getElementById("editRegNo").value) || 0,
+          idNo: document.getElementById("editIdNo").value,
+          name: document.getElementById("editName").value,
+          currentClass: (document.getElementById("editCurrentClass").value || '1').replace(/Class\s*/i, "").trim(),
+          dob: document.getElementById("editDob").value,
+          phone: document.getElementById("editPhone").value,
+          fatherName: document.getElementById("editFatherName").value,
+          place: document.getElementById("editPlace").value,
+          address: document.getElementById("editAddress").value,
+          updatedAt: serverTimestamp()
+        });
+        alert("Student details updated successfully.");
+        bootstrap.Modal.getInstance(document.getElementById('studentEditModal')).hide();
+        loadStudentsByClass(true);
+      } catch (err) { alert("Error: " + err.message); }
+    };
+
+    // Delete Student
+    window.deleteStudent = async (docId, name) => {
+      if (confirm(`Are you sure you want to delete ${name}?`)) {
+        try {
+          await deleteDoc(doc(db, "students", docId));
+          alert("Student removed.");
+          loadStudentsByClass(true);
+        } catch (err) { alert("Error: " + err.message); }
+      }
+    };
+
+    // Load Students List
+    window.loadStudentsByClass = async (forceRefresh = false) => {
+      let selectedClass = document.getElementById("filterClassSelect").value;
+      if (currentUserRole !== "admin" && (!selectedClass || selectedClass === "ALL")) {
+        selectedClass = currentUserAssignedClasses[0] || "1";
+        document.getElementById("filterClassSelect").value = selectedClass;
+      }
+
+      const tbody = document.getElementById("studentsTableBody");
+      tbody.innerHTML = `<tr><td colspan="7" class="text-center">Loading data...</td></tr>`;
+
+      let q;
+      if (selectedClass === "ALL" && currentUserRole === "admin") {
+        q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId));
+      } else {
+        q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", selectedClass.replace(/Class\s*/i, "").trim()));
+      }
+
+      const snap = await getDocs(q);
+      localStudentsCache = [];
+      snap.forEach(d => localStudentsCache.push({ id: d.id, ...d.data() }));
+
+      localStudentsCache.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
+      currentPage = 1;
+      renderPaginatedTable();
+    };
+
+    function renderPaginatedTable() {
+      const tbody = document.getElementById("studentsTableBody");
+      const total = localStudentsCache.length;
+
+      if (!total) {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">No student records found.</td></tr>`;
+        document.getElementById("paginationInfo").innerText = `Showing 0-0 of 0`;
+        document.getElementById("paginationControls").innerHTML = "";
+        return;
+      }
+
+      const startIndex = (currentPage - 1) * pageSize;
+      const endIndex = Math.min(startIndex + pageSize, total);
+      const pageData = localStudentsCache.slice(startIndex, endIndex);
+
+      let html = "";
+      pageData.forEach(s => {
+        const cleanClass = (s.currentClass || '-').replace(/Class\s*/i, "").trim();
+        const actionCol = (currentUserRole === "admin") ? `
+          <td class="text-center">
+            <button class="btn btn-sm btn-outline-primary me-1" onclick="openEditStudentModal('${s.id}')" title="Edit"><i class="fa-solid fa-pen"></i></button>
+            <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${s.id}', '${s.name}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
+          </td>` : ``;
+
+        html += `
+          <tr>
+            <td><b class="text-success">${s.regNo || '-'}</b></td>
+            <td><b>${s.name || '-'}</b></td>
+            <td><span class="badge bg-success">Class ${cleanClass}</span></td>
+            <td>${s.fatherName || s.guardianName || '-'}</td>
+            <td>${s.place || '-'}</td>
+            <td>${s.phone || '-'}</td>
+            ${actionCol}
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html;
+      document.getElementById("paginationInfo").innerText = `Showing ${startIndex + 1}-${endIndex} of ${total} students`;
+      renderPaginationControls(Math.ceil(total / pageSize));
+    }
+
+    function renderPaginationControls(totalPages) {
+      const container = document.getElementById("paginationControls");
+      let html = "";
+      if (totalPages <= 1) { container.innerHTML = ""; return; }
+      for (let i = 1; i <= totalPages; i++) {
+        html += `<li class="page-item ${i === currentPage ? 'active' : ''}"><a class="page-link" href="#" onclick="changePage(${i})">${i}</a></li>`;
+      }
+      container.innerHTML = html;
+    }
+
+    window.changePage = (page) => {
+      currentPage = page;
+      renderPaginatedTable();
+    };
+
+    window.filterStudentsLocal = () => {
+      const term = document.getElementById("searchBox").value.toLowerCase();
+      const filtered = localStudentsCache.filter(s => 
+        (s.name && s.name.toLowerCase().includes(term)) || 
+        (s.regNo && s.regNo.toString().includes(term)) ||
+        (s.place && s.place.toLowerCase().includes(term))
+      );
+      const tbody = document.getElementById("studentsTableBody");
+      let html = "";
+      filtered.slice(0, 50).forEach(s => {
+        const cleanClass = (s.currentClass || '-').replace(/Class\s*/i, "").trim();
+        const actionCol = (currentUserRole === "admin") ? `
+          <td class="text-center">
+            <button class="btn btn-sm btn-outline-primary me-1" onclick="openEditStudentModal('${s.id}')"><i class="fa-solid fa-pen"></i></button>
+            <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${s.id}', '${s.name}')"><i class="fa-solid fa-trash"></i></button>
+          </td>` : ``;
+
+        html += `
+          <tr>
+            <td><b class="text-success">${s.regNo || '-'}</b></td>
+            <td><b>${s.name || '-'}</b></td>
+            <td><span class="badge bg-success">Class ${cleanClass}</span></td>
+            <td>${s.fatherName || s.guardianName || '-'}</td>
+            <td>${s.place || '-'}</td>
+            <td>${s.phone || '-'}</td>
+            ${actionCol}
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html || `<tr><td colspan="7" class="text-center text-muted">No matching results found.</td></tr>`;
+    };
+
+    // Bulk Performance Entry
     window.loadStudentsForPerfSheet = async () => {
       const selClass = document.getElementById("perfClassSelect").value;
       if (!selClass) { document.getElementById("perfSheetArea").classList.add("d-none"); return; }
@@ -1126,7 +1144,7 @@
       tbody.innerHTML = `<tr><td colspan="3" class="text-center">Loading students...</td></tr>`;
       area.classList.remove("d-none");
 
-      const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", selClass));
+      const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", selClass.replace(/Class\s*/i, "").trim()));
       const snap = await getDocs(q);
 
       localPerfStudentsCache = [];
@@ -1265,6 +1283,78 @@
       }
     }
 
+    // Attendance
+    window.loadAttendanceSheet = async () => {
+      const selClass = document.getElementById("attClassSelect").value;
+      if (!selClass) { document.getElementById("attendanceSheetArea").classList.add("d-none"); return; }
+
+      const area = document.getElementById("attendanceSheetArea");
+      const tbody = document.getElementById("attendanceTableBody");
+      tbody.innerHTML = `<tr><td colspan="3" class="text-center">Loading students...</td></tr>`;
+      area.classList.remove("d-none");
+
+      const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", selClass.replace(/Class\s*/i, "").trim()));
+      const snap = await getDocs(q);
+
+      let students = [];
+      snap.forEach(d => students.push({ id: d.id, ...d.data() }));
+      students.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
+
+      let html = "";
+      students.forEach(s => {
+        html += `
+          <tr data-sid="${s.id}">
+            <td style="white-space: nowrap;"><b>${s.regNo || '-'}</b></td>
+            <td><b>${s.name}</b></td>
+            <td class="text-center">
+              <input type="checkbox" class="form-check-input form-check-input-lg att-checkbox" id="att_${s.id}" checked onchange="updateAttendanceCount()">
+            </td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html || `<tr><td colspan="3" class="text-center">No students in this class.</td></tr>`;
+      document.getElementById("selectAllAtt").checked = true;
+      updateAttendanceCount();
+    };
+
+    window.toggleSelectAllAttendance = () => {
+      const isChecked = document.getElementById("selectAllAtt").checked;
+      document.querySelectorAll(".att-checkbox").forEach(cb => cb.checked = isChecked);
+      updateAttendanceCount();
+    };
+
+    window.updateAttendanceCount = () => {
+      const total = document.querySelectorAll(".att-checkbox").length;
+      const present = document.querySelectorAll(".att-checkbox:checked").length;
+      document.getElementById("attCountInfo").innerText = `Total: ${total} | Present: ${present} | Absent: ${total - present}`;
+    };
+
+    window.saveClassAttendance = async () => {
+      const date = document.getElementById("attDate").value;
+      const selClass = document.getElementById("attClassSelect").value;
+      if (!date || !selClass) return alert("Select date and class.");
+
+      const rows = document.querySelectorAll("#attendanceTableBody tr[data-sid]");
+      const records = {};
+      rows.forEach(r => {
+        const sid = r.getAttribute("data-sid");
+        const isPresent = r.querySelector(".att-checkbox").checked;
+        records[sid] = isPresent ? "P" : "A";
+      });
+
+      try {
+        await addDoc(collection(db, "attendance"), {
+          institutionId: currentInstitutionId,
+          date: date,
+          class: selClass.replace(/Class\s*/i, "").trim(),
+          records: records,
+          recordedBy: auth.currentUser.uid,
+          timestamp: serverTimestamp()
+        });
+        alert("Attendance recorded successfully.");
+      } catch (err) { alert("Error: " + err.message); }
+    };
+
     // Marks
     window.loadMarksEntrySheet = async () => {
       const selClass = document.getElementById("markClassSelect").value;
@@ -1275,7 +1365,7 @@
       tbody.innerHTML = `<tr><td colspan="8" class="text-center">Loading...</td></tr>`;
       area.classList.remove("d-none");
 
-      const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", selClass));
+      const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", selClass.replace(/Class\s*/i, "").trim()));
       const snap = await getDocs(q);
 
       let students = [];
@@ -1317,7 +1407,7 @@
         batch.set(markRef, {
           institutionId: currentInstitutionId,
           examName: exam,
-          class: selClass,
+          class: selClass.replace(/Class\s*/i, "").trim(),
           studentId: sid,
           regNo: Number(reg),
           studentName: name,
@@ -1345,7 +1435,7 @@
       const select = document.getElementById("feeStudentSelect");
       if (!selClass) { select.innerHTML = `<option value="">-- Select Class --</option>`; return; }
 
-      const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", selClass));
+      const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", selClass.replace(/Class\s*/i, "").trim()));
       const snap = await getDocs(q);
 
       let html = `<option value="">-- Select Student --</option>`;
@@ -1461,187 +1551,56 @@
       window.open(waUrl, "_blank");
     };
 
-    // Attendance
-    window.loadAttendanceSheet = async () => {
-      const selClass = document.getElementById("attClassSelect").value;
-      if (!selClass) { document.getElementById("attendanceSheetArea").classList.add("d-none"); return; }
+    // Bulk CSV Import
+    window.handleBulkUpload = () => {
+      const fileInput = document.getElementById("csvFileInput");
+      const statusDiv = document.getElementById("bulkStatus");
+      if (!fileInput.files.length) return alert("Please select a CSV file.");
 
-      const area = document.getElementById("attendanceSheetArea");
-      const tbody = document.getElementById("attendanceTableBody");
-      tbody.innerHTML = `<tr><td colspan="3" class="text-center">Loading students...</td></tr>`;
-      area.classList.remove("d-none");
+      statusDiv.classList.remove("d-none");
+      statusDiv.innerText = "Analyzing file...";
 
-      const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", selClass));
-      const snap = await getDocs(q);
+      Papa.parse(fileInput.files[0], {
+        header: true,
+        skipEmptyLines: true,
+        complete: async (results) => {
+          const rows = results.data;
+          try {
+            const batch = writeBatch(db);
+            rows.forEach((row) => {
+              const newStudentRef = doc(collection(db, "students"));
+              const regNum = parseInt(row["REG NO."] || row["regNo"] || 0, 10);
+              const phoneVal = row["PHONE"] || row["MOBILE"] || row["PHONE NO"] || "";
 
-      let students = [];
-      snap.forEach(d => students.push({ id: d.id, ...d.data() }));
-      students.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
+              batch.set(newStudentRef, {
+                institutionId: currentInstitutionId,
+                regNo: isNaN(regNum) ? 0 : regNum,
+                idNo: row["ID NO."] || "",
+                name: row["NAME"] || "",
+                currentClass: (row["CURRENT CLASS"] || "1").replace(/Class\s*/i, "").trim(),
+                address: row["ADDRESS"] || "",
+                place: row["PLACE"] || "",
+                dob: row["D.O.B"] || "",
+                fatherName: row["FATHER NAME"] || "",
+                motherName: row["MOTHER NAME"] || "",
+                guardianName: row["GUARDIAN NAME"] || "",
+                phone: phoneVal,
+                status: "active",
+                createdAt: serverTimestamp()
+              });
+            });
 
-      let html = "";
-      students.forEach(s => {
-        html += `
-          <tr data-sid="${s.id}">
-            <td style="white-space: nowrap;"><b>${s.regNo || '-'}</b></td>
-            <td><b>${s.name}</b></td>
-            <td class="text-center">
-              <input type="checkbox" class="form-check-input form-check-input-lg att-checkbox" id="att_${s.id}" checked onchange="updateAttendanceCount()">
-            </td>
-          </tr>
-        `;
+            await batch.commit();
+            statusDiv.className = "alert alert-success";
+            statusDiv.innerText = `Successfully imported ${rows.length} students!`;
+            bootstrap.Modal.getInstance(document.getElementById('bulkImportModal')).hide();
+            loadStudentsByClass(true);
+          } catch (err) {
+            statusDiv.className = "alert alert-danger";
+            statusDiv.innerText = "Error: " + err.message;
+          }
+        }
       });
-      tbody.innerHTML = html || `<tr><td colspan="3" class="text-center">No students in this class.</td></tr>`;
-      document.getElementById("selectAllAtt").checked = true;
-      updateAttendanceCount();
-    };
-
-    window.toggleSelectAllAttendance = () => {
-      const isChecked = document.getElementById("selectAllAtt").checked;
-      document.querySelectorAll(".att-checkbox").forEach(cb => cb.checked = isChecked);
-      updateAttendanceCount();
-    };
-
-    window.updateAttendanceCount = () => {
-      const total = document.querySelectorAll(".att-checkbox").length;
-      const present = document.querySelectorAll(".att-checkbox:checked").length;
-      document.getElementById("attCountInfo").innerText = `Total: ${total} | Present: ${present} | Absent: ${total - present}`;
-    };
-
-    window.saveClassAttendance = async () => {
-      const date = document.getElementById("attDate").value;
-      const selClass = document.getElementById("attClassSelect").value;
-      if (!date || !selClass) return alert("Select date and class.");
-
-      const rows = document.querySelectorAll("#attendanceTableBody tr[data-sid]");
-      const records = {};
-      rows.forEach(r => {
-        const sid = r.getAttribute("data-sid");
-        const isPresent = r.querySelector(".att-checkbox").checked;
-        records[sid] = isPresent ? "P" : "A";
-      });
-
-      try {
-        await addDoc(collection(db, "attendance"), {
-          institutionId: currentInstitutionId,
-          date: date,
-          class: selClass,
-          records: records,
-          recordedBy: auth.currentUser.uid,
-          timestamp: serverTimestamp()
-        });
-        alert("Attendance recorded successfully.");
-      } catch (err) { alert("Error: " + err.message); }
-    };
-
-    // Load Students List
-    window.loadStudentsByClass = async (forceRefresh = false) => {
-      let selectedClass = document.getElementById("filterClassSelect").value;
-      if (currentUserRole !== "admin" && (!selectedClass || selectedClass === "ALL")) {
-        selectedClass = currentUserAssignedClasses[0] || "1";
-        document.getElementById("filterClassSelect").value = selectedClass;
-      }
-
-      const tbody = document.getElementById("studentsTableBody");
-      tbody.innerHTML = `<tr><td colspan="7" class="text-center">Loading data...</td></tr>`;
-
-      let q;
-      if (selectedClass === "ALL" && currentUserRole === "admin") {
-        q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId));
-      } else {
-        q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", selectedClass));
-      }
-
-      const snap = await getDocs(q);
-      localStudentsCache = [];
-      snap.forEach(d => localStudentsCache.push({ id: d.id, ...d.data() }));
-
-      localStudentsCache.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
-      currentPage = 1;
-      renderPaginatedTable();
-    };
-
-    function renderPaginatedTable() {
-      const tbody = document.getElementById("studentsTableBody");
-      const total = localStudentsCache.length;
-
-      if (!total) {
-        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">No student records found.</td></tr>`;
-        document.getElementById("paginationInfo").innerText = `Showing 0-0 of 0`;
-        document.getElementById("paginationControls").innerHTML = "";
-        return;
-      }
-
-      const startIndex = (currentPage - 1) * pageSize;
-      const endIndex = Math.min(startIndex + pageSize, total);
-      const pageData = localStudentsCache.slice(startIndex, endIndex);
-
-      let html = "";
-      pageData.forEach(s => {
-        const actionCol = (currentUserRole === "admin") ? `
-          <td class="text-center">
-            <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${s.id}', '${s.name}')"><i class="fa-solid fa-trash"></i></button>
-          </td>` : ``;
-
-        html += `
-          <tr>
-            <td><b class="text-success">${s.regNo || '-'}</b></td>
-            <td><b>${s.name || '-'}</b></td>
-            <td><span class="badge bg-success">Class ${s.currentClass || '-'}</span></td>
-            <td>${s.fatherName || s.guardianName || '-'}</td>
-            <td>${s.place || '-'}</td>
-            <td>${s.phone || '-'}</td>
-            ${actionCol}
-          </tr>
-        `;
-      });
-      tbody.innerHTML = html;
-      document.getElementById("paginationInfo").innerText = `Showing ${startIndex + 1}-${endIndex} of ${total} students`;
-      renderPaginationControls(Math.ceil(total / pageSize));
-    }
-
-    function renderPaginationControls(totalPages) {
-      const container = document.getElementById("paginationControls");
-      let html = "";
-      if (totalPages <= 1) { container.innerHTML = ""; return; }
-      for (let i = 1; i <= totalPages; i++) {
-        html += `<li class="page-item ${i === currentPage ? 'active' : ''}"><a class="page-link" href="#" onclick="changePage(${i})">${i}</a></li>`;
-      }
-      container.innerHTML = html;
-    }
-
-    window.changePage = (page) => {
-      currentPage = page;
-      renderPaginatedTable();
-    };
-
-    window.filterStudentsLocal = () => {
-      const term = document.getElementById("searchBox").value.toLowerCase();
-      const filtered = localStudentsCache.filter(s => 
-        (s.name && s.name.toLowerCase().includes(term)) || 
-        (s.regNo && s.regNo.toString().includes(term)) ||
-        (s.place && s.place.toLowerCase().includes(term))
-      );
-      const tbody = document.getElementById("studentsTableBody");
-      let html = "";
-      filtered.slice(0, 50).forEach(s => {
-        const actionCol = (currentUserRole === "admin") ? `
-          <td class="text-center">
-            <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${s.id}', '${s.name}')"><i class="fa-solid fa-trash"></i></button>
-          </td>` : ``;
-
-        html += `
-          <tr>
-            <td><b class="text-success">${s.regNo || '-'}</b></td>
-            <td><b>${s.name || '-'}</b></td>
-            <td><span class="badge bg-success">Class ${s.currentClass || '-'}</span></td>
-            <td>${s.fatherName || s.guardianName || '-'}</td>
-            <td>${s.place || '-'}</td>
-            <td>${s.phone || '-'}</td>
-            ${actionCol}
-          </tr>
-        `;
-      });
-      tbody.innerHTML = html || `<tr><td colspan="7" class="text-center text-muted">No matching results found.</td></tr>`;
     };
 
     // Teachers List
@@ -1676,6 +1635,20 @@
       });
       tbody.innerHTML = html || `<tr><td colspan="8" class="text-center text-muted">No staff registered.</td></tr>`;
     }
+
+    window.promoteStudents = async () => {
+      const from = document.getElementById("fromClass").value;
+      const to = document.getElementById("toClass").value;
+      if (confirm(`Promote all students from Class ${from} to Class ${to}?`)) {
+        const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", from));
+        const snap = await getDocs(q);
+        const batch = writeBatch(db);
+        snap.forEach(d => batch.update(doc(db, "students", d.id), { currentClass: to }));
+        await batch.commit();
+        alert(`Students promoted to Class ${to}.`);
+        loadStudentsByClass(true);
+      }
+    };
 
     window.switchAuthTab = (type) => {
       document.getElementById("loginForm").classList.add("d-none");
