@@ -412,10 +412,10 @@
             </div>
           </div>
 
-          <!-- 5. Redesigned Performance Module (Task First & Class Bulk Selection) -->
+          <!-- 5. Redesigned Performance Module -->
           <div id="performanceTab" class="content-tab d-none">
             <div class="card p-4">
-              <div class="d-flex justify-content-between align-items-center mb-3">
+              <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
                 <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-star me-2"></i>വിദ്യാർത്ഥി പെർഫോമൻസ് & ടാസ്ക് എൻട്രി</h5>
                 <button class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#customTaskModal"><i class="fa-solid fa-plus me-1"></i> പുതിയ ടാസ്ക് ചേർക്കുക</button>
               </div>
@@ -910,7 +910,7 @@
       students.forEach(s => {
         html += `
           <tr data-sid="${s.id}" data-reg="${s.regNo}" data-name="${s.name}" data-class="${s.currentClass}">
-            <td><b>${s.regNo || '-'}</b></td>
+            <td style="white-space: nowrap;"><b>${s.regNo || '-'}</b></td>
             <td><b>${s.name}</b></td>
             <td class="text-center">
               <input type="checkbox" class="form-check-input form-check-input-lg perf-checkbox" id="perf_${s.id}" checked>
@@ -919,7 +919,8 @@
         `;
       });
       tbody.innerHTML = html || `<tr><td colspan="3" class="text-center">ഈ ക്ലാസിൽ കുട്ടികൾ ഇല്ല.</td></tr>`;
-      document.getElementById("selectAllPerf").checked = true;
+      const selectAll = document.getElementById("selectAllPerf");
+      if (selectAll) selectAll.checked = true;
     }
 
     window.toggleSelectAllPerf = () => {
@@ -936,7 +937,7 @@
       renderPerfStudentsTable(filtered);
     };
 
-    // Save Bulk Performance Points
+    // Save Bulk Performance Points & Auto Reset Form
     window.saveBulkPerformancePoints = async () => {
       const taskRaw = document.getElementById("perfTaskSelect").value;
       const [taskTitle, pointsStr] = taskRaw.split('|');
@@ -976,6 +977,14 @@
       try {
         await batch.commit();
         alert(`${count} വിദ്യാർത്ഥികൾക്ക് '${taskTitle}' പോയിന്റുകൾ നൽകി.`);
+        
+        // Auto Clear & Reset
+        document.getElementById("perfSheetArea").classList.add("d-none");
+        document.getElementById("perfTableBody").innerHTML = "";
+        document.getElementById("perfClassSelect").value = "";
+        const searchInput = document.getElementById("perfStudentSearch");
+        if (searchInput) searchInput.value = "";
+        
         loadLeaderboard();
       } catch (err) { alert("Error: " + err.message); }
     };
@@ -1245,7 +1254,7 @@
       students.forEach(s => {
         html += `
           <tr data-sid="${s.id}">
-            <td><b>${s.regNo || '-'}</b></td>
+            <td style="white-space: nowrap;"><b>${s.regNo || '-'}</b></td>
             <td><b>${s.name}</b></td>
             <td class="text-center">
               <input type="checkbox" class="form-check-input form-check-input-lg att-checkbox" id="att_${s.id}" checked onchange="updateAttendanceCount()">
