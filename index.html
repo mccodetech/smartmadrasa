@@ -121,7 +121,7 @@
           <label class="form-label" data-i18n="lbl_pwd">Password</label>
           <input type="password" id="regPassword" class="form-control" required>
         </div>
-        <button type="submit" class="btn btn-madrassa w-100 py-2" data-i18n="btn_createrecord">Submit for Approval</button>
+        <button type="submit" id="btnSubmitSignup" class="btn btn-madrassa w-100 py-2" data-i18n="btn_createrecord">Submit for Approval</button>
       </form>
     </div>
   </div>
@@ -1191,15 +1191,18 @@
       } catch (err) { alert("Sign-in failed: " + err.message); }
     };
 
-    // New Madrasa Registration
+    // New Madrasa Registration & Complete Form Reset
     window.handleSignUp = async (e) => {
       e.preventDefault();
+      const submitBtn = document.getElementById("btnSubmitSignup");
+      if (submitBtn) submitBtn.disabled = true;
+
       try {
         const instCode = document.getElementById("regInstCode").value.trim().toUpperCase();
-        const instName = document.getElementById("regInstName").value;
-        const userName = document.getElementById("regUserName").value;
-        const phone = document.getElementById("regPhone").value;
-        const email = document.getElementById("regEmail").value;
+        const instName = document.getElementById("regInstName").value.trim();
+        const userName = document.getElementById("regUserName").value.trim();
+        const phone = document.getElementById("regPhone").value.trim();
+        const email = document.getElementById("regEmail").value.trim();
         const pwd = document.getElementById("regPassword").value;
         const instId = "MDR_" + instCode;
 
@@ -1220,14 +1223,21 @@
           createdAt: serverTimestamp()
         });
 
+        // Fully reset registration form
+        document.getElementById("signupForm").reset();
+
         if (isDev) {
           alert("Developer Account registered and activated!");
         } else {
-          alert("Registration submitted! Please wait for Developer / Super Admin approval before signing in.");
+          alert("Registration submitted successfully! Please wait for Super Admin approval before signing in.");
           signOut(auth);
           switchAuthTab('login');
         }
-      } catch (err) { alert("Registration failed: " + err.message); }
+      } catch (err) { 
+        alert("Registration failed: " + err.message); 
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
+      }
     };
 
     // Load Super Admin Madrasa Master List
@@ -1293,7 +1303,7 @@
       showTab('superAdminTab');
     };
 
-    // Open Super Admin Edit Madrasa Modal (Populate Email field)
+    // Open Super Admin Edit Madrasa Modal
     window.openSuperAdminEditMadrasaModal = (docId) => {
       const m = localMadrasasCache.find(x => x.id === docId);
       if (!m) return;
@@ -1309,7 +1319,7 @@
       new bootstrap.Modal(document.getElementById('superAdminEditMadrasaModal')).show();
     };
 
-    // Save Super Admin Edited Madrasa (Including Email)
+    // Save Super Admin Edited Madrasa
     window.saveEditedMadrasaBySuperAdmin = async (e) => {
       e.preventDefault();
       const docId = document.getElementById("saEditDocId").value;
