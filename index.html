@@ -94,7 +94,7 @@
         <button type="submit" class="btn btn-madrassa w-100 py-2" data-i18n="btn_viewdetails">View Student Details</button>
       </form>
 
-      <!-- Madrasa Sign Up Form (Pending Developer Approval) -->
+      <!-- Madrasa Sign Up Form -->
       <form id="signupForm" class="d-none" onsubmit="handleSignUp(event)">
         <div class="alert alert-warning py-2 small" data-i18n="reg_approval_notice">New registrations require Developer / Super Admin approval before activation.</div>
         <div class="mb-2">
@@ -181,6 +181,7 @@
           <i class="fa-solid fa-kaaba"></i> <span id="displayMadrassaName">Smart Madrasa</span>
         </a>
         <div class="d-flex align-items-center gap-3 text-white">
+          <button class="btn btn-sm btn-outline-warning d-none" id="superAdminBackBtn" onclick="returnToSuperAdminConsole()"><i class="fa-solid fa-arrow-left me-1"></i> Super Admin Console</button>
           <span class="badge bg-light text-dark" id="displayUserRole">Principal</span>
           <span class="small" id="displayUserName"><i class="fa-solid fa-user"></i> Staff</span>
           <button class="btn btn-outline-light btn-sm" onclick="handleLogout()"><i class="fa-solid fa-right-from-bracket"></i> <span data-i18n="btn_logout">Logout</span></button>
@@ -195,6 +196,7 @@
           <div class="card p-3">
             <div class="nav flex-column nav-pills gap-1" id="tabMenu">
               <button class="nav-link active text-start" id="homeMenuBtn" onclick="showTab('homeDashboardTab')"><i class="fa-solid fa-house me-2"></i> <span data-i18n="nav_home">Home</span></button>
+              <button class="nav-link text-start" id="superAdminMasterBtn" onclick="showTab('superAdminTab')"><i class="fa-solid fa-shield-halved me-2"></i> <span>All Madrasas</span></button>
               <button class="nav-link text-start" onclick="showTab('studentsListTab')"><i class="fa-solid fa-users me-2"></i> <span data-i18n="nav_students">Students</span></button>
               <button class="nav-link text-start" onclick="showTab('attendanceTab')"><i class="fa-solid fa-calendar-check me-2"></i> <span data-i18n="nav_attendance">Attendance</span></button>
               <button class="nav-link text-start" onclick="showTab('marksTab')"><i class="fa-solid fa-award me-2"></i> <span data-i18n="nav_marks">Marks Entry</span></button>
@@ -202,8 +204,6 @@
               <button class="nav-link text-start" onclick="showTab('feesTab')"><i class="fa-solid fa-receipt me-2"></i> <span data-i18n="nav_fees">Fees & Receipts</span></button>
               <button class="nav-link text-start" id="teachersMenuBtn" onclick="showTab('teachersTab')"><i class="fa-solid fa-chalkboard-user me-2"></i> <span data-i18n="nav_staff">Staff Management</span></button>
               <button class="nav-link text-start" id="promotionMenuBtn" onclick="showTab('promotionTab')"><i class="fa-solid fa-graduation-cap me-2"></i> <span data-i18n="nav_promotion">Class Promotion</span></button>
-              <!-- Super Admin Only Menu -->
-              <button class="nav-link text-start d-none" id="superAdminMenuBtn" onclick="showTab('superAdminTab')"><i class="fa-solid fa-shield-halved me-2"></i> <span>Madrasa Requests</span></button>
             </div>
           </div>
         </div>
@@ -211,7 +211,37 @@
         <!-- Content Area -->
         <div class="col-md-9 col-lg-10">
 
-          <!-- 0. Home Dashboard -->
+          <!-- 0. Super Admin Master Console (All Madrasas) -->
+          <div id="superAdminTab" class="content-tab d-none">
+            <div class="card p-4">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-shield-halved me-2"></i>Madrasa Master Console (All Registered Madrasas)</h5>
+                <button class="btn btn-sm btn-outline-success" onclick="loadSuperAdminRequests()"><i class="fa-solid fa-rotate"></i> Reload</button>
+              </div>
+              <p class="text-muted small">Manage access, approve pending institutions, or switch directly to manage any specific madrasa.</p>
+              
+              <div class="table-responsive">
+                <table class="table table-hover table-bordered align-middle">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Code</th>
+                      <th>Madrasa Name</th>
+                      <th>Principal / In-Charge</th>
+                      <th>Email</th>
+                      <th>Phone</th>
+                      <th>Status</th>
+                      <th class="text-center" style="width: 220px;">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="superAdminTableBody">
+                    <tr><td colspan="7" class="text-center text-muted">Loading registered madrasas...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- 1. Home Dashboard -->
           <div id="homeDashboardTab" class="content-tab">
             <div class="row g-3 mb-4">
               <div class="col-md-4">
@@ -265,7 +295,7 @@
             </div>
           </div>
 
-          <!-- 1. Students List Tab -->
+          <!-- 2. Students List Tab -->
           <div id="studentsListTab" class="content-tab d-none">
             <div class="card p-4">
               <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
@@ -314,7 +344,7 @@
             </div>
           </div>
 
-          <!-- 2. Admission Form -->
+          <!-- 3. Admission Form -->
           <div id="admissionTab" class="content-tab d-none">
             <div class="card p-4">
               <div class="d-flex justify-content-between align-items-center mb-3">
@@ -350,7 +380,7 @@
             </div>
           </div>
 
-          <!-- 3. Attendance Module -->
+          <!-- 4. Attendance Module -->
           <div id="attendanceTab" class="content-tab d-none">
             <div class="card p-4">
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-calendar-check"></i> <span data-i18n="nav_attendance">Daily Attendance</span></h5>
@@ -391,7 +421,7 @@
             </div>
           </div>
 
-          <!-- 4. Marks Tab -->
+          <!-- 5. Marks Tab -->
           <div id="marksTab" class="content-tab d-none">
             <div class="card p-4">
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-award"></i> <span data-i18n="nav_marks">Examination Marks Entry</span></h5>
@@ -433,7 +463,7 @@
             </div>
           </div>
 
-          <!-- 5. Performance Tab -->
+          <!-- 6. Performance Tab -->
           <div id="performanceTab" class="content-tab d-none">
             <div class="card p-4">
               <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
@@ -491,7 +521,7 @@
             </div>
           </div>
 
-          <!-- 6. Fees Tab -->
+          <!-- 7. Fees Tab -->
           <div id="feesTab" class="content-tab d-none">
             <div class="card p-4">
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-receipt"></i> <span data-i18n="nav_fees">Fee Collection & Receipt</span></h5>
@@ -531,7 +561,7 @@
             </div>
           </div>
 
-          <!-- 7. Teachers Management Tab -->
+          <!-- 8. Teachers Management Tab -->
           <div id="teachersTab" class="content-tab d-none">
             <div class="card p-4">
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-chalkboard-user"></i> <span data-i18n="nav_staff">Staff Management</span></h5>
@@ -589,7 +619,7 @@
             </div>
           </div>
 
-          <!-- 8. Class Promotion -->
+          <!-- 9. Class Promotion -->
           <div id="promotionTab" class="content-tab d-none">
             <div class="card p-4">
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-graduation-cap"></i> <span data-i18n="nav_promotion">Annual Class Promotion</span></h5>
@@ -613,32 +643,6 @@
                   </select>
                 </div>
                 <div class="col-md-4 d-flex align-items-end"><button class="btn btn-warning w-100" onclick="promoteStudents()"><i class="fa-solid fa-arrow-up-right-dots me-1"></i> <span data-i18n="btn_promote">Promote Class</span></button></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 9. Super Admin Developer Approval Panel -->
-          <div id="superAdminTab" class="content-tab d-none">
-            <div class="card p-4">
-              <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-shield-halved me-2"></i>New Madrasa Approval Requests</h5>
-              <p class="text-muted small">Manage and grant permissions to newly registered madrasas.</p>
-              <div class="table-responsive">
-                <table class="table table-bordered align-middle">
-                  <thead class="table-light">
-                    <tr>
-                      <th>Madrasa Code</th>
-                      <th>Madrasa Name</th>
-                      <th>Applicant / Principal</th>
-                      <th>Email</th>
-                      <th>Phone</th>
-                      <th>Status</th>
-                      <th class="text-center" style="width: 180px;">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody id="superAdminTableBody">
-                    <tr><td colspan="7" class="text-center text-muted">No pending requests found.</td></tr>
-                  </tbody>
-                </table>
               </div>
             </div>
           </div>
@@ -1006,7 +1010,6 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Super Admin / Developer Email
     const SUPER_ADMIN_EMAIL = "chembrasseri1@gmail.com";
 
     let currentInstitutionId = "";
@@ -1040,7 +1043,6 @@
           if (userDoc.exists()) {
             const userData = userDoc.data();
 
-            // Check if user is approved (Developer/Super Admin is always approved)
             isSuperAdmin = (user.email === SUPER_ADMIN_EMAIL);
             if (!isSuperAdmin && userData.status === "pending") {
               alert("Your Madrasa registration is pending approval from the Super Admin / Developer. Please contact support.");
@@ -1053,7 +1055,7 @@
             currentUserAssignedClasses = userData.assignedClasses || (userData.assignedClass ? [userData.assignedClass] : []);
 
             const instNameEl = document.getElementById("displayMadrassaName");
-            if (instNameEl) instNameEl.innerText = userData.institutionName || "Smart Madrasa";
+            if (instNameEl) instNameEl.innerText = isSuperAdmin ? "Smart Madrasa - Master Control Center" : (userData.institutionName || "Smart Madrasa");
 
             const userNameEl = document.getElementById("displayUserName");
             if (userNameEl) userNameEl.innerHTML = `<i class="fa-solid fa-user"></i> ${userData.name}`;
@@ -1063,22 +1065,22 @@
             const pMenuBtn = document.getElementById("promotionMenuBtn");
             const adminActions = document.getElementById("adminStudentActions");
             const actionCol = document.getElementById("actionHeaderCol");
-            const superMenuBtn = document.getElementById("superAdminMenuBtn");
+            const superMasterBtn = document.getElementById("superAdminMasterBtn");
 
             if (isSuperAdmin) {
-              if (superMenuBtn) superMenuBtn.classList.remove("d-none");
+              if (superMasterBtn) superMasterBtn.classList.remove("d-none");
+              if (userRoleEl) userRoleEl.innerText = "Super Admin";
             } else {
-              if (superMenuBtn) superMenuBtn.classList.add("d-none");
+              if (superMasterBtn) superMasterBtn.classList.add("d-none");
+              if (userRoleEl) userRoleEl.innerText = currentUserRole === "admin" ? (window.currentLang === 'ml' ? "സ്വദർ മുഅല്ലിം" : "Principal") : `Teacher (${currentUserAssignedClasses.map(c=>'Class '+c).join(', ')})`;
             }
 
             if (currentUserRole === "admin" || isSuperAdmin) {
-              if (userRoleEl) userRoleEl.innerText = isSuperAdmin ? "Super Admin" : (window.currentLang === 'ml' ? "സ്വദർ മുഅല്ലിം" : "Principal");
               if (tMenuBtn) tMenuBtn.classList.remove("d-none");
               if (pMenuBtn) pMenuBtn.classList.remove("d-none");
               if (adminActions) adminActions.classList.remove("d-none");
               if (actionCol) actionCol.classList.remove("d-none");
             } else {
-              if (userRoleEl) userRoleEl.innerText = `Teacher (${currentUserAssignedClasses.map(c=>'Class '+c).join(', ')})`;
               if (tMenuBtn) tMenuBtn.classList.add("d-none");
               if (pMenuBtn) pMenuBtn.classList.add("d-none");
               if (adminActions) adminActions.classList.add("d-none");
@@ -1092,10 +1094,15 @@
             if (attDateEl) attDateEl.valueAsDate = new Date();
 
             populateClassDropdowns();
-            showTab('homeDashboardTab');
-            loadLeaderboard();
-            if (currentUserRole === "admin" || isSuperAdmin) loadTeachersList();
-            if (isSuperAdmin) loadSuperAdminRequests();
+
+            // Direct Super Admin to Master Console by Default
+            if (isSuperAdmin) {
+              showTab('superAdminTab');
+            } else {
+              showTab('homeDashboardTab');
+              loadLeaderboard();
+              if (currentUserRole === "admin") loadTeachersList();
+            }
           }
         } catch (e) {
           console.error("Auth Load Error:", e);
@@ -1149,7 +1156,7 @@
       } catch (err) { alert("Sign-in failed: " + err.message); }
     };
 
-    // New Madrasa Registration with Approval Required Status
+    // New Madrasa Registration
     window.handleSignUp = async (e) => {
       e.preventDefault();
       try {
@@ -1173,7 +1180,7 @@
           institutionCode: instCode,
           institutionName: instName,
           role: "admin",
-          status: isDev ? "active" : "pending", // Pending approval for non-developers
+          status: isDev ? "active" : "pending",
           assignedClasses: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
           createdAt: serverTimestamp()
         });
@@ -1188,10 +1195,10 @@
       } catch (err) { alert("Registration failed: " + err.message); }
     };
 
-    // Load Super Admin Requests List
+    // Load Super Admin All Madrasas Master Table
     async function loadSuperAdminRequests() {
       const tbody = document.getElementById("superAdminTableBody");
-      tbody.innerHTML = `<tr><td colspan="7" class="text-center">Loading requests...</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" class="text-center">Loading registered madrasas...</td></tr>`;
 
       const q = query(collection(db, "users"), where("role", "==", "admin"));
       const snap = await getDocs(q);
@@ -1204,12 +1211,13 @@
         const isPending = (u.status === "pending");
         const statusBadge = isPending 
           ? `<span class="badge bg-warning text-dark">Pending</span>` 
-          : `<span class="badge bg-success">Active / Approved</span>`;
+          : `<span class="badge bg-success">Active</span>`;
 
         const actionBtns = isPending 
           ? `<button class="btn btn-sm btn-success me-1" onclick="approveMadrasa('${d.id}', '${u.institutionName}')"><i class="fa-solid fa-check"></i> Approve</button>
              <button class="btn btn-sm btn-outline-danger" onclick="rejectMadrasa('${d.id}')"><i class="fa-solid fa-xmark"></i> Reject</button>`
-          : `<button class="btn btn-sm btn-outline-warning" onclick="revokeMadrasa('${d.id}')"><i class="fa-solid fa-ban"></i> Suspend</button>`;
+          : `<button class="btn btn-sm btn-outline-primary me-1" onclick="switchMadrasaScope('${u.institutionId}', '${u.institutionName}')"><i class="fa-solid fa-folder-open"></i> Manage</button>
+             <button class="btn btn-sm btn-outline-warning" onclick="revokeMadrasa('${d.id}')"><i class="fa-solid fa-ban"></i> Suspend</button>`;
 
         html += `
           <tr>
@@ -1226,6 +1234,21 @@
 
       tbody.innerHTML = html || `<tr><td colspan="7" class="text-center text-muted">No madrasa accounts found.</td></tr>`;
     }
+
+    window.switchMadrasaScope = (instId, instName) => {
+      currentInstitutionId = instId;
+      document.getElementById("displayMadrassaName").innerText = instName + " (Super Admin View)";
+      document.getElementById("superAdminBackBtn").classList.remove("d-none");
+      showTab('homeDashboardTab');
+      loadLeaderboard();
+      loadTeachersList();
+    };
+
+    window.returnToSuperAdminConsole = () => {
+      document.getElementById("displayMadrassaName").innerText = "Smart Madrasa - Master Control Center";
+      document.getElementById("superAdminBackBtn").classList.add("d-none");
+      showTab('superAdminTab');
+    };
 
     window.approveMadrasa = async (userId, instName) => {
       if (confirm(`Approve registration for ${instName}?`)) {
