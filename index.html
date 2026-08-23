@@ -137,7 +137,7 @@
                     <option value="1">ക്ലാസ് 1</option><option value="2">ക്ലാസ് 2</option><option value="3">ക്ലാസ് 3</option>
                     <option value="4">ക്ലാസ് 4</option><option value="5">ക്ലാസ് 5</option><option value="6">ക്ലാസ് 6</option>
                     <option value="7">ക്ലാസ് 7</option><option value="8">ക്ലാസ് 8</option><option value="9">ക്ലാസ് 9</option>
-                    <option value="10">ക്ലാസ് 10</option>
+                    <option value="10">ക്ലാസ് 10</option><option value="11">ക്ലാസ് 11</option><option value="12">ക്ലാസ് 12</option>
                   </select>
                 </div>
                 <div class="col-md-6">
@@ -193,7 +193,7 @@
                       <option value="1">ക്ലാസ് 1</option><option value="2">ക്ലാസ് 2</option><option value="3">ക്ലാസ് 3</option>
                       <option value="4">ക്ലാസ് 4</option><option value="5">ക്ലാസ് 5</option><option value="6">ക്ലാസ് 6</option>
                       <option value="7">ക്ലാസ് 7</option><option value="8">ക്ലാസ് 8</option><option value="9">ക്ലാസ് 9</option>
-                      <option value="10">ക്ലാസ് 10</option>
+                      <option value="10">ക്ലാസ് 10</option><option value="11">ക്ലാസ് 11</option><option value="12">ക്ലാസ് 12</option>
                     </select>
                   </div>
                   <div class="col-md-3"><label class="form-label">ജനന തീയതി</label><input type="date" id="dob" class="form-control"></div>
@@ -216,7 +216,7 @@
             </div>
           </div>
 
-          <!-- 3. Attendance Module (Dynamic Class Selection & Tick Box) -->
+          <!-- 3. Attendance Module -->
           <div id="attendanceTab" class="content-tab d-none">
             <div class="card p-4">
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-calendar-check"></i> ദിവസേന ഹാജർ രേഖപ്പെടുത്തൽ</h5>
@@ -259,7 +259,7 @@
             </div>
           </div>
 
-          <!-- 4. Marks Tab (Dynamic Class Selection) -->
+          <!-- 4. Marks Tab -->
           <div id="marksTab" class="content-tab d-none">
             <div class="card p-4">
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-award"></i> പരീക്ഷാ മാർക്ക് എൻട്രി</h5>
@@ -337,39 +337,69 @@
             </div>
           </div>
 
-          <!-- 6. Teachers Management Tab (Multiple Classes Assignment) -->
+          <!-- 6. Teachers Management Tab (Upgraded with MSR, Designation, Dropdown & Edit) -->
           <div id="teachersTab" class="content-tab d-none">
             <div class="card p-4">
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-chalkboard-user"></i> മുഅല്ലിം മാനേജ്‌മെന്റ് (അധ്യാപകരെ ചേർക്കൽ)</h5>
               <form onsubmit="registerNewTeacher(event)" class="mb-4">
                 <div class="row g-3">
-                  <div class="col-md-4"><label class="form-label">മുഅല്ലിമിന്റെ പേര്</label><input type="text" id="tName" class="form-control" required></div>
-                  <div class="col-md-4"><label class="form-label">മൊബൈൽ നമ്പർ</label><input type="tel" id="tPhone" class="form-control" required></div>
-                  <div class="col-md-4"><label class="form-label">ഇമെയിൽ</label><input type="email" id="tEmail" class="form-control" required></div>
-                  <div class="col-md-4"><label class="form-label">പാസ്‌വേഡ്</label><input type="password" id="tPassword" class="form-control" required></div>
-                  
-                  <!-- Multiple Class Selection Checkboxes -->
-                  <div class="col-md-8">
-                    <label class="form-label d-block">ചുമതലയുള്ള ക്ലാസുകൾ (Assigned Classes):</label>
-                    <div class="d-flex flex-wrap gap-3">
-                      <div class="form-check"><input class="form-check-input t-class-cb" type="checkbox" value="1" id="tc1"><label class="form-check-label" for="tc1">ക്ലാസ് 1</label></div>
-                      <div class="form-check"><input class="form-check-input t-class-cb" type="checkbox" value="2" id="tc2"><label class="form-check-label" for="tc2">ക്ലാസ് 2</label></div>
-                      <div class="form-check"><input class="form-check-input t-class-cb" type="checkbox" value="3" id="tc3"><label class="form-check-label" for="tc3">ക്ലാസ് 3</label></div>
-                      <div class="form-check"><input class="form-check-input t-class-cb" type="checkbox" value="4" id="tc4"><label class="form-check-label" for="tc4">ക്ലാസ് 4</label></div>
-                      <div class="form-check"><input class="form-check-input t-class-cb" type="checkbox" value="5" id="tc5"><label class="form-check-label" for="tc5">ക്ലാസ് 5</label></div>
-                      <div class="form-check"><input class="form-check-input t-class-cb" type="checkbox" value="6" id="tc6"><label class="form-check-label" for="tc6">ക്ലാസ് 6</label></div>
-                      <div class="form-check"><input class="form-check-input t-class-cb" type="checkbox" value="7" id="tc7"><label class="form-check-label" for="tc7">ക്ലാസ് 7</label></div>
-                    </div>
+                  <div class="col-md-3">
+                    <label class="form-label">MSR നമ്പർ (MSR No.)</label>
+                    <input type="text" id="tMsrNo" class="form-control" placeholder="ഉദാ: MSR-5021">
                   </div>
-
-                  <div class="col-12"><button type="submit" class="btn btn-madrassa px-4">മുഅല്ലിമിനെ ചേർക്കുക</button></div>
+                  <div class="col-md-3">
+                    <label class="form-label">സ്ഥാനം (Designation)</label>
+                    <select id="tRoleSelect" class="form-select">
+                      <option value="teacher">മുഅല്ലിം (Teacher)</option>
+                      <option value="admin">സ്വദർ മുഅല്ലിം (Principal)</option>
+                    </select>
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label">മുഅല്ലിമിന്റെ പേര് *</label>
+                    <input type="text" id="tName" class="form-control" required>
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label">മൊബൈൽ നമ്പർ *</label>
+                    <input type="tel" id="tPhone" class="form-control" required>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">ഇമെയിൽ *</label>
+                    <input type="email" id="tEmail" class="form-control" required>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">പാസ്‌വേഡ് *</label>
+                    <input type="password" id="tPassword" class="form-control" required>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">ചുമതലയുള്ള ക്ലാസുകൾ (Ctrl പിടിച്ചു ഒന്നിലധികം തിരഞ്ഞെടുക്കാം)</label>
+                    <select id="tClassesMultiSelect" class="form-select" multiple style="height: 100px;">
+                      <option value="1">ക്ലാസ് 1</option><option value="2">ക്ലാസ് 2</option><option value="3">ക്ലാസ് 3</option>
+                      <option value="4">ക്ലാസ് 4</option><option value="5">ക്ലാസ് 5</option><option value="6">ക്ലാസ് 6</option>
+                      <option value="7">ക്ലാസ് 7</option><option value="8">ക്ലാസ് 8</option><option value="9">ക്ലാസ് 9</option>
+                      <option value="10">ക്ലാസ് 10</option><option value="11">ക്ലാസ് 11</option><option value="12">ക്ലാസ് 12</option>
+                    </select>
+                  </div>
+                  <div class="col-12 text-end">
+                    <button type="submit" class="btn btn-madrassa px-4"><i class="fa-solid fa-user-plus me-1"></i> മുഅല്ലിമിനെ രജിസ്റ്റർ ചെയ്യുക</button>
+                  </div>
                 </div>
               </form>
 
-              <h6 class="fw-bold mt-4 mb-2">രജിസ്റ്റർ ചെയ്ത മുഅല്ലിംകൾ</h6>
+              <h6 class="fw-bold mt-4 mb-2">രജിസ്റ്റർ ചെയ്ത മുഅല്ലിംകളുടെ ലിസ്റ്റ്</h6>
               <div class="table-responsive">
-                <table class="table table-bordered">
-                  <thead class="table-light"><tr><th>പേര്</th><th>ഇമെയിൽ</th><th>ഫോൺ</th><th>ചുമതലയുള്ള ക്ലാസുകൾ</th></tr></thead>
+                <table class="table table-bordered align-middle">
+                  <thead class="table-light">
+                    <tr>
+                      <th style="width: 60px;">SL No.</th>
+                      <th>MSR No.</th>
+                      <th>പേര്</th>
+                      <th>സ്ഥാനം</th>
+                      <th>ഇമെയിൽ</th>
+                      <th>ഫോൺ</th>
+                      <th>ചുമതലയുള്ള ക്ലാസുകൾ</th>
+                      <th style="width: 90px;" class="text-center">നടപടി</th>
+                    </tr>
+                  </thead>
                   <tbody id="teachersTableBody"></tbody>
                 </table>
               </div>
@@ -384,13 +414,19 @@
                 <div class="col-md-4">
                   <label class="form-label">നിലവിലെ ക്ലാസ്</label>
                   <select id="fromClass" class="form-select">
-                    <option value="1">ക്ലാസ് 1</option><option value="2">ക്ലാസ് 2</option><option value="3">ക്ലാസ് 3</option><option value="4">ക്ലാസ് 4</option><option value="5">ക്ലാസ് 5</option>
+                    <option value="1">ക്ലാസ് 1</option><option value="2">ക്ലാസ് 2</option><option value="3">ക്ലാസ് 3</option>
+                    <option value="4">ക്ലാസ് 4</option><option value="5">ക്ലാസ് 5</option><option value="6">ക്ലാസ് 6</option>
+                    <option value="7">ക്ലാസ് 7</option><option value="8">ക്ലാസ് 8</option><option value="9">ക്ലാസ് 9</option>
+                    <option value="10">ക്ലാസ് 10</option><option value="11">ക്ലാസ് 11</option>
                   </select>
                 </div>
                 <div class="col-md-4">
                   <label class="form-label">മാറേണ്ട ക്ലാസ്</label>
                   <select id="toClass" class="form-select">
-                    <option value="2">ക്ലാസ് 2</option><option value="3">ക്ലാസ് 3</option><option value="4">ക്ലാസ് 4</option><option value="5">ക്ലാസ് 5</option><option value="Passed Out">പഠനം പൂർത്തിയാക്കി</option>
+                    <option value="2">ക്ലാസ് 2</option><option value="3">ക്ലാസ് 3</option><option value="4">ക്ലാസ് 4</option>
+                    <option value="5">ക്ലാസ് 5</option><option value="6">ക്ലാസ് 6</option><option value="7">ക്ലാസ് 7</option>
+                    <option value="8">ക്ലാസ് 8</option><option value="9">ക്ലാസ് 9</option><option value="10">ക്ലാസ് 10</option>
+                    <option value="11">ക്ലാസ് 11</option><option value="12">ക്ലാസ് 12</option><option value="Passed Out">പഠനം പൂർത്തിയാക്കി</option>
                   </select>
                 </div>
                 <div class="col-md-4 d-flex align-items-end"><button class="btn btn-warning w-100" onclick="promoteStudents()"><i class="fa-solid fa-arrow-up-right-dots me-1"></i> മാറ്റുക</button></div>
@@ -398,6 +434,48 @@
             </div>
           </div>
 
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Teacher Edit Modal -->
+  <div class="modal fade" id="teacherEditModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-madrassa text-white">
+          <h5 class="modal-title fw-bold">മുഅല്ലിമിന്റെ വിവരങ്ങൾ തിരുത്തുക</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <form onsubmit="saveEditedTeacher(event)">
+            <input type="hidden" id="editTeacherDocId">
+            <div class="row g-3">
+              <div class="col-md-4"><label class="form-label">MSR No.</label><input type="text" id="editTMsrNo" class="form-control"></div>
+              <div class="col-md-4"><label class="form-label">പേര്</label><input type="text" id="editTName" class="form-control" required></div>
+              <div class="col-md-4"><label class="form-label">ഫോൺ</label><input type="tel" id="editTPhone" class="form-control" required></div>
+              <div class="col-md-4">
+                <label class="form-label">സ്ഥാനം</label>
+                <select id="editTRole" class="form-select">
+                  <option value="teacher">മുഅല്ലിം</option>
+                  <option value="admin">സ്വദർ മുഅല്ലിം</option>
+                </select>
+              </div>
+              <div class="col-md-8">
+                <label class="form-label">ചുമതലയുള്ള ക്ലാസുകൾ</label>
+                <select id="editTClassesMultiSelect" class="form-select" multiple style="height: 100px;">
+                  <option value="1">ക്ലാസ് 1</option><option value="2">ക്ലാസ് 2</option><option value="3">ക്ലാസ് 3</option>
+                  <option value="4">ക്ലാസ് 4</option><option value="5">ക്ലാസ് 5</option><option value="6">ക്ലാസ് 6</option>
+                  <option value="7">ക്ലാസ് 7</option><option value="8">ക്ലാസ് 8</option><option value="9">ക്ലാസ് 9</option>
+                  <option value="10">ക്ലാസ് 10</option><option value="11">ക്ലാസ് 11</option><option value="12">ക്ലാസ് 12</option>
+                </select>
+              </div>
+              <div class="col-12 mt-4 text-end">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">റദ്ദാക്കുക</button>
+                <button type="submit" class="btn btn-madrassa px-4">അപ്‌ഡേറ്റ് ചെയ്യുക</button>
+              </div>
+            </div>
+          </form>
         </div>
       </div>
     </div>
@@ -456,7 +534,7 @@
                   <option value="1">ക്ലാസ് 1</option><option value="2">ക്ലാസ് 2</option><option value="3">ക്ലാസ് 3</option>
                   <option value="4">ക്ലാസ് 4</option><option value="5">ക്ലാസ് 5</option><option value="6">ക്ലാസ് 6</option>
                   <option value="7">ക്ലാസ് 7</option><option value="8">ക്ലാസ് 8</option><option value="9">ക്ലാസ് 9</option>
-                  <option value="10">ക്ലാസ് 10</option>
+                  <option value="10">ക്ലാസ് 10</option><option value="11">ക്ലാസ് 11</option><option value="12">ക്ലാസ് 12</option>
                 </select>
               </div>
               <div class="col-md-3"><label class="form-label">ജനന തീയതി</label><input type="text" id="editDob" class="form-control"></div>
@@ -506,6 +584,7 @@
     let currentUserRole = "admin";
     let currentUserAssignedClasses = [];
     let localStudentsCache = [];
+    let localTeachersCache = [];
     let currentPage = 1;
     const pageSize = 50;
 
@@ -526,7 +605,7 @@
             document.getElementById("teachersMenuBtn").classList.remove("d-none");
             document.getElementById("promotionMenuBtn").classList.remove("d-none");
           } else {
-            document.getElementById("displayUserRole").innerText = `ഉസ്താദ് (${currentUserAssignedClasses.map(c=>'ക്ലാസ് '+c).join(', ')})`;
+            document.getElementById("displayUserRole").innerText = `മുഅല്ലിം (${currentUserAssignedClasses.map(c=>'ക്ലാസ് '+c).join(', ')})`;
             document.getElementById("teachersMenuBtn").classList.add("d-none");
             document.getElementById("promotionMenuBtn").classList.add("d-none");
           }
@@ -545,9 +624,8 @@
       }
     });
 
-    // Populate Dynamic Class Dropdowns according to Teacher Permissions
     function populateClassDropdowns() {
-      const allClasses = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
+      const allClasses = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
       const allowedClasses = (currentUserRole === "admin") ? allClasses : currentUserAssignedClasses;
 
       const dropdowns = ["attClassSelect", "markClassSelect", "feeClassSelect"];
@@ -584,11 +662,12 @@
           name: userName,
           phone: phone,
           email: email,
+          msrNo: "MSR-001",
           institutionId: instId,
           institutionCode: instCode,
           institutionName: instName,
           role: "admin",
-          assignedClasses: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+          assignedClasses: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
           createdAt: serverTimestamp()
         });
       } catch (err) { alert("രജിസ്ട്രേഷൻ പരാജയപ്പെട്ടു: " + err.message); }
@@ -596,18 +675,20 @@
 
     window.handleLogout = () => signOut(auth);
 
-    // Register Teacher with Multi-Classes
+    // Register Teacher with MSR, Role & Multi-Select Dropdown
     window.registerNewTeacher = async (e) => {
       e.preventDefault();
+      const msrNo = document.getElementById("tMsrNo").value.trim();
+      const role = document.getElementById("tRoleSelect").value;
       const name = document.getElementById("tName").value;
       const phone = document.getElementById("tPhone").value;
       const email = document.getElementById("tEmail").value;
       const password = document.getElementById("tPassword").value;
-      
-      const selectedClasses = [];
-      document.querySelectorAll(".t-class-cb:checked").forEach(cb => selectedClasses.push(cb.value));
 
-      if (!selectedClasses.length) {
+      const multiSelect = document.getElementById("tClassesMultiSelect");
+      const selectedClasses = Array.from(multiSelect.selectedOptions).map(opt => opt.value);
+
+      if (!selectedClasses.length && role === "teacher") {
         return alert("ദയവായി കുറഞ്ഞത് ഒരു ക്ലാസെങ്കിലും തിരഞ്ഞെടുക്കുക.");
       }
 
@@ -615,13 +696,14 @@
         const cred = await createUserWithEmailAndPassword(auth, email, password);
         await setDoc(doc(db, "users", cred.user.uid), {
           uid: cred.user.uid,
+          msrNo: msrNo,
           name: name,
           phone: phone,
           email: email,
           institutionId: currentInstitutionId,
           institutionName: document.getElementById("displayMadrassaName").innerText,
-          role: "teacher",
-          assignedClasses: selectedClasses,
+          role: role,
+          assignedClasses: role === "admin" ? ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"] : selectedClasses,
           createdAt: serverTimestamp()
         });
 
@@ -631,20 +713,84 @@
       } catch (err) { alert("Error: " + err.message); }
     };
 
-    // Load Teachers List
+    // Load Teachers List with SL No., MSR No., Role & Edit Button
     async function loadTeachersList() {
       const tbody = document.getElementById("teachersTableBody");
-      const q = query(collection(db, "users"), where("institutionId", "==", currentInstitutionId), where("role", "==", "teacher"));
+      const q = query(collection(db, "users"), where("institutionId", "==", currentInstitutionId));
       const snap = await getDocs(q);
 
+      localTeachersCache = [];
+      snap.forEach(d => localTeachersCache.push({ id: d.id, ...d.data() }));
+
       let html = "";
-      snap.forEach(d => {
-        const t = d.data();
-        const classesBadges = (t.assignedClasses || []).map(c => `<span class="badge bg-success me-1">ക്ലാസ് ${c}</span>`).join(' ');
-        html += `<tr><td><b>${t.name}</b></td><td>${t.email}</td><td>${t.phone}</td><td>${classesBadges}</td></tr>`;
+      localTeachersCache.forEach((t, index) => {
+        const isPrincipal = t.role === "admin";
+        const roleBadge = isPrincipal ? `<span class="badge bg-danger">സ്വദർ മുഅല്ലിം</span>` : `<span class="badge bg-success">മുഅല്ലിം</span>`;
+        const classesBadges = (t.assignedClasses || []).map(c => `<span class="badge bg-light text-dark border me-1">ക്ലാസ് ${c}</span>`).join(' ') || '-';
+        
+        html += `
+          <tr>
+            <td>${index + 1}</td>
+            <td><b>${t.msrNo || '-'}</b></td>
+            <td><b>${t.name}</b></td>
+            <td>${roleBadge}</td>
+            <td>${t.email}</td>
+            <td>${t.phone}</td>
+            <td>${classesBadges}</td>
+            <td class="text-center">
+              <button class="btn btn-sm btn-outline-primary" onclick="openEditTeacherModal('${t.id}')"><i class="fa-solid fa-pen"></i></button>
+            </td>
+          </tr>
+        `;
       });
-      tbody.innerHTML = html || `<tr><td colspan="4" class="text-center text-muted">മുഅല്ലിംകളെ ചേർത്തിട്ടില്ല.</td></tr>`;
+      tbody.innerHTML = html || `<tr><td colspan="8" class="text-center text-muted">മുഅല്ലിംകളെ ചേർത്തിട്ടില്ല.</td></tr>`;
     }
+
+    // Open Teacher Edit Modal
+    window.openEditTeacherModal = (docId) => {
+      const t = localTeachersCache.find(x => x.id === docId);
+      if (!t) return;
+
+      document.getElementById("editTeacherDocId").value = docId;
+      document.getElementById("editTMsrNo").value = t.msrNo || '';
+      document.getElementById("editTName").value = t.name || '';
+      document.getElementById("editTPhone").value = t.phone || '';
+      document.getElementById("editTRole").value = t.role || 'teacher';
+
+      const select = document.getElementById("editTClassesMultiSelect");
+      Array.from(select.options).forEach(opt => {
+        opt.selected = (t.assignedClasses || []).includes(opt.value);
+      });
+
+      new bootstrap.Modal(document.getElementById('teacherEditModal')).show();
+    };
+
+    // Save Edited Teacher Details
+    window.saveEditedTeacher = async (e) => {
+      e.preventDefault();
+      const docId = document.getElementById("editTeacherDocId").value;
+      const msrNo = document.getElementById("editTMsrNo").value.trim();
+      const name = document.getElementById("editTName").value;
+      const phone = document.getElementById("editTPhone").value;
+      const role = document.getElementById("editTRole").value;
+
+      const select = document.getElementById("editTClassesMultiSelect");
+      const selectedClasses = Array.from(select.selectedOptions).map(opt => opt.value);
+
+      try {
+        await updateDoc(doc(db, "users", docId), {
+          msrNo: msrNo,
+          name: name,
+          phone: phone,
+          role: role,
+          assignedClasses: role === "admin" ? ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"] : selectedClasses,
+          updatedAt: serverTimestamp()
+        });
+        alert("മുഅല്ലിമിന്റെ വിവരങ്ങൾ അപ്‌ഡേറ്റ് ചെയ്തു.");
+        bootstrap.Modal.getInstance(document.getElementById('teacherEditModal')).hide();
+        loadTeachersList();
+      } catch (err) { alert("Error: " + err.message); }
+    };
 
     // Save Student Form
     window.saveDetailedStudent = async (e) => {
@@ -777,7 +923,7 @@
       tbody.innerHTML = html || `<tr><td colspan="7" class="text-center text-muted">വിവരങ്ങൾ കണ്ടെത്തിയില്ല.</td></tr>`;
     };
 
-    // --- ATTENDANCE (Checkbox & Select All) ---
+    // --- ATTENDANCE ---
     window.loadAttendanceSheet = async () => {
       const selClass = document.getElementById("attClassSelect").value;
       if (!selClass) {
