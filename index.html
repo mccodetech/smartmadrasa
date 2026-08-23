@@ -16,7 +16,8 @@
     .card { border-radius: 12px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
     .nav-pills .nav-link.active { background-color: var(--secondary-color); }
     .nav-pills .nav-link { color: #333; font-weight: 500; }
-    .section-title { font-size: 1rem; font-weight: 600; color: var(--primary-color); border-bottom: 2px solid #e9ecef; padding-bottom: 4px; margin-top: 15px; margin-bottom: 12px; }
+    .dashboard-card { cursor: pointer; transition: transform 0.2s; }
+    .dashboard-card:hover { transform: translateY(-4px); box-shadow: 0 6px 16px rgba(0,0,0,0.1); }
     .form-check-input-lg { width: 1.5em; height: 1.5em; cursor: pointer; }
     
     .dropdown-checkbox-menu { max-height: 250px; overflow-y: auto; width: 100%; padding: 8px 12px; }
@@ -60,20 +61,16 @@
         <button type="submit" class="btn btn-madrassa w-100 py-2">പ്രവേശിക്കുക</button>
       </form>
 
-      <!-- Parent/Student Direct Login Form -->
+      <!-- Parent Login: Reg No. + Mobile No. Only -->
       <form id="parentLoginForm" class="d-none" onsubmit="handleParentLogin(event)">
-        <div class="alert alert-info py-2 small">കുട്ടിയുടെ രജിസ്റ്റർ നമ്പർ (Reg No.) നൽകി ലോഗിൻ ചെയ്യുക.</div>
-        <div class="mb-3">
-          <label class="form-label">മദ്റസാ കോഡ് (Madrasa Code)</label>
-          <input type="text" id="parentInstCode" class="form-control" placeholder="ഉദാ: MDR-1045" required>
-        </div>
+        <div class="alert alert-info py-2 small">കുട്ടിയുടെ Reg No. വും രജിസ്റ്റർ ചെയ്ത മൊബൈൽ നമ്പറും നൽകുക.</div>
         <div class="mb-3">
           <label class="form-label">വിദ്യാർത്ഥിയുടെ Reg No.</label>
-          <input type="number" id="parentRegNo" class="form-control" placeholder="യൂസർ ഐഡി (Reg No.)" required>
+          <input type="number" id="parentRegNo" class="form-control" placeholder="രജിസ്റ്റർ നമ്പർ" required>
         </div>
         <div class="mb-3">
-          <label class="form-label">പാസ്‌വേഡ് (Reg No. തന്നെ നൽകുക)</label>
-          <input type="password" id="parentPassword" class="form-control" placeholder="പാസ്‌വേഡ് (Reg No.)" required>
+          <label class="form-label">രക്ഷിതാവിന്റെ മൊബൈൽ നമ്പർ</label>
+          <input type="tel" id="parentMobile" class="form-control" placeholder="9847..." required>
         </div>
         <button type="submit" class="btn btn-madrassa w-100 py-2">വിവരങ്ങൾ കാണുക</button>
       </form>
@@ -147,7 +144,7 @@
   <div id="appSection" class="d-none">
     <nav class="navbar navbar-expand-lg bg-madrassa navbar-dark shadow-sm">
       <div class="container-fluid px-4">
-        <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="#">
+        <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="#" onclick="showTab('homeDashboardTab')">
           <i class="fa-solid fa-kaaba"></i> <span id="displayMadrassaName">Smart Madrasa</span>
         </a>
         <div class="d-flex align-items-center gap-3 text-white">
@@ -164,8 +161,9 @@
         <div class="col-md-3 col-lg-2 mb-4">
           <div class="card p-3">
             <div class="nav flex-column nav-pills gap-1" id="tabMenu">
-              <button class="nav-link active text-start" onclick="showTab('studentsListTab')"><i class="fa-solid fa-users me-2"></i> വിദ്യാർത്ഥികൾ</button>
-              <button class="nav-link text-start" onclick="showTab('attendanceTab')"><i class="fa-solid fa-calendar-check me-2"></i> ഹാജർ (Attendance)</button>
+              <button class="nav-link active text-start" id="homeMenuBtn" onclick="showTab('homeDashboardTab')"><i class="fa-solid fa-house me-2"></i> ഹോം</button>
+              <button class="nav-link text-start" onclick="showTab('studentsListTab')"><i class="fa-solid fa-users me-2"></i> വിദ്യാർത്ഥികൾ</button>
+              <button class="nav-link text-start" onclick="showTab('attendanceTab')"><i class="fa-solid fa-calendar-check me-2"></i> ഹാജർ</button>
               <button class="nav-link text-start" onclick="showTab('marksTab')"><i class="fa-solid fa-award me-2"></i> മാർക്ക് എൻട്രി</button>
               <button class="nav-link text-start" onclick="showTab('feesTab')"><i class="fa-solid fa-receipt me-2"></i> ഫീസ് & രസീത്</button>
               <button class="nav-link text-start" id="teachersMenuBtn" onclick="showTab('teachersTab')"><i class="fa-solid fa-chalkboard-user me-2"></i> മുഅല്ലിംകൾ</button>
@@ -177,8 +175,49 @@
         <!-- Content Area -->
         <div class="col-md-9 col-lg-10">
 
+          <!-- 0. Home Dashboard (Card Interface) -->
+          <div id="homeDashboardTab" class="content-tab">
+            <div class="row g-3">
+              <div class="col-md-4">
+                <div class="card p-4 text-center dashboard-card border-start border-4 border-success" onclick="showTab('attendanceTab')">
+                  <i class="fa-solid fa-calendar-check fa-3x text-success mb-2"></i>
+                  <h5 class="fw-bold">ഹാജർ രേഖപ്പെടുത്തൽ</h5>
+                  <p class="text-muted small m-0">ദിവസേനയുള്ള ഹാജർ രേഖപ്പെടുത്തുക</p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="card p-4 text-center dashboard-card border-start border-4 border-primary" onclick="showTab('marksTab')">
+                  <i class="fa-solid fa-award fa-3x text-primary mb-2"></i>
+                  <h5 class="fw-bold">മാർക്ക് എൻട്രി</h5>
+                  <p class="text-muted small m-0">പരീക്ഷാ മാർക്കുകൾ എന്റർ ചെയ്യുക</p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="card p-4 text-center dashboard-card border-start border-4 border-warning" onclick="showTab('feesTab')">
+                  <i class="fa-solid fa-receipt fa-3x text-warning mb-2"></i>
+                  <h5 class="fw-bold">ഫീസ് & രസീത്</h5>
+                  <p class="text-muted small m-0">ഫീസ് സ്വീകരിച്ച് രസീത് നൽകുക</p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="card p-4 text-center dashboard-card border-start border-4 border-info" onclick="showTab('studentsListTab')">
+                  <i class="fa-solid fa-users fa-3x text-info mb-2"></i>
+                  <h5 class="fw-bold">വിദ്യാർത്ഥി വിവരങ്ങൾ</h5>
+                  <p class="text-muted small m-0">കുട്ടികളുടെ വിവരങ്ങൾ കാണുക / തിരുത്തുക</p>
+                </div>
+              </div>
+              <div class="col-md-6" id="homeTeacherCard">
+                <div class="card p-4 text-center dashboard-card border-start border-4 border-danger" onclick="showTab('teachersTab')">
+                  <i class="fa-solid fa-chalkboard-user fa-3x text-danger mb-2"></i>
+                  <h5 class="fw-bold">മുഅല്ലിം മാനേജ്‌മെന്റ്</h5>
+                  <p class="text-muted small m-0">ഉസ്താദുമാരെ ചേർക്കലും ക്ലാസ് ചുമതലയും</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- 1. Students List Tab -->
-          <div id="studentsListTab" class="content-tab">
+          <div id="studentsListTab" class="content-tab d-none">
             <div class="card p-4">
               <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
                 <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-users"></i> വിദ്യാർത്ഥി ലിസ്റ്റ്</h5>
@@ -347,7 +386,7 @@
             </div>
           </div>
 
-          <!-- 5. Fees Tab (Sequential Receipts & WhatsApp Share) -->
+          <!-- 5. Fees Tab -->
           <div id="feesTab" class="content-tab d-none">
             <div class="card p-4">
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-receipt"></i> ഫീസ് കളക്ഷൻ & ഡിജിറ്റൽ രസീത്</h5>
@@ -572,12 +611,14 @@
             document.getElementById("promotionMenuBtn").classList.remove("d-none");
             document.getElementById("adminStudentActions").classList.remove("d-none");
             document.getElementById("actionHeaderCol").classList.remove("d-none");
+            document.getElementById("homeTeacherCard").classList.remove("d-none");
           } else {
             document.getElementById("displayUserRole").innerText = `മുഅല്ലിം (${currentUserAssignedClasses.map(c=>'ക്ലാസ് '+c).join(', ')})`;
             document.getElementById("teachersMenuBtn").classList.add("d-none");
             document.getElementById("promotionMenuBtn").classList.add("d-none");
             document.getElementById("adminStudentActions").classList.add("d-none");
             document.getElementById("actionHeaderCol").classList.add("d-none");
+            document.getElementById("homeTeacherCard").classList.add("d-none");
           }
 
           document.getElementById("authSection").classList.add("d-none");
@@ -585,7 +626,7 @@
           document.getElementById("attDate").valueAsDate = new Date();
 
           populateClassDropdowns();
-          loadStudentsByClass();
+          showTab('homeDashboardTab');
           if (currentUserRole === "admin") loadTeachersList();
         }
       } else {
@@ -596,20 +637,39 @@
       }
     });
 
+    // Populate Dynamic Class Dropdowns with Single Class Auto-Select
     function populateClassDropdowns() {
       const allClasses = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
       const allowedClasses = (currentUserRole === "admin") ? allClasses : currentUserAssignedClasses;
 
+      // 1. Filter Dropdown in Students List
       const filterSelect = document.getElementById("filterClassSelect");
       filterSelect.innerHTML = "";
-      if (currentUserRole === "admin") filterSelect.innerHTML += `<option value="ALL">എല്ലാ ക്ലാസുകളും</option>`;
+      if (currentUserRole === "admin") {
+        filterSelect.innerHTML += `<option value="ALL">എല്ലാ ക്ലാസുകളും</option>`;
+      }
       allowedClasses.forEach(c => filterSelect.innerHTML += `<option value="${c}">ക്ലാസ് ${c}</option>`);
+      if (currentUserRole !== "admin" && allowedClasses.length === 1) {
+        filterSelect.value = allowedClasses[0];
+      }
 
+      // 2. Attendance, Marks & Fees Dropdowns
       const dropdowns = ["attClassSelect", "markClassSelect", "feeClassSelect"];
       dropdowns.forEach(id => {
         const select = document.getElementById(id);
-        select.innerHTML = `<option value="">-- ക്ലാസ് തിരഞ്ഞെടുക്കുക --</option>`;
+        select.innerHTML = "";
+        if (allowedClasses.length > 1 || currentUserRole === "admin") {
+          select.innerHTML = `<option value="">-- ക്ലാസ് തിരഞ്ഞെടുക്കുക --</option>`;
+        }
         allowedClasses.forEach(c => select.innerHTML += `<option value="${c}">ക്ലാസ് ${c}</option>`);
+
+        // If only 1 assigned class, auto trigger load
+        if (currentUserRole !== "admin" && allowedClasses.length === 1) {
+          select.value = allowedClasses[0];
+          if (id === "attClassSelect") loadAttendanceSheet();
+          if (id === "markClassSelect") loadMarksEntrySheet();
+          if (id === "feeClassSelect") loadStudentsForFees();
+        }
       });
     }
 
@@ -621,38 +681,45 @@
       } catch (err) { alert("ലോഗിൻ പരാജയപ്പെട്ടു: " + err.message); }
     };
 
-    // Parent Login with Reg No as ID & Password
+    // Parent Login: Reg No. + Mobile No.
     window.handleParentLogin = async (e) => {
       e.preventDefault();
-      const code = document.getElementById("parentInstCode").value.trim().toUpperCase();
       const reg = Number(document.getElementById("parentRegNo").value);
-      const pwd = document.getElementById("parentPassword").value;
+      const mobile = document.getElementById("parentMobile").value.trim().slice(-10);
 
-      if (reg.toString() !== pwd) {
-        return alert("Reg No. വും പാസ്‌വേഡും ഒന്നുതന്നെയായിരിക്കണം.");
-      }
-
-      const instId = "MDR_" + code;
-      const q = query(collection(db, "students"), where("institutionId", "==", instId), where("regNo", "==", reg));
+      // Search student matching regNo
+      const q = query(collection(db, "students"), where("regNo", "==", reg));
       const snap = await getDocs(q);
 
       if (snap.empty) {
-        return alert("വിദ്യാർത്ഥിയുടെ വിവരങ്ങൾ കണ്ടെത്തിയില്ല. മദ്റസാ കോഡും Reg No. വും പരിശോധിക്കുക.");
+        return alert("വിദ്യാർത്ഥിയുടെ വിവരങ്ങൾ കണ്ടെത്തിയില്ല. Reg No. പരിശോധിക്കുക.");
       }
 
-      const studentDoc = snap.docs[0].data();
+      let matchedStudent = null;
+      snap.forEach(d => {
+        const data = d.data();
+        const sPhone = (data.phone || '').replace(/[^0-9]/g, '').slice(-10);
+        if (sPhone === mobile) {
+          matchedStudent = data;
+        }
+      });
+
+      if (!matchedStudent) {
+        return alert("നൽകിയ മൊബൈൽ നമ്പർ ഈ വിദ്യാർത്ഥിയുടെ രജിസ്ട്രേഷൻ വിവരങ്ങളുമായി പൊരുത്തപ്പെടുന്നില്ല.");
+      }
+
       sessionStorage.setItem("parentLoggedIn", "true");
 
       document.getElementById("authSection").classList.add("d-none");
       document.getElementById("parentViewSection").classList.remove("d-none");
 
-      document.getElementById("pvStudentName").innerText = studentDoc.name;
-      document.getElementById("pvClass").innerText = "ക്ലാസ് " + studentDoc.currentClass;
-      document.getElementById("pvRegNo").innerText = studentDoc.regNo;
-      document.getElementById("pvFather").innerText = studentDoc.fatherName || studentDoc.guardianName || '-';
+      document.getElementById("pvStudentName").innerText = matchedStudent.name;
+      document.getElementById("pvClass").innerText = "ക്ലാസ് " + matchedStudent.currentClass;
+      document.getElementById("pvRegNo").innerText = matchedStudent.regNo;
+      document.getElementById("pvFather").innerText = matchedStudent.fatherName || matchedStudent.guardianName || '-';
 
       // Load Fee Records for Parent
-      const feeQ = query(collection(db, "feeCollections"), where("institutionId", "==", instId), where("regNo", "==", reg));
+      const feeQ = query(collection(db, "feeCollections"), where("institutionId", "==", matchedStudent.institutionId), where("regNo", "==", reg));
       const feeSnap = await getDocs(feeQ);
       let feeHtml = "";
       feeSnap.forEach(fd => {
@@ -669,6 +736,79 @@
     };
 
     window.handleLogout = () => signOut(auth);
+
+    // Register Teacher with MSR, Role & Multi-Classes
+    window.registerNewTeacher = async (e) => {
+      e.preventDefault();
+      const msrNo = document.getElementById("tMsrNo").value.trim();
+      const role = document.getElementById("tRoleSelect").value;
+      const name = document.getElementById("tName").value;
+      const phone = document.getElementById("tPhone").value;
+      const email = document.getElementById("tEmail").value;
+      const password = document.getElementById("tPassword").value;
+
+      const selectedClasses = [];
+      document.querySelectorAll(".reg-class-cb:checked").forEach(cb => selectedClasses.push(cb.value));
+
+      if (!selectedClasses.length && role === "teacher") {
+        return alert("ദയവായി കുറഞ്ഞത് ഒരു ക്ലാസെങ്കിലും തിരഞ്ഞെടുക്കുക.");
+      }
+
+      try {
+        const cred = await createUserWithEmailAndPassword(auth, email, password);
+        await setDoc(doc(db, "users", cred.user.uid), {
+          uid: cred.user.uid,
+          msrNo: msrNo,
+          name: name,
+          phone: phone,
+          email: email,
+          institutionId: currentInstitutionId,
+          institutionName: document.getElementById("displayMadrassaName").innerText,
+          role: role,
+          assignedClasses: role === "admin" ? ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"] : selectedClasses,
+          createdAt: serverTimestamp()
+        });
+
+        alert("മുഅല്ലിമിനെ വിജയകരമായി ചേർത്തു.");
+        e.target.reset();
+        document.querySelectorAll(".reg-class-cb").forEach(cb => cb.checked = false);
+        updateDropdownLabel('reg');
+        loadTeachersList();
+      } catch (err) { alert("Error: " + err.message); }
+    };
+
+    // Load Teachers List
+    async function loadTeachersList() {
+      const tbody = document.getElementById("teachersTableBody");
+      const q = query(collection(db, "users"), where("institutionId", "==", currentInstitutionId));
+      const snap = await getDocs(q);
+
+      localTeachersCache = [];
+      snap.forEach(d => localTeachersCache.push({ id: d.id, ...d.data() }));
+
+      let html = "";
+      localTeachersCache.forEach((t, index) => {
+        const isPrincipal = t.role === "admin";
+        const roleBadge = isPrincipal ? `<span class="badge bg-danger">സ്വദർ മുഅല്ലിം</span>` : `<span class="badge bg-success">മുഅല്ലിം</span>`;
+        const classesBadges = (t.assignedClasses || []).map(c => `<span class="badge bg-light text-dark border me-1">ക്ലാസ് ${c}</span>`).join(' ') || '-';
+        
+        html += `
+          <tr>
+            <td>${index + 1}</td>
+            <td><b>${t.msrNo || '-'}</b></td>
+            <td><b>${t.name}</b></td>
+            <td>${roleBadge}</td>
+            <td>${t.email}</td>
+            <td>${t.phone}</td>
+            <td>${classesBadges}</td>
+            <td class="text-center">
+              <button class="btn btn-sm btn-outline-primary" onclick="openEditTeacherModal('${t.id}')"><i class="fa-solid fa-pen"></i></button>
+            </td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html || `<tr><td colspan="8" class="text-center text-muted">മുഅല്ലിംകളെ ചേർത്തിട്ടില്ല.</td></tr>`;
+    }
 
     // --- SEQUENTIAL FEE RECEIPT & WHATSAPP GENERATION ---
     window.loadStudentsForFees = async () => {
@@ -708,7 +848,6 @@
       const today = new Date().toLocaleDateString();
 
       try {
-        // Sequential Auto-Incrementing Receipt Number via Firestore Transaction
         const counterRef = doc(db, "counters", currentInstitutionId + "_receipts");
         let nextReceiptNo = 1;
 
@@ -722,7 +861,6 @@
           }
         });
 
-        // Save Fee Record
         await addDoc(collection(db, "feeCollections"), {
           institutionId: currentInstitutionId,
           receiptNo: nextReceiptNo,
@@ -738,7 +876,6 @@
           timestamp: serverTimestamp()
         });
 
-        // Populate Printable Receipt
         document.getElementById("recMadrassaName").innerText = document.getElementById("displayMadrassaName").innerText;
         document.getElementById("recNo").innerText = "#" + nextReceiptNo;
         document.getElementById("recDate").innerText = today;
@@ -755,7 +892,6 @@
           document.getElementById("recManualBox").classList.add("d-none");
         }
 
-        // WhatsApp Payload Setup
         lastReceiptWhatsAppPayload = {
           phone: phone,
           madrassa: document.getElementById("displayMadrassaName").innerText,
@@ -771,7 +907,6 @@
 
         document.getElementById("whatsappShareBtn").classList.remove("d-none");
 
-        // Print Dialog
         document.getElementById("printableReceipt").classList.remove("d-none");
         window.print();
         document.getElementById("printableReceipt").classList.add("d-none");
@@ -779,7 +914,6 @@
       } catch (err) { alert("Error: " + err.message); }
     };
 
-    // WhatsApp Message Trigger
     window.shareToWhatsApp = () => {
       if (!lastReceiptWhatsAppPayload) return;
       const p = lastReceiptWhatsAppPayload;
@@ -988,56 +1122,81 @@
       } catch (err) { alert("Error: " + err.message); }
     };
 
-    // Bulk Upload
-    window.handleBulkUpload = () => {
-      const fileInput = document.getElementById("csvFileInput");
-      const statusDiv = document.getElementById("bulkStatus");
-      if (!fileInput.files.length) return alert("CSV ഫയൽ തിരഞ്ഞെടുക്കുക.");
+    // --- MARKS MODULE ---
+    window.loadMarksEntrySheet = async () => {
+      const selClass = document.getElementById("markClassSelect").value;
+      if (!selClass) {
+        document.getElementById("marksSheetArea").classList.add("d-none");
+        return;
+      }
 
-      statusDiv.classList.remove("d-none");
-      statusDiv.innerText = "ഫയൽ പരിശോധിക്കുന്നു...";
+      const area = document.getElementById("marksSheetArea");
+      const tbody = document.getElementById("marksTableBody");
+      tbody.innerHTML = `<tr><td colspan="8" class="text-center">ലോഡ് ചെയ്യുന്നു...</td></tr>`;
+      area.classList.remove("d-none");
 
-      Papa.parse(fileInput.files[0], {
-        header: true,
-        skipEmptyLines: true,
-        complete: async (results) => {
-          const rows = results.data;
-          try {
-            const batch = writeBatch(db);
-            rows.forEach((row) => {
-              const newStudentRef = doc(collection(db, "students"));
-              const regNum = parseInt(row["REG NO."] || row["regNo"] || 0, 10);
-              const phoneVal = row["PHONE"] || row["MOBILE"] || row["PHONE NO"] || "";
+      const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", selClass));
+      const snap = await getDocs(q);
 
-              batch.set(newStudentRef, {
-                institutionId: currentInstitutionId,
-                regNo: isNaN(regNum) ? 0 : regNum,
-                idNo: row["ID NO."] || "",
-                name: row["NAME"] || "",
-                currentClass: (row["CURRENT CLASS"] || "1").replace(/Class\s*/i, "").trim(),
-                address: row["ADDRESS"] || "",
-                place: row["PLACE"] || "",
-                dob: row["D.O.B"] || "",
-                fatherName: row["FATHER NAME"] || "",
-                motherName: row["MOTHER NAME"] || "",
-                guardianName: row["GUARDIAN NAME"] || "",
-                phone: phoneVal,
-                status: "active",
-                createdAt: serverTimestamp()
-              });
-            });
+      let students = [];
+      snap.forEach(d => students.push({ id: d.id, ...d.data() }));
+      students.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
 
-            await batch.commit();
-            statusDiv.className = "alert alert-success";
-            statusDiv.innerText = `${rows.length} കുട്ടികളെ വിജയകരമായി ഇമ്പോർട്ട് ചെയ്തു!`;
-            bootstrap.Modal.getInstance(document.getElementById('bulkImportModal')).hide();
-            loadStudentsByClass(true);
-          } catch (err) {
-            statusDiv.className = "alert alert-danger";
-            statusDiv.innerText = "Error: " + err.message;
-          }
-        }
+      let html = "";
+      students.forEach(s => {
+        html += `
+          <tr data-sid="${s.id}" data-reg="${s.regNo}" data-name="${s.name}">
+            <td><b>${s.regNo || '-'}</b></td>
+            <td>${s.name}</td>
+            <td><input type="number" class="form-control form-control-sm text-center m-quran" style="max-width:70px; margin:auto;"></td>
+            <td><input type="number" class="form-control form-control-sm text-center m-tajweed" style="max-width:70px; margin:auto;"></td>
+            <td><input type="number" class="form-control form-control-sm text-center m-fiqh" style="max-width:70px; margin:auto;"></td>
+            <td><input type="number" class="form-control form-control-sm text-center m-aqeeda" style="max-width:70px; margin:auto;"></td>
+            <td><input type="number" class="form-control form-control-sm text-center m-tareekh" style="max-width:70px; margin:auto;"></td>
+            <td><input type="number" class="form-control form-control-sm text-center m-lisan" style="max-width:70px; margin:auto;"></td>
+          </tr>
+        `;
       });
+      tbody.innerHTML = html || `<tr><td colspan="8" class="text-center">ഈ ക്ലാസിൽ കുട്ടികൾ ഇല്ല.</td></tr>`;
+    };
+
+    window.saveClassMarks = async () => {
+      const exam = document.getElementById("markExamName").value;
+      const selClass = document.getElementById("markClassSelect").value;
+      if (!exam || !selClass) return alert("പരീക്ഷയുടെ പേരും ക്ലാസും നൽകുക.");
+
+      const rows = document.querySelectorAll("#marksTableBody tr[data-sid]");
+      const batch = writeBatch(db);
+
+      rows.forEach(r => {
+        const sid = r.getAttribute("data-sid");
+        const reg = r.getAttribute("data-reg");
+        const name = r.getAttribute("data-name");
+
+        const markRef = doc(collection(db, "marks"));
+        batch.set(markRef, {
+          institutionId: currentInstitutionId,
+          examName: exam,
+          class: selClass,
+          studentId: sid,
+          regNo: reg,
+          studentName: name,
+          scores: {
+            quran: Number(r.querySelector(".m-quran").value) || 0,
+            tajweed: Number(r.querySelector(".m-tajweed").value) || 0,
+            fiqh: Number(r.querySelector(".m-fiqh").value) || 0,
+            aqeeda: Number(r.querySelector(".m-aqeeda").value) || 0,
+            tareekh: Number(r.querySelector(".m-tareekh").value) || 0,
+            lisan: Number(r.querySelector(".m-lisan").value) || 0
+          },
+          timestamp: serverTimestamp()
+        });
+      });
+
+      try {
+        await batch.commit();
+        alert("മാർക്കുകൾ വിജയകരമായി സേവ് ചെയ്തു.");
+      } catch (err) { alert("Error: " + err.message); }
     };
 
     window.switchAuthTab = (type) => {
@@ -1057,7 +1216,12 @@
       document.querySelectorAll(".content-tab").forEach(t => t.classList.add("d-none"));
       document.getElementById(tabId).classList.remove("d-none");
       document.querySelectorAll("#tabMenu .nav-link").forEach(b => b.classList.remove("active"));
-      event.target.classList.add("active");
+      
+      const activeBtn = document.querySelector(`#tabMenu button[onclick="showTab('${tabId}')"]`);
+      if (activeBtn) activeBtn.classList.add("active");
+
+      if (tabId === 'studentsListTab') loadStudentsByClass();
+      if (tabId === 'teachersTab') loadTeachersList();
     };
   </script>
 </body>
