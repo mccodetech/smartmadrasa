@@ -94,8 +94,9 @@
         <button type="submit" class="btn btn-madrassa w-100 py-2" data-i18n="btn_viewdetails">View Student Details</button>
       </form>
 
-      <!-- Madrasa Sign Up Form -->
+      <!-- Madrasa Sign Up Form (Pending Developer Approval) -->
       <form id="signupForm" class="d-none" onsubmit="handleSignUp(event)">
+        <div class="alert alert-warning py-2 small" data-i18n="reg_approval_notice">New registrations require Developer / Super Admin approval before activation.</div>
         <div class="mb-2">
           <label class="form-label" data-i18n="lbl_instcode">Madrasa Reg / Code</label>
           <input type="text" id="regInstCode" class="form-control" placeholder="e.g. MDR-1045" required>
@@ -120,7 +121,7 @@
           <label class="form-label" data-i18n="lbl_pwd">Password</label>
           <input type="password" id="regPassword" class="form-control" required>
         </div>
-        <button type="submit" class="btn btn-madrassa w-100 py-2" data-i18n="btn_createrecord">Create Madrasa Account</button>
+        <button type="submit" class="btn btn-madrassa w-100 py-2" data-i18n="btn_createrecord">Submit for Approval</button>
       </form>
     </div>
   </div>
@@ -201,6 +202,8 @@
               <button class="nav-link text-start" onclick="showTab('feesTab')"><i class="fa-solid fa-receipt me-2"></i> <span data-i18n="nav_fees">Fees & Receipts</span></button>
               <button class="nav-link text-start" id="teachersMenuBtn" onclick="showTab('teachersTab')"><i class="fa-solid fa-chalkboard-user me-2"></i> <span data-i18n="nav_staff">Staff Management</span></button>
               <button class="nav-link text-start" id="promotionMenuBtn" onclick="showTab('promotionTab')"><i class="fa-solid fa-graduation-cap me-2"></i> <span data-i18n="nav_promotion">Class Promotion</span></button>
+              <!-- Super Admin Only Menu -->
+              <button class="nav-link text-start d-none" id="superAdminMenuBtn" onclick="showTab('superAdminTab')"><i class="fa-solid fa-shield-halved me-2"></i> <span>Madrasa Requests</span></button>
             </div>
           </div>
         </div>
@@ -614,6 +617,32 @@
             </div>
           </div>
 
+          <!-- 9. Super Admin Developer Approval Panel -->
+          <div id="superAdminTab" class="content-tab d-none">
+            <div class="card p-4">
+              <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-shield-halved me-2"></i>New Madrasa Approval Requests</h5>
+              <p class="text-muted small">Manage and grant permissions to newly registered madrasas.</p>
+              <div class="table-responsive">
+                <table class="table table-bordered align-middle">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Madrasa Code</th>
+                      <th>Madrasa Name</th>
+                      <th>Applicant / Principal</th>
+                      <th>Email</th>
+                      <th>Phone</th>
+                      <th>Status</th>
+                      <th class="text-center" style="width: 180px;">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="superAdminTableBody">
+                    <tr><td colspan="7" class="text-center text-muted">No pending requests found.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -748,13 +777,14 @@
         lbl_pwd: "Password",
         btn_signin: "Sign In",
         parent_login_hint: "Enter student's Reg No. and registered mobile number.",
+        reg_approval_notice: "New registrations require Developer / Super Admin approval before activation.",
         lbl_regno: "Student Reg No.",
         lbl_phone: "Registered Mobile Number",
         btn_viewdetails: "View Student Details",
         lbl_instcode: "Madrasa Reg / Code",
         lbl_instname: "Madrasa Name",
         lbl_principal: "Principal / Secretary Name",
-        btn_createrecord: "Create Madrasa Account",
+        btn_createrecord: "Submit for Approval",
         btn_exit: "Exit",
         lbl_father: "Father:",
         lbl_totalpoints: "Total Points",
@@ -846,13 +876,14 @@
         lbl_pwd: "പാസ്‌വേഡ്",
         btn_signin: "പ്രവേശിക്കുക",
         parent_login_hint: "കുട്ടിയുടെ Reg No. വും രജിസ്റ്റർ ചെയ്ത മൊബൈൽ നമ്പറും നൽകുക.",
+        reg_approval_notice: "പുതിയ മദ്റസകളുടെ രജിസ്ട്രേഷൻ സൂപ്പർ അഡ്മിൻ അംഗീകരിച്ച ശേഷം മാത്രമേ ആക്റ്റീവ് ആകൂ.",
         lbl_regno: "വിദ്യാർത്ഥിയുടെ Reg No.",
         lbl_phone: "രജിസ്റ്റർ ചെയ്ത മൊബൈൽ നമ്പർ",
         btn_viewdetails: "വിവരങ്ങൾ കാണുക",
         lbl_instcode: "മദ്റസാ നമ്പർ / കോഡ്",
         lbl_instname: "മദ്റസയുടെ പേര്",
         lbl_principal: "സ്വദർ മുഅല്ലിം / സെക്രട്ടറിയുടെ പേര്",
-        btn_createrecord: "മദ്റസ അക്കൗണ്ട് ഉണ്ടാക്കുക",
+        btn_createrecord: "അംഗീകാരത്തിനായി സമർപ്പിക്കുക",
         btn_exit: "പുറത്തുകടക്കുക",
         lbl_father: "പിതാവ്:",
         lbl_totalpoints: "ആകെ പോയിന്റുകൾ",
@@ -975,9 +1006,13 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    // Super Admin / Developer Email
+    const SUPER_ADMIN_EMAIL = "chembrasseri1@gmail.com";
+
     let currentInstitutionId = "";
     let currentUserRole = "admin";
     let currentUserAssignedClasses = [];
+    let isSuperAdmin = false;
     let localStudentsCache = [];
     let localPerfStudentsCache = [];
     let localTeachersCache = [];
@@ -1004,8 +1039,17 @@
           const userDoc = await getDoc(doc(db, "users", user.uid));
           if (userDoc.exists()) {
             const userData = userDoc.data();
+
+            // Check if user is approved (Developer/Super Admin is always approved)
+            isSuperAdmin = (user.email === SUPER_ADMIN_EMAIL);
+            if (!isSuperAdmin && userData.status === "pending") {
+              alert("Your Madrasa registration is pending approval from the Super Admin / Developer. Please contact support.");
+              signOut(auth);
+              return;
+            }
+
             currentInstitutionId = userData.institutionId;
-            currentUserRole = userData.role || (userData.email === "chembrasseri1@gmail.com" ? "admin" : "teacher");
+            currentUserRole = userData.role || (isSuperAdmin ? "admin" : "teacher");
             currentUserAssignedClasses = userData.assignedClasses || (userData.assignedClass ? [userData.assignedClass] : []);
 
             const instNameEl = document.getElementById("displayMadrassaName");
@@ -1019,9 +1063,16 @@
             const pMenuBtn = document.getElementById("promotionMenuBtn");
             const adminActions = document.getElementById("adminStudentActions");
             const actionCol = document.getElementById("actionHeaderCol");
+            const superMenuBtn = document.getElementById("superAdminMenuBtn");
 
-            if (currentUserRole === "admin") {
-              if (userRoleEl) userRoleEl.innerText = window.currentLang === 'ml' ? "സ്വദർ മുഅല്ലിം" : "Principal";
+            if (isSuperAdmin) {
+              if (superMenuBtn) superMenuBtn.classList.remove("d-none");
+            } else {
+              if (superMenuBtn) superMenuBtn.classList.add("d-none");
+            }
+
+            if (currentUserRole === "admin" || isSuperAdmin) {
+              if (userRoleEl) userRoleEl.innerText = isSuperAdmin ? "Super Admin" : (window.currentLang === 'ml' ? "സ്വദർ മുഅല്ലിം" : "Principal");
               if (tMenuBtn) tMenuBtn.classList.remove("d-none");
               if (pMenuBtn) pMenuBtn.classList.remove("d-none");
               if (adminActions) adminActions.classList.remove("d-none");
@@ -1043,7 +1094,8 @@
             populateClassDropdowns();
             showTab('homeDashboardTab');
             loadLeaderboard();
-            if (currentUserRole === "admin") loadTeachersList();
+            if (currentUserRole === "admin" || isSuperAdmin) loadTeachersList();
+            if (isSuperAdmin) loadSuperAdminRequests();
           }
         } catch (e) {
           console.error("Auth Load Error:", e);
@@ -1058,14 +1110,14 @@
 
     function populateClassDropdowns() {
       const allClasses = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
-      const allowedClasses = (currentUserRole === "admin") ? allClasses : currentUserAssignedClasses;
+      const allowedClasses = (currentUserRole === "admin" || isSuperAdmin) ? allClasses : currentUserAssignedClasses;
 
       const filterSelect = document.getElementById("filterClassSelect");
       if (filterSelect) {
         filterSelect.innerHTML = "";
-        if (currentUserRole === "admin") filterSelect.innerHTML += `<option value="ALL">All Classes</option>`;
+        if (currentUserRole === "admin" || isSuperAdmin) filterSelect.innerHTML += `<option value="ALL">All Classes</option>`;
         allowedClasses.forEach(c => filterSelect.innerHTML += `<option value="${c}">Class ${c}</option>`);
-        if (currentUserRole !== "admin" && allowedClasses.length === 1) filterSelect.value = allowedClasses[0];
+        if (currentUserRole !== "admin" && !isSuperAdmin && allowedClasses.length === 1) filterSelect.value = allowedClasses[0];
       }
 
       const dropdowns = ["attClassSelect", "markClassSelect", "perfClassSelect", "feeClassSelect"];
@@ -1073,12 +1125,12 @@
         const select = document.getElementById(id);
         if (select) {
           select.innerHTML = "";
-          if (allowedClasses.length > 1 || currentUserRole === "admin") {
+          if (allowedClasses.length > 1 || currentUserRole === "admin" || isSuperAdmin) {
             select.innerHTML = `<option value="">-- Select Class --</option>`;
           }
           allowedClasses.forEach(c => select.innerHTML += `<option value="${c}">Class ${c}</option>`);
 
-          if (currentUserRole !== "admin" && allowedClasses.length === 1) {
+          if (currentUserRole !== "admin" && !isSuperAdmin && allowedClasses.length === 1) {
             select.value = allowedClasses[0];
             if (id === "attClassSelect") loadAttendanceSheet();
             if (id === "markClassSelect") loadMarksEntrySheet();
@@ -1095,6 +1147,108 @@
       try {
         await signInWithEmailAndPassword(auth, document.getElementById("loginEmail").value, document.getElementById("loginPassword").value);
       } catch (err) { alert("Sign-in failed: " + err.message); }
+    };
+
+    // New Madrasa Registration with Approval Required Status
+    window.handleSignUp = async (e) => {
+      e.preventDefault();
+      try {
+        const instCode = document.getElementById("regInstCode").value.trim().toUpperCase();
+        const instName = document.getElementById("regInstName").value;
+        const userName = document.getElementById("regUserName").value;
+        const phone = document.getElementById("regPhone").value;
+        const email = document.getElementById("regEmail").value;
+        const pwd = document.getElementById("regPassword").value;
+        const instId = "MDR_" + instCode;
+
+        const isDev = (email === SUPER_ADMIN_EMAIL);
+        const cred = await createUserWithEmailAndPassword(auth, email, pwd);
+        await setDoc(doc(db, "users", cred.user.uid), {
+          uid: cred.user.uid,
+          name: userName,
+          phone: phone,
+          email: email,
+          msrNo: "MSR-001",
+          institutionId: instId,
+          institutionCode: instCode,
+          institutionName: instName,
+          role: "admin",
+          status: isDev ? "active" : "pending", // Pending approval for non-developers
+          assignedClasses: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
+          createdAt: serverTimestamp()
+        });
+
+        if (isDev) {
+          alert("Developer Account registered and activated!");
+        } else {
+          alert("Registration submitted! Please wait for Developer / Super Admin approval before signing in.");
+          signOut(auth);
+          switchAuthTab('login');
+        }
+      } catch (err) { alert("Registration failed: " + err.message); }
+    };
+
+    // Load Super Admin Requests List
+    async function loadSuperAdminRequests() {
+      const tbody = document.getElementById("superAdminTableBody");
+      tbody.innerHTML = `<tr><td colspan="7" class="text-center">Loading requests...</td></tr>`;
+
+      const q = query(collection(db, "users"), where("role", "==", "admin"));
+      const snap = await getDocs(q);
+
+      let html = "";
+      snap.forEach(d => {
+        const u = d.data();
+        if (u.email === SUPER_ADMIN_EMAIL) return;
+
+        const isPending = (u.status === "pending");
+        const statusBadge = isPending 
+          ? `<span class="badge bg-warning text-dark">Pending</span>` 
+          : `<span class="badge bg-success">Active / Approved</span>`;
+
+        const actionBtns = isPending 
+          ? `<button class="btn btn-sm btn-success me-1" onclick="approveMadrasa('${d.id}', '${u.institutionName}')"><i class="fa-solid fa-check"></i> Approve</button>
+             <button class="btn btn-sm btn-outline-danger" onclick="rejectMadrasa('${d.id}')"><i class="fa-solid fa-xmark"></i> Reject</button>`
+          : `<button class="btn btn-sm btn-outline-warning" onclick="revokeMadrasa('${d.id}')"><i class="fa-solid fa-ban"></i> Suspend</button>`;
+
+        html += `
+          <tr>
+            <td><b>${u.institutionCode || '-'}</b></td>
+            <td><b>${u.institutionName || '-'}</b></td>
+            <td>${u.name || '-'}</td>
+            <td>${u.email}</td>
+            <td>${u.phone}</td>
+            <td>${statusBadge}</td>
+            <td class="text-center">${actionBtns}</td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html || `<tr><td colspan="7" class="text-center text-muted">No madrasa accounts found.</td></tr>`;
+    }
+
+    window.approveMadrasa = async (userId, instName) => {
+      if (confirm(`Approve registration for ${instName}?`)) {
+        await updateDoc(doc(db, "users", userId), { status: "active" });
+        alert("Madrasa approved successfully!");
+        loadSuperAdminRequests();
+      }
+    };
+
+    window.revokeMadrasa = async (userId) => {
+      if (confirm(`Suspend access for this madrasa?`)) {
+        await updateDoc(doc(db, "users", userId), { status: "pending" });
+        alert("Madrasa status suspended.");
+        loadSuperAdminRequests();
+      }
+    };
+
+    window.rejectMadrasa = async (userId) => {
+      if (confirm(`Reject and delete this registration?`)) {
+        await deleteDoc(doc(db, "users", userId));
+        alert("Registration request rejected.");
+        loadSuperAdminRequests();
+      }
     };
 
     // Parent Login
@@ -1239,7 +1393,7 @@
     // Load Students List
     window.loadStudentsByClass = async (forceRefresh = false) => {
       let selectedClass = document.getElementById("filterClassSelect").value;
-      if (currentUserRole !== "admin" && (!selectedClass || selectedClass === "ALL")) {
+      if (currentUserRole !== "admin" && !isSuperAdmin && (!selectedClass || selectedClass === "ALL")) {
         selectedClass = currentUserAssignedClasses[0] || "1";
         document.getElementById("filterClassSelect").value = selectedClass;
       }
@@ -1248,7 +1402,7 @@
       tbody.innerHTML = `<tr><td colspan="7" class="text-center">Loading data...</td></tr>`;
 
       let q;
-      if (selectedClass === "ALL" && currentUserRole === "admin") {
+      if (selectedClass === "ALL" && (currentUserRole === "admin" || isSuperAdmin)) {
         q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId));
       } else {
         q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", selectedClass.replace(/Class\s*/i, "").trim()));
@@ -1281,7 +1435,7 @@
       let html = "";
       pageData.forEach(s => {
         const cleanClass = (s.currentClass || '-').replace(/Class\s*/i, "").trim();
-        const actionCol = (currentUserRole === "admin") ? `
+        const actionCol = (currentUserRole === "admin" || isSuperAdmin) ? `
           <td class="text-center">
             <button class="btn btn-sm btn-outline-primary me-1" onclick="openEditStudentModal('${s.id}')" title="Edit"><i class="fa-solid fa-pen"></i></button>
             <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${s.id}', '${s.name}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
@@ -1330,7 +1484,7 @@
       let html = "";
       filtered.slice(0, 50).forEach(s => {
         const cleanClass = (s.currentClass || '-').replace(/Class\s*/i, "").trim();
-        const actionCol = (currentUserRole === "admin") ? `
+        const actionCol = (currentUserRole === "admin" || isSuperAdmin) ? `
           <td class="text-center">
             <button class="btn btn-sm btn-outline-primary me-1" onclick="openEditStudentModal('${s.id}')"><i class="fa-solid fa-pen"></i></button>
             <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${s.id}', '${s.name}')"><i class="fa-solid fa-trash"></i></button>
@@ -1892,6 +2046,7 @@
       if (tabId === 'studentsListTab') loadStudentsByClass();
       if (tabId === 'teachersTab') loadTeachersList();
       if (tabId === 'homeDashboardTab') loadLeaderboard();
+      if (tabId === 'superAdminTab') loadSuperAdminRequests();
     };
   </script>
 </body>
