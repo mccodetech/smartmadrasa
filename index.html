@@ -62,7 +62,7 @@
         <button type="submit" class="btn btn-madrassa w-100 py-2">പ്രവേശിക്കുക</button>
       </form>
 
-      <!-- Parent Login: Reg No. + Mobile No. -->
+      <!-- Parent Login -->
       <form id="parentLoginForm" class="d-none" onsubmit="handleParentLogin(event)">
         <div class="alert alert-info py-2 small">കുട്ടിയുടെ Reg No. വും രജിസ്റ്റർ ചെയ്ത മൊബൈൽ നമ്പറും നൽകുക.</div>
         <div class="mb-3">
@@ -145,7 +145,7 @@
             <div class="table-responsive">
               <table class="table table-bordered align-middle">
                 <thead class="table-light"><tr><th>തീയതി</th><th>ടാസ്ക് / വിഷയം</th><th>പോയിന്റ്</th></tr></thead>
-                <tbody id="pvPointsTableBody"><tr><td colspan="3" class="text-center text-muted">രേഖപ്പെടുത്തിയിട്ടില്ല</td></tr></tbody>
+                <tbody id="pvPointsTableBody"><tr><td colspan="3" class="text-center text-muted">പോയിന്റുകൾ ലഭ്യമല്ല</td></tr></tbody>
               </table>
             </div>
           </div>
@@ -216,7 +216,6 @@
               </div>
             </div>
             
-            <!-- Leaderboard Display -->
             <div class="card p-4">
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-trophy me-2"></i>മദ്റസാ പ്രതിഭാ ലീഡർബോർഡ് (Top Performers)</h5>
               <div class="row g-3 text-center" id="homeLeaderboardArea">
@@ -302,7 +301,6 @@
                 <button class="btn btn-sm btn-outline-secondary" onclick="showTab('studentsListTab')"><i class="fa-solid fa-arrow-left"></i> ലിസ്റ്റിലേക്ക് തിരികെ</button>
               </div>
               <form onsubmit="saveDetailedStudent(event)">
-                <div class="section-title">1. അടിസ്ഥാന വിവരങ്ങൾ</div>
                 <div class="row g-3">
                   <div class="col-md-3"><label class="form-label">Reg No. *</label><input type="number" id="regNo" class="form-control" required></div>
                   <div class="col-md-3"><label class="form-label">ID No.</label><input type="text" id="idNo" class="form-control"></div>
@@ -319,10 +317,6 @@
                   <div class="col-md-3"><label class="form-label">ജനന തീയതി</label><input type="date" id="dob" class="form-control"></div>
                   <div class="col-md-3"><label class="form-label">ചേർന്ന തീയതി</label><input type="date" id="joinedDate" class="form-control"></div>
                   <div class="col-md-3"><label class="form-label">ചേർന്ന ക്ലാസ്</label><input type="text" id="joinedClass" class="form-control"></div>
-                </div>
-
-                <div class="section-title">2. കുടുംബ വിവരങ്ങളും വിലാസവും</div>
-                <div class="row g-3">
                   <div class="col-md-4"><label class="form-label">പിതാവിന്റെ പേര്</label><input type="text" id="fatherName" class="form-control"></div>
                   <div class="col-md-4"><label class="form-label">മാതാവിന്റെ പേര്</label><input type="text" id="motherName" class="form-control"></div>
                   <div class="col-md-4"><label class="form-label">രക്ഷാകർത്താവ്</label><input type="text" id="guardianName" class="form-control"></div>
@@ -330,7 +324,6 @@
                   <div class="col-md-4"><label class="form-label">സ്ഥലം</label><input type="text" id="place" class="form-control"></div>
                   <div class="col-md-4"><label class="form-label">വീട്ടുപേര് / വിലാസം</label><input type="text" id="address" class="form-control"></div>
                 </div>
-
                 <div class="mt-4"><button type="submit" class="btn btn-madrassa px-4"><i class="fa-solid fa-floppy-disk me-1"></i> സേവ് ചെയ്യുക</button></div>
               </form>
             </div>
@@ -377,7 +370,7 @@
             </div>
           </div>
 
-          <!-- 4. Marks Tab (3 Preset Exams in Malayalam & English) -->
+          <!-- 4. Marks Tab -->
           <div id="marksTab" class="content-tab d-none">
             <div class="card p-4">
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-award"></i> പരീക്ഷാ മാർക്ക് എൻട്രി</h5>
@@ -419,7 +412,7 @@
             </div>
           </div>
 
-          <!-- 5. Student Performance & Points Module -->
+          <!-- 5. Performance Tab -->
           <div id="performanceTab" class="content-tab d-none">
             <div class="card p-4">
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-star me-2"></i>വിദ്യാർത്ഥി പെർഫോമൻസ് പോയിന്റുകൾ നൽകൽ</h5>
@@ -619,6 +612,24 @@
     </div>
   </div>
 
+  <!-- Bulk Import Modal -->
+  <div class="modal fade" id="bulkImportModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-madrassa text-white">
+          <h5 class="modal-title fw-bold"><i class="fa-solid fa-file-csv me-1"></i> ബൾക്ക് ഇമ്പോർട്ട് (Excel/CSV)</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <p class="text-muted small">ഗൂഗിൾ ഷീറ്റിൽ നിന്ന് ഡൗൺലോഡ് ചെയ്ത CSV ഫയൽ തിരഞ്ഞെടുക്കുക.</p>
+          <input type="file" id="csvFileInput" class="form-control mb-3" accept=".csv">
+          <div id="bulkStatus" class="alert alert-info d-none"></div>
+          <button class="btn btn-success w-100" onclick="handleBulkUpload()"><i class="fa-solid fa-cloud-arrow-up me-1"></i> ഡാറ്റ ഇമ്പോർട്ട് ചെയ്യുക</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <!-- Firebase Scripts -->
@@ -658,50 +669,65 @@
     window.updateDropdownLabel = (type) => {
       const checkboxes = document.querySelectorAll(`.${type}-class-cb:checked`);
       const label = document.getElementById(`${type}ClassDropdownLabel`);
-      if (!checkboxes.length) {
-        label.innerText = "ക്ലാസ് തിരഞ്ഞെടുക്കുക";
-      } else {
-        const selected = Array.from(checkboxes).map(cb => cb.value);
-        label.innerText = selected.map(c => `ക്ലാസ് ${c}`).join(', ');
+      if (label) {
+        if (!checkboxes.length) {
+          label.innerText = "ക്ലാസ് തിരഞ്ഞെടുക്കുക";
+        } else {
+          const selected = Array.from(checkboxes).map(cb => cb.value);
+          label.innerText = selected.map(c => `ക്ലാസ് ${c}`).join(', ');
+        }
       }
     };
 
     onAuthStateChanged(auth, async (user) => {
       if (user) {
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          currentInstitutionId = userData.institutionId;
-          currentUserRole = userData.role || (userData.email === "chembrasseri1@gmail.com" ? "admin" : "teacher");
-          currentUserAssignedClasses = userData.assignedClasses || (userData.assignedClass ? [userData.assignedClass] : []);
+        try {
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            currentInstitutionId = userData.institutionId;
+            currentUserRole = userData.role || (userData.email === "chembrasseri1@gmail.com" ? "admin" : "teacher");
+            currentUserAssignedClasses = userData.assignedClasses || (userData.assignedClass ? [userData.assignedClass] : []);
 
-          document.getElementById("displayMadrassaName").innerText = userData.institutionName || "Smart Madrasa";
-          document.getElementById("displayUserName").innerHTML = `<i class="fa-solid fa-user"></i> ${userData.name}`;
-          
-          if (currentUserRole === "admin") {
-            document.getElementById("displayUserRole").innerText = "സ്വദർ മുഅല്ലിം";
-            document.getElementById("teachersMenuBtn").classList.remove("d-none");
-            document.getElementById("promotionMenuBtn").classList.remove("d-none");
-            document.getElementById("adminStudentActions").classList.remove("d-none");
-            document.getElementById("actionHeaderCol").classList.remove("d-none");
-            document.getElementById("homeTeacherCard").classList.remove("d-none");
-          } else {
-            document.getElementById("displayUserRole").innerText = `മുഅല്ലിം (${currentUserAssignedClasses.map(c=>'ക്ലാസ് '+c).join(', ')})`;
-            document.getElementById("teachersMenuBtn").classList.add("d-none");
-            document.getElementById("promotionMenuBtn").classList.add("d-none");
-            document.getElementById("adminStudentActions").classList.add("d-none");
-            document.getElementById("actionHeaderCol").classList.add("d-none");
-            document.getElementById("homeTeacherCard").classList.add("d-none");
+            const instNameEl = document.getElementById("displayMadrassaName");
+            if (instNameEl) instNameEl.innerText = userData.institutionName || "Smart Madrasa";
+
+            const userNameEl = document.getElementById("displayUserName");
+            if (userNameEl) userNameEl.innerHTML = `<i class="fa-solid fa-user"></i> ${userData.name}`;
+            
+            const userRoleEl = document.getElementById("displayUserRole");
+            const tMenuBtn = document.getElementById("teachersMenuBtn");
+            const pMenuBtn = document.getElementById("promotionMenuBtn");
+            const adminActions = document.getElementById("adminStudentActions");
+            const actionCol = document.getElementById("actionHeaderCol");
+
+            if (currentUserRole === "admin") {
+              if (userRoleEl) userRoleEl.innerText = "സ്വദർ മുഅല്ലിം";
+              if (tMenuBtn) tMenuBtn.classList.remove("d-none");
+              if (pMenuBtn) pMenuBtn.classList.remove("d-none");
+              if (adminActions) adminActions.classList.remove("d-none");
+              if (actionCol) actionCol.classList.remove("d-none");
+            } else {
+              if (userRoleEl) userRoleEl.innerText = `മുഅല്ലിം (${currentUserAssignedClasses.map(c=>'ക്ലാസ് '+c).join(', ')})`;
+              if (tMenuBtn) tMenuBtn.classList.add("d-none");
+              if (pMenuBtn) pMenuBtn.classList.add("d-none");
+              if (adminActions) adminActions.classList.add("d-none");
+              if (actionCol) actionCol.classList.add("d-none");
+            }
+
+            document.getElementById("authSection").classList.add("d-none");
+            document.getElementById("appSection").classList.remove("d-none");
+            
+            const attDateEl = document.getElementById("attDate");
+            if (attDateEl) attDateEl.valueAsDate = new Date();
+
+            populateClassDropdowns();
+            showTab('homeDashboardTab');
+            loadLeaderboard();
+            if (currentUserRole === "admin") loadTeachersList();
           }
-
-          document.getElementById("authSection").classList.add("d-none");
-          document.getElementById("appSection").classList.remove("d-none");
-          document.getElementById("attDate").valueAsDate = new Date();
-
-          populateClassDropdowns();
-          showTab('homeDashboardTab');
-          loadLeaderboard();
-          if (currentUserRole === "admin") loadTeachersList();
+        } catch (e) {
+          console.error("Auth Load Error:", e);
         }
       } else {
         if (!sessionStorage.getItem("parentLoggedIn")) {
@@ -716,31 +742,35 @@
       const allowedClasses = (currentUserRole === "admin") ? allClasses : currentUserAssignedClasses;
 
       const filterSelect = document.getElementById("filterClassSelect");
-      filterSelect.innerHTML = "";
-      if (currentUserRole === "admin") filterSelect.innerHTML += `<option value="ALL">എല്ലാ ക്ലാസുകളും</option>`;
-      allowedClasses.forEach(c => filterSelect.innerHTML += `<option value="${c}">ക്ലാസ് ${c}</option>`);
-      if (currentUserRole !== "admin" && allowedClasses.length === 1) filterSelect.value = allowedClasses[0];
+      if (filterSelect) {
+        filterSelect.innerHTML = "";
+        if (currentUserRole === "admin") filterSelect.innerHTML += `<option value="ALL">എല്ലാ ക്ലാസുകളും</option>`;
+        allowedClasses.forEach(c => filterSelect.innerHTML += `<option value="${c}">ക്ലാസ് ${c}</option>`);
+        if (currentUserRole !== "admin" && allowedClasses.length === 1) filterSelect.value = allowedClasses[0];
+      }
 
       const dropdowns = ["attClassSelect", "markClassSelect", "perfClassSelect", "feeClassSelect"];
       dropdowns.forEach(id => {
         const select = document.getElementById(id);
-        select.innerHTML = "";
-        if (allowedClasses.length > 1 || currentUserRole === "admin") {
-          select.innerHTML = `<option value="">-- ക്ലാസ് തിരഞ്ഞെടുക്കുക --</option>`;
-        }
-        allowedClasses.forEach(c => select.innerHTML += `<option value="${c}">ക്ലാസ് ${c}</option>`);
+        if (select) {
+          select.innerHTML = "";
+          if (allowedClasses.length > 1 || currentUserRole === "admin") {
+            select.innerHTML = `<option value="">-- ക്ലാസ് തിരഞ്ഞെടുക്കുക --</option>`;
+          }
+          allowedClasses.forEach(c => select.innerHTML += `<option value="${c}">ക്ലാസ് ${c}</option>`);
 
-        if (currentUserRole !== "admin" && allowedClasses.length === 1) {
-          select.value = allowedClasses[0];
-          if (id === "attClassSelect") loadAttendanceSheet();
-          if (id === "markClassSelect") loadMarksEntrySheet();
-          if (id === "perfClassSelect") loadStudentsForPerf();
-          if (id === "feeClassSelect") loadStudentsForFees();
+          if (currentUserRole !== "admin" && allowedClasses.length === 1) {
+            select.value = allowedClasses[0];
+            if (id === "attClassSelect") loadAttendanceSheet();
+            if (id === "markClassSelect") loadMarksEntrySheet();
+            if (id === "perfClassSelect") loadStudentsForPerf();
+            if (id === "feeClassSelect") loadStudentsForFees();
+          }
         }
       });
     }
 
-    // Teacher Login
+    // Login
     window.handleLogin = async (e) => {
       e.preventDefault();
       try {
@@ -748,7 +778,7 @@
       } catch (err) { alert("ലോഗിൻ പരാജയപ്പെട്ടു: " + err.message); }
     };
 
-    // Parent Login: Reg No. + Mobile No.
+    // Parent Login
     window.handleParentLogin = async (e) => {
       e.preventDefault();
       const reg = Number(document.getElementById("parentRegNo").value);
@@ -760,14 +790,10 @@
       if (snap.empty) return alert("വിദ്യാർത്ഥിയുടെ വിവരങ്ങൾ കണ്ടെത്തിയില്ല. Reg No. പരിശോധിക്കുക.");
 
       let matchedStudent = null;
-      let matchedDocId = "";
       snap.forEach(d => {
         const data = d.data();
         const sPhone = (data.phone || '').replace(/[^0-9]/g, '').slice(-10);
-        if (sPhone === mobile) {
-          matchedStudent = data;
-          matchedDocId = d.id;
-        }
+        if (sPhone === mobile) matchedStudent = data;
       });
 
       if (!matchedStudent) return alert("നൽകിയ മൊബൈൽ നമ്പർ ഈ വിദ്യാർത്ഥിയുടെ രജിസ്ട്രേഷൻ വിവരങ്ങളുമായി പൊരുത്തപ്പെടുന്നില്ല.");
@@ -781,7 +807,6 @@
       document.getElementById("pvRegNo").innerText = matchedStudent.regNo;
       document.getElementById("pvFather").innerText = matchedStudent.fatherName || matchedStudent.guardianName || '-';
 
-      // Load Fee Records
       const feeQ = query(collection(db, "feeCollections"), where("institutionId", "==", matchedStudent.institutionId), where("regNo", "==", reg));
       const feeSnap = await getDocs(feeQ);
       let feeHtml = "";
@@ -791,7 +816,6 @@
       });
       document.getElementById("pvFeeTableBody").innerHTML = feeHtml || `<tr><td colspan="4" class="text-center text-muted">ഫീസ് വിവരങ്ങൾ ലഭ്യമല്ല</td></tr>`;
 
-      // Load Performance Points
       const perfQ = query(collection(db, "performancePoints"), where("institutionId", "==", matchedStudent.institutionId), where("regNo", "==", reg));
       const perfSnap = await getDocs(perfQ);
       let totalPts = 0;
@@ -813,7 +837,7 @@
 
     window.handleLogout = () => signOut(auth);
 
-    // Performance Module: Load Students
+    // Save Performance Point
     window.loadStudentsForPerf = async () => {
       const selClass = document.getElementById("perfClassSelect").value;
       const select = document.getElementById("perfStudentSelect");
@@ -830,7 +854,6 @@
       select.innerHTML = html;
     };
 
-    // Save Performance Point
     window.savePerformancePoint = async (e) => {
       e.preventDefault();
       const sSelect = document.getElementById("perfStudentSelect");
@@ -844,7 +867,6 @@
       const taskVal = document.getElementById("perfTaskSelect").value;
       const note = document.getElementById("perfNote").value;
 
-      // Extract Points from task string
       let points = 10;
       if (taskVal.includes("+20")) points = 20;
       else if (taskVal.includes("+15")) points = 15;
@@ -871,7 +893,6 @@
       } catch (err) { alert("Error: " + err.message); }
     };
 
-    // Load Top Leaderboard Stars
     async function loadLeaderboard() {
       const q = query(collection(db, "performancePoints"), where("institutionId", "==", currentInstitutionId));
       const snap = await getDocs(q);
@@ -902,7 +923,7 @@
       }
     }
 
-    // Save Marks Sheet
+    // Marks
     window.loadMarksEntrySheet = async () => {
       const selClass = document.getElementById("markClassSelect").value;
       if (!selClass) { document.getElementById("marksSheetArea").classList.add("d-none"); return; }
@@ -976,7 +997,7 @@
       } catch (err) { alert("Error: " + err.message); }
     };
 
-    // Sequential Fee Collection & WhatsApp
+    // Fees
     window.loadStudentsForFees = async () => {
       const selClass = document.getElementById("feeClassSelect").value;
       const select = document.getElementById("feeStudentSelect");
@@ -1329,9 +1350,10 @@
 
     window.showTab = (tabId) => {
       document.querySelectorAll(".content-tab").forEach(t => t.classList.add("d-none"));
-      document.getElementById(tabId).classList.remove("d-none");
+      const targetTab = document.getElementById(tabId);
+      if (targetTab) targetTab.classList.remove("d-none");
+
       document.querySelectorAll("#tabMenu .nav-link").forEach(b => b.classList.remove("active"));
-      
       const activeBtn = document.querySelector(`#tabMenu button[onclick="showTab('${tabId}')"]`);
       if (activeBtn) activeBtn.classList.add("active");
 
