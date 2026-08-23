@@ -6,7 +6,6 @@
   <title>Smart Madrasa - തഅ്‌ലീം പോർട്ടൽ</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
-  <!-- PapaParse for Excel/CSV Bulk Upload -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <style>
     :root { --primary-color: #0f5132; --secondary-color: #198754; }
@@ -18,6 +17,8 @@
     .nav-pills .nav-link.active { background-color: var(--secondary-color); }
     .nav-pills .nav-link { color: #333; font-weight: 500; }
     .section-title { font-size: 1.05rem; font-weight: 600; color: var(--primary-color); border-bottom: 2px solid #e9ecef; padding-bottom: 6px; margin-top: 15px; margin-bottom: 15px; }
+    .clickable-row { cursor: pointer; }
+    .clickable-row:hover { background-color: #f0fdf4 !important; }
   </style>
 </head>
 <body>
@@ -96,9 +97,9 @@
         <div class="col-md-3 col-lg-2 mb-4">
           <div class="card p-3">
             <div class="nav flex-column nav-pills gap-1" id="tabMenu">
-              <button class="nav-link active text-start" onclick="showTab('admissionTab')"><i class="fa-solid fa-user-plus me-2"></i> അഡ്മിഷൻ ഫോം</button>
+              <button class="nav-link active text-start" onclick="showTab('studentsListTab')"><i class="fa-solid fa-users me-2"></i> വിദ്യാർത്ഥി ലിസ്റ്റ്</button>
+              <button class="nav-link text-start" onclick="showTab('admissionTab')"><i class="fa-solid fa-user-plus me-2"></i> പുതിയ അഡ്മിഷൻ</button>
               <button class="nav-link text-start" onclick="showTab('bulkImportTab')"><i class="fa-solid fa-file-csv me-2"></i> ബൾക്ക് ഇമ്പോർട്ട് (Excel)</button>
-              <button class="nav-link text-start" onclick="showTab('studentsListTab')"><i class="fa-solid fa-users me-2"></i> വിദ്യാർത്ഥി ലിസ്റ്റ്</button>
               <button class="nav-link text-start" onclick="showTab('promotionTab')"><i class="fa-solid fa-graduation-cap me-2"></i> ക്ലാസ് കയറ്റം</button>
               <button class="nav-link text-start" onclick="showTab('attendanceTab')"><i class="fa-solid fa-calendar-check me-2"></i> ഹാജർ</button>
               <button class="nav-link text-start" onclick="showTab('marksTab')"><i class="fa-solid fa-award me-2"></i> മാർക്ക്</button>
@@ -110,140 +111,26 @@
         <!-- Main Content Area -->
         <div class="col-md-9 col-lg-10">
 
-          <!-- 1. Detailed Madrasa Admission Form -->
-          <div id="admissionTab" class="content-tab">
+          <!-- 1. Students List Tab (Default Tab with Sorting & Search) -->
+          <div id="studentsListTab" class="content-tab">
             <div class="card p-4">
-              <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-address-card"></i> സമഗ്ര മദ്റസാ അഡ്മിഷൻ ഫോം</h5>
-              <form onsubmit="saveDetailedStudent(event)">
-                
-                <div class="section-title">1. അടിസ്ഥാന വിവരങ്ങൾ (Basic Details)</div>
-                <div class="row g-3">
-                  <div class="col-md-3">
-                    <label class="form-label">രജിസ്റ്റർ നമ്പർ (Reg No.) *</label>
-                    <input type="text" id="regNo" class="form-control" required>
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label">ഐഡി നമ്പർ (ID No.)</label>
-                    <input type="text" id="idNo" class="form-control">
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label">വിദ്യാർത്ഥിയുടെ പേര് (Name) *</label>
-                    <input type="text" id="studentName" class="form-control" required>
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label">നിലവിലെ ക്ലാസ് (Current Class) *</label>
-                    <select id="currentClass" class="form-select" required>
-                      <option value="Class 1">ക്ലാസ് 1</option>
-                      <option value="Class 2">ക്ലാസ് 2</option>
-                      <option value="Class 3">ക്ലാസ് 3</option>
-                      <option value="Class 4">ക്ലാസ് 4</option>
-                      <option value="Class 5">ക്ലാസ് 5</option>
-                      <option value="Class 6">ക്ലാസ് 6</option>
-                      <option value="Class 7">ക്ലാസ് 7</option>
-                      <option value="Class 8">ക്ലാസ് 8</option>
-                      <option value="Class 9">ക്ലാസ് 9</option>
-                      <option value="Class 10">ക്ലാസ് 10</option>
-                      <option value="Plus 1">പ്ലസ് 1</option>
-                      <option value="Plus 2">പ്ലസ് 2</option>
-                    </select>
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label">ജനന തീയതി (D.O.B)</label>
-                    <input type="date" id="dob" class="form-control">
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label">ചേർന്ന തീയതി (Joined Date)</label>
-                    <input type="date" id="joinedDate" class="form-control">
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label">ചേർന്ന ക്ലാസ് (Joined Class)</label>
-                    <input type="text" id="joinedClass" class="form-control" placeholder="ഉദാ: ക്ലാസ് 1">
-                  </div>
-                </div>
-
-                <div class="section-title">2. കുടുംബ വിവരങ്ങളും വിലാസവും (Parent & Contact)</div>
-                <div class="row g-3">
-                  <div class="col-md-4">
-                    <label class="form-label">പിതാവിന്റെ പേര് (Father Name)</label>
-                    <input type="text" id="fatherName" class="form-control">
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label">മാതാവിന്റെ പേര് (Mother Name)</label>
-                    <input type="text" id="motherName" class="form-control">
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label">രക്ഷാകർത്താവ് (Guardian Name)</label>
-                    <input type="text" id="guardianName" class="form-control">
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label">കുട്ടിയുമായുള്ള ബന്ധം (Relationship)</label>
-                    <input type="text" id="relationship" class="form-control" placeholder="Father / Mother / Uncle">
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label">സ്ഥലം (Place)</label>
-                    <input type="text" id="place" class="form-control">
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label">വീട്ടുപേര് / വിലാസം (Address)</label>
-                    <input type="text" id="address" class="form-control">
-                  </div>
-                </div>
-
-                <div class="section-title">3. മുൻ മദ്റസ വിവരങ്ങൾ (Previous Madrasa / TC Details)</div>
-                <div class="row g-3">
-                  <div class="col-md-6">
-                    <label class="form-label">മുൻപ് പഠിച്ച മദ്റസ / TC വിവരങ്ങൾ</label>
-                    <input type="text" id="prevMadrasa" class="form-control" placeholder="മദ്റസയുടെ പേര്, TC നമ്പർ, തീയതി">
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label">പ്രത്യേക വിവരങ്ങൾ (Special Information)</label>
-                    <input type="text" id="specialInfo" class="form-control">
-                  </div>
-                </div>
-
-                <div class="mt-4">
-                  <button type="submit" class="btn btn-madrassa px-4 py-2"><i class="fa-solid fa-floppy-disk me-1"></i> അഡ്മിഷൻ പൂർത്തിയാക്കുക</button>
-                </div>
-              </form>
-            </div>
-          </div>
-
-          <!-- 2. Bulk Upload CSV Tab -->
-          <div id="bulkImportTab" class="content-tab d-none">
-            <div class="card p-4">
-              <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-file-csv"></i> Excel / CSV വഴി കുട്ടികളെ ഒന്നിച്ച് ചേർക്കുക</h5>
-              <p class="text-muted">നിങ്ങളുടെ ഗൂഗിൾ ഷീറ്റ് <b>File > Download > Comma Separated Values (.csv)</b> ആയി ഡൗൺലോഡ് ചെയ്ത് ഇവിടെ അപ്‌ലോഡ് ചെയ്യുക.</p>
-              
-              <div class="row g-3 mb-3">
-                <div class="col-md-6">
-                  <input type="file" id="csvFileInput" class="form-control" accept=".csv">
-                </div>
-                <div class="col-md-3">
-                  <button class="btn btn-success w-100" onclick="handleBulkUpload()"><i class="fa-solid fa-cloud-arrow-up me-1"></i> അപ്‌ലോഡ് ചെയ്യുക</button>
-                </div>
-              </div>
-
-              <div id="bulkStatus" class="alert alert-info d-none"></div>
-            </div>
-          </div>
-
-          <!-- 3. Students List Tab -->
-          <div id="studentsListTab" class="content-tab d-none">
-            <div class="card p-4">
-              <div class="d-flex justify-content-between align-items-center mb-3">
+              <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
                 <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-users"></i> രജിസ്റ്റർ ചെയ്ത വിദ്യാർത്ഥികൾ</h5>
-                <button class="btn btn-sm btn-outline-success" onclick="loadStudentsList()"><i class="fa-solid fa-rotate"></i> പുതുക്കുക</button>
+                <div class="d-flex gap-2">
+                  <input type="text" id="searchBox" class="form-control form-control-sm" placeholder="പേര് / Reg No..." oninput="filterStudents()">
+                  <button class="btn btn-sm btn-outline-success" onclick="loadStudentsList()"><i class="fa-solid fa-rotate"></i></button>
+                </div>
               </div>
               <div class="table-responsive">
                 <table class="table table-hover table-bordered align-middle">
                   <thead class="table-light">
                     <tr>
-                      <th>Reg No.</th>
-                      <th>പേര്</th>
+                      <th style="width: 90px;">Reg No.</th>
+                      <th>പേര് (Name)</th>
                       <th>ക്ലാസ്</th>
                       <th>പിതാവ് / രക്ഷാകർത്താവ്</th>
                       <th>സ്ഥലം</th>
-                      <th>ഫോൺ</th>
+                      <th>ഫോൺ നമ്പർ</th>
                     </tr>
                   </thead>
                   <tbody id="studentsTableBody">
@@ -254,36 +141,136 @@
             </div>
           </div>
 
-          <!-- 4. Class Promotion Tab -->
+          <!-- 2. Detailed Admission Form -->
+          <div id="admissionTab" class="content-tab d-none">
+            <div class="card p-4">
+              <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-address-card"></i> സമഗ്ര മദ്റസാ അഡ്മിഷൻ ഫോം</h5>
+              <form onsubmit="saveDetailedStudent(event)">
+                <div class="section-title">1. അടിസ്ഥാന വിവരങ്ങൾ</div>
+                <div class="row g-3">
+                  <div class="col-md-3">
+                    <label class="form-label">രജിസ്റ്റർ നമ്പർ (Reg No.) *</label>
+                    <input type="number" id="regNo" class="form-control" required>
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label">ഐഡി നമ്പർ (ID No.)</label>
+                    <input type="text" id="idNo" class="form-control">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">വിദ്യാർത്ഥിയുടെ പേര് *</label>
+                    <input type="text" id="studentName" class="form-control" required>
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label">നിലവിലെ ക്ലാസ് *</label>
+                    <select id="currentClass" class="form-select" required>
+                      <option value="1">ക്ലാസ് 1</option>
+                      <option value="2">ക്ലാസ് 2</option>
+                      <option value="3">ക്ലാസ് 3</option>
+                      <option value="4">ക്ലാസ് 4</option>
+                      <option value="5">ക്ലാസ് 5</option>
+                      <option value="6">ക്ലാസ് 6</option>
+                      <option value="7">ക്ലാസ് 7</option>
+                      <option value="8">ക്ലാസ് 8</option>
+                      <option value="9">ക്ലാസ് 9</option>
+                      <option value="10">ക്ലാസ് 10</option>
+                    </select>
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label">ജനന തീയതി</label>
+                    <input type="date" id="dob" class="form-control">
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label">ചേർന്ന തീയതി</label>
+                    <input type="date" id="joinedDate" class="form-control">
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label">ചേർന്ന ക്ലാസ്</label>
+                    <input type="text" id="joinedClass" class="form-control">
+                  </div>
+                </div>
+
+                <div class="section-title">2. കുടുംബ വിവരങ്ങളും വിലാസവും</div>
+                <div class="row g-3">
+                  <div class="col-md-4">
+                    <label class="form-label">പിതാവിന്റെ പേര്</label>
+                    <input type="text" id="fatherName" class="form-control">
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">മാതാവിന്റെ പേര്</label>
+                    <input type="text" id="motherName" class="form-control">
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">രക്ഷാകർത്താവ്</label>
+                    <input type="text" id="guardianName" class="form-control">
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">ഫോൺ നമ്പർ</label>
+                    <input type="tel" id="parentPhone" class="form-control">
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">സ്ഥലം</label>
+                    <input type="text" id="place" class="form-control">
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">വീട്ടുപേര് / വിലാസം</label>
+                    <input type="text" id="address" class="form-control">
+                  </div>
+                </div>
+
+                <div class="section-title">3. മുൻ മദ്റസ വിവരങ്ങൾ</div>
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label">മുൻപ് പഠിച്ച മദ്റസ / TC വിവരങ്ങൾ</label>
+                    <input type="text" id="prevMadrasa" class="form-control">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">പ്രത്യേക വിവരങ്ങൾ</label>
+                    <input type="text" id="specialInfo" class="form-control">
+                  </div>
+                </div>
+
+                <div class="mt-4">
+                  <button type="submit" class="btn btn-madrassa px-4"><i class="fa-solid fa-floppy-disk me-1"></i> സേവ് ചെയ്യുക</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- 3. Bulk Upload CSV -->
+          <div id="bulkImportTab" class="content-tab d-none">
+            <div class="card p-4">
+              <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-file-csv"></i> Excel / CSV ഇമ്പോർട്ടർ</h5>
+              <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                  <input type="file" id="csvFileInput" class="form-control" accept=".csv">
+                </div>
+                <div class="col-md-3">
+                  <button class="btn btn-success w-100" onclick="handleBulkUpload()"><i class="fa-solid fa-cloud-arrow-up me-1"></i> അപ്‌ലോഡ് ചെയ്യുക</button>
+                </div>
+              </div>
+              <div id="bulkStatus" class="alert alert-info d-none"></div>
+            </div>
+          </div>
+
+          <!-- 4. Class Promotion -->
           <div id="promotionTab" class="content-tab d-none">
             <div class="card p-4">
-              <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-graduation-cap"></i> ക്ലാസ് കയറ്റം (Annual Class Promotion)</h5>
-              <p class="text-muted">അധ്യയന വർഷാവസാനം ഒരു ക്ലാസിലെ കുട്ടികളെ അടുത്ത ക്ലാസിലേക്ക് ഉയർത്താൻ ഇത് ഉപയോഗിക്കാം.</p>
-              
+              <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-graduation-cap"></i> ക്ലാസ് കയറ്റം</h5>
               <div class="row g-3">
                 <div class="col-md-4">
                   <label class="form-label">നിലവിലെ ക്ലാസ്</label>
                   <select id="fromClass" class="form-select">
-                    <option value="Class 1">ക്ലാസ് 1</option>
-                    <option value="Class 2">ക്ലാസ് 2</option>
-                    <option value="Class 3">ക്ലാസ് 3</option>
-                    <option value="Class 4">ക്ലാസ് 4</option>
-                    <option value="Class 5">ക്ലാസ് 5</option>
+                    <option value="1">ക്ലാസ് 1</option><option value="2">ക്ലാസ് 2</option><option value="3">ക്ലാസ് 3</option><option value="4">ക്ലാസ് 4</option><option value="5">ക്ലാസ് 5</option>
                   </select>
                 </div>
                 <div class="col-md-4">
                   <label class="form-label">മാറേണ്ട ക്ലാസ്</label>
                   <select id="toClass" class="form-select">
-                    <option value="Class 2">ക്ലാസ് 2</option>
-                    <option value="Class 3">ക്ലാസ് 3</option>
-                    <option value="Class 4">ക്ലാസ് 4</option>
-                    <option value="Class 5">ക്ലാസ് 5</option>
-                    <option value="Class 6">ക്ലാസ് 6</option>
-                    <option value="Passed Out">പഠനം പൂർത്തിയാക്കി (Passed Out)</option>
+                    <option value="2">ക്ലാസ് 2</option><option value="3">ക്ലാസ് 3</option><option value="4">ക്ലാസ് 4</option><option value="5">ക്ലാസ് 5</option><option value="Passed Out">പഠനം പൂർത്തിയാക്കി</option>
                   </select>
                 </div>
                 <div class="col-md-4 d-flex align-items-end">
-                  <button class="btn btn-warning w-100" onclick="promoteStudents()"><i class="fa-solid fa-arrow-up-right-dots me-1"></i> ക്ലാസ് ഉയർത്തുക</button>
+                  <button class="btn btn-warning w-100" onclick="promoteStudents()"><i class="fa-solid fa-arrow-up-right-dots me-1"></i> മാറ്റുക</button>
                 </div>
               </div>
             </div>
@@ -293,15 +280,11 @@
           <div id="attendanceTab" class="content-tab d-none">
             <div class="card p-4">
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-calendar-check"></i> ദിവസേന ഹാജർ</h5>
-              <div class="row g-3 mb-3">
+              <div class="row g-3">
                 <div class="col-md-4"><input type="date" id="attDate" class="form-control"></div>
                 <div class="col-md-4">
                   <select id="attClassSelect" class="form-select">
-                    <option value="Class 1">ക്ലാസ് 1</option>
-                    <option value="Class 2">ക്ലാസ് 2</option>
-                    <option value="Class 3">ക്ലാസ് 3</option>
-                    <option value="Class 4">ക്ലാസ് 4</option>
-                    <option value="Class 5">ക്ലാസ് 5</option>
+                    <option value="1">ക്ലാസ് 1</option><option value="2">ക്ലാസ് 2</option><option value="3">ക്ലാസ് 3</option><option value="4">ക്ലാസ് 4</option><option value="5">ക്ലാസ് 5</option>
                   </select>
                 </div>
               </div>
@@ -315,7 +298,7 @@
               <form onsubmit="saveMarks(event)">
                 <div class="row g-3">
                   <div class="col-md-4"><input type="text" id="examName" class="form-control" placeholder="പരീക്ഷ" required></div>
-                  <div class="col-md-4"><input type="text" id="markAdmNo" class="form-control" placeholder="Reg No." required></div>
+                  <div class="col-md-4"><input type="number" id="markAdmNo" class="form-control" placeholder="Reg No." required></div>
                   <div class="col-md-4"><input type="number" id="markQuran" class="form-control" placeholder="ഖുർആൻ" required></div>
                   <div class="col-12"><button type="submit" class="btn btn-madrassa">മാർക്ക് സേവ് ചെയ്യുക</button></div>
                 </div>
@@ -329,10 +312,10 @@
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-receipt"></i> ഫീസ് കളക്ഷൻ & രസീത്</h5>
               <form onsubmit="processFee(event)">
                 <div class="row g-3">
-                  <div class="col-md-4"><input type="text" id="feeAdmNo" class="form-control" placeholder="Reg No." required></div>
+                  <div class="col-md-4"><input type="number" id="feeAdmNo" class="form-control" placeholder="Reg No." required></div>
                   <div class="col-md-4"><input type="number" id="feeAmount" class="form-control" placeholder="തുക (₹)" required></div>
                   <div class="col-md-4"><input type="text" id="manualReceipt" class="form-control" placeholder="മാനുവൽ രസീത് നമ്പർ"></div>
-                  <div class="col-12"><button type="submit" class="btn btn-madrassa">ഫീസ് രേഖപ്പെടുത്തുക & രസീത് നൽകുക</button></div>
+                  <div class="col-12"><button type="submit" class="btn btn-madrassa">ഫീസ് രേഖപ്പെടുത്തുക</button></div>
                 </div>
               </form>
             </div>
@@ -342,6 +325,24 @@
       </div>
     </div>
   </div>
+
+  <!-- Student Detail View Modal -->
+  <div class="modal fade" id="studentDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-madrassa text-white">
+          <h5 class="modal-title fw-bold" id="modalStudentName">വിദ്യാർത്ഥി പ്രൊഫൈൽ</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4" id="modalStudentBody">
+          <!-- Details injected here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <!-- Firebase Scripts -->
   <script type="module">
@@ -369,6 +370,7 @@
     const db = getFirestore(app);
 
     let currentInstitutionId = "";
+    let allStudentsCache = [];
 
     onAuthStateChanged(auth, async (user) => {
       if (user) {
@@ -420,13 +422,13 @@
 
     window.handleLogout = () => signOut(auth);
 
-    // Save Detailed Student Form
+    // Save Student Form
     window.saveDetailedStudent = async (e) => {
       e.preventDefault();
       try {
         await addDoc(collection(db, "students"), {
           institutionId: currentInstitutionId,
-          regNo: document.getElementById("regNo").value,
+          regNo: Number(document.getElementById("regNo").value) || 0,
           idNo: document.getElementById("idNo").value,
           name: document.getElementById("studentName").value,
           currentClass: document.getElementById("currentClass").value,
@@ -436,7 +438,7 @@
           fatherName: document.getElementById("fatherName").value,
           motherName: document.getElementById("motherName").value,
           guardianName: document.getElementById("guardianName").value,
-          relationship: document.getElementById("relationship").value,
+          phone: document.getElementById("parentPhone").value,
           place: document.getElementById("place").value,
           address: document.getElementById("address").value,
           prevMadrasa: document.getElementById("prevMadrasa").value,
@@ -444,13 +446,14 @@
           status: "active",
           createdAt: serverTimestamp()
         });
-        alert("വിദ്യാർത്ഥിയുടെ വിവരങ്ങൾ വിജയകരമായി രജിസ്റ്റർ ചെയ്തു.");
+        alert("വിദ്യാർത്ഥിയുടെ വിവരങ്ങൾ സേവ് ചെയ്തു.");
         e.target.reset();
         loadStudentsList();
+        showTab('studentsListTab');
       } catch (err) { alert("Error: " + err.message); }
     };
 
-    // Bulk Upload from Google Sheets CSV
+    // Bulk Upload with Correct Mapping & Numeric Reg No
     window.handleBulkUpload = () => {
       const fileInput = document.getElementById("csvFileInput");
       const statusDiv = document.getElementById("bulkStatus");
@@ -468,18 +471,23 @@
         skipEmptyLines: true,
         complete: async (results) => {
           const rows = results.data;
-          statusDiv.innerText = `${rows.length} കുട്ടികളുടെ വിവരങ്ങൾ ഡാറ്റാബേസിലേക്ക് ചേർക്കുന്നു...`;
+          statusDiv.innerText = `${rows.length} കുട്ടികളുടെ വിവരങ്ങൾ ചേർക്കുന്നു...`;
 
           try {
             const batch = writeBatch(db);
             rows.forEach((row) => {
               const newStudentRef = doc(collection(db, "students"));
+              
+              // Correct Field Mapping
+              const regNum = parseInt(row["REG NO."] || row["regNo"] || 0, 10);
+              const phoneVal = row["PHONE"] || row["MOBILE"] || row["PHONE NO"] || "";
+
               batch.set(newStudentRef, {
                 institutionId: currentInstitutionId,
-                regNo: row["REG NO."] || row["regNo"] || "",
+                regNo: isNaN(regNum) ? 0 : regNum,
                 idNo: row["ID NO."] || "",
                 name: row["NAME"] || "",
-                currentClass: row["CURRENT CLASS"] || "Class 1",
+                currentClass: (row["CURRENT CLASS"] || "1").replace(/Class\s*/i, "").trim(),
                 address: row["ADDRESS"] || "",
                 place: row["PLACE"] || "",
                 dob: row["D.O.B"] || "",
@@ -490,6 +498,7 @@
                 joinedDate: row["JOINED DATE"] || "",
                 joinedClass: row["JOINED CLASS"] || "",
                 specialInfo: row["SPECIAL INFORMATION"] || "",
+                phone: phoneVal,
                 status: "active",
                 createdAt: serverTimestamp()
               });
@@ -497,17 +506,18 @@
 
             await batch.commit();
             statusDiv.className = "alert alert-success";
-            statusDiv.innerText = `വിജയകരമായി ${rows.length} കുട്ടികളെ ഡാറ്റാബേസിലേക്ക് ഇമ്പോർട്ട് ചെയ്തു!`;
+            statusDiv.innerText = `വിജയകരമായി ${rows.length} കുട്ടികളെ ഇമ്പോർട്ട് ചെയ്തു!`;
             loadStudentsList();
+            showTab('studentsListTab');
           } catch (err) {
             statusDiv.className = "alert alert-danger";
-            statusDiv.innerText = "ഇമ്പോർട്ട് പരാജയപ്പെട്ടു: " + err.message;
+            statusDiv.innerText = "Error: " + err.message;
           }
         }
       });
     };
 
-    // Load Students List
+    // Load Students Sorted by Reg No
     window.loadStudentsList = async () => {
       const tbody = document.getElementById("studentsTableBody");
       tbody.innerHTML = `<tr><td colspan="6" class="text-center">ഡാറ്റ ലോഡ് ചെയ്യുന്നു...</td></tr>`;
@@ -520,29 +530,84 @@
         return;
       }
 
+      allStudentsCache = [];
+      snap.forEach(d => {
+        allStudentsCache.push({ id: d.id, ...d.data() });
+      });
+
+      // Sort Ascending by Reg No (101, 102, 103...)
+      allStudentsCache.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
+
+      renderStudentsTable(allStudentsCache);
+    };
+
+    // Render Table Rows
+    function renderStudentsTable(students) {
+      const tbody = document.getElementById("studentsTableBody");
       let html = "";
-      snap.forEach(docSnap => {
-        const s = docSnap.data();
+      students.forEach(s => {
         html += `
-          <tr>
-            <td><b>${s.regNo || '-'}</b></td>
-            <td>${s.name || '-'}</td>
-            <td><span class="badge bg-success">${s.currentClass || '-'}</span></td>
+          <tr class="clickable-row" onclick="viewStudentDetails('${s.id}')">
+            <td><b class="text-success">${s.regNo || '-'}</b></td>
+            <td><b>${s.name || '-'}</b> <i class="fa-solid fa-arrow-up-right-from-square text-muted small ms-1"></i></td>
+            <td><span class="badge bg-success">ക്ലാസ് ${s.currentClass || '-'}</span></td>
             <td>${s.fatherName || s.guardianName || '-'}</td>
             <td>${s.place || '-'}</td>
-            <td>${s.address || '-'}</td>
+            <td>${s.phone || '-'}</td>
           </tr>
         `;
       });
       tbody.innerHTML = html;
+    }
+
+    // Filter Students by Search
+    window.filterStudents = () => {
+      const term = document.getElementById("searchBox").value.toLowerCase();
+      const filtered = allStudentsCache.filter(s => 
+        (s.name && s.name.toLowerCase().includes(term)) || 
+        (s.regNo && s.regNo.toString().includes(term)) ||
+        (s.place && s.place.toLowerCase().includes(term))
+      );
+      renderStudentsTable(filtered);
     };
 
-    // Class Promotion Script
+    // View Complete Student Details in Modal
+    window.viewStudentDetails = (studentDocId) => {
+      const s = allStudentsCache.find(x => x.id === studentDocId);
+      if (!s) return;
+
+      document.getElementById("modalStudentName").innerText = `${s.name} (Reg No: ${s.regNo || '-'})`;
+      document.getElementById("modalStudentBody").innerHTML = `
+        <div class="row g-3">
+          <div class="col-md-4"><b>ഐഡി നമ്പർ:</b> ${s.idNo || '-'}</div>
+          <div class="col-md-4"><b>നിലവിലെ ക്ലാസ്:</b> ക്ലാസ് ${s.currentClass || '-'}</div>
+          <div class="col-md-4"><b>ജനന തീയതി:</b> ${s.dob || '-'}</div>
+          
+          <div class="col-md-4"><b>ചേർന്ന തീയതി:</b> ${s.joinedDate || '-'}</div>
+          <div class="col-md-4"><b>ചേർന്ന ക്ലാസ്:</b> ${s.joinedClass || '-'}</div>
+          <div class="col-md-4"><b>ഫോൺ നമ്പർ:</b> ${s.phone || '-'}</div>
+
+          <div class="col-md-4"><b>പിതാവ്:</b> ${s.fatherName || '-'}</div>
+          <div class="col-md-4"><b>മാതാവ്:</b> ${s.motherName || '-'}</div>
+          <div class="col-md-4"><b>രക്ഷാകർത്താവ്:</b> ${s.guardianName || '-'} (${s.relationship || '-'})</div>
+
+          <div class="col-md-6"><b>സ്ഥലം:</b> ${s.place || '-'}</div>
+          <div class="col-md-6"><b>വിലാസം / വീട്ടുപേര്:</b> ${s.address || '-'}</div>
+
+          <div class="col-12 border-top pt-2 mt-2"><b>മുൻ മദ്റസ / TC വിവരങ്ങൾ:</b> ${s.prevMadrasa || '-'}</div>
+          <div class="col-12"><b>പ്രത്യേക വിവരങ്ങൾ:</b> ${s.specialInfo || '-'}</div>
+        </div>
+      `;
+
+      const myModal = new bootstrap.Modal(document.getElementById('studentDetailModal'));
+      myModal.show();
+    };
+
     window.promoteStudents = async () => {
       const from = document.getElementById("fromClass").value;
       const to = document.getElementById("toClass").value;
 
-      if (confirm(`${from}-ലെ മുഴുവൻ കുട്ടികളെയും ${to}-ലേക്ക് മാറ്റാൻ ഉറപ്പാണോ?`)) {
+      if (confirm(`ക്ലാസ് ${from}-ലെ മുഴുവൻ കുട്ടികളെയും ക്ലാസ് ${to}-ലേക്ക് മാറ്റാൻ ഉറപ്പാണോ?`)) {
         const q = query(
           collection(db, "students"), 
           where("institutionId", "==", currentInstitutionId),
@@ -556,7 +621,7 @@
         });
 
         await batch.commit();
-        alert(`${from}-ലെ വിദ്യാർത്ഥികളെ ${to}-ലേക്ക് ഉയർത്തി.`);
+        alert(`വിദ്യാർത്ഥികളെ ക്ലാസ് ${to}-ലേക്ക് മാറ്റി.`);
         loadStudentsList();
       }
     };
