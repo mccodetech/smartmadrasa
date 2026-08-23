@@ -412,44 +412,62 @@
             </div>
           </div>
 
-          <!-- 5. Performance Tab -->
+          <!-- 5. Redesigned Performance Module (Task First & Class Bulk Selection) -->
           <div id="performanceTab" class="content-tab d-none">
             <div class="card p-4">
-              <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-star me-2"></i>വിദ്യാർത്ഥി പെർഫോമൻസ് പോയിന്റുകൾ നൽകൽ</h5>
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-star me-2"></i>വിദ്യാർത്ഥി പെർഫോമൻസ് & ടാസ്ക് എൻട്രി</h5>
+                <button class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#customTaskModal"><i class="fa-solid fa-plus me-1"></i> പുതിയ ടാസ്ക് ചേർക്കുക</button>
+              </div>
+
               <div class="row g-3 mb-4">
-                <div class="col-md-4">
-                  <label class="form-label">ക്ലാസ് തിരഞ്ഞെടുക്കുക</label>
-                  <select id="perfClassSelect" class="form-select" onchange="loadStudentsForPerf()"></select>
+                <div class="col-md-6">
+                  <label class="form-label">ടാസ്ക് തിരഞ്ഞെടുക്കുക (Select Task) *</label>
+                  <select id="perfTaskSelect" class="form-select">
+                    <option value="ഹോംവർക്ക് പൂർത്തിയാക്കി (+10)|10">ഹോംവർക്ക് പൂർത്തിയാക്കി (+10 Pts)</option>
+                    <option value="കൃത്യമായ യൂണിഫോം (+5)|5">കൃത്യമായ യൂണിഫോം (+5 Pts)</option>
+                    <option value="ക്വിസ് / മത്സര വിജയം (+20)|20">ക്വിസ് / മത്സര വിജയം (+20 Pts)</option>
+                    <option value="ഖുർആൻ പാരായണം മികച്ചത് (+15)|15">ഖുർആൻ പാരായണം മികച്ചത് (+15 Pts)</option>
+                    <option value="നല്ല സ്വഭാവം (+10)|10">നല്ല സ്വഭാവം (+10 Pts)</option>
+                    <option value="ഹോംവർക്ക് ചെയ്തില്ല (-10)|-10">ഹോംവർക്ക് ചെയ്തില്ല (-10 Pts)</option>
+                    <option value="അച്ചടക്കക്കുറവ് (-15)|-15">അച്ചടക്കക്കുറവ് (-15 Pts)</option>
+                  </select>
                 </div>
-                <div class="col-md-8">
-                  <label class="form-label">വിദ്യാർത്ഥിയെ തിരഞ്ഞെടുക്കുക</label>
-                  <select id="perfStudentSelect" class="form-select"><option value="">-- തിരഞ്ഞെടുക്കുക --</option></select>
+                <div class="col-md-6">
+                  <label class="form-label">ക്ലാസ് തിരഞ്ഞെടുക്കുക *</label>
+                  <select id="perfClassSelect" class="form-select" onchange="loadStudentsForPerfSheet()"></select>
                 </div>
               </div>
 
-              <form onsubmit="savePerformancePoint(event)">
-                <div class="row g-3">
+              <!-- Class Students List for Task Marking -->
+              <div id="perfSheetArea" class="d-none">
+                <div class="row g-2 align-items-center mb-2">
                   <div class="col-md-6">
-                    <label class="form-label">ടാസ്ക് / വിഷയം (Task)</label>
-                    <select id="perfTaskSelect" class="form-select">
-                      <option value="ഹോംവർക്ക് പൂർത്തിയാക്കി (+10)">ഹോംവർക്ക് പൂർത്തിയാക്കി (+10 Pts)</option>
-                      <option value="കൃത്യമായ യൂണിഫോം (+5)">കൃത്യമായ യൂണിഫോം (+5 Pts)</option>
-                      <option value="ക്വിസ് / മത്സര വിജയം (+20)">ക്വിസ് / മത്സര വിജയം (+20 Pts)</option>
-                      <option value="ഖുർആൻ പാരായണം മികച്ചത് (+15)">ഖുർആൻ പാരായണം മികച്ചത് (+15 Pts)</option>
-                      <option value="നല്ല സ്വഭാവം (+10)">നല്ല സ്വഭാവം (+10 Pts)</option>
-                      <option value="ഹോംവർക്ക് ചെയ്തില്ല (-10)">ഹോംവർക്ക് ചെയ്തില്ല (-10 Pts)</option>
-                      <option value="അച്ചടക്കക്കുറവ് (-15)">അച്ചടക്കക്കുറവ് (-15 Pts)</option>
-                    </select>
+                    <input type="text" id="perfStudentSearch" class="form-control form-control-sm" placeholder="പേര് / Reg No. വെച്ച് ഫിൽട്ടർ ചെയ്യുക..." oninput="filterPerfStudents()">
                   </div>
-                  <div class="col-md-6">
-                    <label class="form-label">പ്രത്യേക കുറിപ്പ് (Optional)</label>
-                    <input type="text" id="perfNote" class="form-control" placeholder="വിശദാംശങ്ങൾ...">
-                  </div>
-                  <div class="col-12 mt-3">
-                    <button type="submit" class="btn btn-madrassa px-4"><i class="fa-solid fa-plus me-1"></i> പോയിന്റ് നൽകുക</button>
+                  <div class="col-md-6 text-end">
+                    <div class="form-check d-inline-block">
+                      <input class="form-check-input form-check-input-lg" type="checkbox" id="selectAllPerf" checked onchange="toggleSelectAllPerf()">
+                      <label class="form-check-label fw-bold ms-1" for="selectAllPerf">മുഴുവൻ പേർക്കും നൽകുക (Select All)</label>
+                    </div>
                   </div>
                 </div>
-              </form>
+
+                <div class="table-responsive">
+                  <table class="table table-bordered align-middle">
+                    <thead class="table-light">
+                      <tr>
+                        <th style="width: 80px;">Reg No.</th>
+                        <th>വിദ്യാർത്ഥിയുടെ പേര്</th>
+                        <th style="width: 150px;" class="text-center">ടാസ്ക് നൽകുക (Tick)</th>
+                      </tr>
+                    </thead>
+                    <tbody id="perfTableBody"></tbody>
+                  </table>
+                </div>
+
+                <button class="btn btn-madrassa px-4 mt-2" onclick="saveBulkPerformancePoints()"><i class="fa-solid fa-floppy-disk me-1"></i> പോയിന്റുകൾ സേവ് ചെയ്യുക</button>
+              </div>
             </div>
           </div>
 
@@ -584,6 +602,34 @@
     </div>
   </div>
 
+  <!-- Modal: Custom Task Addition -->
+  <div class="modal fade" id="customTaskModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-madrassa text-white">
+          <h5 class="modal-title fw-bold">പുതിയ പെർഫോമൻസ് ടാസ്ക് ചേർക്കുക</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <form onsubmit="addNewCustomTask(event)">
+            <div class="mb-3">
+              <label class="form-label">ടാസ്കിന്റെ പേര് *</label>
+              <input type="text" id="newTaskName" class="form-control" placeholder="ഉദാ: വായനാ മത്സരം / ദഅ്‌വത്ത്" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">പോയിന്റ് (+ അല്ലെങ്കിൽ - നൽകാം) *</label>
+              <input type="number" id="newTaskPoints" class="form-control" placeholder="ഉദാ: 10 അല്ലെങ്കിൽ -5" required>
+            </div>
+            <div class="text-end">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">റദ്ദാക്കുക</button>
+              <button type="submit" class="btn btn-madrassa px-4">ചേർക്കുക</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Printable Digital Receipt Component -->
   <div id="printableReceipt" class="p-4 bg-white border d-none m-auto" style="max-width: 480px;">
     <div class="text-center border-bottom pb-3 mb-3">
@@ -661,6 +707,7 @@
     let currentUserRole = "admin";
     let currentUserAssignedClasses = [];
     let localStudentsCache = [];
+    let localPerfStudentsCache = [];
     let localTeachersCache = [];
     let lastReceiptWhatsAppPayload = null;
     let currentPage = 1;
@@ -763,7 +810,7 @@
             select.value = allowedClasses[0];
             if (id === "attClassSelect") loadAttendanceSheet();
             if (id === "markClassSelect") loadMarksEntrySheet();
-            if (id === "perfClassSelect") loadStudentsForPerf();
+            if (id === "perfClassSelect") loadStudentsForPerfSheet();
             if (id === "feeClassSelect") loadStudentsForFees();
           }
         }
@@ -837,62 +884,120 @@
 
     window.handleLogout = () => signOut(auth);
 
-    // Save Performance Point
-    window.loadStudentsForPerf = async () => {
+    // --- TASK-FIRST BULK PERFORMANCE ENTRY ---
+    window.loadStudentsForPerfSheet = async () => {
       const selClass = document.getElementById("perfClassSelect").value;
-      const select = document.getElementById("perfStudentSelect");
-      if (!selClass) { select.innerHTML = `<option value="">-- തിരഞ്ഞെടുക്കുക --</option>`; return; }
+      if (!selClass) { document.getElementById("perfSheetArea").classList.add("d-none"); return; }
+
+      const area = document.getElementById("perfSheetArea");
+      const tbody = document.getElementById("perfTableBody");
+      tbody.innerHTML = `<tr><td colspan="3" class="text-center">കുട്ടികളുടെ വിവരങ്ങൾ എടുക്കുന്നു...</td></tr>`;
+      area.classList.remove("d-none");
 
       const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", selClass));
       const snap = await getDocs(q);
 
-      let html = `<option value="">-- വിദ്യാർത്ഥിയെ തിരഞ്ഞെടുക്കുക --</option>`;
-      snap.forEach(d => {
-        const s = d.data();
-        html += `<option value="${d.id}" data-reg="${s.regNo}" data-name="${s.name}" data-class="${s.currentClass}">Reg: ${s.regNo} - ${s.name}</option>`;
-      });
-      select.innerHTML = html;
+      localPerfStudentsCache = [];
+      snap.forEach(d => localPerfStudentsCache.push({ id: d.id, ...d.data() }));
+      localPerfStudentsCache.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
+
+      renderPerfStudentsTable(localPerfStudentsCache);
     };
 
-    window.savePerformancePoint = async (e) => {
-      e.preventDefault();
-      const sSelect = document.getElementById("perfStudentSelect");
-      const opt = sSelect.options[sSelect.selectedIndex];
-      if (!opt || !opt.value) return alert("വിദ്യാർത്ഥിയെ തിരഞ്ഞെടുക്കുക.");
+    function renderPerfStudentsTable(students) {
+      const tbody = document.getElementById("perfTableBody");
+      let html = "";
+      students.forEach(s => {
+        html += `
+          <tr data-sid="${s.id}" data-reg="${s.regNo}" data-name="${s.name}" data-class="${s.currentClass}">
+            <td><b>${s.regNo || '-'}</b></td>
+            <td><b>${s.name}</b></td>
+            <td class="text-center">
+              <input type="checkbox" class="form-check-input form-check-input-lg perf-checkbox" id="perf_${s.id}" checked>
+            </td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html || `<tr><td colspan="3" class="text-center">ഈ ക്ലാസിൽ കുട്ടികൾ ഇല്ല.</td></tr>`;
+      document.getElementById("selectAllPerf").checked = true;
+    }
 
-      const sId = opt.value;
-      const reg = opt.getAttribute("data-reg");
-      const name = opt.getAttribute("data-name");
-      const sClass = opt.getAttribute("data-class");
-      const taskVal = document.getElementById("perfTaskSelect").value;
-      const note = document.getElementById("perfNote").value;
+    window.toggleSelectAllPerf = () => {
+      const isChecked = document.getElementById("selectAllPerf").checked;
+      document.querySelectorAll(".perf-checkbox").forEach(cb => cb.checked = isChecked);
+    };
 
-      let points = 10;
-      if (taskVal.includes("+20")) points = 20;
-      else if (taskVal.includes("+15")) points = 15;
-      else if (taskVal.includes("+10")) points = 10;
-      else if (taskVal.includes("+5")) points = 5;
-      else if (taskVal.includes("-10")) points = -10;
-      else if (taskVal.includes("-15")) points = -15;
+    window.filterPerfStudents = () => {
+      const term = document.getElementById("perfStudentSearch").value.toLowerCase();
+      const filtered = localPerfStudentsCache.filter(s => 
+        (s.name && s.name.toLowerCase().includes(term)) || 
+        (s.regNo && s.regNo.toString().includes(term))
+      );
+      renderPerfStudentsTable(filtered);
+    };
+
+    // Save Bulk Performance Points
+    window.saveBulkPerformancePoints = async () => {
+      const taskRaw = document.getElementById("perfTaskSelect").value;
+      const [taskTitle, pointsStr] = taskRaw.split('|');
+      const points = Number(pointsStr) || 10;
+      const today = new Date().toLocaleDateString();
+
+      const checkedRows = document.querySelectorAll("#perfTableBody tr");
+      const batch = writeBatch(db);
+      let count = 0;
+
+      checkedRows.forEach(r => {
+        const cb = r.querySelector(".perf-checkbox");
+        if (cb && cb.checked) {
+          const sid = r.getAttribute("data-sid");
+          const reg = r.getAttribute("data-reg");
+          const name = r.getAttribute("data-name");
+          const sClass = r.getAttribute("data-class");
+
+          const pRef = doc(collection(db, "performancePoints"));
+          batch.set(pRef, {
+            institutionId: currentInstitutionId,
+            studentId: sid,
+            regNo: Number(reg),
+            studentName: name,
+            class: sClass,
+            task: taskTitle,
+            points: points,
+            date: today,
+            timestamp: serverTimestamp()
+          });
+          count++;
+        }
+      });
+
+      if (!count) return alert("ദയവായി കുറഞ്ഞത് ഒരു വിദ്യാർത്ഥിയെയെങ്കിലും തിരഞ്ഞെടുക്കുക.");
 
       try {
-        await addDoc(collection(db, "performancePoints"), {
-          institutionId: currentInstitutionId,
-          studentId: sId,
-          regNo: Number(reg),
-          studentName: name,
-          class: sClass,
-          task: taskVal,
-          points: points,
-          note: note,
-          date: new Date().toLocaleDateString(),
-          timestamp: serverTimestamp()
-        });
-        alert(`${name}-ന് ${points > 0 ? '+' : ''}${points} പോയിന്റുകൾ നൽകി.`);
+        await batch.commit();
+        alert(`${count} വിദ്യാർത്ഥികൾക്ക് '${taskTitle}' പോയിന്റുകൾ നൽകി.`);
         loadLeaderboard();
       } catch (err) { alert("Error: " + err.message); }
     };
 
+    // Add New Custom Task to Dropdown
+    window.addNewCustomTask = (e) => {
+      e.preventDefault();
+      const name = document.getElementById("newTaskName").value.trim();
+      const pts = document.getElementById("newTaskPoints").value.trim();
+      const sign = Number(pts) > 0 ? `+${pts}` : pts;
+      const formattedValue = `${name} (${sign} Pts)|${pts}`;
+
+      const select = document.getElementById("perfTaskSelect");
+      const newOption = new Option(`${name} (${sign} Pts)`, formattedValue, true, true);
+      select.add(newOption, 0);
+
+      bootstrap.Modal.getInstance(document.getElementById('customTaskModal')).hide();
+      e.target.reset();
+      alert("പുതിയ ടാസ്ക് ചേർത്തു.");
+    };
+
+    // Load Leaderboard
     async function loadLeaderboard() {
       const q = query(collection(db, "performancePoints"), where("institutionId", "==", currentInstitutionId));
       const snap = await getDocs(q);
