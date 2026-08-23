@@ -17,6 +17,11 @@
     .nav-pills .nav-link.active { background-color: var(--secondary-color); }
     .nav-pills .nav-link { color: #333; font-weight: 500; }
     .section-title { font-size: 1rem; font-weight: 600; color: var(--primary-color); border-bottom: 2px solid #e9ecef; padding-bottom: 4px; margin-top: 15px; margin-bottom: 12px; }
+    @media print {
+      body * { visibility: hidden; }
+      #printableReceipt, #printableReceipt * { visibility: visible; }
+      #printableReceipt { position: absolute; left: 0; top: 0; width: 100%; display: block !important; }
+    }
   </style>
 </head>
 <body>
@@ -48,7 +53,7 @@
         <button type="submit" class="btn btn-madrassa w-100 py-2">പ്രവേശിക്കുക</button>
       </form>
 
-      <!-- Sign Up Form (Unique Madrasa Auto Setup) -->
+      <!-- Sign Up Form -->
       <form id="signupForm" class="d-none" onsubmit="handleSignUp(event)">
         <div class="mb-2">
           <label class="form-label">മദ്റസയുടെ പേര്</label>
@@ -98,10 +103,10 @@
               <button class="nav-link active text-start" onclick="showTab('studentsListTab')"><i class="fa-solid fa-users me-2"></i> വിദ്യാർത്ഥി ലിസ്റ്റ്</button>
               <button class="nav-link text-start" onclick="showTab('admissionTab')"><i class="fa-solid fa-user-plus me-2"></i> പുതിയ അഡ്മിഷൻ</button>
               <button class="nav-link text-start" onclick="showTab('bulkImportTab')"><i class="fa-solid fa-file-csv me-2"></i> ബൾക്ക് ഇമ്പോർട്ട് (Excel)</button>
-              <button class="nav-link text-start" onclick="showTab('promotionTab')"><i class="fa-solid fa-graduation-cap me-2"></i> ക്ലാസ് കയറ്റം</button>
-              <button class="nav-link text-start" onclick="showTab('attendanceTab')"><i class="fa-solid fa-calendar-check me-2"></i> ഹാജർ</button>
-              <button class="nav-link text-start" onclick="showTab('marksTab')"><i class="fa-solid fa-award me-2"></i> മാർക്ക്</button>
+              <button class="nav-link text-start" onclick="showTab('attendanceTab')"><i class="fa-solid fa-calendar-check me-2"></i> ഹാജർ (Attendance)</button>
+              <button class="nav-link text-start" onclick="showTab('marksTab')"><i class="fa-solid fa-award me-2"></i> മാർക്ക് എൻട്രി</button>
               <button class="nav-link text-start" onclick="showTab('feesTab')"><i class="fa-solid fa-receipt me-2"></i> ഫീസ് & രസീത്</button>
+              <button class="nav-link text-start" onclick="showTab('promotionTab')"><i class="fa-solid fa-graduation-cap me-2"></i> ക്ലാസ് കയറ്റം</button>
             </div>
           </div>
         </div>
@@ -109,26 +114,19 @@
         <!-- Content Area -->
         <div class="col-md-9 col-lg-10">
 
-          <!-- 1. Students List Tab (Class-wise Quota Saver + Search) -->
+          <!-- 1. Students List Tab (With 50-Item Pagination) -->
           <div id="studentsListTab" class="content-tab">
             <div class="card p-4">
               <div class="row g-2 align-items-center mb-3">
                 <div class="col-md-3">
                   <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-users"></i> വിദ്യാർത്ഥികൾ</h5>
                 </div>
-                <!-- Class-wise filter to minimize Reads -->
                 <div class="col-md-3">
                   <select id="filterClassSelect" class="form-select form-select-sm" onchange="loadStudentsByClass()">
                     <option value="ALL">എല്ലാ ക്ലാസുകളും</option>
-                    <option value="1">ക്ലാസ് 1</option>
-                    <option value="2">ക്ലാസ് 2</option>
-                    <option value="3">ക്ലാസ് 3</option>
-                    <option value="4">ക്ലാസ് 4</option>
-                    <option value="5">ക്ലാസ് 5</option>
-                    <option value="6">ക്ലാസ് 6</option>
-                    <option value="7">ക്ലാസ് 7</option>
-                    <option value="8">ക്ലാസ് 8</option>
-                    <option value="9">ക്ലാസ് 9</option>
+                    <option value="1">ക്ലാസ് 1</option><option value="2">ക്ലാസ് 2</option><option value="3">ക്ലാസ് 3</option>
+                    <option value="4">ക്ലാസ് 4</option><option value="5">ക്ലാസ് 5</option><option value="6">ക്ലാസ് 6</option>
+                    <option value="7">ക്ലാസ് 7</option><option value="8">ക്ലാസ് 8</option><option value="9">ക്ലാസ് 9</option>
                     <option value="10">ക്ലാസ് 10</option>
                   </select>
                 </div>
@@ -158,6 +156,14 @@
                   </tbody>
                 </table>
               </div>
+
+              <!-- Pagination Controls (50 items per page) -->
+              <div class="d-flex justify-content-between align-items-center mt-3">
+                <span class="small text-muted" id="paginationInfo">Showing 0-0 of 0</span>
+                <nav>
+                  <ul class="pagination pagination-sm m-0" id="paginationControls"></ul>
+                </nav>
+              </div>
             </div>
           </div>
 
@@ -174,7 +180,10 @@
                   <div class="col-md-3">
                     <label class="form-label">നിലവിലെ ക്ലാസ് *</label>
                     <select id="currentClass" class="form-select" required>
-                      <option value="1">ക്ലാസ് 1</option><option value="2">ക്ലാസ് 2</option><option value="3">ക്ലാസ് 3</option><option value="4">ക്ലാസ് 4</option><option value="5">ക്ലാസ് 5</option><option value="6">ക്ലാസ് 6</option><option value="7">ക്ലാസ് 7</option><option value="8">ക്ലാസ് 8</option><option value="9">ക്ലാസ് 9</option><option value="10">ക്ലാസ് 10</option>
+                      <option value="1">ക്ലാസ് 1</option><option value="2">ക്ലാസ് 2</option><option value="3">ക്ലാസ് 3</option>
+                      <option value="4">ക്ലാസ് 4</option><option value="5">ക്ലാസ് 5</option><option value="6">ക്ലാസ് 6</option>
+                      <option value="7">ക്ലാസ് 7</option><option value="8">ക്ലാസ് 8</option><option value="9">ക്ലാസ് 9</option>
+                      <option value="10">ക്ലാസ് 10</option>
                     </select>
                   </div>
                   <div class="col-md-3"><label class="form-label">ജനന തീയതി</label><input type="date" id="dob" class="form-control"></div>
@@ -209,7 +218,140 @@
             </div>
           </div>
 
-          <!-- 4. Class Promotion -->
+          <!-- 4. Attendance Module -->
+          <div id="attendanceTab" class="content-tab d-none">
+            <div class="card p-4">
+              <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-calendar-check"></i> ദിവസേന ഹാജർ രേഖപ്പെടുത്തൽ</h5>
+              <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                  <label class="form-label">തീയതി</label>
+                  <input type="date" id="attDate" class="form-control">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">ക്ലാസ് തിരഞ്ഞെടുക്കുക</label>
+                  <select id="attClassSelect" class="form-select" onchange="loadAttendanceSheet()">
+                    <option value="">-- ക്ലാസ് തിരഞ്ഞെടുക്കുക --</option>
+                    <option value="1">ക്ലാസ് 1</option><option value="2">ക്ലാസ് 2</option><option value="3">ക്ലാസ് 3</option>
+                    <option value="4">ക്ലാസ് 4</option><option value="5">ക്ലാസ് 5</option><option value="6">ക്ലാസ് 6</option>
+                    <option value="7">ക്ലാസ് 7</option><option value="8">ക്ലാസ് 8</option><option value="9">ക്ലാസ് 9</option>
+                    <option value="10">ക്ലാസ് 10</option>
+                  </select>
+                </div>
+              </div>
+
+              <div id="attendanceSheetArea" class="d-none">
+                <div class="table-responsive">
+                  <table class="table table-bordered align-middle">
+                    <thead class="table-light">
+                      <tr>
+                        <th style="width: 80px;">Reg No.</th>
+                        <th>വിദ്യാർത്ഥിയുടെ പേര്</th>
+                        <th style="width: 200px;" class="text-center">ഹാജർ നില</th>
+                      </tr>
+                    </thead>
+                    <tbody id="attendanceTableBody"></tbody>
+                  </table>
+                </div>
+                <button class="btn btn-madrassa px-4 mt-2" onclick="saveClassAttendance()"><i class="fa-solid fa-check-double me-1"></i> ഹാജർ സേവ് ചെയ്യുക</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. Marks Entry Module -->
+          <div id="marksTab" class="content-tab d-none">
+            <div class="card p-4">
+              <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-award"></i> പരീക്ഷാ മാർക്ക് എൻട്രി</h5>
+              <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                  <label class="form-label">പരീക്ഷയുടെ പേര്</label>
+                  <input type="text" id="markExamName" class="form-control" placeholder="ഉദാ: അർദ്ധവാർഷിക പരീക്ഷ">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">ക്ലാസ്</label>
+                  <select id="markClassSelect" class="form-select" onchange="loadMarksEntrySheet()">
+                    <option value="">-- ക്ലാസ് തിരഞ്ഞെടുക്കുക --</option>
+                    <option value="1">ക്ലാസ് 1</option><option value="2">ക്ലാസ് 2</option><option value="3">ക്ലാസ് 3</option>
+                    <option value="4">ക്ലാസ് 4</option><option value="5">ക്ലാസ് 5</option><option value="6">ക്ലാസ് 6</option>
+                    <option value="7">ക്ലാസ് 7</option><option value="8">ക്ലാസ് 8</option><option value="9">ക്ലാസ് 9</option>
+                    <option value="10">ക്ലാസ് 10</option>
+                  </select>
+                </div>
+              </div>
+
+              <div id="marksSheetArea" class="d-none">
+                <div class="table-responsive">
+                  <table class="table table-bordered align-middle">
+                    <thead class="table-light text-center">
+                      <tr>
+                        <th>Reg No.</th>
+                        <th>പേര്</th>
+                        <th>ഖുർആൻ</th>
+                        <th>തജ്‌വീദ്</th>
+                        <th>ഫിഖ്ഹ്</th>
+                        <th>അഖീദ</th>
+                        <th>താരീഖ്</th>
+                        <th>ലിസാൻ</th>
+                      </tr>
+                    </thead>
+                    <tbody id="marksTableBody"></tbody>
+                  </table>
+                </div>
+                <button class="btn btn-madrassa px-4 mt-2" onclick="saveClassMarks()"><i class="fa-solid fa-floppy-disk me-1"></i> മാർക്കുകൾ സേവ് ചെയ്യുക</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 6. Fees Module -->
+          <div id="feesTab" class="content-tab d-none">
+            <div class="card p-4">
+              <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-receipt"></i> ഫീസ് കളക്ഷൻ & രസീത്</h5>
+              <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                  <label class="form-label">ക്ലാസ് തിരഞ്ഞെടുക്കുക</label>
+                  <select id="feeClassSelect" class="form-select" onchange="loadStudentsForFees()">
+                    <option value="">-- ക്ലാസ് തിരഞ്ഞെടുക്കുക --</option>
+                    <option value="1">ക്ലാസ് 1</option><option value="2">ക്ലാസ് 2</option><option value="3">ക്ലാസ് 3</option>
+                    <option value="4">ക്ലാസ് 4</option><option value="5">ക്ലാസ് 5</option><option value="6">ക്ലാസ് 6</option>
+                    <option value="7">ക്ലാസ് 7</option><option value="8">ക്ലാസ് 8</option><option value="9">ക്ലാസ് 9</option>
+                    <option value="10">ക്ലാസ് 10</option>
+                  </select>
+                </div>
+                <div class="col-md-8">
+                  <label class="form-label">വിദ്യാർത്ഥിയെ തിരഞ്ഞെടുക്കുക</label>
+                  <select id="feeStudentSelect" class="form-select">
+                    <option value="">-- ആദ്യം ക്ലാസ് തിരഞ്ഞെടുക്കുക --</option>
+                  </select>
+                </div>
+              </div>
+
+              <form onsubmit="processFeeReceipt(event)">
+                <div class="row g-3">
+                  <div class="col-md-4">
+                    <label class="form-label">തുക (₹) *</label>
+                    <input type="number" id="feeAmount" class="form-control" placeholder="തുക നൽകുക" required>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">ഫീസ് ഇനം (Fee Type)</label>
+                    <select id="feeType" class="form-select">
+                      <option value="പ്രതിമാസ ഫീസ്">പ്രതിമാസ ഫീസ് (Monthly Fee)</option>
+                      <option value="അഡ്മിഷൻ ഫീസ്">അഡ്മിഷൻ ഫീസ്</option>
+                      <option value="പരീക്ഷാ ഫീസ്">പരീക്ഷാ ഫീസ്</option>
+                      <option value="മറ്റു സംഭാവനകൾ">മറ്റു സംഭാവനകൾ</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">മാനുവൽ രസീത് നമ്പർ</label>
+                    <input type="text" id="manualReceipt" class="form-control" placeholder="Book Rec No.">
+                  </div>
+                  <div class="col-12 mt-4">
+                    <button type="submit" class="btn btn-madrassa px-4"><i class="fa-solid fa-print me-1"></i> ഫീസ് രേഖപ്പെടുത്തി രസീത് പ്രിന്റ് ചെയ്യുക</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- 7. Class Promotion -->
           <div id="promotionTab" class="content-tab d-none">
             <div class="card p-4">
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-graduation-cap"></i> ക്ലാസ് കയറ്റം</h5>
@@ -233,13 +375,30 @@
             </div>
           </div>
 
-          <!-- Other tabs: Attendance, Marks, Fees -->
-          <div id="attendanceTab" class="content-tab d-none"><div class="card p-4"><h5>ഹാജർ രേഖപ്പെടുത്തൽ</h5></div></div>
-          <div id="marksTab" class="content-tab d-none"><div class="card p-4"><h5>മാർക്ക് എൻട്രി</h5></div></div>
-          <div id="feesTab" class="content-tab d-none"><div class="card p-4"><h5>ഫീസ് കളക്ഷൻ</h5></div></div>
-
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Printable Digital Receipt Component -->
+  <div id="printableReceipt" class="p-4 bg-white border d-none m-auto" style="max-width: 450px;">
+    <div class="text-center border-bottom pb-3 mb-3">
+      <h4 class="fw-bold mb-1" id="recMadrassaName">Smart Madrasa</h4>
+      <p class="small text-muted mb-0">ഡിജിറ്റൽ ഫീസ് രസീത്</p>
+    </div>
+    <div class="d-flex justify-content-between mb-2">
+      <span>രസീത് നമ്പർ: <b id="recNo">#REC-123</b></span>
+      <span id="recDate">Date</span>
+    </div>
+    <div class="mb-2">വിദ്യാർത്ഥി: <b id="recStudentName">-</b></div>
+    <div class="mb-2">Reg No: <b id="recAdmNo">101</b> | ക്ലാസ്: <b id="recClass">-</b></div>
+    <div class="mb-2">ഇനം: <span id="recFeeType">പ്രതിമാസ ഫീസ്</span></div>
+    <div class="mb-3 border-top pt-2 d-flex justify-content-between">
+      <span>സ്വീകരിച്ച തുക:</span>
+      <h5 class="fw-bold text-success mb-0" id="recAmount">₹0</h5>
+    </div>
+    <div class="text-center mt-3 pt-2 border-top">
+      <small class="text-muted">കൈപ്പറ്റിയത്: <span id="recCollector">ഉസ്താദ്</span></small>
     </div>
   </div>
 
@@ -261,7 +420,10 @@
               <div class="col-md-3">
                 <label class="form-label">ക്ലാസ് *</label>
                 <select id="editCurrentClass" class="form-select" required>
-                  <option value="1">ക്ലാസ് 1</option><option value="2">ക്ലാസ് 2</option><option value="3">ക്ലാസ് 3</option><option value="4">ക്ലാസ് 4</option><option value="5">ക്ലാസ് 5</option><option value="6">ക്ലാസ് 6</option><option value="7">ക്ലാസ് 7</option><option value="8">ക്ലാസ് 8</option><option value="9">ക്ലാസ് 9</option><option value="10">ക്ലാസ് 10</option>
+                  <option value="1">ക്ലാസ് 1</option><option value="2">ക്ലാസ് 2</option><option value="3">ക്ലാസ് 3</option>
+                  <option value="4">ക്ലാസ് 4</option><option value="5">ക്ലാസ് 5</option><option value="6">ക്ലാസ് 6</option>
+                  <option value="7">ക്ലാസ് 7</option><option value="8">ക്ലാസ് 8</option><option value="9">ക്ലാസ് 9</option>
+                  <option value="10">ക്ലാസ് 10</option>
                 </select>
               </div>
               <div class="col-md-3"><label class="form-label">ജനന തീയതി</label><input type="text" id="editDob" class="form-control"></div>
@@ -309,6 +471,8 @@
 
     let currentInstitutionId = "";
     let localStudentsCache = [];
+    let currentPage = 1;
+    const pageSize = 50;
 
     onAuthStateChanged(auth, async (user) => {
       if (user) {
@@ -320,6 +484,7 @@
           document.getElementById("displayUserName").innerHTML = `<i class="fa-solid fa-user"></i> ${userData.name}`;
           document.getElementById("authSection").classList.add("d-none");
           document.getElementById("appSection").classList.remove("d-none");
+          document.getElementById("attDate").valueAsDate = new Date();
           loadStudentsByClass();
         }
       } else {
@@ -343,7 +508,6 @@
         const phone = document.getElementById("regPhone").value;
         const email = document.getElementById("regEmail").value;
         const pwd = document.getElementById("regPassword").value;
-        // Unique institution ID for each newly registered Madrasa
         const instId = "MDR_" + Date.now();
 
         const cred = await createUserWithEmailAndPassword(auth, email, pwd);
@@ -361,7 +525,7 @@
 
     window.handleLogout = () => signOut(auth);
 
-    // Save Single Student Form
+    // Save Student
     window.saveDetailedStudent = async (e) => {
       e.preventDefault();
       try {
@@ -390,7 +554,7 @@
       } catch (err) { alert("Error: " + err.message); }
     };
 
-    // Load Students Class-wise (Reduces Firestore Reads)
+    // Load Students with 50-Item Pagination
     window.loadStudentsByClass = async (forceRefresh = false) => {
       const selectedClass = document.getElementById("filterClassSelect").value;
       const tbody = document.getElementById("studentsTableBody");
@@ -407,20 +571,28 @@
       localStudentsCache = [];
       snap.forEach(d => localStudentsCache.push({ id: d.id, ...d.data() }));
 
-      // Sort Ascending by Reg No
       localStudentsCache.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
-      renderStudentsTable(localStudentsCache);
+      currentPage = 1;
+      renderPaginatedTable();
     };
 
-    function renderStudentsTable(students) {
+    function renderPaginatedTable() {
       const tbody = document.getElementById("studentsTableBody");
-      if (!students.length) {
+      const total = localStudentsCache.length;
+
+      if (!total) {
         tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">കുട്ടികളുടെ വിവരങ്ങൾ ലഭ്യമല്ല.</td></tr>`;
+        document.getElementById("paginationInfo").innerText = `Showing 0-0 of 0`;
+        document.getElementById("paginationControls").innerHTML = "";
         return;
       }
 
+      const startIndex = (currentPage - 1) * pageSize;
+      const endIndex = Math.min(startIndex + pageSize, total);
+      const pageData = localStudentsCache.slice(startIndex, endIndex);
+
       let html = "";
-      students.forEach(s => {
+      pageData.forEach(s => {
         html += `
           <tr>
             <td><b class="text-success">${s.regNo || '-'}</b></td>
@@ -430,16 +602,35 @@
             <td>${s.place || '-'}</td>
             <td>${s.phone || '-'}</td>
             <td class="text-center">
-              <button class="btn btn-sm btn-outline-primary me-1" onclick="openEditStudentModal('${s.id}')" title="തിരുത്തുക"><i class="fa-solid fa-pen"></i></button>
-              <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${s.id}', '${s.name}')" title="ഒഴിവാക്കുക"><i class="fa-solid fa-trash"></i></button>
+              <button class="btn btn-sm btn-outline-primary me-1" onclick="openEditStudentModal('${s.id}')"><i class="fa-solid fa-pen"></i></button>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${s.id}', '${s.name}')"><i class="fa-solid fa-trash"></i></button>
             </td>
           </tr>
         `;
       });
       tbody.innerHTML = html;
+
+      // Update Pagination UI
+      document.getElementById("paginationInfo").innerText = `Showing ${startIndex + 1}-${endIndex} of ${total} students`;
+      renderPaginationControls(Math.ceil(total / pageSize));
     }
 
-    // Filter Local Table Data
+    function renderPaginationControls(totalPages) {
+      const container = document.getElementById("paginationControls");
+      let html = "";
+      if (totalPages <= 1) { container.innerHTML = ""; return; }
+
+      for (let i = 1; i <= totalPages; i++) {
+        html += `<li class="page-item ${i === currentPage ? 'active' : ''}"><a class="page-link" href="#" onclick="changePage(${i})">${i}</a></li>`;
+      }
+      container.innerHTML = html;
+    }
+
+    window.changePage = (page) => {
+      currentPage = page;
+      renderPaginatedTable();
+    };
+
     window.filterStudentsLocal = () => {
       const term = document.getElementById("searchBox").value.toLowerCase();
       const filtered = localStudentsCache.filter(s => 
@@ -447,14 +638,233 @@
         (s.regNo && s.regNo.toString().includes(term)) ||
         (s.place && s.place.toLowerCase().includes(term))
       );
-      renderStudentsTable(filtered);
+      
+      const tbody = document.getElementById("studentsTableBody");
+      let html = "";
+      filtered.slice(0, 50).forEach(s => {
+        html += `
+          <tr>
+            <td><b class="text-success">${s.regNo || '-'}</b></td>
+            <td><b>${s.name || '-'}</b></td>
+            <td><span class="badge bg-success">ക്ലാസ് ${s.currentClass || '-'}</span></td>
+            <td>${s.fatherName || s.guardianName || '-'}</td>
+            <td>${s.place || '-'}</td>
+            <td>${s.phone || '-'}</td>
+            <td class="text-center">
+              <button class="btn btn-sm btn-outline-primary me-1" onclick="openEditStudentModal('${s.id}')"><i class="fa-solid fa-pen"></i></button>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${s.id}', '${s.name}')"><i class="fa-solid fa-trash"></i></button>
+            </td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html || `<tr><td colspan="7" class="text-center text-muted">വിവരങ്ങൾ കണ്ടെത്തിയില്ല.</td></tr>`;
     };
 
-    // Open Edit Modal
+    // --- ATTENDANCE MODULE ---
+    window.loadAttendanceSheet = async () => {
+      const selClass = document.getElementById("attClassSelect").value;
+      if (!selClass) return;
+
+      const area = document.getElementById("attendanceSheetArea");
+      const tbody = document.getElementById("attendanceTableBody");
+      tbody.innerHTML = `<tr><td colspan="3" class="text-center">കുട്ടികളുടെ വിവരങ്ങൾ എടുക്കുന്നു...</td></tr>`;
+      area.classList.remove("d-none");
+
+      const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", selClass));
+      const snap = await getDocs(q);
+
+      let students = [];
+      snap.forEach(d => students.push({ id: d.id, ...d.data() }));
+      students.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
+
+      let html = "";
+      students.forEach(s => {
+        html += `
+          <tr data-sid="${s.id}">
+            <td><b>${s.regNo || '-'}</b></td>
+            <td>${s.name}</td>
+            <td class="text-center">
+              <div class="btn-group" role="group">
+                <input type="radio" class="btn-check" name="att_${s.id}" id="p_${s.id}" value="P" checked>
+                <label class="btn btn-outline-success btn-sm" for="p_${s.id}">ഹാജർ (P)</label>
+                <input type="radio" class="btn-check" name="att_${s.id}" id="a_${s.id}" value="A">
+                <label class="btn btn-outline-danger btn-sm" for="a_${s.id}">ഗൈർഹാജർ (A)</label>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html || `<tr><td colspan="3" class="text-center">ഈ ക്ലാസിൽ കുട്ടികൾ ഇല്ല.</td></tr>`;
+    };
+
+    window.saveClassAttendance = async () => {
+      const date = document.getElementById("attDate").value;
+      const selClass = document.getElementById("attClassSelect").value;
+      if (!date || !selClass) return alert("തീയതിയും ക്ലാസും നൽകുക.");
+
+      const rows = document.querySelectorAll("#attendanceTableBody tr[data-sid]");
+      const records = {};
+      rows.forEach(r => {
+        const sid = r.getAttribute("data-sid");
+        const status = r.querySelector(`input[name="att_${sid}"]:checked`).value;
+        records[sid] = status;
+      });
+
+      try {
+        await addDoc(collection(db, "attendance"), {
+          institutionId: currentInstitutionId,
+          date: date,
+          class: selClass,
+          records: records,
+          recordedBy: auth.currentUser.uid,
+          timestamp: serverTimestamp()
+        });
+        alert("ഹാജർ വിജയകരമായി രേഖപ്പെടുത്തി.");
+      } catch (err) { alert("Error: " + err.message); }
+    };
+
+    // --- MARKS ENTRY MODULE ---
+    window.loadMarksEntrySheet = async () => {
+      const selClass = document.getElementById("markClassSelect").value;
+      if (!selClass) return;
+
+      const area = document.getElementById("marksSheetArea");
+      const tbody = document.getElementById("marksTableBody");
+      tbody.innerHTML = `<tr><td colspan="8" class="text-center">ലോഡ് ചെയ്യുന്നു...</td></tr>`;
+      area.classList.remove("d-none");
+
+      const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", selClass));
+      const snap = await getDocs(q);
+
+      let students = [];
+      snap.forEach(d => students.push({ id: d.id, ...d.data() }));
+      students.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
+
+      let html = "";
+      students.forEach(s => {
+        html += `
+          <tr data-sid="${s.id}" data-reg="${s.regNo}" data-name="${s.name}">
+            <td><b>${s.regNo || '-'}</b></td>
+            <td>${s.name}</td>
+            <td><input type="number" class="form-control form-control-sm text-center m-quran" style="max-width:70px; margin:auto;" max="100"></td>
+            <td><input type="number" class="form-control form-control-sm text-center m-tajweed" style="max-width:70px; margin:auto;" max="100"></td>
+            <td><input type="number" class="form-control form-control-sm text-center m-fiqh" style="max-width:70px; margin:auto;" max="100"></td>
+            <td><input type="number" class="form-control form-control-sm text-center m-aqeeda" style="max-width:70px; margin:auto;" max="100"></td>
+            <td><input type="number" class="form-control form-control-sm text-center m-tareekh" style="max-width:70px; margin:auto;" max="100"></td>
+            <td><input type="number" class="form-control form-control-sm text-center m-lisan" style="max-width:70px; margin:auto;" max="100"></td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html || `<tr><td colspan="8" class="text-center">ഈ ക്ലാസിൽ കുട്ടികൾ ഇല്ല.</td></tr>`;
+    };
+
+    window.saveClassMarks = async () => {
+      const exam = document.getElementById("markExamName").value;
+      const selClass = document.getElementById("markClassSelect").value;
+      if (!exam || !selClass) return alert("പരീക്ഷയുടെ പേരും ക്ലാസും നൽകുക.");
+
+      const rows = document.querySelectorAll("#marksTableBody tr[data-sid]");
+      const batch = writeBatch(db);
+
+      rows.forEach(r => {
+        const sid = r.getAttribute("data-sid");
+        const reg = r.getAttribute("data-reg");
+        const name = r.getAttribute("data-name");
+
+        const markRef = doc(collection(db, "marks"));
+        batch.set(markRef, {
+          institutionId: currentInstitutionId,
+          examName: exam,
+          class: selClass,
+          studentId: sid,
+          regNo: reg,
+          studentName: name,
+          scores: {
+            quran: Number(r.querySelector(".m-quran").value) || 0,
+            tajweed: Number(r.querySelector(".m-tajweed").value) || 0,
+            fiqh: Number(r.querySelector(".m-fiqh").value) || 0,
+            aqeeda: Number(r.querySelector(".m-aqeeda").value) || 0,
+            tareekh: Number(r.querySelector(".m-tareekh").value) || 0,
+            lisan: Number(r.querySelector(".m-lisan").value) || 0
+          },
+          timestamp: serverTimestamp()
+        });
+      });
+
+      try {
+        await batch.commit();
+        alert("മാർക്കുകൾ വിജയകരമായി സേവ് ചെയ്തു.");
+      } catch (err) { alert("Error: " + err.message); }
+    };
+
+    // --- FEES MODULE ---
+    window.loadStudentsForFees = async () => {
+      const selClass = document.getElementById("feeClassSelect").value;
+      const select = document.getElementById("feeStudentSelect");
+      select.innerHTML = `<option value="">ലോഡ് ചെയ്യുന്നു...</option>`;
+
+      const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", selClass));
+      const snap = await getDocs(q);
+
+      let html = `<option value="">-- വിദ്യാർത്ഥിയെ തിരഞ്ഞെടുക്കുക --</option>`;
+      snap.forEach(d => {
+        const s = d.data();
+        html += `<option value="${d.id}" data-reg="${s.regNo}" data-name="${s.name}" data-class="${s.currentClass}">Reg: ${s.regNo} - ${s.name}</option>`;
+      });
+      select.innerHTML = html;
+    };
+
+    window.processFeeReceipt = async (e) => {
+      e.preventDefault();
+      const sSelect = document.getElementById("feeStudentSelect");
+      const opt = sSelect.options[sSelect.selectedIndex];
+      if (!opt || !opt.value) return alert("വിദ്യാർത്ഥിയെ തിരഞ്ഞെടുക്കുക.");
+
+      const sId = opt.value;
+      const reg = opt.getAttribute("data-reg");
+      const name = opt.getAttribute("data-name");
+      const sClass = opt.getAttribute("data-class");
+      const amount = document.getElementById("feeAmount").value;
+      const type = document.getElementById("feeType").value;
+      const manual = document.getElementById("manualReceipt").value;
+      const recNo = "REC-" + Math.floor(100000 + Math.random() * 900000);
+
+      try {
+        await addDoc(collection(db, "feeCollections"), {
+          institutionId: currentInstitutionId,
+          receiptNo: recNo,
+          studentId: sId,
+          regNo: reg,
+          studentName: name,
+          class: sClass,
+          amount: Number(amount),
+          feeType: type,
+          manualReceiptNo: manual,
+          collectedBy: auth.currentUser.uid,
+          timestamp: serverTimestamp()
+        });
+
+        // Setup Printable Receipt
+        document.getElementById("recMadrassaName").innerText = document.getElementById("displayMadrassaName").innerText;
+        document.getElementById("recNo").innerText = "#" + recNo;
+        document.getElementById("recDate").innerText = new Date().toLocaleDateString();
+        document.getElementById("recStudentName").innerText = name;
+        document.getElementById("recAdmNo").innerText = reg;
+        document.getElementById("recClass").innerText = "ക്ലാസ് " + sClass;
+        document.getElementById("recFeeType").innerText = type;
+        document.getElementById("recAmount").innerText = "₹" + amount;
+
+        document.getElementById("printableReceipt").classList.remove("d-none");
+        window.print();
+        document.getElementById("printableReceipt").classList.add("d-none");
+        e.target.reset();
+      } catch (err) { alert("Error: " + err.message); }
+    };
+
+    // Edit Modal Logic
     window.openEditStudentModal = (docId) => {
       const s = localStudentsCache.find(x => x.id === docId);
       if (!s) return;
-
       document.getElementById("editDocId").value = docId;
       document.getElementById("editRegNo").value = s.regNo || '';
       document.getElementById("editIdNo").value = s.idNo || '';
@@ -465,12 +875,9 @@
       document.getElementById("editFatherName").value = s.fatherName || '';
       document.getElementById("editPlace").value = s.place || '';
       document.getElementById("editAddress").value = s.address || '';
-
-      const modal = new bootstrap.Modal(document.getElementById('studentEditModal'));
-      modal.show();
+      new bootstrap.Modal(document.getElementById('studentEditModal')).show();
     };
 
-    // Save Edited Student Details
     window.saveEditedStudent = async (e) => {
       e.preventDefault();
       const docId = document.getElementById("editDocId").value;
@@ -487,20 +894,17 @@
           address: document.getElementById("editAddress").value,
           updatedAt: serverTimestamp()
         });
-        alert("വിവരങ്ങൾ വിജയകരമായി അപ്‌ഡേറ്റ് ചെയ്തു.");
+        alert("വിവരങ്ങൾ അപ്‌ഡേറ്റ് ചെയ്തു.");
         bootstrap.Modal.getInstance(document.getElementById('studentEditModal')).hide();
         loadStudentsByClass(true);
       } catch (err) { alert("Error: " + err.message); }
     };
 
-    // Delete Student
-    window.deleteStudent = async (docId, studentName) => {
-      if (confirm(`${studentName}-ന്റെ വിവരങ്ങൾ പൂർണ്ണമായി ഒഴിവാക്കാൻ (Delete) ഉറപ്പാണോ?`)) {
-        try {
-          await deleteDoc(doc(db, "students", docId));
-          alert("വിദ്യാർത്ഥിയെ ഒഴിവാക്കി.");
-          loadStudentsByClass(true);
-        } catch (err) { alert("Error: " + err.message); }
+    window.deleteStudent = async (docId, name) => {
+      if (confirm(`${name}-നെ ഒഴിവാക്കാൻ ഉറപ്പാണോ?`)) {
+        await deleteDoc(doc(db, "students", docId));
+        alert("വിദ്യാർത്ഥിയെ ഒഴിവാക്കി.");
+        loadStudentsByClass(true);
       }
     };
 
@@ -554,6 +958,20 @@
           }
         }
       });
+    };
+
+    window.promoteStudents = async () => {
+      const from = document.getElementById("fromClass").value;
+      const to = document.getElementById("toClass").value;
+      if (confirm(`ക്ലാസ് ${from}-ലെ കുട്ടികളെ ക്ലാസ് ${to}-ലേക്ക് മാറ്റാൻ ഉറപ്പാണോ?`)) {
+        const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", from));
+        const snap = await getDocs(q);
+        const batch = writeBatch(db);
+        snap.forEach(d => batch.update(doc(db, "students", d.id), { currentClass: to }));
+        await batch.commit();
+        alert(`വിദ്യാർത്ഥികളെ ക്ലാസ് ${to}-ലേക്ക് മാറ്റി.`);
+        loadStudentsByClass(true);
+      }
     };
 
     window.showTab = (tabId) => {
