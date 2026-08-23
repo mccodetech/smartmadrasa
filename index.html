@@ -16,14 +16,12 @@
     .card { border-radius: 12px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
     .nav-pills .nav-link.active { background-color: var(--secondary-color); }
     .nav-pills .nav-link { color: #333; font-weight: 500; }
-    .section-title { font-size: 1.05rem; font-weight: 600; color: var(--primary-color); border-bottom: 2px solid #e9ecef; padding-bottom: 6px; margin-top: 15px; margin-bottom: 15px; }
-    .clickable-row { cursor: pointer; }
-    .clickable-row:hover { background-color: #f0fdf4 !important; }
+    .section-title { font-size: 1rem; font-weight: 600; color: var(--primary-color); border-bottom: 2px solid #e9ecef; padding-bottom: 4px; margin-top: 15px; margin-bottom: 12px; }
   </style>
 </head>
 <body>
 
-  <!-- Auth Screen (Login / Register) -->
+  <!-- Auth Screen -->
   <div id="authSection" class="container d-flex justify-content-center align-items-center min-vh-100">
     <div class="card p-4 shadow-lg" style="max-width: 420px; width: 100%;">
       <div class="text-center mb-4">
@@ -50,7 +48,7 @@
         <button type="submit" class="btn btn-madrassa w-100 py-2">പ്രവേശിക്കുക</button>
       </form>
 
-      <!-- Sign Up Form -->
+      <!-- Sign Up Form (Unique Madrasa Auto Setup) -->
       <form id="signupForm" class="d-none" onsubmit="handleSignUp(event)">
         <div class="mb-2">
           <label class="form-label">മദ്റസയുടെ പേര്</label>
@@ -77,7 +75,7 @@
     </div>
   </div>
 
-  <!-- Main Dashboard App -->
+  <!-- Main App Screen -->
   <div id="appSection" class="d-none">
     <nav class="navbar navbar-expand-lg bg-madrassa navbar-dark shadow-sm">
       <div class="container-fluid px-4">
@@ -108,33 +106,55 @@
           </div>
         </div>
 
-        <!-- Main Content Area -->
+        <!-- Content Area -->
         <div class="col-md-9 col-lg-10">
 
-          <!-- 1. Students List Tab (Default Tab with Sorting & Search) -->
+          <!-- 1. Students List Tab (Class-wise Quota Saver + Search) -->
           <div id="studentsListTab" class="content-tab">
             <div class="card p-4">
-              <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-                <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-users"></i> രജിസ്റ്റർ ചെയ്ത വിദ്യാർത്ഥികൾ</h5>
-                <div class="d-flex gap-2">
-                  <input type="text" id="searchBox" class="form-control form-control-sm" placeholder="പേര് / Reg No..." oninput="filterStudents()">
-                  <button class="btn btn-sm btn-outline-success" onclick="loadStudentsList()"><i class="fa-solid fa-rotate"></i></button>
+              <div class="row g-2 align-items-center mb-3">
+                <div class="col-md-3">
+                  <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-users"></i> വിദ്യാർത്ഥികൾ</h5>
+                </div>
+                <!-- Class-wise filter to minimize Reads -->
+                <div class="col-md-3">
+                  <select id="filterClassSelect" class="form-select form-select-sm" onchange="loadStudentsByClass()">
+                    <option value="ALL">എല്ലാ ക്ലാസുകളും</option>
+                    <option value="1">ക്ലാസ് 1</option>
+                    <option value="2">ക്ലാസ് 2</option>
+                    <option value="3">ക്ലാസ് 3</option>
+                    <option value="4">ക്ലാസ് 4</option>
+                    <option value="5">ക്ലാസ് 5</option>
+                    <option value="6">ക്ലാസ് 6</option>
+                    <option value="7">ക്ലാസ് 7</option>
+                    <option value="8">ക്ലാസ് 8</option>
+                    <option value="9">ക്ലാസ് 9</option>
+                    <option value="10">ക്ലാസ് 10</option>
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <input type="text" id="searchBox" class="form-control form-control-sm" placeholder="പേര് / Reg No..." oninput="filterStudentsLocal()">
+                </div>
+                <div class="col-md-2 text-end">
+                  <button class="btn btn-sm btn-outline-success" onclick="loadStudentsByClass(true)"><i class="fa-solid fa-rotate"></i> റീലോഡ്</button>
                 </div>
               </div>
+
               <div class="table-responsive">
                 <table class="table table-hover table-bordered align-middle">
                   <thead class="table-light">
                     <tr>
-                      <th style="width: 90px;">Reg No.</th>
+                      <th style="width: 80px;">Reg No.</th>
                       <th>പേര് (Name)</th>
                       <th>ക്ലാസ്</th>
                       <th>പിതാവ് / രക്ഷാകർത്താവ്</th>
                       <th>സ്ഥലം</th>
                       <th>ഫോൺ നമ്പർ</th>
+                      <th style="width: 110px;" class="text-center">നടപടികൾ</th>
                     </tr>
                   </thead>
                   <tbody id="studentsTableBody">
-                    <tr><td colspan="6" class="text-center text-muted">ഡാറ്റ ലോഡ് ചെയ്യുന്നു...</td></tr>
+                    <tr><td colspan="7" class="text-center text-muted">ഡാറ്റ ലോഡ് ചെയ്യുന്നു...</td></tr>
                   </tbody>
                 </table>
               </div>
@@ -144,94 +164,35 @@
           <!-- 2. Detailed Admission Form -->
           <div id="admissionTab" class="content-tab d-none">
             <div class="card p-4">
-              <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-address-card"></i> സമഗ്ര മദ്റസാ അഡ്മിഷൻ ഫോം</h5>
+              <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-address-card"></i> പുതിയ അഡ്മിഷൻ ഫോം</h5>
               <form onsubmit="saveDetailedStudent(event)">
                 <div class="section-title">1. അടിസ്ഥാന വിവരങ്ങൾ</div>
                 <div class="row g-3">
-                  <div class="col-md-3">
-                    <label class="form-label">രജിസ്റ്റർ നമ്പർ (Reg No.) *</label>
-                    <input type="number" id="regNo" class="form-control" required>
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label">ഐഡി നമ്പർ (ID No.)</label>
-                    <input type="text" id="idNo" class="form-control">
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label">വിദ്യാർത്ഥിയുടെ പേര് *</label>
-                    <input type="text" id="studentName" class="form-control" required>
-                  </div>
+                  <div class="col-md-3"><label class="form-label">Reg No. *</label><input type="number" id="regNo" class="form-control" required></div>
+                  <div class="col-md-3"><label class="form-label">ID No.</label><input type="text" id="idNo" class="form-control"></div>
+                  <div class="col-md-6"><label class="form-label">വിദ്യാർത്ഥിയുടെ പേര് *</label><input type="text" id="studentName" class="form-control" required></div>
                   <div class="col-md-3">
                     <label class="form-label">നിലവിലെ ക്ലാസ് *</label>
                     <select id="currentClass" class="form-select" required>
-                      <option value="1">ക്ലാസ് 1</option>
-                      <option value="2">ക്ലാസ് 2</option>
-                      <option value="3">ക്ലാസ് 3</option>
-                      <option value="4">ക്ലാസ് 4</option>
-                      <option value="5">ക്ലാസ് 5</option>
-                      <option value="6">ക്ലാസ് 6</option>
-                      <option value="7">ക്ലാസ് 7</option>
-                      <option value="8">ക്ലാസ് 8</option>
-                      <option value="9">ക്ലാസ് 9</option>
-                      <option value="10">ക്ലാസ് 10</option>
+                      <option value="1">ക്ലാസ് 1</option><option value="2">ക്ലാസ് 2</option><option value="3">ക്ലാസ് 3</option><option value="4">ക്ലാസ് 4</option><option value="5">ക്ലാസ് 5</option><option value="6">ക്ലാസ് 6</option><option value="7">ക്ലാസ് 7</option><option value="8">ക്ലാസ് 8</option><option value="9">ക്ലാസ് 9</option><option value="10">ക്ലാസ് 10</option>
                     </select>
                   </div>
-                  <div class="col-md-3">
-                    <label class="form-label">ജനന തീയതി</label>
-                    <input type="date" id="dob" class="form-control">
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label">ചേർന്ന തീയതി</label>
-                    <input type="date" id="joinedDate" class="form-control">
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label">ചേർന്ന ക്ലാസ്</label>
-                    <input type="text" id="joinedClass" class="form-control">
-                  </div>
+                  <div class="col-md-3"><label class="form-label">ജനന തീയതി</label><input type="date" id="dob" class="form-control"></div>
+                  <div class="col-md-3"><label class="form-label">ചേർന്ന തീയതി</label><input type="date" id="joinedDate" class="form-control"></div>
+                  <div class="col-md-3"><label class="form-label">ചേർന്ന ക്ലാസ്</label><input type="text" id="joinedClass" class="form-control"></div>
                 </div>
 
                 <div class="section-title">2. കുടുംബ വിവരങ്ങളും വിലാസവും</div>
                 <div class="row g-3">
-                  <div class="col-md-4">
-                    <label class="form-label">പിതാവിന്റെ പേര്</label>
-                    <input type="text" id="fatherName" class="form-control">
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label">മാതാവിന്റെ പേര്</label>
-                    <input type="text" id="motherName" class="form-control">
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label">രക്ഷാകർത്താവ്</label>
-                    <input type="text" id="guardianName" class="form-control">
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label">ഫോൺ നമ്പർ</label>
-                    <input type="tel" id="parentPhone" class="form-control">
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label">സ്ഥലം</label>
-                    <input type="text" id="place" class="form-control">
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label">വീട്ടുപേര് / വിലാസം</label>
-                    <input type="text" id="address" class="form-control">
-                  </div>
+                  <div class="col-md-4"><label class="form-label">പിതാവിന്റെ പേര്</label><input type="text" id="fatherName" class="form-control"></div>
+                  <div class="col-md-4"><label class="form-label">മാതാവിന്റെ പേര്</label><input type="text" id="motherName" class="form-control"></div>
+                  <div class="col-md-4"><label class="form-label">രക്ഷാകർത്താവ്</label><input type="text" id="guardianName" class="form-control"></div>
+                  <div class="col-md-4"><label class="form-label">ഫോൺ നമ്പർ</label><input type="tel" id="parentPhone" class="form-control"></div>
+                  <div class="col-md-4"><label class="form-label">സ്ഥലം</label><input type="text" id="place" class="form-control"></div>
+                  <div class="col-md-4"><label class="form-label">വീട്ടുപേര് / വിലാസം</label><input type="text" id="address" class="form-control"></div>
                 </div>
 
-                <div class="section-title">3. മുൻ മദ്റസ വിവരങ്ങൾ</div>
-                <div class="row g-3">
-                  <div class="col-md-6">
-                    <label class="form-label">മുൻപ് പഠിച്ച മദ്റസ / TC വിവരങ്ങൾ</label>
-                    <input type="text" id="prevMadrasa" class="form-control">
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label">പ്രത്യേക വിവരങ്ങൾ</label>
-                    <input type="text" id="specialInfo" class="form-control">
-                  </div>
-                </div>
-
-                <div class="mt-4">
-                  <button type="submit" class="btn btn-madrassa px-4"><i class="fa-solid fa-floppy-disk me-1"></i> സേവ് ചെയ്യുക</button>
-                </div>
+                <div class="mt-4"><button type="submit" class="btn btn-madrassa px-4"><i class="fa-solid fa-floppy-disk me-1"></i> സേവ് ചെയ്യുക</button></div>
               </form>
             </div>
           </div>
@@ -241,12 +202,8 @@
             <div class="card p-4">
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-file-csv"></i> Excel / CSV ഇമ്പോർട്ടർ</h5>
               <div class="row g-3 mb-3">
-                <div class="col-md-6">
-                  <input type="file" id="csvFileInput" class="form-control" accept=".csv">
-                </div>
-                <div class="col-md-3">
-                  <button class="btn btn-success w-100" onclick="handleBulkUpload()"><i class="fa-solid fa-cloud-arrow-up me-1"></i> അപ്‌ലോഡ് ചെയ്യുക</button>
-                </div>
+                <div class="col-md-6"><input type="file" id="csvFileInput" class="form-control" accept=".csv"></div>
+                <div class="col-md-3"><button class="btn btn-success w-100" onclick="handleBulkUpload()"><i class="fa-solid fa-cloud-arrow-up me-1"></i> അപ്‌ലോഡ് ചെയ്യുക</button></div>
               </div>
               <div id="bulkStatus" class="alert alert-info d-none"></div>
             </div>
@@ -276,72 +233,53 @@
             </div>
           </div>
 
-          <!-- 5. Attendance Tab -->
-          <div id="attendanceTab" class="content-tab d-none">
-            <div class="card p-4">
-              <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-calendar-check"></i> ദിവസേന ഹാജർ</h5>
-              <div class="row g-3">
-                <div class="col-md-4"><input type="date" id="attDate" class="form-control"></div>
-                <div class="col-md-4">
-                  <select id="attClassSelect" class="form-select">
-                    <option value="1">ക്ലാസ് 1</option><option value="2">ക്ലാസ് 2</option><option value="3">ക്ലാസ് 3</option><option value="4">ക്ലാസ് 4</option><option value="5">ക്ലാസ് 5</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 6. Marks Tab -->
-          <div id="marksTab" class="content-tab d-none">
-            <div class="card p-4">
-              <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-award"></i> മാർക്ക് എൻട്രി</h5>
-              <form onsubmit="saveMarks(event)">
-                <div class="row g-3">
-                  <div class="col-md-4"><input type="text" id="examName" class="form-control" placeholder="പരീക്ഷ" required></div>
-                  <div class="col-md-4"><input type="number" id="markAdmNo" class="form-control" placeholder="Reg No." required></div>
-                  <div class="col-md-4"><input type="number" id="markQuran" class="form-control" placeholder="ഖുർആൻ" required></div>
-                  <div class="col-12"><button type="submit" class="btn btn-madrassa">മാർക്ക് സേവ് ചെയ്യുക</button></div>
-                </div>
-              </form>
-            </div>
-          </div>
-
-          <!-- 7. Fees Tab -->
-          <div id="feesTab" class="content-tab d-none">
-            <div class="card p-4">
-              <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-receipt"></i> ഫീസ് കളക്ഷൻ & രസീത്</h5>
-              <form onsubmit="processFee(event)">
-                <div class="row g-3">
-                  <div class="col-md-4"><input type="number" id="feeAdmNo" class="form-control" placeholder="Reg No." required></div>
-                  <div class="col-md-4"><input type="number" id="feeAmount" class="form-control" placeholder="തുക (₹)" required></div>
-                  <div class="col-md-4"><input type="text" id="manualReceipt" class="form-control" placeholder="മാനുവൽ രസീത് നമ്പർ"></div>
-                  <div class="col-12"><button type="submit" class="btn btn-madrassa">ഫീസ് രേഖപ്പെടുത്തുക</button></div>
-                </div>
-              </form>
-            </div>
-          </div>
+          <!-- Other tabs: Attendance, Marks, Fees -->
+          <div id="attendanceTab" class="content-tab d-none"><div class="card p-4"><h5>ഹാജർ രേഖപ്പെടുത്തൽ</h5></div></div>
+          <div id="marksTab" class="content-tab d-none"><div class="card p-4"><h5>മാർക്ക് എൻട്രി</h5></div></div>
+          <div id="feesTab" class="content-tab d-none"><div class="card p-4"><h5>ഫീസ് കളക്ഷൻ</h5></div></div>
 
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Student Detail View Modal -->
-  <div class="modal fade" id="studentDetailModal" tabindex="-1" aria-hidden="true">
+  <!-- Student Edit Modal -->
+  <div class="modal fade" id="studentEditModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content border-0 shadow">
         <div class="modal-header bg-madrassa text-white">
-          <h5 class="modal-title fw-bold" id="modalStudentName">വിദ്യാർത്ഥി പ്രൊഫൈൽ</h5>
+          <h5 class="modal-title fw-bold">വിദ്യാർത്ഥിയുടെ വിവരങ്ങൾ തിരുത്തുക (Edit)</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
-        <div class="modal-body p-4" id="modalStudentBody">
-          <!-- Details injected here -->
+        <div class="modal-body p-4">
+          <form onsubmit="saveEditedStudent(event)">
+            <input type="hidden" id="editDocId">
+            <div class="row g-3">
+              <div class="col-md-3"><label class="form-label">Reg No. *</label><input type="number" id="editRegNo" class="form-control" required></div>
+              <div class="col-md-3"><label class="form-label">ID No.</label><input type="text" id="editIdNo" class="form-control"></div>
+              <div class="col-md-6"><label class="form-label">പേര് *</label><input type="text" id="editName" class="form-control" required></div>
+              <div class="col-md-3">
+                <label class="form-label">ക്ലാസ് *</label>
+                <select id="editCurrentClass" class="form-select" required>
+                  <option value="1">ക്ലാസ് 1</option><option value="2">ക്ലാസ് 2</option><option value="3">ക്ലാസ് 3</option><option value="4">ക്ലാസ് 4</option><option value="5">ക്ലാസ് 5</option><option value="6">ക്ലാസ് 6</option><option value="7">ക്ലാസ് 7</option><option value="8">ക്ലാസ് 8</option><option value="9">ക്ലാസ് 9</option><option value="10">ക്ലാസ് 10</option>
+                </select>
+              </div>
+              <div class="col-md-3"><label class="form-label">ജനന തീയതി</label><input type="text" id="editDob" class="form-control"></div>
+              <div class="col-md-3"><label class="form-label">ഫോൺ നമ്പർ</label><input type="tel" id="editPhone" class="form-control"></div>
+              <div class="col-md-3"><label class="form-label">പിതാവ്</label><input type="text" id="editFatherName" class="form-control"></div>
+              <div class="col-md-6"><label class="form-label">സ്ഥലം</label><input type="text" id="editPlace" class="form-control"></div>
+              <div class="col-md-6"><label class="form-label">വിലാസം</label><input type="text" id="editAddress" class="form-control"></div>
+              <div class="col-12 mt-4 text-end">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">റദ്ദാക്കുക</button>
+                <button type="submit" class="btn btn-madrassa px-4">അപ്‌ഡേറ്റ് ചെയ്യുക</button>
+              </div>
+            </div>
+          </form>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Bootstrap Bundle with Popper -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <!-- Firebase Scripts -->
@@ -352,7 +290,7 @@
       signOut, onAuthStateChanged 
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import { 
-      getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, query, where, writeBatch, serverTimestamp 
+      getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, addDoc, getDocs, query, where, writeBatch, serverTimestamp 
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -370,7 +308,7 @@
     const db = getFirestore(app);
 
     let currentInstitutionId = "";
-    let allStudentsCache = [];
+    let localStudentsCache = [];
 
     onAuthStateChanged(auth, async (user) => {
       if (user) {
@@ -382,7 +320,7 @@
           document.getElementById("displayUserName").innerHTML = `<i class="fa-solid fa-user"></i> ${userData.name}`;
           document.getElementById("authSection").classList.add("d-none");
           document.getElementById("appSection").classList.remove("d-none");
-          loadStudentsList();
+          loadStudentsByClass();
         }
       } else {
         document.getElementById("authSection").classList.remove("d-none");
@@ -405,6 +343,7 @@
         const phone = document.getElementById("regPhone").value;
         const email = document.getElementById("regEmail").value;
         const pwd = document.getElementById("regPassword").value;
+        // Unique institution ID for each newly registered Madrasa
         const instId = "MDR_" + Date.now();
 
         const cred = await createUserWithEmailAndPassword(auth, email, pwd);
@@ -422,7 +361,7 @@
 
     window.handleLogout = () => signOut(auth);
 
-    // Save Student Form
+    // Save Single Student Form
     window.saveDetailedStudent = async (e) => {
       e.preventDefault();
       try {
@@ -441,27 +380,135 @@
           phone: document.getElementById("parentPhone").value,
           place: document.getElementById("place").value,
           address: document.getElementById("address").value,
-          prevMadrasa: document.getElementById("prevMadrasa").value,
-          specialInfo: document.getElementById("specialInfo").value,
           status: "active",
           createdAt: serverTimestamp()
         });
         alert("വിദ്യാർത്ഥിയുടെ വിവരങ്ങൾ സേവ് ചെയ്തു.");
         e.target.reset();
-        loadStudentsList();
+        loadStudentsByClass(true);
         showTab('studentsListTab');
       } catch (err) { alert("Error: " + err.message); }
     };
 
-    // Bulk Upload with Correct Mapping & Numeric Reg No
+    // Load Students Class-wise (Reduces Firestore Reads)
+    window.loadStudentsByClass = async (forceRefresh = false) => {
+      const selectedClass = document.getElementById("filterClassSelect").value;
+      const tbody = document.getElementById("studentsTableBody");
+      tbody.innerHTML = `<tr><td colspan="7" class="text-center">ഡാറ്റ ലോഡ് ചെയ്യുന്നു...</td></tr>`;
+
+      let q;
+      if (selectedClass === "ALL") {
+        q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId));
+      } else {
+        q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", selectedClass));
+      }
+
+      const snap = await getDocs(q);
+      localStudentsCache = [];
+      snap.forEach(d => localStudentsCache.push({ id: d.id, ...d.data() }));
+
+      // Sort Ascending by Reg No
+      localStudentsCache.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
+      renderStudentsTable(localStudentsCache);
+    };
+
+    function renderStudentsTable(students) {
+      const tbody = document.getElementById("studentsTableBody");
+      if (!students.length) {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">കുട്ടികളുടെ വിവരങ്ങൾ ലഭ്യമല്ല.</td></tr>`;
+        return;
+      }
+
+      let html = "";
+      students.forEach(s => {
+        html += `
+          <tr>
+            <td><b class="text-success">${s.regNo || '-'}</b></td>
+            <td><b>${s.name || '-'}</b></td>
+            <td><span class="badge bg-success">ക്ലാസ് ${s.currentClass || '-'}</span></td>
+            <td>${s.fatherName || s.guardianName || '-'}</td>
+            <td>${s.place || '-'}</td>
+            <td>${s.phone || '-'}</td>
+            <td class="text-center">
+              <button class="btn btn-sm btn-outline-primary me-1" onclick="openEditStudentModal('${s.id}')" title="തിരുത്തുക"><i class="fa-solid fa-pen"></i></button>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${s.id}', '${s.name}')" title="ഒഴിവാക്കുക"><i class="fa-solid fa-trash"></i></button>
+            </td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html;
+    }
+
+    // Filter Local Table Data
+    window.filterStudentsLocal = () => {
+      const term = document.getElementById("searchBox").value.toLowerCase();
+      const filtered = localStudentsCache.filter(s => 
+        (s.name && s.name.toLowerCase().includes(term)) || 
+        (s.regNo && s.regNo.toString().includes(term)) ||
+        (s.place && s.place.toLowerCase().includes(term))
+      );
+      renderStudentsTable(filtered);
+    };
+
+    // Open Edit Modal
+    window.openEditStudentModal = (docId) => {
+      const s = localStudentsCache.find(x => x.id === docId);
+      if (!s) return;
+
+      document.getElementById("editDocId").value = docId;
+      document.getElementById("editRegNo").value = s.regNo || '';
+      document.getElementById("editIdNo").value = s.idNo || '';
+      document.getElementById("editName").value = s.name || '';
+      document.getElementById("editCurrentClass").value = s.currentClass || '1';
+      document.getElementById("editDob").value = s.dob || '';
+      document.getElementById("editPhone").value = s.phone || '';
+      document.getElementById("editFatherName").value = s.fatherName || '';
+      document.getElementById("editPlace").value = s.place || '';
+      document.getElementById("editAddress").value = s.address || '';
+
+      const modal = new bootstrap.Modal(document.getElementById('studentEditModal'));
+      modal.show();
+    };
+
+    // Save Edited Student Details
+    window.saveEditedStudent = async (e) => {
+      e.preventDefault();
+      const docId = document.getElementById("editDocId").value;
+      try {
+        await updateDoc(doc(db, "students", docId), {
+          regNo: Number(document.getElementById("editRegNo").value) || 0,
+          idNo: document.getElementById("editIdNo").value,
+          name: document.getElementById("editName").value,
+          currentClass: document.getElementById("editCurrentClass").value,
+          dob: document.getElementById("editDob").value,
+          phone: document.getElementById("editPhone").value,
+          fatherName: document.getElementById("editFatherName").value,
+          place: document.getElementById("editPlace").value,
+          address: document.getElementById("editAddress").value,
+          updatedAt: serverTimestamp()
+        });
+        alert("വിവരങ്ങൾ വിജയകരമായി അപ്‌ഡേറ്റ് ചെയ്തു.");
+        bootstrap.Modal.getInstance(document.getElementById('studentEditModal')).hide();
+        loadStudentsByClass(true);
+      } catch (err) { alert("Error: " + err.message); }
+    };
+
+    // Delete Student
+    window.deleteStudent = async (docId, studentName) => {
+      if (confirm(`${studentName}-ന്റെ വിവരങ്ങൾ പൂർണ്ണമായി ഒഴിവാക്കാൻ (Delete) ഉറപ്പാണോ?`)) {
+        try {
+          await deleteDoc(doc(db, "students", docId));
+          alert("വിദ്യാർത്ഥിയെ ഒഴിവാക്കി.");
+          loadStudentsByClass(true);
+        } catch (err) { alert("Error: " + err.message); }
+      }
+    };
+
+    // Bulk Upload
     window.handleBulkUpload = () => {
       const fileInput = document.getElementById("csvFileInput");
       const statusDiv = document.getElementById("bulkStatus");
-
-      if (!fileInput.files.length) {
-        alert("ദയവായി CSV ഫയൽ തിരഞ്ഞെടുക്കുക.");
-        return;
-      }
+      if (!fileInput.files.length) return alert("CSV ഫയൽ തിരഞ്ഞെടുക്കുക.");
 
       statusDiv.classList.remove("d-none");
       statusDiv.innerText = "ഫയൽ പരിശോധിക്കുന്നു...";
@@ -471,14 +518,10 @@
         skipEmptyLines: true,
         complete: async (results) => {
           const rows = results.data;
-          statusDiv.innerText = `${rows.length} കുട്ടികളുടെ വിവരങ്ങൾ ചേർക്കുന്നു...`;
-
           try {
             const batch = writeBatch(db);
             rows.forEach((row) => {
               const newStudentRef = doc(collection(db, "students"));
-              
-              // Correct Field Mapping
               const regNum = parseInt(row["REG NO."] || row["regNo"] || 0, 10);
               const phoneVal = row["PHONE"] || row["MOBILE"] || row["PHONE NO"] || "";
 
@@ -494,10 +537,6 @@
                 fatherName: row["FATHER NAME"] || "",
                 motherName: row["MOTHER NAME"] || "",
                 guardianName: row["GUARDIAN NAME"] || "",
-                relationship: row["RILATIONSHIP FROM CHILDRILATIONSHIP FROM GUARDIAN"] || "",
-                joinedDate: row["JOINED DATE"] || "",
-                joinedClass: row["JOINED CLASS"] || "",
-                specialInfo: row["SPECIAL INFORMATION"] || "",
                 phone: phoneVal,
                 status: "active",
                 createdAt: serverTimestamp()
@@ -506,8 +545,8 @@
 
             await batch.commit();
             statusDiv.className = "alert alert-success";
-            statusDiv.innerText = `വിജയകരമായി ${rows.length} കുട്ടികളെ ഇമ്പോർട്ട് ചെയ്തു!`;
-            loadStudentsList();
+            statusDiv.innerText = `${rows.length} കുട്ടികളെ വിജയകരമായി ഇമ്പോർട്ട് ചെയ്തു!`;
+            loadStudentsByClass(true);
             showTab('studentsListTab');
           } catch (err) {
             statusDiv.className = "alert alert-danger";
@@ -515,115 +554,6 @@
           }
         }
       });
-    };
-
-    // Load Students Sorted by Reg No
-    window.loadStudentsList = async () => {
-      const tbody = document.getElementById("studentsTableBody");
-      tbody.innerHTML = `<tr><td colspan="6" class="text-center">ഡാറ്റ ലോഡ് ചെയ്യുന്നു...</td></tr>`;
-
-      const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId));
-      const snap = await getDocs(q);
-
-      if (snap.empty) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted">കുട്ടികളുടെ വിവരങ്ങൾ ലഭ്യമല്ല.</td></tr>`;
-        return;
-      }
-
-      allStudentsCache = [];
-      snap.forEach(d => {
-        allStudentsCache.push({ id: d.id, ...d.data() });
-      });
-
-      // Sort Ascending by Reg No (101, 102, 103...)
-      allStudentsCache.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
-
-      renderStudentsTable(allStudentsCache);
-    };
-
-    // Render Table Rows
-    function renderStudentsTable(students) {
-      const tbody = document.getElementById("studentsTableBody");
-      let html = "";
-      students.forEach(s => {
-        html += `
-          <tr class="clickable-row" onclick="viewStudentDetails('${s.id}')">
-            <td><b class="text-success">${s.regNo || '-'}</b></td>
-            <td><b>${s.name || '-'}</b> <i class="fa-solid fa-arrow-up-right-from-square text-muted small ms-1"></i></td>
-            <td><span class="badge bg-success">ക്ലാസ് ${s.currentClass || '-'}</span></td>
-            <td>${s.fatherName || s.guardianName || '-'}</td>
-            <td>${s.place || '-'}</td>
-            <td>${s.phone || '-'}</td>
-          </tr>
-        `;
-      });
-      tbody.innerHTML = html;
-    }
-
-    // Filter Students by Search
-    window.filterStudents = () => {
-      const term = document.getElementById("searchBox").value.toLowerCase();
-      const filtered = allStudentsCache.filter(s => 
-        (s.name && s.name.toLowerCase().includes(term)) || 
-        (s.regNo && s.regNo.toString().includes(term)) ||
-        (s.place && s.place.toLowerCase().includes(term))
-      );
-      renderStudentsTable(filtered);
-    };
-
-    // View Complete Student Details in Modal
-    window.viewStudentDetails = (studentDocId) => {
-      const s = allStudentsCache.find(x => x.id === studentDocId);
-      if (!s) return;
-
-      document.getElementById("modalStudentName").innerText = `${s.name} (Reg No: ${s.regNo || '-'})`;
-      document.getElementById("modalStudentBody").innerHTML = `
-        <div class="row g-3">
-          <div class="col-md-4"><b>ഐഡി നമ്പർ:</b> ${s.idNo || '-'}</div>
-          <div class="col-md-4"><b>നിലവിലെ ക്ലാസ്:</b> ക്ലാസ് ${s.currentClass || '-'}</div>
-          <div class="col-md-4"><b>ജനന തീയതി:</b> ${s.dob || '-'}</div>
-          
-          <div class="col-md-4"><b>ചേർന്ന തീയതി:</b> ${s.joinedDate || '-'}</div>
-          <div class="col-md-4"><b>ചേർന്ന ക്ലാസ്:</b> ${s.joinedClass || '-'}</div>
-          <div class="col-md-4"><b>ഫോൺ നമ്പർ:</b> ${s.phone || '-'}</div>
-
-          <div class="col-md-4"><b>പിതാവ്:</b> ${s.fatherName || '-'}</div>
-          <div class="col-md-4"><b>മാതാവ്:</b> ${s.motherName || '-'}</div>
-          <div class="col-md-4"><b>രക്ഷാകർത്താവ്:</b> ${s.guardianName || '-'} (${s.relationship || '-'})</div>
-
-          <div class="col-md-6"><b>സ്ഥലം:</b> ${s.place || '-'}</div>
-          <div class="col-md-6"><b>വിലാസം / വീട്ടുപേര്:</b> ${s.address || '-'}</div>
-
-          <div class="col-12 border-top pt-2 mt-2"><b>മുൻ മദ്റസ / TC വിവരങ്ങൾ:</b> ${s.prevMadrasa || '-'}</div>
-          <div class="col-12"><b>പ്രത്യേക വിവരങ്ങൾ:</b> ${s.specialInfo || '-'}</div>
-        </div>
-      `;
-
-      const myModal = new bootstrap.Modal(document.getElementById('studentDetailModal'));
-      myModal.show();
-    };
-
-    window.promoteStudents = async () => {
-      const from = document.getElementById("fromClass").value;
-      const to = document.getElementById("toClass").value;
-
-      if (confirm(`ക്ലാസ് ${from}-ലെ മുഴുവൻ കുട്ടികളെയും ക്ലാസ് ${to}-ലേക്ക് മാറ്റാൻ ഉറപ്പാണോ?`)) {
-        const q = query(
-          collection(db, "students"), 
-          where("institutionId", "==", currentInstitutionId),
-          where("currentClass", "==", from)
-        );
-        const snap = await getDocs(q);
-        const batch = writeBatch(db);
-
-        snap.forEach(d => {
-          batch.update(doc(db, "students", d.id), { currentClass: to });
-        });
-
-        await batch.commit();
-        alert(`വിദ്യാർത്ഥികളെ ക്ലാസ് ${to}-ലേക്ക് മാറ്റി.`);
-        loadStudentsList();
-      }
     };
 
     window.showTab = (tabId) => {
