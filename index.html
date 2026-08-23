@@ -18,6 +18,22 @@
     .nav-pills .nav-link { color: #333; font-weight: 500; }
     .section-title { font-size: 1rem; font-weight: 600; color: var(--primary-color); border-bottom: 2px solid #e9ecef; padding-bottom: 4px; margin-top: 15px; margin-bottom: 12px; }
     .form-check-input-lg { width: 1.5em; height: 1.5em; cursor: pointer; }
+    
+    /* Dropdown Checkbox Multi-Select Styling */
+    .dropdown-checkbox-menu {
+      max-height: 250px;
+      overflow-y: auto;
+      width: 100%;
+      padding: 8px 12px;
+    }
+    .dropdown-checkbox-item {
+      padding: 4px 0;
+      cursor: pointer;
+    }
+    .dropdown-checkbox-item:hover {
+      background-color: #f8f9fa;
+    }
+
     @media print {
       body * { visibility: hidden; }
       #printableReceipt, #printableReceipt * { visibility: visible; }
@@ -337,7 +353,7 @@
             </div>
           </div>
 
-          <!-- 6. Teachers Management Tab (Upgraded with MSR, Designation, Dropdown & Edit) -->
+          <!-- 6. Teachers Management Tab (Dropdown with Checkboxes) -->
           <div id="teachersTab" class="content-tab d-none">
             <div class="card p-4">
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-chalkboard-user"></i> മുഅല്ലിം മാനേജ്‌മെന്റ് (അധ്യാപകരെ ചേർക്കൽ)</h5>
@@ -370,15 +386,31 @@
                     <label class="form-label">പാസ്‌വേഡ് *</label>
                     <input type="password" id="tPassword" class="form-control" required>
                   </div>
+
+                  <!-- Dropdown Checkbox for Register -->
                   <div class="col-md-4">
-                    <label class="form-label">ചുമതലയുള്ള ക്ലാസുകൾ (Ctrl പിടിച്ചു ഒന്നിലധികം തിരഞ്ഞെടുക്കാം)</label>
-                    <select id="tClassesMultiSelect" class="form-select" multiple style="height: 100px;">
-                      <option value="1">ക്ലാസ് 1</option><option value="2">ക്ലാസ് 2</option><option value="3">ക്ലാസ് 3</option>
-                      <option value="4">ക്ലാസ് 4</option><option value="5">ക്ലാസ് 5</option><option value="6">ക്ലാസ് 6</option>
-                      <option value="7">ക്ലാസ് 7</option><option value="8">ക്ലാസ് 8</option><option value="9">ക്ലാസ് 9</option>
-                      <option value="10">ക്ലാസ് 10</option><option value="11">ക്ലാസ് 11</option><option value="12">ക്ലാസ് 12</option>
-                    </select>
+                    <label class="form-label">ചുമതലയുള്ള ക്ലാസുകൾ</label>
+                    <div class="dropdown">
+                      <button class="btn btn-outline-secondary dropdown-toggle w-100 text-start d-flex justify-content-between align-items-center" type="button" id="regClassDropdownBtn" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                        <span id="regClassDropdownLabel">ക്ലാസ് തിരഞ്ഞെടുക്കുക</span>
+                      </button>
+                      <ul class="dropdown-menu dropdown-checkbox-menu" aria-labelledby="regClassDropdownBtn">
+                        <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 reg-class-cb" value="1" onchange="updateDropdownLabel('reg')"> ക്ലാസ് 1</label></li>
+                        <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 reg-class-cb" value="2" onchange="updateDropdownLabel('reg')"> ക്ലാസ് 2</label></li>
+                        <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 reg-class-cb" value="3" onchange="updateDropdownLabel('reg')"> ക്ലാസ് 3</label></li>
+                        <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 reg-class-cb" value="4" onchange="updateDropdownLabel('reg')"> ക്ലാസ് 4</label></li>
+                        <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 reg-class-cb" value="5" onchange="updateDropdownLabel('reg')"> ക്ലാസ് 5</label></li>
+                        <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 reg-class-cb" value="6" onchange="updateDropdownLabel('reg')"> ക്ലാസ് 6</label></li>
+                        <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 reg-class-cb" value="7" onchange="updateDropdownLabel('reg')"> ക്ലാസ് 7</label></li>
+                        <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 reg-class-cb" value="8" onchange="updateDropdownLabel('reg')"> ക്ലാസ് 8</label></li>
+                        <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 reg-class-cb" value="9" onchange="updateDropdownLabel('reg')"> ക്ലാസ് 9</label></li>
+                        <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 reg-class-cb" value="10" onchange="updateDropdownLabel('reg')"> ക്ലാസ് 10</label></li>
+                        <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 reg-class-cb" value="11" onchange="updateDropdownLabel('reg')"> ക്ലാസ് 11</label></li>
+                        <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 reg-class-cb" value="12" onchange="updateDropdownLabel('reg')"> ക്ലാസ് 12</label></li>
+                      </ul>
+                    </div>
                   </div>
+
                   <div class="col-12 text-end">
                     <button type="submit" class="btn btn-madrassa px-4"><i class="fa-solid fa-user-plus me-1"></i> മുഅല്ലിമിനെ രജിസ്റ്റർ ചെയ്യുക</button>
                   </div>
@@ -439,7 +471,7 @@
     </div>
   </div>
 
-  <!-- Teacher Edit Modal -->
+  <!-- Teacher Edit Modal (Dropdown with Checkboxes) -->
   <div class="modal fade" id="teacherEditModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content border-0 shadow">
@@ -461,15 +493,31 @@
                   <option value="admin">സ്വദർ മുഅല്ലിം</option>
                 </select>
               </div>
+
+              <!-- Dropdown Checkbox for Edit -->
               <div class="col-md-8">
                 <label class="form-label">ചുമതലയുള്ള ക്ലാസുകൾ</label>
-                <select id="editTClassesMultiSelect" class="form-select" multiple style="height: 100px;">
-                  <option value="1">ക്ലാസ് 1</option><option value="2">ക്ലാസ് 2</option><option value="3">ക്ലാസ് 3</option>
-                  <option value="4">ക്ലാസ് 4</option><option value="5">ക്ലാസ് 5</option><option value="6">ക്ലാസ് 6</option>
-                  <option value="7">ക്ലാസ് 7</option><option value="8">ക്ലാസ് 8</option><option value="9">ക്ലാസ് 9</option>
-                  <option value="10">ക്ലാസ് 10</option><option value="11">ക്ലാസ് 11</option><option value="12">ക്ലാസ് 12</option>
-                </select>
+                <div class="dropdown">
+                  <button class="btn btn-outline-secondary dropdown-toggle w-100 text-start d-flex justify-content-between align-items-center" type="button" id="editClassDropdownBtn" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                    <span id="editClassDropdownLabel">ക്ലാസ് തിരഞ്ഞെടുക്കുക</span>
+                  </button>
+                  <ul class="dropdown-menu dropdown-checkbox-menu" aria-labelledby="editClassDropdownBtn">
+                    <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 edit-class-cb" value="1" onchange="updateDropdownLabel('edit')"> ക്ലാസ് 1</label></li>
+                    <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 edit-class-cb" value="2" onchange="updateDropdownLabel('edit')"> ക്ലാസ് 2</label></li>
+                    <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 edit-class-cb" value="3" onchange="updateDropdownLabel('edit')"> ക്ലാസ് 3</label></li>
+                    <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 edit-class-cb" value="4" onchange="updateDropdownLabel('edit')"> ക്ലാസ് 4</label></li>
+                    <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 edit-class-cb" value="5" onchange="updateDropdownLabel('edit')"> ക്ലാസ് 5</label></li>
+                    <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 edit-class-cb" value="6" onchange="updateDropdownLabel('edit')"> ക്ലാസ് 6</label></li>
+                    <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 edit-class-cb" value="7" onchange="updateDropdownLabel('edit')"> ക്ലാസ് 7</label></li>
+                    <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 edit-class-cb" value="8" onchange="updateDropdownLabel('edit')"> ക്ലാസ് 8</label></li>
+                    <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 edit-class-cb" value="9" onchange="updateDropdownLabel('edit')"> ക്ലാസ് 9</label></li>
+                    <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 edit-class-cb" value="10" onchange="updateDropdownLabel('edit')"> ക്ലാസ് 10</label></li>
+                    <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 edit-class-cb" value="11" onchange="updateDropdownLabel('edit')"> ക്ലാസ് 11</label></li>
+                    <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 edit-class-cb" value="12" onchange="updateDropdownLabel('edit')"> ക്ലാസ് 12</label></li>
+                  </ul>
+                </div>
               </div>
+
               <div class="col-12 mt-4 text-end">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">റദ്ദാക്കുക</button>
                 <button type="submit" class="btn btn-madrassa px-4">അപ്‌ഡേറ്റ് ചെയ്യുക</button>
@@ -588,6 +636,18 @@
     let currentPage = 1;
     const pageSize = 50;
 
+    // Helper for Multi-select Dropdown label
+    window.updateDropdownLabel = (type) => {
+      const checkboxes = document.querySelectorAll(`.${type}-class-cb:checked`);
+      const label = document.getElementById(`${type}ClassDropdownLabel`);
+      if (!checkboxes.length) {
+        label.innerText = "ക്ലാസ് തിരഞ്ഞെടുക്കുക";
+      } else {
+        const selected = Array.from(checkboxes).map(cb => cb.value);
+        label.innerText = selected.map(c => `ക്ലാസ് ${c}`).join(', ');
+      }
+    };
+
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         const userDoc = await getDoc(doc(db, "users", user.uid));
@@ -675,7 +735,7 @@
 
     window.handleLogout = () => signOut(auth);
 
-    // Register Teacher with MSR, Role & Multi-Select Dropdown
+    // Register Teacher with Dropdown Checkboxes
     window.registerNewTeacher = async (e) => {
       e.preventDefault();
       const msrNo = document.getElementById("tMsrNo").value.trim();
@@ -685,8 +745,8 @@
       const email = document.getElementById("tEmail").value;
       const password = document.getElementById("tPassword").value;
 
-      const multiSelect = document.getElementById("tClassesMultiSelect");
-      const selectedClasses = Array.from(multiSelect.selectedOptions).map(opt => opt.value);
+      const selectedClasses = [];
+      document.querySelectorAll(".reg-class-cb:checked").forEach(cb => selectedClasses.push(cb.value));
 
       if (!selectedClasses.length && role === "teacher") {
         return alert("ദയവായി കുറഞ്ഞത് ഒരു ക്ലാസെങ്കിലും തിരഞ്ഞെടുക്കുക.");
@@ -709,11 +769,13 @@
 
         alert("മുഅല്ലിമിനെ വിജയകരമായി ചേർത്തു.");
         e.target.reset();
+        document.querySelectorAll(".reg-class-cb").forEach(cb => cb.checked = false);
+        updateDropdownLabel('reg');
         loadTeachersList();
       } catch (err) { alert("Error: " + err.message); }
     };
 
-    // Load Teachers List with SL No., MSR No., Role & Edit Button
+    // Load Teachers List
     async function loadTeachersList() {
       const tbody = document.getElementById("teachersTableBody");
       const q = query(collection(db, "users"), where("institutionId", "==", currentInstitutionId));
@@ -757,10 +819,11 @@
       document.getElementById("editTPhone").value = t.phone || '';
       document.getElementById("editTRole").value = t.role || 'teacher';
 
-      const select = document.getElementById("editTClassesMultiSelect");
-      Array.from(select.options).forEach(opt => {
-        opt.selected = (t.assignedClasses || []).includes(opt.value);
+      const assigned = t.assignedClasses || [];
+      document.querySelectorAll(".edit-class-cb").forEach(cb => {
+        cb.checked = assigned.includes(cb.value);
       });
+      updateDropdownLabel('edit');
 
       new bootstrap.Modal(document.getElementById('teacherEditModal')).show();
     };
@@ -774,8 +837,8 @@
       const phone = document.getElementById("editTPhone").value;
       const role = document.getElementById("editTRole").value;
 
-      const select = document.getElementById("editTClassesMultiSelect");
-      const selectedClasses = Array.from(select.selectedOptions).map(opt => opt.value);
+      const selectedClasses = [];
+      document.querySelectorAll(".edit-class-cb:checked").forEach(cb => selectedClasses.push(cb.value));
 
       try {
         await updateDoc(doc(db, "users", docId), {
