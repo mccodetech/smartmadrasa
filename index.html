@@ -19,24 +19,14 @@
     .section-title { font-size: 1rem; font-weight: 600; color: var(--primary-color); border-bottom: 2px solid #e9ecef; padding-bottom: 4px; margin-top: 15px; margin-bottom: 12px; }
     .form-check-input-lg { width: 1.5em; height: 1.5em; cursor: pointer; }
     
-    .dropdown-checkbox-menu {
-      max-height: 250px;
-      overflow-y: auto;
-      width: 100%;
-      padding: 8px 12px;
-    }
-    .dropdown-checkbox-item {
-      padding: 4px 0;
-      cursor: pointer;
-    }
-    .dropdown-checkbox-item:hover {
-      background-color: #f8f9fa;
-    }
+    .dropdown-checkbox-menu { max-height: 250px; overflow-y: auto; width: 100%; padding: 8px 12px; }
+    .dropdown-checkbox-item { padding: 4px 0; cursor: pointer; }
+    .dropdown-checkbox-item:hover { background-color: #f8f9fa; }
 
     @media print {
       body * { visibility: hidden; }
       #printableReceipt, #printableReceipt * { visibility: visible; }
-      #printableReceipt { position: absolute; left: 0; top: 0; width: 100%; display: block !important; }
+      #printableReceipt { position: absolute; left: 0; top: 0; width: 100%; display: block !important; border: 1px solid #333 !important; }
     }
   </style>
 </head>
@@ -52,11 +42,12 @@
       </div>
 
       <ul class="nav nav-tabs nav-justified mb-3" id="authTabs">
-        <li class="nav-item"><button class="nav-link active" onclick="switchAuthTab('login')">ലോഗിൻ</button></li>
-        <li class="nav-item"><button class="nav-link" onclick="switchAuthTab('signup')">മദ്റസ രജിസ്ട്രേഷൻ</button></li>
+        <li class="nav-item"><button class="nav-link active" onclick="switchAuthTab('login')">ഉസ്താദ് ലോഗിൻ</button></li>
+        <li class="nav-item"><button class="nav-link" onclick="switchAuthTab('parent')">രക്ഷിതാവ്</button></li>
+        <li class="nav-item"><button class="nav-link" onclick="switchAuthTab('signup')">രജിസ്ട്രേഷൻ</button></li>
       </ul>
 
-      <!-- Login Form -->
+      <!-- Teacher/Admin Login Form -->
       <form id="loginForm" onsubmit="handleLogin(event)">
         <div class="mb-3">
           <label class="form-label">ഇമെയിൽ</label>
@@ -69,10 +60,28 @@
         <button type="submit" class="btn btn-madrassa w-100 py-2">പ്രവേശിക്കുക</button>
       </form>
 
+      <!-- Parent/Student Direct Login Form -->
+      <form id="parentLoginForm" class="d-none" onsubmit="handleParentLogin(event)">
+        <div class="alert alert-info py-2 small">കുട്ടിയുടെ രജിസ്റ്റർ നമ്പർ (Reg No.) നൽകി ലോഗിൻ ചെയ്യുക.</div>
+        <div class="mb-3">
+          <label class="form-label">മദ്റസാ കോഡ് (Madrasa Code)</label>
+          <input type="text" id="parentInstCode" class="form-control" placeholder="ഉദാ: MDR-1045" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">വിദ്യാർത്ഥിയുടെ Reg No.</label>
+          <input type="number" id="parentRegNo" class="form-control" placeholder="യൂസർ ഐഡി (Reg No.)" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">പാസ്‌വേഡ് (Reg No. തന്നെ നൽകുക)</label>
+          <input type="password" id="parentPassword" class="form-control" placeholder="പാസ്‌വേഡ് (Reg No.)" required>
+        </div>
+        <button type="submit" class="btn btn-madrassa w-100 py-2">വിവരങ്ങൾ കാണുക</button>
+      </form>
+
       <!-- Madrasa Sign Up Form -->
       <form id="signupForm" class="d-none" onsubmit="handleSignUp(event)">
         <div class="mb-2">
-          <label class="form-label">മദ്റസാ നമ്പർ / കോഡ് (Madrasa Reg No.)</label>
+          <label class="form-label">മദ്റസാ നമ്പർ / കോഡ്</label>
           <input type="text" id="regInstCode" class="form-control" placeholder="ഉദാ: MDR-1045" required>
         </div>
         <div class="mb-2">
@@ -100,7 +109,41 @@
     </div>
   </div>
 
-  <!-- Main App Screen -->
+  <!-- Parent View Dashboard -->
+  <div id="parentViewSection" class="d-none">
+    <nav class="navbar navbar-expand-lg bg-madrassa navbar-dark shadow-sm">
+      <div class="container px-4">
+        <a class="navbar-brand fw-bold" href="#"><i class="fa-solid fa-kaaba me-2"></i><span id="parentInstNameDisplay">Smart Madrasa</span></a>
+        <button class="btn btn-outline-light btn-sm" onclick="logoutParent()"><i class="fa-solid fa-right-from-bracket"></i> പുറത്തുകടക്കുക</button>
+      </div>
+    </nav>
+    <div class="container py-4">
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="card p-4 text-center">
+            <i class="fa-solid fa-user-graduate fa-4x text-success mb-3"></i>
+            <h4 class="fw-bold mb-1" id="pvStudentName">-</h4>
+            <span class="badge bg-success mb-2" id="pvClass">-</span>
+            <p class="text-muted mb-0">Reg No: <b id="pvRegNo">-</b></p>
+            <p class="text-muted small">പിതാവ്: <span id="pvFather">-</span></p>
+          </div>
+        </div>
+        <div class="col-md-8">
+          <div class="card p-4">
+            <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-receipt me-2"></i>ഫീസ് വിവരങ്ങൾ & രസീതുകൾ</h5>
+            <div class="table-responsive">
+              <table class="table table-bordered align-middle">
+                <thead class="table-light"><tr><th>രസീത് No.</th><th>തീയതി</th><th>ഇനം</th><th>തുക</th></tr></thead>
+                <tbody id="pvFeeTableBody"><tr><td colspan="4" class="text-center text-muted">ഫീസ് വിവരങ്ങൾ ലഭ്യമല്ല</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Management App Screen -->
   <div id="appSection" class="d-none">
     <nav class="navbar navbar-expand-lg bg-madrassa navbar-dark shadow-sm">
       <div class="container-fluid px-4">
@@ -141,15 +184,13 @@
                 <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-users"></i> വിദ്യാർത്ഥി ലിസ്റ്റ്</h5>
                 <div class="d-flex gap-2" id="adminStudentActions">
                   <button class="btn btn-sm btn-success" onclick="showTab('admissionTab')"><i class="fa-solid fa-user-plus me-1"></i> പുതിയ അഡ്മിഷൻ</button>
-                  <button class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#bulkImportModal"><i class="fa-solid fa-file-csv me-1"></i> ബൾക്ക് ഇമ്പോർട്ട് (Excel)</button>
+                  <button class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#bulkImportModal"><i class="fa-solid fa-file-csv me-1"></i> ബൾക്ക് ഇമ്പോർട്ട്</button>
                 </div>
               </div>
 
               <div class="row g-2 align-items-center mb-3">
                 <div class="col-md-4">
-                  <select id="filterClassSelect" class="form-select form-select-sm" onchange="loadStudentsByClass()">
-                    <!-- Populated Dynamically -->
-                  </select>
+                  <select id="filterClassSelect" class="form-select form-select-sm" onchange="loadStudentsByClass()"></select>
                 </div>
                 <div class="col-md-6">
                   <input type="text" id="searchBox" class="form-control form-control-sm" placeholder="പേര് / Reg No. വെച്ച് തിരയുക..." oninput="filterStudentsLocal()">
@@ -217,7 +258,7 @@
                   <div class="col-md-4"><label class="form-label">പിതാവിന്റെ പേര്</label><input type="text" id="fatherName" class="form-control"></div>
                   <div class="col-md-4"><label class="form-label">മാതാവിന്റെ പേര്</label><input type="text" id="motherName" class="form-control"></div>
                   <div class="col-md-4"><label class="form-label">രക്ഷാകർത്താവ്</label><input type="text" id="guardianName" class="form-control"></div>
-                  <div class="col-md-4"><label class="form-label">ഫോൺ നമ്പർ</label><input type="tel" id="parentPhone" class="form-control"></div>
+                  <div class="col-md-4"><label class="form-label">WhatsApp ഫോൺ നമ്പർ *</label><input type="tel" id="parentPhone" class="form-control" placeholder="9847..." required></div>
                   <div class="col-md-4"><label class="form-label">സ്ഥലം</label><input type="text" id="place" class="form-control"></div>
                   <div class="col-md-4"><label class="form-label">വീട്ടുപേര് / വിലാസം</label><input type="text" id="address" class="form-control"></div>
                 </div>
@@ -238,9 +279,7 @@
                 </div>
                 <div class="col-md-4">
                   <label class="form-label">ക്ലാസ് തിരഞ്ഞെടുക്കുക</label>
-                  <select id="attClassSelect" class="form-select" onchange="loadAttendanceSheet()">
-                    <option value="">-- ക്ലാസ് തിരഞ്ഞെടുക്കുക --</option>
-                  </select>
+                  <select id="attClassSelect" class="form-select" onchange="loadAttendanceSheet()"></select>
                 </div>
               </div>
 
@@ -281,9 +320,7 @@
                 </div>
                 <div class="col-md-4">
                   <label class="form-label">ക്ലാസ്</label>
-                  <select id="markClassSelect" class="form-select" onchange="loadMarksEntrySheet()">
-                    <option value="">-- ക്ലാസ് തിരഞ്ഞെടുക്കുക --</option>
-                  </select>
+                  <select id="markClassSelect" class="form-select" onchange="loadMarksEntrySheet()"></select>
                 </div>
               </div>
 
@@ -310,16 +347,14 @@
             </div>
           </div>
 
-          <!-- 5. Fees Tab -->
+          <!-- 5. Fees Tab (Sequential Receipts & WhatsApp Share) -->
           <div id="feesTab" class="content-tab d-none">
             <div class="card p-4">
-              <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-receipt"></i> ഫീസ് കളക്ഷൻ & രസീത്</h5>
+              <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-receipt"></i> ഫീസ് കളക്ഷൻ & ഡിജിറ്റൽ രസീത്</h5>
               <div class="row g-3 mb-4">
                 <div class="col-md-4">
                   <label class="form-label">ക്ലാസ് തിരഞ്ഞെടുക്കുക</label>
-                  <select id="feeClassSelect" class="form-select" onchange="loadStudentsForFees()">
-                    <option value="">-- ക്ലാസ് തിരഞ്ഞെടുക്കുക --</option>
-                  </select>
+                  <select id="feeClassSelect" class="form-select" onchange="loadStudentsForFees()"></select>
                 </div>
                 <div class="col-md-8">
                   <label class="form-label">വിദ്യാർത്ഥിയെ തിരഞ്ഞെടുക്കുക</label>
@@ -341,8 +376,12 @@
                       <option value="മറ്റു സംഭാവനകൾ">മറ്റു സംഭാവനകൾ</option>
                     </select>
                   </div>
-                  <div class="col-md-4"><label class="form-label">മാനുവൽ രസീത് നമ്പർ</label><input type="text" id="manualReceipt" class="form-control" placeholder="Book Rec No."></div>
-                  <div class="col-12 mt-4"><button type="submit" class="btn btn-madrassa px-4"><i class="fa-solid fa-print me-1"></i> ഫീസ് രേഖപ്പെടുത്തി രസീത് പ്രിന്റ് ചെയ്യുക</button></div>
+                  <div class="col-md-4"><label class="form-label">മാനുവൽ രസീത് നമ്പർ (Book No)</label><input type="text" id="manualReceipt" class="form-control" placeholder="ബുക്കിലെ രസീത് നമ്പർ"></div>
+                  
+                  <div class="col-12 mt-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-madrassa px-4"><i class="fa-solid fa-print me-1"></i> രസീത് സേവ് & പ്രിന്റ്</button>
+                    <button type="button" id="whatsappShareBtn" class="btn btn-success px-4 d-none" onclick="shareToWhatsApp()"><i class="fa-brands fa-whatsapp me-1"></i> WhatsApp-ൽ അയക്കുക</button>
+                  </div>
                 </div>
               </form>
             </div>
@@ -354,35 +393,19 @@
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-chalkboard-user"></i> മുഅല്ലിം മാനേജ്‌മെന്റ് (അധ്യാപകരെ ചേർക്കൽ)</h5>
               <form onsubmit="registerNewTeacher(event)" class="mb-4">
                 <div class="row g-3">
+                  <div class="col-md-3"><label class="form-label">MSR No.</label><input type="text" id="tMsrNo" class="form-control" placeholder="ഉദാ: MSR-5021"></div>
                   <div class="col-md-3">
-                    <label class="form-label">MSR നമ്പർ (MSR No.)</label>
-                    <input type="text" id="tMsrNo" class="form-control" placeholder="ഉദാ: MSR-5021">
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label">സ്ഥാനം (Designation)</label>
+                    <label class="form-label">സ്ഥാനം</label>
                     <select id="tRoleSelect" class="form-select">
                       <option value="teacher">മുഅല്ലിം (Teacher)</option>
                       <option value="admin">സ്വദർ മുഅല്ലിം (Principal)</option>
                     </select>
                   </div>
-                  <div class="col-md-3">
-                    <label class="form-label">മുഅല്ലിമിന്റെ പേര് *</label>
-                    <input type="text" id="tName" class="form-control" required>
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label">മൊബൈൽ നമ്പർ *</label>
-                    <input type="tel" id="tPhone" class="form-control" required>
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label">ഇമെയിൽ *</label>
-                    <input type="email" id="tEmail" class="form-control" required>
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label">പാസ്‌വേഡ് *</label>
-                    <input type="password" id="tPassword" class="form-control" required>
-                  </div>
+                  <div class="col-md-3"><label class="form-label">മുഅല്ലിമിന്റെ പേര് *</label><input type="text" id="tName" class="form-control" required></div>
+                  <div class="col-md-3"><label class="form-label">മൊബൈൽ നമ്പർ *</label><input type="tel" id="tPhone" class="form-control" required></div>
+                  <div class="col-md-4"><label class="form-label">ഇമെയിൽ *</label><input type="email" id="tEmail" class="form-control" required></div>
+                  <div class="col-md-4"><label class="form-label">പാസ്‌വേഡ് *</label><input type="password" id="tPassword" class="form-control" required></div>
 
-                  <!-- Dropdown Checkbox for Register -->
                   <div class="col-md-4">
                     <label class="form-label">ചുമതലയുള്ള ക്ലാസുകൾ</label>
                     <div class="dropdown">
@@ -406,9 +429,7 @@
                     </div>
                   </div>
 
-                  <div class="col-12 text-end">
-                    <button type="submit" class="btn btn-madrassa px-4"><i class="fa-solid fa-user-plus me-1"></i> മുഅല്ലിമിനെ രജിസ്റ്റർ ചെയ്യുക</button>
-                  </div>
+                  <div class="col-12 text-end"><button type="submit" class="btn btn-madrassa px-4"><i class="fa-solid fa-user-plus me-1"></i> മുഅല്ലിമിനെ രജിസ്റ്റർ ചെയ്യുക</button></div>
                 </div>
               </form>
 
@@ -416,16 +437,7 @@
               <div class="table-responsive">
                 <table class="table table-bordered align-middle">
                   <thead class="table-light">
-                    <tr>
-                      <th style="width: 60px;">SL No.</th>
-                      <th>MSR No.</th>
-                      <th>പേര്</th>
-                      <th>സ്ഥാനം</th>
-                      <th>ഇമെയിൽ</th>
-                      <th>ഫോൺ</th>
-                      <th>ചുമതലയുള്ള ക്ലാസുകൾ</th>
-                      <th style="width: 90px;" class="text-center">നടപടി</th>
-                    </tr>
+                    <tr><th style="width: 60px;">SL No.</th><th>MSR No.</th><th>പേര്</th><th>സ്ഥാനം</th><th>ഇമെയിൽ</th><th>ഫോൺ</th><th>ചുമതലയുള്ള ക്ലാസുകൾ</th><th style="width: 90px;" class="text-center">നടപടി</th></tr>
                   </thead>
                   <tbody id="teachersTableBody"></tbody>
                 </table>
@@ -466,136 +478,35 @@
     </div>
   </div>
 
-  <!-- Teacher Edit Modal -->
-  <div class="modal fade" id="teacherEditModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-      <div class="modal-content border-0 shadow">
-        <div class="modal-header bg-madrassa text-white">
-          <h5 class="modal-title fw-bold">മുഅല്ലിമിന്റെ വിവരങ്ങൾ തിരുത്തുക</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body p-4">
-          <form onsubmit="saveEditedTeacher(event)">
-            <input type="hidden" id="editTeacherDocId">
-            <div class="row g-3">
-              <div class="col-md-4"><label class="form-label">MSR No.</label><input type="text" id="editTMsrNo" class="form-control"></div>
-              <div class="col-md-4"><label class="form-label">പേര്</label><input type="text" id="editTName" class="form-control" required></div>
-              <div class="col-md-4"><label class="form-label">ഫോൺ</label><input type="tel" id="editTPhone" class="form-control" required></div>
-              <div class="col-md-4">
-                <label class="form-label">സ്ഥാനം</label>
-                <select id="editTRole" class="form-select">
-                  <option value="teacher">മുഅല്ലിം</option>
-                  <option value="admin">സ്വദർ മുഅല്ലിം</option>
-                </select>
-              </div>
-
-              <!-- Dropdown Checkbox for Edit -->
-              <div class="col-md-8">
-                <label class="form-label">ചുമതലയുള്ള ക്ലാസുകൾ</label>
-                <div class="dropdown">
-                  <button class="btn btn-outline-secondary dropdown-toggle w-100 text-start d-flex justify-content-between align-items-center" type="button" id="editClassDropdownBtn" data-bs-toggle="dropdown" data-bs-auto-close="outside">
-                    <span id="editClassDropdownLabel">ക്ലാസ് തിരഞ്ഞെടുക്കുക</span>
-                  </button>
-                  <ul class="dropdown-menu dropdown-checkbox-menu" aria-labelledby="editClassDropdownBtn">
-                    <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 edit-class-cb" value="1" onchange="updateDropdownLabel('edit')"> ക്ലാസ് 1</label></li>
-                    <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 edit-class-cb" value="2" onchange="updateDropdownLabel('edit')"> ക്ലാസ് 2</label></li>
-                    <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 edit-class-cb" value="3" onchange="updateDropdownLabel('edit')"> ക്ലാസ് 3</label></li>
-                    <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 edit-class-cb" value="4" onchange="updateDropdownLabel('edit')"> ക്ലാസ് 4</label></li>
-                    <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 edit-class-cb" value="5" onchange="updateDropdownLabel('edit')"> ക്ലാസ് 5</label></li>
-                    <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 edit-class-cb" value="6" onchange="updateDropdownLabel('edit')"> ക്ലാസ് 6</label></li>
-                    <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 edit-class-cb" value="7" onchange="updateDropdownLabel('edit')"> ക്ലാസ് 7</label></li>
-                    <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 edit-class-cb" value="8" onchange="updateDropdownLabel('edit')"> ക്ലാസ് 8</label></li>
-                    <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 edit-class-cb" value="9" onchange="updateDropdownLabel('edit')"> ക്ലാസ് 9</label></li>
-                    <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 edit-class-cb" value="10" onchange="updateDropdownLabel('edit')"> ക്ലാസ് 10</label></li>
-                    <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 edit-class-cb" value="11" onchange="updateDropdownLabel('edit')"> ക്ലാസ് 11</label></li>
-                    <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 edit-class-cb" value="12" onchange="updateDropdownLabel('edit')"> ക്ലാസ് 12</label></li>
-                  </ul>
-                </div>
-              </div>
-
-              <div class="col-12 mt-4 text-end">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">റദ്ദാക്കുക</button>
-                <button type="submit" class="btn btn-madrassa px-4">അപ്‌ഡേറ്റ് ചെയ്യുക</button>
-              </div>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Bulk Import Modal -->
-  <div class="modal fade" id="bulkImportModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content border-0 shadow">
-        <div class="modal-header bg-madrassa text-white">
-          <h5 class="modal-title fw-bold"><i class="fa-solid fa-file-csv me-1"></i> ബൾക്ക് ഇമ്പോർട്ട് (Excel/CSV)</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body p-4">
-          <p class="text-muted small">ഗൂഗിൾ ഷീറ്റിൽ നിന്ന് ഡൗൺലോഡ് ചെയ്ത CSV ഫയൽ തിരഞ്ഞെടുക്കുക.</p>
-          <input type="file" id="csvFileInput" class="form-control mb-3" accept=".csv">
-          <div id="bulkStatus" class="alert alert-info d-none"></div>
-          <button class="btn btn-success w-100" onclick="handleBulkUpload()"><i class="fa-solid fa-cloud-arrow-up me-1"></i> ഡാറ്റ ഇമ്പോർട്ട് ചെയ്യുക</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Printable Receipt -->
-  <div id="printableReceipt" class="p-4 bg-white border d-none m-auto" style="max-width: 450px;">
+  <!-- Printable Digital Receipt Component -->
+  <div id="printableReceipt" class="p-4 bg-white border d-none m-auto" style="max-width: 480px;">
     <div class="text-center border-bottom pb-3 mb-3">
       <h4 class="fw-bold mb-1" id="recMadrassaName">Smart Madrasa</h4>
       <p class="small text-muted mb-0">ഡിജിറ്റൽ ഫീസ് രസീത്</p>
     </div>
-    <div class="d-flex justify-content-between mb-2"><span>രസീത് നമ്പർ: <b id="recNo">#REC-123</b></span><span id="recDate">Date</span></div>
-    <div class="mb-2">വിദ്യാർത്ഥി: <b id="recStudentName">-</b></div>
-    <div class="mb-2">Reg No: <b id="recAdmNo">101</b> | ക്ലാസ്: <b id="recClass">-</b></div>
+    <div class="d-flex justify-content-between mb-2">
+      <span>രസീത് നമ്പർ: <b id="recNo">#1</b></span>
+      <span id="recDate">Date</span>
+    </div>
+    <div class="d-flex justify-content-between mb-2">
+      <span>വിദ്യാർത്ഥി: <b id="recStudentName">-</b></span>
+      <span>Reg No: <b id="recAdmNo">101</b></span>
+    </div>
+    <div class="d-flex justify-content-between mb-2">
+      <span>ക്ലാസ്: <b id="recClass">-</b></span>
+      <span id="recManualBox" class="d-none">ബുക്ക് രസീത് No: <b id="recManualNo">-</b></span>
+    </div>
     <div class="mb-2">ഇനം: <span id="recFeeType">പ്രതിമാസ ഫീസ്</span></div>
-    <div class="mb-3 border-top pt-2 d-flex justify-content-between"><span>സ്വീകരിച്ച തുക:</span><h5 class="fw-bold text-success mb-0" id="recAmount">₹0</h5></div>
-    <div class="text-center mt-3 pt-2 border-top"><small class="text-muted">കൈപ്പറ്റിയത്: <span id="recCollector">ഉസ്താദ്</span></small></div>
-  </div>
-
-  <!-- Student Edit Modal -->
-  <div class="modal fade" id="studentEditModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-      <div class="modal-content border-0 shadow">
-        <div class="modal-header bg-madrassa text-white">
-          <h5 class="modal-title fw-bold">വിദ്യാർത്ഥിയുടെ വിവരങ്ങൾ തിരുത്തുക</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body p-4">
-          <form onsubmit="saveEditedStudent(event)">
-            <input type="hidden" id="editDocId">
-            <div class="row g-3">
-              <div class="col-md-3"><label class="form-label">Reg No. *</label><input type="number" id="editRegNo" class="form-control" required></div>
-              <div class="col-md-3"><label class="form-label">ID No.</label><input type="text" id="editIdNo" class="form-control"></div>
-              <div class="col-md-6"><label class="form-label">പേര് *</label><input type="text" id="editName" class="form-control" required></div>
-              <div class="col-md-3">
-                <label class="form-label">ക്ലാസ് *</label>
-                <select id="editCurrentClass" class="form-select" required>
-                  <option value="1">ക്ലാസ് 1</option><option value="2">ക്ലാസ് 2</option><option value="3">ക്ലാസ് 3</option>
-                  <option value="4">ക്ലാസ് 4</option><option value="5">ക്ലാസ് 5</option><option value="6">ക്ലാസ് 6</option>
-                  <option value="7">ക്ലാസ് 7</option><option value="8">ക്ലാസ് 8</option><option value="9">ക്ലാസ് 9</option>
-                  <option value="10">ക്ലാസ് 10</option><option value="11">ക്ലാസ് 11</option><option value="12">ക്ലാസ് 12</option>
-                </select>
-              </div>
-              <div class="col-md-3"><label class="form-label">ജനന തീയതി</label><input type="text" id="editDob" class="form-control"></div>
-              <div class="col-md-3"><label class="form-label">ഫോൺ നമ്പർ</label><input type="tel" id="editPhone" class="form-control"></div>
-              <div class="col-md-3"><label class="form-label">പിതാവ്</label><input type="text" id="editFatherName" class="form-control"></div>
-              <div class="col-md-6"><label class="form-label">സ്ഥലം</label><input type="text" id="editPlace" class="form-control"></div>
-              <div class="col-md-6"><label class="form-label">വിലാസം</label><input type="text" id="editAddress" class="form-control"></div>
-              <div class="col-12 mt-4 text-end">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">റദ്ദാക്കുക</button>
-                <button type="submit" class="btn btn-madrassa px-4">അപ്‌ഡേറ്റ് ചെയ്യുക</button>
-              </div>
-            </div>
-          </form>
-        </div>
-      </div>
+    <div class="mb-3 border-top pt-2 d-flex justify-content-between align-items-center">
+      <span class="fw-bold">സ്വീകരിച്ച തുക:</span>
+      <h4 class="fw-bold text-success mb-0" id="recAmount">₹0</h4>
+    </div>
+    <div class="text-center mt-3 pt-2 border-top">
+      <small class="text-muted">കൈപ്പറ്റിയത്: <span id="recCollector">ഉസ്താദ്</span></small>
     </div>
   </div>
 
+  <!-- Bootstrap Bundle with Popper -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <!-- Firebase Scripts -->
@@ -606,7 +517,7 @@
       signOut, onAuthStateChanged 
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import { 
-      getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, addDoc, getDocs, query, where, writeBatch, serverTimestamp 
+      getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, addDoc, getDocs, query, where, writeBatch, runTransaction, serverTimestamp 
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -628,6 +539,7 @@
     let currentUserAssignedClasses = [];
     let localStudentsCache = [];
     let localTeachersCache = [];
+    let lastReceiptWhatsAppPayload = null;
     let currentPage = 1;
     const pageSize = 50;
 
@@ -677,37 +589,31 @@
           if (currentUserRole === "admin") loadTeachersList();
         }
       } else {
-        document.getElementById("authSection").classList.remove("d-none");
-        document.getElementById("appSection").classList.add("d-none");
+        if (!sessionStorage.getItem("parentLoggedIn")) {
+          document.getElementById("authSection").classList.remove("d-none");
+          document.getElementById("appSection").classList.add("d-none");
+        }
       }
     });
 
-    // Populate Dynamic Class Dropdowns according to Teacher Permissions
     function populateClassDropdowns() {
       const allClasses = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
       const allowedClasses = (currentUserRole === "admin") ? allClasses : currentUserAssignedClasses;
 
-      // 1. Student List Filter Dropdown
       const filterSelect = document.getElementById("filterClassSelect");
       filterSelect.innerHTML = "";
-      if (currentUserRole === "admin") {
-        filterSelect.innerHTML += `<option value="ALL">എല്ലാ ക്ലാസുകളും</option>`;
-      }
-      allowedClasses.forEach(c => {
-        filterSelect.innerHTML += `<option value="${c}">ക്ലാസ് ${c}</option>`;
-      });
+      if (currentUserRole === "admin") filterSelect.innerHTML += `<option value="ALL">എല്ലാ ക്ലാസുകളും</option>`;
+      allowedClasses.forEach(c => filterSelect.innerHTML += `<option value="${c}">ക്ലാസ് ${c}</option>`);
 
-      // 2. Attendance, Marks & Fees Dropdowns
       const dropdowns = ["attClassSelect", "markClassSelect", "feeClassSelect"];
       dropdowns.forEach(id => {
         const select = document.getElementById(id);
         select.innerHTML = `<option value="">-- ക്ലാസ് തിരഞ്ഞെടുക്കുക --</option>`;
-        allowedClasses.forEach(c => {
-          select.innerHTML += `<option value="${c}">ക്ലാസ് ${c}</option>`;
-        });
+        allowedClasses.forEach(c => select.innerHTML += `<option value="${c}">ക്ലാസ് ${c}</option>`);
       });
     }
 
+    // Teacher/Admin Login
     window.handleLogin = async (e) => {
       e.preventDefault();
       try {
@@ -715,190 +621,190 @@
       } catch (err) { alert("ലോഗിൻ പരാജയപ്പെട്ടു: " + err.message); }
     };
 
-    window.handleSignUp = async (e) => {
+    // Parent Login with Reg No as ID & Password
+    window.handleParentLogin = async (e) => {
       e.preventDefault();
-      try {
-        const instCode = document.getElementById("regInstCode").value.trim().toUpperCase();
-        const instName = document.getElementById("regInstName").value;
-        const userName = document.getElementById("regUserName").value;
-        const phone = document.getElementById("regPhone").value;
-        const email = document.getElementById("regEmail").value;
-        const pwd = document.getElementById("regPassword").value;
-        const instId = "MDR_" + instCode;
+      const code = document.getElementById("parentInstCode").value.trim().toUpperCase();
+      const reg = Number(document.getElementById("parentRegNo").value);
+      const pwd = document.getElementById("parentPassword").value;
 
-        const cred = await createUserWithEmailAndPassword(auth, email, pwd);
-        await setDoc(doc(db, "users", cred.user.uid), {
-          uid: cred.user.uid,
-          name: userName,
-          phone: phone,
-          email: email,
-          msrNo: "MSR-001",
-          institutionId: instId,
-          institutionCode: instCode,
-          institutionName: instName,
-          role: "admin",
-          assignedClasses: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
-          createdAt: serverTimestamp()
-        });
-      } catch (err) { alert("രജിസ്ട്രേഷൻ പരാജയപ്പെട്ടു: " + err.message); }
+      if (reg.toString() !== pwd) {
+        return alert("Reg No. വും പാസ്‌വേഡും ഒന്നുതന്നെയായിരിക്കണം.");
+      }
+
+      const instId = "MDR_" + code;
+      const q = query(collection(db, "students"), where("institutionId", "==", instId), where("regNo", "==", reg));
+      const snap = await getDocs(q);
+
+      if (snap.empty) {
+        return alert("വിദ്യാർത്ഥിയുടെ വിവരങ്ങൾ കണ്ടെത്തിയില്ല. മദ്റസാ കോഡും Reg No. വും പരിശോധിക്കുക.");
+      }
+
+      const studentDoc = snap.docs[0].data();
+      sessionStorage.setItem("parentLoggedIn", "true");
+
+      document.getElementById("authSection").classList.add("d-none");
+      document.getElementById("parentViewSection").classList.remove("d-none");
+
+      document.getElementById("pvStudentName").innerText = studentDoc.name;
+      document.getElementById("pvClass").innerText = "ക്ലാസ് " + studentDoc.currentClass;
+      document.getElementById("pvRegNo").innerText = studentDoc.regNo;
+      document.getElementById("pvFather").innerText = studentDoc.fatherName || studentDoc.guardianName || '-';
+
+      // Load Fee Records for Parent
+      const feeQ = query(collection(db, "feeCollections"), where("institutionId", "==", instId), where("regNo", "==", reg));
+      const feeSnap = await getDocs(feeQ);
+      let feeHtml = "";
+      feeSnap.forEach(fd => {
+        const f = fd.data();
+        feeHtml += `<tr><td>#${f.receiptNo}</td><td>${f.date || '-'}</td><td>${f.feeType}</td><td class="fw-bold text-success">₹${f.amount}</td></tr>`;
+      });
+      document.getElementById("pvFeeTableBody").innerHTML = feeHtml || `<tr><td colspan="4" class="text-center text-muted">ഫീസ് വിവരങ്ങൾ ലഭ്യമല്ല</td></tr>`;
+    };
+
+    window.logoutParent = () => {
+      sessionStorage.removeItem("parentLoggedIn");
+      document.getElementById("parentViewSection").classList.add("d-none");
+      document.getElementById("authSection").classList.remove("d-none");
     };
 
     window.handleLogout = () => signOut(auth);
 
-    // Register Teacher with Dropdown Checkboxes
-    window.registerNewTeacher = async (e) => {
-      e.preventDefault();
-      const msrNo = document.getElementById("tMsrNo").value.trim();
-      const role = document.getElementById("tRoleSelect").value;
-      const name = document.getElementById("tName").value;
-      const phone = document.getElementById("tPhone").value;
-      const email = document.getElementById("tEmail").value;
-      const password = document.getElementById("tPassword").value;
-
-      const selectedClasses = [];
-      document.querySelectorAll(".reg-class-cb:checked").forEach(cb => selectedClasses.push(cb.value));
-
-      if (!selectedClasses.length && role === "teacher") {
-        return alert("ദയവായി കുറഞ്ഞത് ഒരു ക്ലാസെങ്കിലും തിരഞ്ഞെടുക്കുക.");
+    // --- SEQUENTIAL FEE RECEIPT & WHATSAPP GENERATION ---
+    window.loadStudentsForFees = async () => {
+      const selClass = document.getElementById("feeClassSelect").value;
+      const select = document.getElementById("feeStudentSelect");
+      if (!selClass) {
+        select.innerHTML = `<option value="">-- ആദ്യം ക്ലാസ് തിരഞ്ഞെടുക്കുക --</option>`;
+        return;
       }
+      select.innerHTML = `<option value="">ലോഡ് ചെയ്യുന്നു...</option>`;
 
-      try {
-        const cred = await createUserWithEmailAndPassword(auth, email, password);
-        await setDoc(doc(db, "users", cred.user.uid), {
-          uid: cred.user.uid,
-          msrNo: msrNo,
-          name: name,
-          phone: phone,
-          email: email,
-          institutionId: currentInstitutionId,
-          institutionName: document.getElementById("displayMadrassaName").innerText,
-          role: role,
-          assignedClasses: role === "admin" ? ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"] : selectedClasses,
-          createdAt: serverTimestamp()
-        });
-
-        alert("മുഅല്ലിമിനെ വിജയകരമായി ചേർത്തു.");
-        e.target.reset();
-        document.querySelectorAll(".reg-class-cb").forEach(cb => cb.checked = false);
-        updateDropdownLabel('reg');
-        loadTeachersList();
-      } catch (err) { alert("Error: " + err.message); }
-    };
-
-    // Load Teachers List
-    async function loadTeachersList() {
-      const tbody = document.getElementById("teachersTableBody");
-      const q = query(collection(db, "users"), where("institutionId", "==", currentInstitutionId));
+      const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", selClass));
       const snap = await getDocs(q);
 
-      localTeachersCache = [];
-      snap.forEach(d => localTeachersCache.push({ id: d.id, ...d.data() }));
-
-      let html = "";
-      localTeachersCache.forEach((t, index) => {
-        const isPrincipal = t.role === "admin";
-        const roleBadge = isPrincipal ? `<span class="badge bg-danger">സ്വദർ മുഅല്ലിം</span>` : `<span class="badge bg-success">മുഅല്ലിം</span>`;
-        const classesBadges = (t.assignedClasses || []).map(c => `<span class="badge bg-light text-dark border me-1">ക്ലാസ് ${c}</span>`).join(' ') || '-';
-        
-        html += `
-          <tr>
-            <td>${index + 1}</td>
-            <td><b>${t.msrNo || '-'}</b></td>
-            <td><b>${t.name}</b></td>
-            <td>${roleBadge}</td>
-            <td>${t.email}</td>
-            <td>${t.phone}</td>
-            <td>${classesBadges}</td>
-            <td class="text-center">
-              <button class="btn btn-sm btn-outline-primary" onclick="openEditTeacherModal('${t.id}')"><i class="fa-solid fa-pen"></i></button>
-            </td>
-          </tr>
-        `;
+      let html = `<option value="">-- വിദ്യാർത്ഥിയെ തിരഞ്ഞെടുക്കുക --</option>`;
+      snap.forEach(d => {
+        const s = d.data();
+        html += `<option value="${d.id}" data-reg="${s.regNo}" data-name="${s.name}" data-class="${s.currentClass}" data-phone="${s.phone || ''}">Reg: ${s.regNo} - ${s.name}</option>`;
       });
-      tbody.innerHTML = html || `<tr><td colspan="8" class="text-center text-muted">മുഅല്ലിംകളെ ചേർത്തിട്ടില്ല.</td></tr>`;
-    }
-
-    // Open Teacher Edit Modal
-    window.openEditTeacherModal = (docId) => {
-      const t = localTeachersCache.find(x => x.id === docId);
-      if (!t) return;
-
-      document.getElementById("editTeacherDocId").value = docId;
-      document.getElementById("editTMsrNo").value = t.msrNo || '';
-      document.getElementById("editTName").value = t.name || '';
-      document.getElementById("editTPhone").value = t.phone || '';
-      document.getElementById("editTRole").value = t.role || 'teacher';
-
-      const assigned = t.assignedClasses || [];
-      document.querySelectorAll(".edit-class-cb").forEach(cb => {
-        cb.checked = assigned.includes(cb.value);
-      });
-      updateDropdownLabel('edit');
-
-      new bootstrap.Modal(document.getElementById('teacherEditModal')).show();
+      select.innerHTML = html;
     };
 
-    // Save Edited Teacher Details
-    window.saveEditedTeacher = async (e) => {
+    window.processFeeReceipt = async (e) => {
       e.preventDefault();
-      const docId = document.getElementById("editTeacherDocId").value;
-      const msrNo = document.getElementById("editTMsrNo").value.trim();
-      const name = document.getElementById("editTName").value;
-      const phone = document.getElementById("editTPhone").value;
-      const role = document.getElementById("editTRole").value;
+      const sSelect = document.getElementById("feeStudentSelect");
+      const opt = sSelect.options[sSelect.selectedIndex];
+      if (!opt || !opt.value) return alert("വിദ്യാർത്ഥിയെ തിരഞ്ഞെടുക്കുക.");
 
-      const selectedClasses = [];
-      document.querySelectorAll(".edit-class-cb:checked").forEach(cb => selectedClasses.push(cb.value));
+      const sId = opt.value;
+      const reg = opt.getAttribute("data-reg");
+      const name = opt.getAttribute("data-name");
+      const sClass = opt.getAttribute("data-class");
+      const phone = opt.getAttribute("data-phone");
+      const amount = document.getElementById("feeAmount").value;
+      const type = document.getElementById("feeType").value;
+      const manual = document.getElementById("manualReceipt").value.trim();
+      const today = new Date().toLocaleDateString();
 
       try {
-        await updateDoc(doc(db, "users", docId), {
-          msrNo: msrNo,
-          name: name,
-          phone: phone,
-          role: role,
-          assignedClasses: role === "admin" ? ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"] : selectedClasses,
-          updatedAt: serverTimestamp()
+        // Sequential Auto-Incrementing Receipt Number via Firestore Transaction
+        const counterRef = doc(db, "counters", currentInstitutionId + "_receipts");
+        let nextReceiptNo = 1;
+
+        await runTransaction(db, async (transaction) => {
+          const counterDoc = await transaction.get(counterRef);
+          if (counterDoc.exists()) {
+            nextReceiptNo = (counterDoc.data().lastNo || 0) + 1;
+            transaction.update(counterRef, { lastNo: nextReceiptNo });
+          } else {
+            transaction.set(counterRef, { lastNo: 1 });
+          }
         });
-        alert("മുഅല്ലിമിന്റെ വിവരങ്ങൾ അപ്‌ഡേറ്റ് ചെയ്തു.");
-        bootstrap.Modal.getInstance(document.getElementById('teacherEditModal')).hide();
-        loadTeachersList();
-      } catch (err) { alert("Error: " + err.message); }
-    };
 
-    // Save Student Form
-    window.saveDetailedStudent = async (e) => {
-      e.preventDefault();
-      try {
-        await addDoc(collection(db, "students"), {
+        // Save Fee Record
+        await addDoc(collection(db, "feeCollections"), {
           institutionId: currentInstitutionId,
-          regNo: Number(document.getElementById("regNo").value) || 0,
-          idNo: document.getElementById("idNo").value,
-          name: document.getElementById("studentName").value,
-          currentClass: document.getElementById("currentClass").value,
-          dob: document.getElementById("dob").value,
-          joinedDate: document.getElementById("joinedDate").value,
-          joinedClass: document.getElementById("joinedClass").value,
-          fatherName: document.getElementById("fatherName").value,
-          motherName: document.getElementById("motherName").value,
-          guardianName: document.getElementById("guardianName").value,
-          phone: document.getElementById("parentPhone").value,
-          place: document.getElementById("place").value,
-          address: document.getElementById("address").value,
-          status: "active",
-          createdAt: serverTimestamp()
+          receiptNo: nextReceiptNo,
+          studentId: sId,
+          regNo: Number(reg),
+          studentName: name,
+          class: sClass,
+          amount: Number(amount),
+          feeType: type,
+          manualReceiptNo: manual,
+          date: today,
+          collectedBy: auth.currentUser.uid,
+          timestamp: serverTimestamp()
         });
-        alert("വിദ്യാർത്ഥിയുടെ വിവരങ്ങൾ സേവ് ചെയ്തു.");
-        e.target.reset();
-        loadStudentsByClass(true);
-        showTab('studentsListTab');
+
+        // Populate Printable Receipt
+        document.getElementById("recMadrassaName").innerText = document.getElementById("displayMadrassaName").innerText;
+        document.getElementById("recNo").innerText = "#" + nextReceiptNo;
+        document.getElementById("recDate").innerText = today;
+        document.getElementById("recStudentName").innerText = name;
+        document.getElementById("recAdmNo").innerText = reg;
+        document.getElementById("recClass").innerText = "ക്ലാസ് " + sClass;
+        document.getElementById("recFeeType").innerText = type;
+        document.getElementById("recAmount").innerText = "₹" + amount;
+
+        if (manual) {
+          document.getElementById("recManualNo").innerText = manual;
+          document.getElementById("recManualBox").classList.remove("d-none");
+        } else {
+          document.getElementById("recManualBox").classList.add("d-none");
+        }
+
+        // WhatsApp Payload Setup
+        lastReceiptWhatsAppPayload = {
+          phone: phone,
+          madrassa: document.getElementById("displayMadrassaName").innerText,
+          receiptNo: nextReceiptNo,
+          name: name,
+          reg: reg,
+          class: sClass,
+          amount: amount,
+          type: type,
+          manual: manual,
+          date: today
+        };
+
+        document.getElementById("whatsappShareBtn").classList.remove("d-none");
+
+        // Print Dialog
+        document.getElementById("printableReceipt").classList.remove("d-none");
+        window.print();
+        document.getElementById("printableReceipt").classList.add("d-none");
+
       } catch (err) { alert("Error: " + err.message); }
     };
 
-    // Load Students by Class with Strict Permission Checks
+    // WhatsApp Message Trigger
+    window.shareToWhatsApp = () => {
+      if (!lastReceiptWhatsAppPayload) return;
+      const p = lastReceiptWhatsAppPayload;
+
+      let msg = `*${p.madrassa} - ഫീസ് രസീത്*%0A%0A`;
+      msg += `രസീത് നമ്പർ: #${p.receiptNo}%0A`;
+      msg += `തീയതി: ${p.date}%0A`;
+      msg += `വിദ്യാർത്ഥി: *${p.name}* (Reg No: ${p.reg})%0A`;
+      msg += `ക്ലാസ്: ${p.class}%0A`;
+      msg += `ഇനം: ${p.type}%0A`;
+      if (p.manual) msg += `ബുക്ക് രസീത് No: ${p.manual}%0A`;
+      msg += `സ്വീകരിച്ച തുക: *₹${p.amount}*%0A%0A`;
+      msg += `_അല്ലാഹു സ്വീകരിക്കട്ടെ (ആമീൻ)_`;
+
+      const cleanPhone = (p.phone || '').replace(/[^0-9]/g, '');
+      const waUrl = cleanPhone.length >= 10 
+        ? `https://wa.me/91${cleanPhone.slice(-10)}?text=${msg}`
+        : `https://wa.me/?text=${msg}`;
+
+      window.open(waUrl, "_blank");
+    };
+
+    // Load Students by Class
     window.loadStudentsByClass = async (forceRefresh = false) => {
       let selectedClass = document.getElementById("filterClassSelect").value;
-      
-      // If Teacher has no ALL option, default to their first assigned class
       if (currentUserRole !== "admin" && (!selectedClass || selectedClass === "ALL")) {
         selectedClass = currentUserAssignedClasses[0] || "1";
         document.getElementById("filterClassSelect").value = selectedClass;
@@ -942,7 +848,6 @@
       pageData.forEach(s => {
         const actionCol = (currentUserRole === "admin") ? `
           <td class="text-center">
-            <button class="btn btn-sm btn-outline-primary me-1" onclick="openEditStudentModal('${s.id}')"><i class="fa-solid fa-pen"></i></button>
             <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${s.id}', '${s.name}')"><i class="fa-solid fa-trash"></i></button>
           </td>` : ``;
 
@@ -990,7 +895,6 @@
       filtered.slice(0, 50).forEach(s => {
         const actionCol = (currentUserRole === "admin") ? `
           <td class="text-center">
-            <button class="btn btn-sm btn-outline-primary me-1" onclick="openEditStudentModal('${s.id}')"><i class="fa-solid fa-pen"></i></button>
             <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${s.id}', '${s.name}')"><i class="fa-solid fa-trash"></i></button>
           </td>` : ``;
 
@@ -1084,197 +988,6 @@
       } catch (err) { alert("Error: " + err.message); }
     };
 
-    // --- MARKS MODULE ---
-    window.loadMarksEntrySheet = async () => {
-      const selClass = document.getElementById("markClassSelect").value;
-      if (!selClass) {
-        document.getElementById("marksSheetArea").classList.add("d-none");
-        return;
-      }
-
-      const area = document.getElementById("marksSheetArea");
-      const tbody = document.getElementById("marksTableBody");
-      tbody.innerHTML = `<tr><td colspan="8" class="text-center">ലോഡ് ചെയ്യുന്നു...</td></tr>`;
-      area.classList.remove("d-none");
-
-      const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", selClass));
-      const snap = await getDocs(q);
-
-      let students = [];
-      snap.forEach(d => students.push({ id: d.id, ...d.data() }));
-      students.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
-
-      let html = "";
-      students.forEach(s => {
-        html += `
-          <tr data-sid="${s.id}" data-reg="${s.regNo}" data-name="${s.name}">
-            <td><b>${s.regNo || '-'}</b></td>
-            <td>${s.name}</td>
-            <td><input type="number" class="form-control form-control-sm text-center m-quran" style="max-width:70px; margin:auto;"></td>
-            <td><input type="number" class="form-control form-control-sm text-center m-tajweed" style="max-width:70px; margin:auto;"></td>
-            <td><input type="number" class="form-control form-control-sm text-center m-fiqh" style="max-width:70px; margin:auto;"></td>
-            <td><input type="number" class="form-control form-control-sm text-center m-aqeeda" style="max-width:70px; margin:auto;"></td>
-            <td><input type="number" class="form-control form-control-sm text-center m-tareekh" style="max-width:70px; margin:auto;"></td>
-            <td><input type="number" class="form-control form-control-sm text-center m-lisan" style="max-width:70px; margin:auto;"></td>
-          </tr>
-        `;
-      });
-      tbody.innerHTML = html || `<tr><td colspan="8" class="text-center">ഈ ക്ലാസിൽ കുട്ടികൾ ഇല്ല.</td></tr>`;
-    };
-
-    window.saveClassMarks = async () => {
-      const exam = document.getElementById("markExamName").value;
-      const selClass = document.getElementById("markClassSelect").value;
-      if (!exam || !selClass) return alert("പരീക്ഷയുടെ പേരും ക്ലാസും നൽകുക.");
-
-      const rows = document.querySelectorAll("#marksTableBody tr[data-sid]");
-      const batch = writeBatch(db);
-
-      rows.forEach(r => {
-        const sid = r.getAttribute("data-sid");
-        const reg = r.getAttribute("data-reg");
-        const name = r.getAttribute("data-name");
-
-        const markRef = doc(collection(db, "marks"));
-        batch.set(markRef, {
-          institutionId: currentInstitutionId,
-          examName: exam,
-          class: selClass,
-          studentId: sid,
-          regNo: reg,
-          studentName: name,
-          scores: {
-            quran: Number(r.querySelector(".m-quran").value) || 0,
-            tajweed: Number(r.querySelector(".m-tajweed").value) || 0,
-            fiqh: Number(r.querySelector(".m-fiqh").value) || 0,
-            aqeeda: Number(r.querySelector(".m-aqeeda").value) || 0,
-            tareekh: Number(r.querySelector(".m-tareekh").value) || 0,
-            lisan: Number(r.querySelector(".m-lisan").value) || 0
-          },
-          timestamp: serverTimestamp()
-        });
-      });
-
-      try {
-        await batch.commit();
-        alert("മാർക്കുകൾ വിജയകരമായി സേവ് ചെയ്തു.");
-      } catch (err) { alert("Error: " + err.message); }
-    };
-
-    // --- FEES MODULE ---
-    window.loadStudentsForFees = async () => {
-      const selClass = document.getElementById("feeClassSelect").value;
-      const select = document.getElementById("feeStudentSelect");
-      if (!selClass) {
-        select.innerHTML = `<option value="">-- ആദ്യം ക്ലാസ് തിരഞ്ഞെടുക്കുക --</option>`;
-        return;
-      }
-      select.innerHTML = `<option value="">ലോഡ് ചെയ്യുന്നു...</option>`;
-
-      const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", selClass));
-      const snap = await getDocs(q);
-
-      let html = `<option value="">-- വിദ്യാർത്ഥിയെ തിരഞ്ഞെടുക്കുക --</option>`;
-      snap.forEach(d => {
-        const s = d.data();
-        html += `<option value="${d.id}" data-reg="${s.regNo}" data-name="${s.name}" data-class="${s.currentClass}">Reg: ${s.regNo} - ${s.name}</option>`;
-      });
-      select.innerHTML = html;
-    };
-
-    window.processFeeReceipt = async (e) => {
-      e.preventDefault();
-      const sSelect = document.getElementById("feeStudentSelect");
-      const opt = sSelect.options[sSelect.selectedIndex];
-      if (!opt || !opt.value) return alert("വിദ്യാർത്ഥിയെ തിരഞ്ഞെടുക്കുക.");
-
-      const sId = opt.value;
-      const reg = opt.getAttribute("data-reg");
-      const name = opt.getAttribute("data-name");
-      const sClass = opt.getAttribute("data-class");
-      const amount = document.getElementById("feeAmount").value;
-      const type = document.getElementById("feeType").value;
-      const manual = document.getElementById("manualReceipt").value;
-      const recNo = "REC-" + Math.floor(100000 + Math.random() * 900000);
-
-      try {
-        await addDoc(collection(db, "feeCollections"), {
-          institutionId: currentInstitutionId,
-          receiptNo: recNo,
-          studentId: sId,
-          regNo: reg,
-          studentName: name,
-          class: sClass,
-          amount: Number(amount),
-          feeType: type,
-          manualReceiptNo: manual,
-          collectedBy: auth.currentUser.uid,
-          timestamp: serverTimestamp()
-        });
-
-        document.getElementById("recMadrassaName").innerText = document.getElementById("displayMadrassaName").innerText;
-        document.getElementById("recNo").innerText = "#" + recNo;
-        document.getElementById("recDate").innerText = new Date().toLocaleDateString();
-        document.getElementById("recStudentName").innerText = name;
-        document.getElementById("recAdmNo").innerText = reg;
-        document.getElementById("recClass").innerText = "ക്ലാസ് " + sClass;
-        document.getElementById("recFeeType").innerText = type;
-        document.getElementById("recAmount").innerText = "₹" + amount;
-
-        document.getElementById("printableReceipt").classList.remove("d-none");
-        window.print();
-        document.getElementById("printableReceipt").classList.add("d-none");
-        e.target.reset();
-      } catch (err) { alert("Error: " + err.message); }
-    };
-
-    // Edit Modal Logic (Admin Only)
-    window.openEditStudentModal = (docId) => {
-      const s = localStudentsCache.find(x => x.id === docId);
-      if (!s) return;
-      document.getElementById("editDocId").value = docId;
-      document.getElementById("editRegNo").value = s.regNo || '';
-      document.getElementById("editIdNo").value = s.idNo || '';
-      document.getElementById("editName").value = s.name || '';
-      document.getElementById("editCurrentClass").value = s.currentClass || '1';
-      document.getElementById("editDob").value = s.dob || '';
-      document.getElementById("editPhone").value = s.phone || '';
-      document.getElementById("editFatherName").value = s.fatherName || '';
-      document.getElementById("editPlace").value = s.place || '';
-      document.getElementById("editAddress").value = s.address || '';
-      new bootstrap.Modal(document.getElementById('studentEditModal')).show();
-    };
-
-    window.saveEditedStudent = async (e) => {
-      e.preventDefault();
-      const docId = document.getElementById("editDocId").value;
-      try {
-        await updateDoc(doc(db, "students", docId), {
-          regNo: Number(document.getElementById("editRegNo").value) || 0,
-          idNo: document.getElementById("editIdNo").value,
-          name: document.getElementById("editName").value,
-          currentClass: document.getElementById("editCurrentClass").value,
-          dob: document.getElementById("editDob").value,
-          phone: document.getElementById("editPhone").value,
-          fatherName: document.getElementById("editFatherName").value,
-          place: document.getElementById("editPlace").value,
-          address: document.getElementById("editAddress").value,
-          updatedAt: serverTimestamp()
-        });
-        alert("വിവരങ്ങൾ അപ്‌ഡേറ്റ് ചെയ്തു.");
-        bootstrap.Modal.getInstance(document.getElementById('studentEditModal')).hide();
-        loadStudentsByClass(true);
-      } catch (err) { alert("Error: " + err.message); }
-    };
-
-    window.deleteStudent = async (docId, name) => {
-      if (confirm(`${name}-നെ ഒഴിവാക്കാൻ ഉറപ്പാണോ?`)) {
-        await deleteDoc(doc(db, "students", docId));
-        alert("വിദ്യാർത്ഥിയെ ഒഴിവാക്കി.");
-        loadStudentsByClass(true);
-      }
-    };
-
     // Bulk Upload
     window.handleBulkUpload = () => {
       const fileInput = document.getElementById("csvFileInput");
@@ -1327,36 +1040,23 @@
       });
     };
 
-    window.promoteStudents = async () => {
-      const from = document.getElementById("fromClass").value;
-      const to = document.getElementById("toClass").value;
-      if (confirm(`ക്ലാസ് ${from}-ലെ കുട്ടികളെ ക്ലാസ് ${to}-ലേക്ക് മാറ്റാൻ ഉറപ്പാണോ?`)) {
-        const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", from));
-        const snap = await getDocs(q);
-        const batch = writeBatch(db);
-        snap.forEach(d => batch.update(doc(db, "students", d.id), { currentClass: to }));
-        await batch.commit();
-        alert(`വിദ്യാർത്ഥികളെ ക്ലാസ് ${to}-ലേക്ക് മാറ്റി.`);
-        loadStudentsByClass(true);
-      }
+    window.switchAuthTab = (type) => {
+      document.getElementById("loginForm").classList.add("d-none");
+      document.getElementById("parentLoginForm").classList.add("d-none");
+      document.getElementById("signupForm").classList.add("d-none");
+
+      if (type === 'login') document.getElementById("loginForm").classList.remove("d-none");
+      else if (type === 'parent') document.getElementById("parentLoginForm").classList.remove("d-none");
+      else if (type === 'signup') document.getElementById("signupForm").classList.remove("d-none");
+
+      document.querySelectorAll("#authTabs .nav-link").forEach(b => b.classList.remove("active"));
+      event.target.classList.add("active");
     };
 
     window.showTab = (tabId) => {
       document.querySelectorAll(".content-tab").forEach(t => t.classList.add("d-none"));
       document.getElementById(tabId).classList.remove("d-none");
       document.querySelectorAll("#tabMenu .nav-link").forEach(b => b.classList.remove("active"));
-      event.target.classList.add("active");
-    };
-
-    window.switchAuthTab = (type) => {
-      if (type === 'login') {
-        document.getElementById("loginForm").classList.remove("d-none");
-        document.getElementById("signupForm").classList.add("d-none");
-      } else {
-        document.getElementById("loginForm").classList.add("d-none");
-        document.getElementById("signupForm").classList.remove("d-none");
-      }
-      document.querySelectorAll("#authTabs .nav-link").forEach(b => b.classList.remove("active"));
       event.target.classList.add("active");
     };
   </script>
