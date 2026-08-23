@@ -624,7 +624,7 @@
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content border-0 shadow">
         <div class="modal-header bg-madrassa text-white">
-          <h5 class="modal-title fw-bold">Edit Student Details (വിവരങ്ങൾ തിരുത്തുക)</h5>
+          <h5 class="modal-title fw-bold">Edit Student Details</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body p-4">
@@ -735,6 +735,221 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
+  <!-- Internationalization (i18n) Scripts -->
+  <script>
+    window.currentLang = 'en';
+    const translations = {
+      en: {
+        portal_sub: "Digital Madrasa Management Suite",
+        tab_teacher: "Teacher Login",
+        tab_parent: "Parent",
+        tab_signup: "Register",
+        lbl_email: "Email Address",
+        lbl_pwd: "Password",
+        btn_signin: "Sign In",
+        parent_login_hint: "Enter student's Reg No. and registered mobile number.",
+        lbl_regno: "Student Reg No.",
+        lbl_phone: "Registered Mobile Number",
+        btn_viewdetails: "View Student Details",
+        lbl_instcode: "Madrasa Reg / Code",
+        lbl_instname: "Madrasa Name",
+        lbl_principal: "Principal / Secretary Name",
+        btn_createrecord: "Create Madrasa Account",
+        btn_exit: "Exit",
+        lbl_father: "Father:",
+        lbl_totalpoints: "Total Points",
+        nav_fees: "Fee Receipts",
+        nav_perf: "Performance Tasks",
+        th_receiptno: "Receipt No",
+        th_date: "Date",
+        th_item: "Item",
+        th_amount: "Amount",
+        msg_nofees: "No fee records found",
+        th_task: "Task / Category",
+        th_points: "Points",
+        msg_nopoints: "No points awarded yet",
+        btn_logout: "Logout",
+        nav_home: "Home",
+        nav_students: "Students",
+        nav_attendance: "Attendance",
+        nav_marks: "Marks Entry",
+        nav_staff: "Staff Management",
+        nav_promotion: "Class Promotion",
+        home_card_att_sub: "Record daily attendance",
+        home_card_perf_sub: "Tasks & Star Points",
+        home_card_mark_sub: "Exam scores & evaluations",
+        home_leaderboard_title: "Top Performers Leaderboard",
+        star_today: "Today's Star",
+        star_week: "Weekly Star",
+        star_month: "Monthly Star",
+        students_list_title: "Student Directory",
+        btn_newadm: "New Admission",
+        btn_bulkimport: "Bulk Import",
+        btn_reload: "Reload",
+        th_name: "Name",
+        th_class: "Class",
+        th_guardian: "Parent / Guardian",
+        th_place: "Place",
+        th_actions: "Actions",
+        msg_loading: "Loading data...",
+        adm_form_title: "Student Admission Form",
+        btn_backtolist: "Back to List",
+        lbl_idno: "ID No.",
+        lbl_fullname: "Full Name *",
+        lbl_currentclass: "Class *",
+        lbl_dob: "Date of Birth",
+        lbl_joineddate: "Joined Date",
+        lbl_joinedclass: "Joined Class",
+        lbl_mother: "Mother Name",
+        lbl_guardian: "Guardian Name",
+        lbl_whatsapp: "WhatsApp Number *",
+        lbl_place: "Place",
+        lbl_address: "Address / House Name",
+        btn_save: "Save Admission",
+        lbl_date: "Date",
+        lbl_selectclass: "Select Class",
+        lbl_selectall: "Select All",
+        th_status: "Status (Present)",
+        btn_saveatt: "Save Attendance",
+        lbl_selectexam: "Select Exam *",
+        btn_savemarks: "Save Marks",
+        btn_addtask: "Add Custom Task",
+        lbl_selecttask: "Select Task *",
+        th_award: "Award (Tick)",
+        btn_savepoints: "Save Points",
+        lbl_selectstudent: "Select Student",
+        lbl_amount: "Amount (₹) *",
+        lbl_feetype: "Fee Type",
+        lbl_manualno: "Manual Receipt No (Book)",
+        btn_saveprint: "Save & Print Receipt",
+        btn_whatsapp: "Send via WhatsApp",
+        lbl_role: "Role",
+        lbl_assignedclasses: "Assigned Classes",
+        btn_addstaff: "Register Staff",
+        staff_list_title: "Registered Staff Directory",
+        th_role: "Role",
+        th_email: "Email",
+        th_assigned: "Classes",
+        lbl_promoteto: "Promote To",
+        btn_promote: "Promote Class",
+        lbl_taskname: "Task Name *",
+        lbl_points: "Points (+ or -) *",
+        btn_cancel: "Cancel",
+        btn_add: "Add Task"
+      },
+      ml: {
+        portal_sub: "സ്മാർട്ട് മദ്റസാ മാനേജ്‌മെന്റ് പോർട്ടൽ",
+        tab_teacher: "ഉസ്താദ് ലോഗിൻ",
+        tab_parent: "രക്ഷിതാവ്",
+        tab_signup: "രജിസ്ട്രേഷൻ",
+        lbl_email: "ഇമെയിൽ വിലാസം",
+        lbl_pwd: "പാസ്‌വേഡ്",
+        btn_signin: "പ്രവേശിക്കുക",
+        parent_login_hint: "കുട്ടിയുടെ Reg No. വും രജിസ്റ്റർ ചെയ്ത മൊബൈൽ നമ്പറും നൽകുക.",
+        lbl_regno: "വിദ്യാർത്ഥിയുടെ Reg No.",
+        lbl_phone: "രജിസ്റ്റർ ചെയ്ത മൊബൈൽ നമ്പർ",
+        btn_viewdetails: "വിവരങ്ങൾ കാണുക",
+        lbl_instcode: "മദ്റസാ നമ്പർ / കോഡ്",
+        lbl_instname: "മദ്റസയുടെ പേര്",
+        lbl_principal: "സ്വദർ മുഅല്ലിം / സെക്രട്ടറിയുടെ പേര്",
+        btn_createrecord: "മദ്റസ അക്കൗണ്ട് ഉണ്ടാക്കുക",
+        btn_exit: "പുറത്തുകടക്കുക",
+        lbl_father: "പിതാവ്:",
+        lbl_totalpoints: "ആകെ പോയിന്റുകൾ",
+        nav_fees: "ഫീസ് & രസീത്",
+        nav_perf: "പെർഫോമൻസ് ടാസ്കുകൾ",
+        th_receiptno: "രസീത് No",
+        th_date: "തീയതി",
+        th_item: "ഇനം",
+        th_amount: "തുക",
+        msg_nofees: "ഫീസ് വിവരങ്ങൾ ലഭ്യമല്ല",
+        th_task: "ടാസ്ക് / വിഷയം",
+        th_points: "പോയിന്റ്",
+        msg_nopoints: "പോയിന്റുകൾ നൽകിയിട്ടില്ല",
+        btn_logout: "ലോഗ് ഔട്ട്",
+        nav_home: "ഹോം",
+        nav_students: "വിദ്യാർത്ഥികൾ",
+        nav_attendance: "ഹാജർ",
+        nav_marks: "മാർക്ക് എൻട്രി",
+        nav_staff: "മുഅല്ലിം മാനേജ്‌മെന്റ്",
+        nav_promotion: "ക്ലാസ് കയറ്റം",
+        home_card_att_sub: "ദിവസേനയുള്ള ഹാജർ രേഖപ്പെടുത്തുക",
+        home_card_perf_sub: "പോയിന്റുകളും ക്ലാസ് താരങ്ങളും",
+        home_card_mark_sub: "പരീക്ഷാ മാർക്കുകൾ എന്റർ ചെയ്യുക",
+        home_leaderboard_title: "മദ്റസാ പ്രതിഭാ ലീഡർബോർഡ്",
+        star_today: "ഇന്നത്തെ താരം",
+        star_week: "ഈ ആഴ്ചയിലെ താരം",
+        star_month: "മാസത്തിലെ താരം",
+        students_list_title: "വിദ്യാർത്ഥി ലിസ്റ്റ്",
+        btn_newadm: "പുതിയ അഡ്മിഷൻ",
+        btn_bulkimport: "ബൾക്ക് ഇമ്പോർട്ട്",
+        btn_reload: "റീലോഡ്",
+        th_name: "പേര്",
+        th_class: "ക്ലാസ്",
+        th_guardian: "പിതാവ് / രക്ഷാകർത്താവ്",
+        th_place: "സ്ഥലം",
+        th_actions: "നടപടികൾ",
+        msg_loading: "ഡാറ്റ ലോഡ് ചെയ്യുന്നു...",
+        adm_form_title: "പുതിയ അഡ്മിഷൻ ഫോം",
+        btn_backtolist: "ലിസ്റ്റിലേക്ക് തിരികെ",
+        lbl_idno: "ID No.",
+        lbl_fullname: "വിദ്യാർത്ഥിയുടെ പേര് *",
+        lbl_currentclass: "നിലവിലെ ക്ലാസ് *",
+        lbl_dob: "ജനന തീയതി",
+        lbl_joineddate: "ചേർന്ന തീയതി",
+        lbl_joinedclass: "ചേർന്ന ക്ലാസ്",
+        lbl_mother: "മാതാവിന്റെ പേര്",
+        lbl_guardian: "രക്ഷാകർത്താവ്",
+        lbl_whatsapp: "WhatsApp ഫോൺ നമ്പർ *",
+        lbl_place: "സ്ഥലം",
+        lbl_address: "വീട്ടുപേര് / വിലാസം",
+        btn_save: "സേവ് ചെയ്യുക",
+        lbl_date: "തീയതി",
+        lbl_selectclass: "ക്ലാസ് തിരഞ്ഞെടുക്കുക",
+        lbl_selectall: "മുഴുവൻ പേർക്കും (Select All)",
+        th_status: "ഹാജർ നില (Tick)",
+        btn_saveatt: "ഹാജർ സേവ് ചെയ്യുക",
+        lbl_selectexam: "പരീക്ഷ തിരഞ്ഞെടുക്കുക *",
+        btn_savemarks: "മാർക്കുകൾ സേവ് ചെയ്യുക",
+        btn_addtask: "പുതിയ ടാസ്ക് ചേർക്കുക",
+        lbl_selecttask: "ടാസ്ക് തിരഞ്ഞെടുക്കുക *",
+        th_award: "ടാസ്ക് നൽകുക (Tick)",
+        btn_savepoints: "പോയിന്റുകൾ സേവ് ചെയ്യുക",
+        lbl_selectstudent: "വിദ്യാർത്ഥിയെ തിരഞ്ഞെടുക്കുക",
+        lbl_amount: "തുക (₹) *",
+        lbl_feetype: "ഫീസ് ഇനം",
+        lbl_manualno: "മാനുവൽ രസീത് നമ്പർ (Book No)",
+        btn_saveprint: "രസീത് സേവ് & പ്രിന്റ്",
+        btn_whatsapp: "WhatsApp-ൽ അയക്കുക",
+        lbl_role: "സ്ഥാനം",
+        lbl_assignedclasses: "ചുമതലയുള്ള ക്ലാസുകൾ",
+        btn_addstaff: "മുഅല്ലിമിനെ രജിസ്റ്റർ ചെയ്യുക",
+        staff_list_title: "രജിസ്റ്റർ ചെയ്ത മുഅല്ലിംകളുടെ ലിസ്റ്റ്",
+        th_role: "സ്ഥാനം",
+        th_email: "ഇമെയിൽ",
+        th_assigned: "ക്ലാസുകൾ",
+        lbl_promoteto: "മാറേണ്ട ക്ലാസ്",
+        btn_promote: "ക്ലാസ് മാറ്റുക",
+        lbl_taskname: "ടാസ്കിന്റെ പേര് *",
+        lbl_points: "പോയിന്റ് (+ അല്ലെങ്കിൽ -) *",
+        btn_cancel: "റദ്ദാക്കുക",
+        btn_add: "ചേർക്കുക"
+      }
+    };
+
+    window.toggleLanguage = () => {
+      window.currentLang = window.currentLang === 'en' ? 'ml' : 'en';
+      document.getElementById('langSwitchLabel').innerText = window.currentLang === 'en' ? 'മലയാളം' : 'English';
+      
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (translations[window.currentLang][key]) {
+          el.innerText = translations[window.currentLang][key];
+        }
+      });
+    };
+  </script>
+
   <!-- Firebase Modular Scripts -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -775,7 +990,7 @@
       const label = document.getElementById(`${type}ClassDropdownLabel`);
       if (label) {
         if (!checkboxes.length) {
-          label.innerText = currentLang === 'ml' ? "ക്ലാസ് തിരഞ്ഞെടുക്കുക" : "Select Class";
+          label.innerText = window.currentLang === 'ml' ? "ക്ലാസ് തിരഞ്ഞെടുക്കുക" : "Select Class";
         } else {
           const selected = Array.from(checkboxes).map(cb => cb.value);
           label.innerText = selected.map(c => `Class ${c}`).join(', ');
@@ -806,7 +1021,7 @@
             const actionCol = document.getElementById("actionHeaderCol");
 
             if (currentUserRole === "admin") {
-              if (userRoleEl) userRoleEl.innerText = currentLang === 'ml' ? "സ്വദർ മുഅല്ലിം" : "Principal";
+              if (userRoleEl) userRoleEl.innerText = window.currentLang === 'ml' ? "സ്വദർ മുഅല്ലിം" : "Principal";
               if (tMenuBtn) tMenuBtn.classList.remove("d-none");
               if (pMenuBtn) pMenuBtn.classList.remove("d-none");
               if (adminActions) adminActions.classList.remove("d-none");
@@ -874,6 +1089,7 @@
       });
     }
 
+    // Login
     window.handleLogin = async (e) => {
       e.preventDefault();
       try {
@@ -881,6 +1097,7 @@
       } catch (err) { alert("Sign-in failed: " + err.message); }
     };
 
+    // Parent Login
     window.handleParentLogin = async (e) => {
       e.preventDefault();
       const reg = Number(document.getElementById("parentRegNo").value);
