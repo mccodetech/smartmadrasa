@@ -196,7 +196,7 @@
           <div class="card p-3">
             <div class="nav flex-column nav-pills gap-1" id="tabMenu">
               <button class="nav-link active text-start" id="homeMenuBtn" onclick="showTab('homeDashboardTab')"><i class="fa-solid fa-house me-2"></i> <span data-i18n="nav_home">Home</span></button>
-              <button class="nav-link text-start" id="superAdminMasterBtn" onclick="showTab('superAdminTab')"><i class="fa-solid fa-shield-halved me-2"></i> <span>All Madrasas</span></button>
+              <button class="nav-link text-start d-none" id="superAdminMasterBtn" onclick="showTab('superAdminTab')"><i class="fa-solid fa-shield-halved me-2"></i> <span>All Madrasas</span></button>
               <button class="nav-link text-start" onclick="showTab('studentsListTab')"><i class="fa-solid fa-users me-2"></i> <span data-i18n="nav_students">Students</span></button>
               <button class="nav-link text-start" onclick="showTab('attendanceTab')"><i class="fa-solid fa-calendar-check me-2"></i> <span data-i18n="nav_attendance">Attendance</span></button>
               <button class="nav-link text-start" onclick="showTab('marksTab')"><i class="fa-solid fa-award me-2"></i> <span data-i18n="nav_marks">Marks Entry</span></button>
@@ -215,10 +215,10 @@
           <div id="superAdminTab" class="content-tab d-none">
             <div class="card p-4">
               <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-shield-halved me-2"></i>Madrasa Master Console (All Registered Madrasas)</h5>
+                <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-shield-halved me-2"></i>Madrasa Master Console (Super Admin)</h5>
                 <button class="btn btn-sm btn-outline-success" onclick="loadSuperAdminRequests()"><i class="fa-solid fa-rotate"></i> Reload</button>
               </div>
-              <p class="text-muted small">Manage access, approve pending institutions, or switch directly to manage any specific madrasa.</p>
+              <p class="text-muted small">Manage and edit all registered madrasas, approve requests, and take over control.</p>
               
               <div class="table-responsive">
                 <table class="table table-hover table-bordered align-middle">
@@ -226,11 +226,11 @@
                     <tr>
                       <th>Code</th>
                       <th>Madrasa Name</th>
-                      <th>Principal / In-Charge</th>
+                      <th>Principal / Secretary</th>
                       <th>Email</th>
                       <th>Phone</th>
                       <th>Status</th>
-                      <th class="text-center" style="width: 220px;">Actions</th>
+                      <th class="text-center" style="width: 240px;">Actions</th>
                     </tr>
                   </thead>
                   <tbody id="superAdminTableBody">
@@ -692,6 +692,40 @@
     </div>
   </div>
 
+  <!-- Super Admin Madrasa Edit Modal -->
+  <div class="modal fade" id="superAdminEditMadrasaModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-madrassa text-white">
+          <h5 class="modal-title fw-bold">Edit Madrasa Account Details (Super Admin)</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <form onsubmit="saveEditedMadrasaBySuperAdmin(event)">
+            <input type="hidden" id="saEditDocId">
+            <div class="row g-3">
+              <div class="col-md-4"><label class="form-label">Madrasa Code *</label><input type="text" id="saEditInstCode" class="form-control" required></div>
+              <div class="col-md-8"><label class="form-label">Madrasa Name *</label><input type="text" id="saEditInstName" class="form-control" required></div>
+              <div class="col-md-4"><label class="form-label">Principal / Secretary *</label><input type="text" id="saEditName" class="form-control" required></div>
+              <div class="col-md-4"><label class="form-label">Phone Number *</label><input type="tel" id="saEditPhone" class="form-control" required></div>
+              <div class="col-md-4">
+                <label class="form-label">Status</label>
+                <select id="saEditStatus" class="form-select">
+                  <option value="active">Active (Approved)</option>
+                  <option value="pending">Pending (Suspended)</option>
+                </select>
+              </div>
+              <div class="col-12 mt-4 text-end">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-madrassa px-4">Save Changes</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal: Custom Task -->
   <div class="modal fade" id="customTaskModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -1019,6 +1053,7 @@
     let localStudentsCache = [];
     let localPerfStudentsCache = [];
     let localTeachersCache = [];
+    let localMadrasasCache = [];
     let lastReceiptWhatsAppPayload = null;
     let currentPage = 1;
     const pageSize = 50;
@@ -1095,7 +1130,6 @@
 
             populateClassDropdowns();
 
-            // Direct Super Admin to Master Console by Default
             if (isSuperAdmin) {
               showTab('superAdminTab');
             } else {
@@ -1195,7 +1229,7 @@
       } catch (err) { alert("Registration failed: " + err.message); }
     };
 
-    // Load Super Admin All Madrasas Master Table
+    // Load Super Admin Madrasa Master List
     async function loadSuperAdminRequests() {
       const tbody = document.getElementById("superAdminTableBody");
       tbody.innerHTML = `<tr><td colspan="7" class="text-center">Loading registered madrasas...</td></tr>`;
@@ -1203,21 +1237,24 @@
       const q = query(collection(db, "users"), where("role", "==", "admin"));
       const snap = await getDocs(q);
 
-      let html = "";
+      localMadrasasCache = [];
       snap.forEach(d => {
-        const u = d.data();
-        if (u.email === SUPER_ADMIN_EMAIL) return;
+        const data = d.data();
+        if (data.email !== SUPER_ADMIN_EMAIL) {
+          localMadrasasCache.push({ id: d.id, ...data });
+        }
+      });
 
+      let html = "";
+      localMadrasasCache.forEach(u => {
         const isPending = (u.status === "pending");
         const statusBadge = isPending 
           ? `<span class="badge bg-warning text-dark">Pending</span>` 
           : `<span class="badge bg-success">Active</span>`;
 
-        const actionBtns = isPending 
-          ? `<button class="btn btn-sm btn-success me-1" onclick="approveMadrasa('${d.id}', '${u.institutionName}')"><i class="fa-solid fa-check"></i> Approve</button>
-             <button class="btn btn-sm btn-outline-danger" onclick="rejectMadrasa('${d.id}')"><i class="fa-solid fa-xmark"></i> Reject</button>`
-          : `<button class="btn btn-sm btn-outline-primary me-1" onclick="switchMadrasaScope('${u.institutionId}', '${u.institutionName}')"><i class="fa-solid fa-folder-open"></i> Manage</button>
-             <button class="btn btn-sm btn-outline-warning" onclick="revokeMadrasa('${d.id}')"><i class="fa-solid fa-ban"></i> Suspend</button>`;
+        const approveOrManageBtn = isPending 
+          ? `<button class="btn btn-sm btn-success me-1" onclick="approveMadrasa('${u.id}', '${u.institutionName}')" title="Approve"><i class="fa-solid fa-check"></i> Approve</button>`
+          : `<button class="btn btn-sm btn-primary me-1" onclick="switchMadrasaScope('${u.institutionId}', '${u.institutionName}')" title="Manage Scope"><i class="fa-solid fa-folder-open"></i> Manage</button>`;
 
         html += `
           <tr>
@@ -1227,7 +1264,11 @@
             <td>${u.email}</td>
             <td>${u.phone}</td>
             <td>${statusBadge}</td>
-            <td class="text-center">${actionBtns}</td>
+            <td class="text-center">
+              ${approveOrManageBtn}
+              <button class="btn btn-sm btn-outline-secondary me-1" onclick="openSuperAdminEditMadrasaModal('${u.id}')" title="Edit Details"><i class="fa-solid fa-pen"></i></button>
+              <button class="btn btn-sm btn-outline-danger" onclick="rejectMadrasa('${u.id}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
+            </td>
           </tr>
         `;
       });
@@ -1235,6 +1276,7 @@
       tbody.innerHTML = html || `<tr><td colspan="7" class="text-center text-muted">No madrasa accounts found.</td></tr>`;
     }
 
+    // Super Admin Switch Scope
     window.switchMadrasaScope = (instId, instName) => {
       currentInstitutionId = instId;
       document.getElementById("displayMadrassaName").innerText = instName + " (Super Admin View)";
@@ -1250,6 +1292,46 @@
       showTab('superAdminTab');
     };
 
+    // Open Super Admin Edit Madrasa Modal
+    window.openSuperAdminEditMadrasaModal = (docId) => {
+      const m = localMadrasasCache.find(x => x.id === docId);
+      if (!m) return;
+
+      document.getElementById("saEditDocId").value = docId;
+      document.getElementById("saEditInstCode").value = m.institutionCode || '';
+      document.getElementById("saEditInstName").value = m.institutionName || '';
+      document.getElementById("saEditName").value = m.name || '';
+      document.getElementById("saEditPhone").value = m.phone || '';
+      document.getElementById("saEditStatus").value = m.status || 'active';
+
+      new bootstrap.Modal(document.getElementById('superAdminEditMadrasaModal')).show();
+    };
+
+    // Save Super Admin Edited Madrasa
+    window.saveEditedMadrasaBySuperAdmin = async (e) => {
+      e.preventDefault();
+      const docId = document.getElementById("saEditDocId").value;
+      const code = document.getElementById("saEditInstCode").value.trim().toUpperCase();
+      const instName = document.getElementById("saEditInstName").value.trim();
+      const name = document.getElementById("saEditName").value.trim();
+      const phone = document.getElementById("saEditPhone").value.trim();
+      const status = document.getElementById("saEditStatus").value;
+
+      try {
+        await updateDoc(doc(db, "users", docId), {
+          institutionCode: code,
+          institutionName: instName,
+          name: name,
+          phone: phone,
+          status: status,
+          updatedAt: serverTimestamp()
+        });
+        alert("Madrasa details updated successfully.");
+        bootstrap.Modal.getInstance(document.getElementById('superAdminEditMadrasaModal')).hide();
+        loadSuperAdminRequests();
+      } catch (err) { alert("Error: " + err.message); }
+    };
+
     window.approveMadrasa = async (userId, instName) => {
       if (confirm(`Approve registration for ${instName}?`)) {
         await updateDoc(doc(db, "users", userId), { status: "active" });
@@ -1258,18 +1340,10 @@
       }
     };
 
-    window.revokeMadrasa = async (userId) => {
-      if (confirm(`Suspend access for this madrasa?`)) {
-        await updateDoc(doc(db, "users", userId), { status: "pending" });
-        alert("Madrasa status suspended.");
-        loadSuperAdminRequests();
-      }
-    };
-
     window.rejectMadrasa = async (userId) => {
-      if (confirm(`Reject and delete this registration?`)) {
+      if (confirm(`Delete this madrasa account?`)) {
         await deleteDoc(doc(db, "users", userId));
-        alert("Registration request rejected.");
+        alert("Madrasa account deleted.");
         loadSuperAdminRequests();
       }
     };
