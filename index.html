@@ -692,7 +692,7 @@
     </div>
   </div>
 
-  <!-- Super Admin Madrasa Edit Modal -->
+  <!-- Super Admin Madrasa Edit Modal (With Email Field Included) -->
   <div class="modal fade" id="superAdminEditMadrasaModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content border-0 shadow">
@@ -707,8 +707,9 @@
               <div class="col-md-4"><label class="form-label">Madrasa Code *</label><input type="text" id="saEditInstCode" class="form-control" required></div>
               <div class="col-md-8"><label class="form-label">Madrasa Name *</label><input type="text" id="saEditInstName" class="form-control" required></div>
               <div class="col-md-4"><label class="form-label">Principal / Secretary *</label><input type="text" id="saEditName" class="form-control" required></div>
+              <div class="col-md-4"><label class="form-label">Email Address *</label><input type="email" id="saEditEmail" class="form-control" required></div>
               <div class="col-md-4"><label class="form-label">Phone Number *</label><input type="tel" id="saEditPhone" class="form-control" required></div>
-              <div class="col-md-4">
+              <div class="col-md-12">
                 <label class="form-label">Status</label>
                 <select id="saEditStatus" class="form-select">
                   <option value="active">Active (Approved)</option>
@@ -1292,7 +1293,7 @@
       showTab('superAdminTab');
     };
 
-    // Open Super Admin Edit Madrasa Modal
+    // Open Super Admin Edit Madrasa Modal (Populate Email field)
     window.openSuperAdminEditMadrasaModal = (docId) => {
       const m = localMadrasasCache.find(x => x.id === docId);
       if (!m) return;
@@ -1301,19 +1302,21 @@
       document.getElementById("saEditInstCode").value = m.institutionCode || '';
       document.getElementById("saEditInstName").value = m.institutionName || '';
       document.getElementById("saEditName").value = m.name || '';
+      document.getElementById("saEditEmail").value = m.email || '';
       document.getElementById("saEditPhone").value = m.phone || '';
       document.getElementById("saEditStatus").value = m.status || 'active';
 
       new bootstrap.Modal(document.getElementById('superAdminEditMadrasaModal')).show();
     };
 
-    // Save Super Admin Edited Madrasa
+    // Save Super Admin Edited Madrasa (Including Email)
     window.saveEditedMadrasaBySuperAdmin = async (e) => {
       e.preventDefault();
       const docId = document.getElementById("saEditDocId").value;
       const code = document.getElementById("saEditInstCode").value.trim().toUpperCase();
       const instName = document.getElementById("saEditInstName").value.trim();
       const name = document.getElementById("saEditName").value.trim();
+      const email = document.getElementById("saEditEmail").value.trim();
       const phone = document.getElementById("saEditPhone").value.trim();
       const status = document.getElementById("saEditStatus").value;
 
@@ -1322,6 +1325,7 @@
           institutionCode: code,
           institutionName: instName,
           name: name,
+          email: email,
           phone: phone,
           status: status,
           updatedAt: serverTimestamp()
