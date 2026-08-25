@@ -4,12 +4,15 @@ const translations = {
     portal_sub: "Digital Madrasa Management Suite",
     tab_login: "Login",
     tab_signup: "Register Madrasa",
+    tab_staff_signup: "Staff Register",
     lbl_login_input: "Email Address or Student Reg No.",
     lbl_email: "Email Address",
     lbl_pwd: "Password",
     btn_signin: "Sign In",
     parent_login_hint: "Enter student's Reg No. and registered mobile number.",
     reg_approval_notice: "New registrations require Developer / Super Admin approval before activation.",
+    staff_reg_notice: "Staff registration requires approval from the Institution Admin.",
+    btn_submit_staff_reg: "Register as Staff",
     lbl_regno: "Student Reg No.",
     lbl_phone: "Registered Mobile Number",
     btn_viewdetails: "View Student Details",
@@ -103,12 +106,15 @@ const translations = {
     portal_sub: "സ്മാർട്ട് മദ്റസാ മാനേജ്‌മെന്റ് പോർട്ടൽ",
     tab_login: "ലോഗിൻ",
     tab_signup: "മദ്റസ രജിസ്ട്രേഷൻ",
+    tab_staff_signup: "സ്റ്റാഫ് രജിസ്ട്രേഷൻ",
     lbl_login_input: "ഇമെയിൽ അല്ലെങ്കിൽ കുട്ടിയുടെ Reg No.",
     lbl_email: "ഇമെയിൽ വിലാസം",
     lbl_pwd: "പാസ്‌വേഡ്",
     btn_signin: "പ്രവേശിക്കുക",
     parent_login_hint: "കുട്ടിയുടെ Reg No. വും രജിസ്റ്റർ ചെയ്ത മൊബൈൽ നമ്പറും നൽകുക.",
     reg_approval_notice: "പുതിയ മദ്റസകളുടെ രജിസ്ട്രേഷൻ സൂപ്പർ അഡ്മിൻ അംഗീകരിച്ച ശേഷം മാത്രമേ ആക്റ്റീവ് ആകൂ.",
+    staff_reg_notice: "സ്റ്റാഫ് രജിസ്ട്രേഷൻ ഇൻസ്റ്റിറ്റ്യൂഷൻ അഡ്മിൻ അംഗീകരിച്ച ശേഷം മാത്രമേ ആക്റ്റീവ് ആകൂ.",
+    btn_submit_staff_reg: "സ്റ്റാഫ് ആയി രജിസ്റ്റർ ചെയ്യുക",
     lbl_regno: "വിദ്യാർത്ഥിയുടെ Reg No.",
     lbl_phone: "രജിസ്റ്റർ ചെയ്ത മൊബൈൽ നമ്പർ",
     btn_viewdetails: "വിവരങ്ങൾ കാണുക",
@@ -156,7 +162,7 @@ const translations = {
     adm_form_title: "പുതിയ അഡ്മിഷൻ ഫോം",
     btn_backtolist: "ലിസ്റ്റിലേക്ക് തിരികെ",
     lbl_idno: "ID No.",
-    lbl_fullname: "വിദ്യാർത്ഥിയുടെ പേര് *",
+    lbl_fullname: "പൂർണ്ണമായ പേര് *",
     lbl_currentclass: "നിലവിലെ ക്ലാസ് *",
     lbl_dob: "ജനന തീയതി",
     lbl_joineddate: "ചേർന്ന തീയതി",
@@ -272,6 +278,7 @@ let localPerfStudentsCache = [];
 let localTeachersCache = [];
 let localPrincipalsCache = [];
 let localMadrasasCache = [];
+let pendingStaffCache = [];
 let lastReceiptWhatsAppPayload = null;
 let currentPage = 1;
 const pageSize = 50;
@@ -297,8 +304,14 @@ onAuthStateChanged(auth, async (user) => {
         const userData = userDoc.data();
 
         isSuperAdmin = (user.email === SUPER_ADMIN_EMAIL);
+        
+        // Handle pending users
         if (!isSuperAdmin && userData.status === "pending") {
-          alert("Your Madrasa registration is pending approval from the Super Admin / Developer. Please contact support.");
+           let alertMsg = "Your registration is pending approval.";
+           if(userData.role === 'admin') alertMsg = "Your Madrasa registration is pending approval from the Super Admin / Developer. Please contact support.";
+           else alertMsg = "Your Staff registration is pending approval from your Institution Admin.";
+           
+          alert(alertMsg);
           signOut(auth);
           return;
         }
@@ -361,8 +374,9 @@ onAuthStateChanged(auth, async (user) => {
         if (currentUserRole === "admin") {
             // Institution Admin View
             if (instAdminStaffBtn) instAdminStaffBtn.classList.remove("d-none");
-            // Hide other menus until Principal is clicked, or keep them hidden for Admin
-             if (homeMenuBtn) homeMenuBtn.classList.add("d-none");
+            if (tMenuBtn) tMenuBtn.classList.remove("d-none"); // Show Staff Management for Admin
+            // Hide other menus until needed
+            if (homeMenuBtn) homeMenuBtn.classList.add("d-none");
             if (studentsMenuBtn) studentsMenuBtn.classList.add("d-none");
             if (attendanceMenuBtn) attendanceMenuBtn.classList.add("d-none");
             if (marksMenuBtn) marksMenuBtn.classList.add("d-none");
@@ -456,17 +470,6 @@ window.handleUnifiedLogin = async (e) => {
 
     if (!mobile) return alert("Please enter the registered mobile number.");
 
-    // Query by mobile number to find ALL students associated with this parent
-    // Note: This requires the phone number format to be consistent in the database.
-    // For a more robust solution, a separate "Parents" collection mapping to student IDs would be better.
-    // Here we will query students where the phone number ends with the provided mobile number.
-    // However, Firestore doesn't support 'endsWith' queries directly on string fields in a simple way without workarounds.
-    // As a workaround for this specific implementation, we will query all students and filter locally. 
-    // THIS IS NOT RECOMMENDED FOR LARGE DATABASES.
-    
-    // Better approach: We assume the user is trying to log in for a *specific* student first using the Reg No.
-    // Then we find siblings.
-
     const q = query(collection(db, "students"), where("regNo", "==", reg));
     const snap = await getDocs(q);
 
@@ -483,7 +486,7 @@ window.handleUnifiedLogin = async (e) => {
 
     if (!matchedStudent) return alert("Provided phone number does not match student's records.");
 
-    // Now, let's find siblings (students with the same phone number in the same institution)
+    // Now, let's find siblings
     const siblingsQ = query(collection(db, "students"), where("institutionId", "==", matchedStudent.institutionId));
     const siblingsSnap = await getDocs(siblingsQ);
     
@@ -564,7 +567,7 @@ async function loadParentStudentData(student) {
     document.getElementById("pvPointsTableBody").innerHTML = perfHtml || `<tr><td colspan="3" class="text-center text-muted">No points awarded yet</td></tr>`;
 }
 
-// Registration
+// Institution Registration
 window.handleSignUp = async (e) => {
   e.preventDefault();
   const submitBtn = document.getElementById("btnSubmitSignup");
@@ -586,11 +589,10 @@ window.handleSignUp = async (e) => {
       name: userName,
       phone: phone,
       email: email,
-      msrNo: "MSR-001",
       institutionId: instId,
       institutionCode: instCode,
       institutionName: instName,
-      role: "admin", // This person is the Institution Admin
+      role: "admin", // Institution Admin
       status: isDev ? "active" : "pending",
       assignedClasses: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
       createdAt: serverTimestamp()
@@ -611,6 +613,60 @@ window.handleSignUp = async (e) => {
     if (submitBtn) submitBtn.disabled = false;
   }
 };
+
+// Staff Registration (Self-Sign Up)
+window.handleStaffSignUp = async (e) => {
+    e.preventDefault();
+    const submitBtn = document.getElementById("btnStaffSubmitSignup");
+    if (submitBtn) submitBtn.disabled = true;
+  
+    try {
+      const instCode = document.getElementById("staffInstCode").value.trim().toUpperCase();
+      const userName = document.getElementById("staffName").value.trim();
+      const phone = document.getElementById("staffPhone").value.trim();
+      const email = document.getElementById("staffEmail").value.trim();
+      const pwd = document.getElementById("staffPassword").value;
+      const instId = "MDR_" + instCode;
+  
+      // Verify if the institution exists
+      const instQuery = query(collection(db, "users"), where("institutionId", "==", instId), where("role", "==", "admin"));
+      const instSnap = await getDocs(instQuery);
+  
+      if (instSnap.empty) {
+          alert("Madrasa Code not found. Please check with your Institution Admin.");
+          submitBtn.disabled = false;
+          return;
+      }
+      
+      let instName = "";
+      instSnap.forEach(d=> instName = d.data().institutionName);
+  
+      const cred = await createUserWithEmailAndPassword(auth, email, pwd);
+      await setDoc(doc(db, "users", cred.user.uid), {
+        uid: cred.user.uid,
+        name: userName,
+        phone: phone,
+        email: email,
+        institutionId: instId,
+        institutionCode: instCode,
+        institutionName: instName,
+        role: "teacher", // Default role for staff signups
+        status: "pending", // Requires admin approval
+        assignedClasses: [],
+        createdAt: serverTimestamp()
+      });
+  
+      document.getElementById("staffSignupForm").reset();
+      alert("Staff Registration submitted successfully! Please wait for your Institution Admin to approve.");
+      signOut(auth);
+      switchAuthTab('login');
+  
+    } catch (err) { 
+      alert("Registration failed: " + err.message); 
+    } finally {
+      if (submitBtn) submitBtn.disabled = false;
+    }
+  };
 
 // Load Super Admin Madrasa Master List
 window.loadSuperAdminRequests = async () => {
@@ -1464,7 +1520,7 @@ window.handleBulkUpload = () => {
 };
 
 
-// Register Teacher/Staff (By Principal)
+// Register Teacher/Staff (By Admin directly)
 window.registerNewTeacher = async (e) => {
   e.preventDefault();
   
@@ -1495,7 +1551,7 @@ window.registerNewTeacher = async (e) => {
           institutionId: currentInstitutionId,
           role: "teacher", // They are teachers
           assignedClasses: assignedClasses,
-          status: "active",
+          status: "active", // Direct registration makes them active
           createdAt: serverTimestamp()
       });
 
@@ -1509,23 +1565,72 @@ window.registerNewTeacher = async (e) => {
   }
 };
 
-// Teachers List (Viewable by Principal)
+// Open approval form
+window.openAssignClassesForm = (staffId) => {
+    const staff = pendingStaffCache.find(s => s.id === staffId);
+    if(staff) {
+        document.getElementById("assignStaffId").value = staffId;
+        document.getElementById("assignStaffNameDisplay").innerText = staff.name;
+        document.getElementById("assignClassesForm").classList.remove("d-none");
+        
+        // Reset checkboxes
+        document.querySelectorAll('.reg-class-cb').forEach(cb => cb.checked = false);
+        updateDropdownLabel('reg');
+    }
+};
+
+window.cancelAssignClasses = () => {
+    document.getElementById("assignClassesForm").classList.add("d-none");
+    document.getElementById("assignStaffId").value = "";
+}
+
+// Assign Classes and Approve
+window.assignClassesToStaff = async (e) => {
+    e.preventDefault();
+    const staffId = document.getElementById("assignStaffId").value;
+    const checkboxes = document.querySelectorAll('.reg-class-cb:checked');
+    const assignedClasses = Array.from(checkboxes).map(cb => cb.value);
+
+    if (assignedClasses.length === 0) {
+        alert("Please select at least one class.");
+        return;
+    }
+
+    try {
+        await updateDoc(doc(db, "users", staffId), { 
+            status: "active",
+            assignedClasses: assignedClasses
+        });
+        alert("Staff approved and classes assigned successfully!");
+        document.getElementById("assignClassesForm").classList.add("d-none");
+        loadTeachersList(); // Reload lists
+    } catch (err) {
+        alert("Error: " + err.message);
+    }
+};
+
+
+// Teachers List (Viewable by Admin/Principal)
 window.loadTeachersList = async () => {
   const tbody = document.getElementById("teachersTableBody");
-  tbody.innerHTML = `<tr><td colspan="6" class="text-center">Loading...</td></tr>`;
+  const pendingTbody = document.getElementById("pendingStaffTableBody");
+  const pendingSection = document.getElementById("pendingStaffSection");
   
-  // Only query users with role 'teacher' in the same institution
-  const q = query(collection(db, "users"), where("institutionId", "==", currentInstitutionId), where("role", "==", "teacher"));
-  const snap = await getDocs(q);
+  tbody.innerHTML = `<tr><td colspan="6" class="text-center">Loading...</td></tr>`;
+  pendingTbody.innerHTML = `<tr><td colspan="4" class="text-center">Loading...</td></tr>`;
+  
+  // Load Active Teachers
+  const qActive = query(collection(db, "users"), where("institutionId", "==", currentInstitutionId), where("role", "==", "teacher"), where("status", "==", "active"));
+  const snapActive = await getDocs(qActive);
 
   localTeachersCache = [];
-  snap.forEach(d => localTeachersCache.push({ id: d.id, ...d.data() }));
+  snapActive.forEach(d => localTeachersCache.push({ id: d.id, ...d.data() }));
 
-  let html = "";
+  let htmlActive = "";
   localTeachersCache.forEach((t, index) => {
     const classesBadges = (t.assignedClasses || []).map(c => `<span class="badge bg-light text-dark border me-1">Class ${c}</span>`).join(' ') || '-';
     
-    html += `
+    htmlActive += `
       <tr>
         <td>${index + 1}</td>
         <td><b>${t.name}</b></td>
@@ -1538,7 +1643,37 @@ window.loadTeachersList = async () => {
       </tr>
     `;
   });
-  tbody.innerHTML = html || `<tr><td colspan="6" class="text-center text-muted">No staff registered yet.</td></tr>`;
+  tbody.innerHTML = htmlActive || `<tr><td colspan="6" class="text-center text-muted">No active staff registered yet.</td></tr>`;
+
+  // Load Pending Teachers (Only for Admins)
+  if (currentUserRole === 'admin') {
+      const qPending = query(collection(db, "users"), where("institutionId", "==", currentInstitutionId), where("role", "==", "teacher"), where("status", "==", "pending"));
+      const snapPending = await getDocs(qPending);
+    
+      pendingStaffCache = [];
+      snapPending.forEach(d => pendingStaffCache.push({ id: d.id, ...d.data() }));
+    
+      if (pendingStaffCache.length > 0) {
+          pendingSection.classList.remove("d-none");
+          let htmlPending = "";
+          pendingStaffCache.forEach((t) => {
+            htmlPending += `
+              <tr>
+                <td><b>${t.name}</b></td>
+                <td>${t.email}</td>
+                <td>${t.phone}</td>
+                <td class="text-center">
+                    <button class="btn btn-sm btn-success me-1" onclick="openAssignClassesForm('${t.id}')" title="Approve & Assign Class"><i class="fa-solid fa-check"></i></button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteUser('${t.id}', '${t.name}')" title="Reject"><i class="fa-solid fa-xmark"></i></button>
+                </td>
+              </tr>
+            `;
+          });
+          pendingTbody.innerHTML = htmlPending;
+      } else {
+           pendingSection.classList.add("d-none");
+      }
+  }
 };
 
 
@@ -1551,6 +1686,7 @@ window.deleteUser = async (userId, name) => {
             // Reload the respective list based on current view
             if (currentUserRole === 'admin') {
                 loadPrincipalsList();
+                loadTeachersList();
             } else if (currentUserRole === 'principal') {
                 loadTeachersList();
             }
@@ -1577,9 +1713,12 @@ window.promoteStudents = async () => {
 window.switchAuthTab = (type) => {
   document.getElementById("loginForm").classList.add("d-none");
   document.getElementById("signupForm").classList.add("d-none");
+  document.getElementById("staffSignupForm").classList.add("d-none");
 
   document.getElementById("tabBtnLogin").classList.remove("active");
   document.getElementById("tabBtnRegister").classList.remove("active");
+  document.getElementById("tabBtnStaffRegister").classList.remove("active");
+
 
   if (type === 'login') {
     document.getElementById("loginForm").classList.remove("d-none");
@@ -1587,6 +1726,9 @@ window.switchAuthTab = (type) => {
   } else if (type === 'signup') {
     document.getElementById("signupForm").classList.remove("d-none");
     document.getElementById("tabBtnRegister").classList.add("active");
+  } else if (type === 'staffSignup') {
+    document.getElementById("staffSignupForm").classList.remove("d-none");
+    document.getElementById("tabBtnStaffRegister").classList.add("active");
   }
 };
 
