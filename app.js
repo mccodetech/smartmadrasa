@@ -351,6 +351,7 @@ window.handleSignUp = async (e) => {
     const pwd = document.getElementById("regPassword").value;
     const instId = board + "_" + instCode;
     
+    // Additional generic fields for Institution
     const address = document.getElementById("regAddress") ? document.getElementById("regAddress").value.trim().toUpperCase() : "";
     const place = document.getElementById("regPlace") ? document.getElementById("regPlace").value.trim().toUpperCase() : "";
     const po = document.getElementById("regPo") ? document.getElementById("regPo").value.trim().toUpperCase() : "";
@@ -568,7 +569,7 @@ window.approveMadrasa = async (userId, instName) => {
         if(userDoc.exists()) {
              const data = userDoc.data();
              
-             // WhatsApp Msg
+             // 1. WhatsApp Message
              if(data.whatsapp || data.phone) {
                  const destPhone = data.whatsapp || data.phone;
                  let waMsg = `Hello ${data.name},%0A%0AYour institution *${data.institutionName}* has been approved on Smart Madrasa.%0A%0AYour Institution ID is: *${data.institutionId}*. Please share this Board & Code with your staff to join.`;
@@ -577,12 +578,15 @@ window.approveMadrasa = async (userId, instName) => {
                  window.open(waUrl, "_blank");
              }
 
-             // Email Msg
+             // 2. Email Message
              if(data.email) {
                  const subject = encodeURIComponent("Smart Madrasa - Registration Approved");
                  const body = encodeURIComponent(`Hello ${data.name},\n\nYour institution ${data.institutionName} has been approved on Smart Madrasa.\n\nYour Institution ID is: ${data.institutionId}.\n\nPlease share this ID with your staff to join.\n\nRegards,\nSmart Madrasa Admin`);
                  const mailtoUrl = `mailto:${data.email}?subject=${subject}&body=${body}`;
-                 setTimeout(() => { window.location.href = mailtoUrl; }, 800);
+                 
+                 setTimeout(() => {
+                     window.location.href = mailtoUrl;
+                 }, 800);
              }
              
              alert("Madrasa approved successfully! WhatsApp & Email prompts opened.");
@@ -720,7 +724,7 @@ window.instAssignClassesToStaff = async (e) => {
         
         const staff = pendingStaffCache.find(s => s.id === staffId);
         if(staff) {
-            // WhatsApp Msg
+            // 1. WhatsApp Message
             if(staff.whatsapp || staff.phone) {
                 const destPhone = staff.whatsapp || staff.phone;
                 let waMsg = `Hello ${staff.name},%0A%0AYour registration as ${role} at *${document.getElementById("displayMadrassaName").innerText}* has been *approved*.%0A%0AYou can now login using your email: ${staff.email}.`;
@@ -731,14 +735,18 @@ window.instAssignClassesToStaff = async (e) => {
                 window.open(waUrl, "_blank");
             }
             
-            // Email Msg
+            // 2. Email Message
             if(staff.email) {
                 const subject = encodeURIComponent(`Smart Madrasa - ${role.charAt(0).toUpperCase() + role.slice(1)} Registration Approved`);
                 const body = encodeURIComponent(`Hello ${staff.name},\n\nYour registration as ${role} at ${document.getElementById("displayMadrassaName").innerText} has been approved.\n\nYou can now login using your email: ${staff.email}.\n\nRegards,\nInstitution Admin`);
                 const mailtoUrl = `mailto:${staff.email}?subject=${subject}&body=${body}`;
-                setTimeout(() => { window.location.href = mailtoUrl; }, 800);
+                
+                setTimeout(() => {
+                    window.location.href = mailtoUrl;
+                }, 800);
             }
-            alert("Approved successfully! Prompts opened.");
+            
+            alert("Approved successfully! WhatsApp & Email prompts opened.");
         }
 
         document.getElementById("instAssignClassesForm").classList.add("d-none");
@@ -781,6 +789,7 @@ window.openStudentProfileModal = (docId) => {
         document.getElementById("stuMotherName").value = s.motherName || '';
         document.getElementById("stuGuardianName").value = s.guardianName || '';
         document.getElementById("stuRelation").value = s.relation || '';
+        document.getElementById("stuGuardianJob").value = s.guardianOccupation || '';
         document.getElementById("stuPhone").value = s.phone || '';
         document.getElementById("stuEmergency").value = s.emergencyPhone || '';
 
@@ -801,7 +810,6 @@ window.openStudentProfileModal = (docId) => {
 
         // Tab 6: Other
         document.getElementById("stuMarks").value = s.identificationMarks || '';
-        document.getElementById("stuGuardianOp").value = s.guardianOpinion || '';
         document.getElementById("stuSpecialInfo").value = s.specialInfo || '';
 
     } else {
@@ -840,6 +848,7 @@ window.saveStudentProfile = async (e) => {
         motherName: document.getElementById("stuMotherName").value.trim().toUpperCase(),
         guardianName: document.getElementById("stuGuardianName").value.trim().toUpperCase(),
         relation: document.getElementById("stuRelation").value.trim().toUpperCase(),
+        guardianOccupation: document.getElementById("stuGuardianJob").value.trim().toUpperCase(),
         phone: document.getElementById("stuPhone").value.trim(),
         emergencyPhone: document.getElementById("stuEmergency").value.trim(),
 
@@ -857,7 +866,6 @@ window.saveStudentProfile = async (e) => {
         tcDetails: document.getElementById("stuTcDetails").value.trim().toUpperCase(),
 
         identificationMarks: document.getElementById("stuMarks").value.trim().toUpperCase(),
-        guardianOpinion: document.getElementById("stuGuardianOp").value.trim().toUpperCase(),
         specialInfo: document.getElementById("stuSpecialInfo").value.trim().toUpperCase(),
         
         status: "active"
@@ -1425,8 +1433,8 @@ window.shareToWhatsApp = () => {
 // ==========================================
 
 window.downloadCSVFormat = () => {
-    const headers = "REG NO.,ID NO.,AADHAAR,STUDENT NAME,GENDER,D.O.B,BLOOD GROUP,CURRENT CLASS,JOINED CLASS,JOINED DATE,PRESENCE,FATHER NAME,MOTHER NAME,GUARDIAN NAME,RELATION,MOBILE NO,EMERGENCY NO,HOUSE NAME,PLACE,PO,PINCODE,DISTRICT,STATE,TRANSFERRED TO,REASON FOR LEAVING,DATE OF LEAVING,TC ISSUED(Yes/No),TC DETAILS,IDENTIFICATION MARKS,GUARDIAN OPINION,SPECIAL INFO\n";
-    const sampleData = "101,A123,123456789012,MUHAMMED,Male,2015-05-12,O+,1,1,2021-06-01,Regular,ABDULLA,FATHIMA,ABDULLA,Father,9876543210,9876543211,HOUSE NAME,CALICUT,CALICUT PO,673001,KOZHIKODE,KERALA,,,,,,,,None,Good,\n";
+    const headers = "REG NO.,ID NO.,AADHAAR,STUDENT NAME,GENDER,D.O.B,BLOOD GROUP,CURRENT CLASS,JOINED CLASS,JOINED DATE,PRESENCE,FATHER NAME,MOTHER NAME,GUARDIAN NAME,RELATION,GUARDIAN OCCUPATION,MOBILE NO,EMERGENCY NO,HOUSE NAME,PLACE,PO,PINCODE,DISTRICT,STATE,TRANSFERRED TO,REASON FOR LEAVING,DATE OF LEAVING,TC ISSUED(Yes/No),TC DETAILS,IDENTIFICATION MARKS,SPECIAL INFO\n";
+    const sampleData = "101,A123,123456789012,MUHAMMED,Male,2015-05-12,O+,1,1,2021-06-01,Regular,ABDULLA,FATHIMA,ABDULLA,Father,Business,9876543210,9876543211,HOUSE NAME,CALICUT,CALICUT PO,673001,KOZHIKODE,KERALA,,,,,,,,None,\n";
     const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(headers + sampleData);
     
     const link = document.createElement("a");
@@ -1475,6 +1483,7 @@ window.handleBulkUpload = () => {
             motherName: (row["MOTHER NAME"] || "").toUpperCase(),
             guardianName: (row["GUARDIAN NAME"] || "").toUpperCase(),
             relation: (row["RELATION"] || "").toUpperCase(),
+            guardianOccupation: (row["GUARDIAN OCCUPATION"] || "").toUpperCase(),
             phone: row["MOBILE NO"] || row["PHONE"] || "",
             emergencyPhone: row["EMERGENCY NO"] || "",
 
@@ -1492,7 +1501,6 @@ window.handleBulkUpload = () => {
             tcDetails: (row["TC DETAILS"] || "").toUpperCase(),
 
             identificationMarks: (row["IDENTIFICATION MARKS"] || "").toUpperCase(),
-            guardianOpinion: (row["GUARDIAN OPINION"] || "").toUpperCase(),
             specialInfo: (row["SPECIAL INFO"] || "").toUpperCase(),
             
             status: "active",
