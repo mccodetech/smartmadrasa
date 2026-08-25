@@ -38,7 +38,6 @@
             <input type="text" id="loginIdentifier" class="form-control" placeholder="name@madrasa.com / 101" oninput="detectLoginMode()" required>
           </div>
         </div>
-
         <div class="mb-3" id="passwordGroup">
           <label class="form-label fw-semibold small">Password</label>
           <div class="input-group">
@@ -46,7 +45,6 @@
             <input type="password" id="loginPassword" class="form-control" placeholder="••••••••">
           </div>
         </div>
-
         <div class="mb-3 d-none" id="phoneGroup">
           <label class="form-label fw-semibold small">Registered Mobile Number</label>
           <div class="input-group">
@@ -54,7 +52,6 @@
             <input type="tel" id="loginMobile" class="form-control" placeholder="9847...">
           </div>
         </div>
-
         <button type="submit" id="btnAuthSubmit" class="btn btn-primary-custom w-100 mt-2">Sign In</button>
       </form>
 
@@ -107,7 +104,7 @@
           <input type="tel" id="regPhone" class="form-control" placeholder="9847..." required>
         </div>
         <div class="mb-2">
-            <label class="form-label small fw-semibold">WhatsApp Number (For Approval Notifications)</label>
+            <label class="form-label small fw-semibold">WhatsApp Number</label>
             <input type="tel" id="regWhatsapp" class="form-control" placeholder="Optional if same as mobile">
         </div>
         <div class="mb-2">
@@ -132,8 +129,6 @@
                 <option value="principal">Principal</option>
             </select>
         </div>
-        
-        <!-- Board and Code selection for Staff -->
         <div class="row g-2 mb-2">
           <div class="col-6">
             <label class="form-label small fw-semibold">Board</label>
@@ -152,7 +147,6 @@
             <input type="text" id="staffInstCode" class="form-control text-uppercase" placeholder="e.g. 1145" required>
           </div>
         </div>
-
         <div class="mb-2">
           <label class="form-label small fw-semibold">Full Name</label>
           <input type="text" id="staffName" class="form-control text-uppercase" placeholder="Your Name" required>
@@ -160,10 +154,6 @@
         <div class="mb-2">
           <label class="form-label small fw-semibold">Mobile Number</label>
           <input type="tel" id="staffPhone" class="form-control" placeholder="9847..." required>
-        </div>
-        <div class="mb-2">
-            <label class="form-label small fw-semibold">WhatsApp Number (For Notifications)</label>
-            <input type="tel" id="staffWhatsapp" class="form-control" placeholder="Optional if same as mobile">
         </div>
         <div class="mb-2">
           <label class="form-label small fw-semibold">Email Address</label>
@@ -190,8 +180,7 @@
     <div class="container py-4">
         <div class="row mb-3">
             <div class="col-12">
-                <select id="parentStudentSelect" class="form-select" onchange="switchParentStudent()">
-                </select>
+                <select id="parentStudentSelect" class="form-select" onchange="switchParentStudent()"></select>
             </div>
         </div>
       <div class="row g-4">
@@ -218,15 +207,6 @@
               </table>
             </div>
           </div>
-          <div class="card p-4">
-            <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-star me-2"></i>Performance Tasks History</h5>
-            <div class="table-responsive">
-              <table class="table table-bordered align-middle">
-                <thead class="table-light"><tr><th>Date</th><th>Task / Category</th><th>Points</th></tr></thead>
-                <tbody id="pvPointsTableBody"><tr><td colspan="3" class="text-center text-muted">No points awarded yet</td></tr></tbody>
-              </table>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -249,7 +229,6 @@
         <div class="d-flex align-items-center gap-2 text-white">
           <button class="btn btn-sm btn-outline-warning d-none" id="superAdminBackBtn" onclick="returnToSuperAdminConsole()"><i class="fa-solid fa-arrow-left me-1"></i> Console</button>
           <span class="badge bg-light text-dark d-none d-sm-inline-block" id="displayUserRole">Admin</span>
-          <span class="small d-none d-md-inline-block" id="displayUserName"><i class="fa-solid fa-user"></i> Staff</span>
           <button class="btn btn-outline-light btn-sm" onclick="handleLogout()"><i class="fa-solid fa-right-from-bracket"></i> <span class="d-none d-sm-inline-block">Logout</span></button>
         </div>
       </div>
@@ -274,7 +253,7 @@
             <div class="nav flex-column nav-pills gap-1" id="desktopTabMenu">
               <button class="nav-link active text-start" id="homeMenuBtn" onclick="showTab('homeDashboardTab')"><i class="fa-solid fa-house me-2"></i> Home</button>
               <button class="nav-link text-start d-none" id="superAdminMasterBtn" onclick="showTab('superAdminTab')"><i class="fa-solid fa-shield-halved me-2"></i> All Madrasas</button>
-              <button class="nav-link text-start d-none" id="instAdminStaffBtn" onclick="showTab('instAdminTab')"><i class="fa-solid fa-user-tie me-2"></i> Staff & Principals</button>
+              <button class="nav-link text-start d-none" id="instAdminStaffBtn" onclick="showTab('instAdminTab')"><i class="fa-solid fa-user-tie me-2"></i> Manage Staff</button>
               <button class="nav-link text-start" id="studentsMenuBtn" onclick="showTab('studentsListTab')"><i class="fa-solid fa-users me-2"></i> Students</button>
               <button class="nav-link text-start" id="attendanceMenuBtn" onclick="showTab('attendanceTab')"><i class="fa-solid fa-calendar-check me-2"></i> Attendance</button>
               <button class="nav-link text-start" id="marksMenuBtn" onclick="showTab('marksTab')"><i class="fa-solid fa-award me-2"></i> Marks Entry</button>
@@ -296,24 +275,12 @@
                 <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-shield-halved me-2"></i>Madrasa Master Console (Super Admin)</h5>
                 <button class="btn btn-sm btn-outline-success" onclick="loadSuperAdminRequests()"><i class="fa-solid fa-rotate"></i> Reload</button>
               </div>
-              <p class="text-muted small">Manage all registered madrasas.</p>
-              
               <div class="table-responsive">
                 <table class="table table-hover table-bordered align-middle">
                   <thead class="table-light">
-                    <tr>
-                      <th>Inst. ID</th>
-                      <th>Madrasa Name</th>
-                      <th>Board</th>
-                      <th>Admin Name</th>
-                      <th>Email</th>
-                      <th>Status</th>
-                      <th class="text-center" style="width: 240px;">Actions</th>
-                    </tr>
+                    <tr><th>Inst. ID</th><th>Madrasa Name</th><th>Board</th><th>Admin Name</th><th>Email</th><th>Status</th><th class="text-center">Actions</th></tr>
                   </thead>
-                  <tbody id="superAdminTableBody">
-                    <tr><td colspan="7" class="text-center text-muted">Loading registered madrasas...</td></tr>
-                  </tbody>
+                  <tbody id="superAdminTableBody"></tbody>
                 </table>
               </div>
             </div>
@@ -322,23 +289,17 @@
           <!-- 0.1 Institution Admin Console -->
           <div id="instAdminTab" class="content-tab d-none">
             <div class="card p-4">
-              <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-user-tie"></i> Manage Principals & Staff</h5>
-              <p class="text-muted small">As the Institution Admin, you can manage the Principals and Teachers here.</p>
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-user-tie"></i> Manage Principals & Staff</h5>
+                  <button class="btn btn-sm btn-outline-success" onclick="openStaffProfileModal(null)"><i class="fa-solid fa-plus me-1"></i> Add Staff / Principal</button>
+              </div>
               
               <!-- Pending Staff for Inst Admin -->
               <div id="instPendingStaffSection" class="mb-4 d-none">
                   <h6 class="fw-bold text-warning mb-2"><i class="fa-solid fa-clock me-1"></i> Pending Approvals</h6>
                   <div class="table-responsive">
                       <table class="table table-bordered align-middle table-warning">
-                          <thead>
-                              <tr>
-                                  <th>Name</th>
-                                  <th>Requested Role</th>
-                                  <th>Email</th>
-                                  <th>Phone</th>
-                                  <th style="width: 150px;" class="text-center">Action</th>
-                              </tr>
-                          </thead>
+                          <thead><tr><th>Name</th><th>Requested Role</th><th>Email</th><th>Phone</th><th class="text-center">Action</th></tr></thead>
                           <tbody id="instPendingStaffTableBody"></tbody>
                       </table>
                   </div>
@@ -357,11 +318,18 @@
                         <span id="instApproveClassDropdownLabel">Select Class</span>
                       </button>
                       <ul class="dropdown-menu dropdown-checkbox-menu" aria-labelledby="instApproveClassDropdownBtn">
-                        <!-- Options generated in JS or static -->
                          <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 inst-approve-class-cb" value="1" onchange="updateDropdownLabel('inst-approve')"> Class 1</label></li>
                          <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 inst-approve-class-cb" value="2" onchange="updateDropdownLabel('inst-approve')"> Class 2</label></li>
                          <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 inst-approve-class-cb" value="3" onchange="updateDropdownLabel('inst-approve')"> Class 3</label></li>
                          <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 inst-approve-class-cb" value="4" onchange="updateDropdownLabel('inst-approve')"> Class 4</label></li>
+                         <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 inst-approve-class-cb" value="5" onchange="updateDropdownLabel('inst-approve')"> Class 5</label></li>
+                         <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 inst-approve-class-cb" value="6" onchange="updateDropdownLabel('inst-approve')"> Class 6</label></li>
+                         <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 inst-approve-class-cb" value="7" onchange="updateDropdownLabel('inst-approve')"> Class 7</label></li>
+                         <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 inst-approve-class-cb" value="8" onchange="updateDropdownLabel('inst-approve')"> Class 8</label></li>
+                         <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 inst-approve-class-cb" value="9" onchange="updateDropdownLabel('inst-approve')"> Class 9</label></li>
+                         <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 inst-approve-class-cb" value="10" onchange="updateDropdownLabel('inst-approve')"> Class 10</label></li>
+                         <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 inst-approve-class-cb" value="11" onchange="updateDropdownLabel('inst-approve')"> Class 11</label></li>
+                         <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 inst-approve-class-cb" value="12" onchange="updateDropdownLabel('inst-approve')"> Class 12</label></li>
                       </ul>
                     </div>
                   </div>
@@ -376,7 +344,7 @@
               <div class="table-responsive">
                 <table class="table table-bordered align-middle">
                   <thead class="table-light">
-                    <tr><th>Name</th><th>Role</th><th>Email</th><th>Phone</th><th style="width: 90px;" class="text-center">Action</th></tr>
+                    <tr><th>Name</th><th>Role</th><th>Email</th><th>Phone</th><th class="text-center">Action</th></tr>
                   </thead>
                   <tbody id="principalsTableBody"></tbody>
                 </table>
@@ -386,60 +354,37 @@
 
           <!-- 1. Home Dashboard -->
           <div id="homeDashboardTab" class="content-tab">
+            <!-- Summary Cards & Leaderboard (Same as before) -->
             <div class="row g-3 mb-4">
-              <div class="col-md-4">
-                <div class="card p-4 text-center dashboard-card border-start border-4 border-success" onclick="showTab('attendanceTab')">
-                  <i class="fa-solid fa-calendar-check fa-3x text-success mb-2"></i>
-                  <h5 class="fw-bold">Attendance</h5>
-                  <p class="text-muted small m-0">Record daily attendance</p>
+                <div class="col-md-4">
+                  <div class="card p-4 text-center dashboard-card border-start border-4 border-success" onclick="showTab('attendanceTab')">
+                    <i class="fa-solid fa-calendar-check fa-3x text-success mb-2"></i><h5 class="fw-bold">Attendance</h5><p class="text-muted small m-0">Record daily attendance</p>
+                  </div>
                 </div>
-              </div>
-              <div class="col-md-4">
-                <div class="card p-4 text-center dashboard-card border-start border-4 border-warning" onclick="showTab('performanceTab')">
-                  <i class="fa-solid fa-star fa-3x text-warning mb-2"></i>
-                  <h5 class="fw-bold">Performance Board</h5>
-                  <p class="text-muted small m-0">Tasks & Star Points</p>
+                <div class="col-md-4">
+                  <div class="card p-4 text-center dashboard-card border-start border-4 border-warning" onclick="showTab('performanceTab')">
+                    <i class="fa-solid fa-star fa-3x text-warning mb-2"></i><h5 class="fw-bold">Performance Board</h5><p class="text-muted small m-0">Tasks & Star Points</p>
+                  </div>
                 </div>
-              </div>
-              <div class="col-md-4">
-                <div class="card p-4 text-center dashboard-card border-start border-4 border-primary" onclick="showTab('marksTab')">
-                  <i class="fa-solid fa-award fa-3x text-primary mb-2"></i>
-                  <h5 class="fw-bold">Marks Entry</h5>
-                  <p class="text-muted small m-0">Exam scores & evaluations</p>
+                <div class="col-md-4">
+                  <div class="card p-4 text-center dashboard-card border-start border-4 border-primary" onclick="showTab('marksTab')">
+                    <i class="fa-solid fa-award fa-3x text-primary mb-2"></i><h5 class="fw-bold">Marks Entry</h5><p class="text-muted small m-0">Exam scores & evaluations</p>
+                  </div>
                 </div>
-              </div>
             </div>
-            
             <div class="card p-4">
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-trophy me-2"></i>Top Performers Leaderboard</h5>
               <div class="row g-3 text-center" id="homeLeaderboardArea">
-                <div class="col-md-4">
-                  <div class="card p-3 bg-light">
-                    <span class="star-badge mb-2 d-inline-block">Today's Star</span>
-                    <h5 class="fw-bold mt-2" id="starTodayName">-</h5>
-                    <small class="text-muted" id="starTodayClass">-</small>
-                  </div>
-                </div>
-                <div class="col-md-4">
-                  <div class="card p-3 bg-light">
-                    <span class="star-badge mb-2 d-inline-block">Weekly Star</span>
-                    <h5 class="fw-bold mt-2" id="starWeekName">-</h5>
-                    <small class="text-muted" id="starWeekClass">-</small>
-                  </div>
-                </div>
-                <div class="col-md-4">
-                  <div class="card p-3 bg-light">
-                    <span class="star-badge mb-2 d-inline-block">Monthly Star</span>
-                    <h5 class="fw-bold mt-2" id="starMonthName">-</h5>
-                    <small class="text-muted" id="starMonthClass">-</small>
-                  </div>
-                </div>
+                <div class="col-md-4"><div class="card p-3 bg-light"><span class="star-badge mb-2 d-inline-block">Today's Star</span><h5 class="fw-bold mt-2" id="starTodayName">-</h5><small class="text-muted" id="starTodayClass">-</small></div></div>
+                <div class="col-md-4"><div class="card p-3 bg-light"><span class="star-badge mb-2 d-inline-block">Weekly Star</span><h5 class="fw-bold mt-2" id="starWeekName">-</h5><small class="text-muted" id="starWeekClass">-</small></div></div>
+                <div class="col-md-4"><div class="card p-3 bg-light"><span class="star-badge mb-2 d-inline-block">Monthly Star</span><h5 class="fw-bold mt-2" id="starMonthName">-</h5><small class="text-muted" id="starMonthClass">-</small></div></div>
               </div>
             </div>
           </div>
 
           <!-- 2. Students List Tab -->
           <div id="studentsListTab" class="content-tab d-none">
+            <!-- Student Table details... -->
             <div class="card p-4">
               <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
                 <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-users"></i> Student Directory</h5>
@@ -448,38 +393,17 @@
                   <button class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#bulkImportModal"><i class="fa-solid fa-file-csv me-1"></i> Bulk Import</button>
                 </div>
               </div>
-
               <div class="row g-2 align-items-center mb-3">
-                <div class="col-md-4">
-                  <select id="filterClassSelect" class="form-select form-select-sm" onchange="loadStudentsByClass()"></select>
-                </div>
-                <div class="col-md-6">
-                  <input type="text" id="searchBox" class="form-control form-control-sm" placeholder="Search by name or Reg No..." oninput="filterStudentsLocal()">
-                </div>
-                <div class="col-md-2 text-end">
-                  <button class="btn btn-sm btn-outline-success w-100" onclick="loadStudentsByClass(true)"><i class="fa-solid fa-rotate"></i> Reload</button>
-                </div>
+                <div class="col-md-4"><select id="filterClassSelect" class="form-select form-select-sm" onchange="loadStudentsByClass()"></select></div>
+                <div class="col-md-6"><input type="text" id="searchBox" class="form-control form-control-sm" placeholder="Search by name or Reg No..." oninput="filterStudentsLocal()"></div>
+                <div class="col-md-2 text-end"><button class="btn btn-sm btn-outline-success w-100" onclick="loadStudentsByClass(true)"><i class="fa-solid fa-rotate"></i> Reload</button></div>
               </div>
-
               <div class="table-responsive">
                 <table class="table table-hover table-bordered align-middle">
-                  <thead class="table-light">
-                    <tr>
-                      <th style="width: 80px;">Reg No</th>
-                      <th>Name</th>
-                      <th>Class</th>
-                      <th>Parent / Guardian</th>
-                      <th>Place</th>
-                      <th>Phone</th>
-                      <th style="width: 120px;" class="text-center" id="actionHeaderCol">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody id="studentsTableBody">
-                    <tr><td colspan="7" class="text-center text-muted">Loading data...</td></tr>
-                  </tbody>
+                  <thead class="table-light"><tr><th>Reg No</th><th>Name</th><th>Class</th><th>Parent / Guardian</th><th>Place</th><th>Phone</th><th class="text-center" id="actionHeaderCol">Actions</th></tr></thead>
+                  <tbody id="studentsTableBody"><tr><td colspan="7" class="text-center text-muted">Loading data...</td></tr></tbody>
                 </table>
               </div>
-
               <div class="d-flex justify-content-between align-items-center mt-3">
                 <span class="small text-muted" id="paginationInfo">Showing 0-0 of 0</span>
                 <nav><ul class="pagination pagination-sm m-0" id="paginationControls"></ul></nav>
@@ -487,9 +411,10 @@
             </div>
           </div>
 
-          <!-- 3. Admission Form -->
+          <!-- 3. Admission Form Tab -->
           <div id="admissionTab" class="content-tab d-none">
-            <div class="card p-4">
+             <!-- Admission Form (Unchanged) -->
+             <div class="card p-4">
               <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-address-card"></i> Student Admission Form</h5>
                 <button class="btn btn-sm btn-outline-secondary" onclick="showTab('studentsListTab')"><i class="fa-solid fa-arrow-left"></i> Back to List</button>
@@ -502,10 +427,7 @@
                   <div class="col-md-3">
                     <label class="form-label">Class *</label>
                     <select id="currentClass" class="form-select" required>
-                      <option value="1">Class 1</option><option value="2">Class 2</option><option value="3">Class 3</option>
-                      <option value="4">Class 4</option><option value="5">Class 5</option><option value="6">Class 6</option>
-                      <option value="7">Class 7</option><option value="8">Class 8</option><option value="9">Class 9</option>
-                      <option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option>
+                      <option value="1">Class 1</option><option value="2">Class 2</option><option value="3">Class 3</option><option value="4">Class 4</option><option value="5">Class 5</option><option value="6">Class 6</option><option value="7">Class 7</option><option value="8">Class 8</option><option value="9">Class 9</option><option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option>
                     </select>
                   </div>
                   <div class="col-md-3"><label class="form-label">Date of Birth</label><input type="date" id="dob" class="form-control"></div>
@@ -524,37 +446,21 @@
 
           <!-- 4. Attendance Module -->
           <div id="attendanceTab" class="content-tab d-none">
-            <div class="card p-4">
+             <!-- Attendance details... -->
+             <div class="card p-4">
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-calendar-check"></i> Daily Attendance</h5>
               <div class="row g-3 mb-4">
-                <div class="col-md-4">
-                  <label class="form-label">Date</label>
-                  <input type="date" id="attDate" class="form-control">
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label">Select Class</label>
-                  <select id="attClassSelect" class="form-select" onchange="loadAttendanceSheet()"></select>
-                </div>
+                <div class="col-md-4"><label class="form-label">Date</label><input type="date" id="attDate" class="form-control"></div>
+                <div class="col-md-4"><label class="form-label">Select Class</label><select id="attClassSelect" class="form-select" onchange="loadAttendanceSheet()"></select></div>
               </div>
-
               <div id="attendanceSheetArea" class="d-none">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                   <span class="fw-bold text-muted" id="attCountInfo">Total: 0 | Present: 0</span>
-                  <div class="form-check">
-                    <input class="form-check-input form-check-input-lg" type="checkbox" id="selectAllAtt" checked onchange="toggleSelectAllAttendance()">
-                    <label class="form-check-label fw-bold ms-1" for="selectAllAtt">Select All</label>
-                  </div>
+                  <div class="form-check"><input class="form-check-input form-check-input-lg" type="checkbox" id="selectAllAtt" checked onchange="toggleSelectAllAttendance()"><label class="form-check-label fw-bold ms-1" for="selectAllAtt">Select All</label></div>
                 </div>
-
                 <div class="table-responsive">
                   <table class="table table-bordered align-middle">
-                    <thead class="table-light">
-                      <tr>
-                        <th style="width: 80px;">Reg No</th>
-                        <th>Student Name</th>
-                        <th style="width: 140px;" class="text-center">Status (Present)</th>
-                      </tr>
-                    </thead>
+                    <thead class="table-light"><tr><th style="width: 80px;">Reg No</th><th>Student Name</th><th style="width: 140px;" class="text-center">Status (Present)</th></tr></thead>
                     <tbody id="attendanceTableBody"></tbody>
                   </table>
                 </div>
@@ -567,6 +473,7 @@
           <div id="marksTab" class="content-tab d-none">
             <div class="card p-4">
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-award"></i> Examination Marks Entry</h5>
+              <!-- Marks Selection & Table... -->
               <div class="row g-3 mb-4">
                 <div class="col-md-6">
                   <label class="form-label">Select Exam *</label>
@@ -576,27 +483,12 @@
                     <option value="Annual Exam">Annual Exam</option>
                   </select>
                 </div>
-                <div class="col-md-6">
-                  <label class="form-label">Class</label>
-                  <select id="markClassSelect" class="form-select" onchange="loadMarksEntrySheet()"></select>
-                </div>
+                <div class="col-md-6"><label class="form-label">Class</label><select id="markClassSelect" class="form-select" onchange="loadMarksEntrySheet()"></select></div>
               </div>
-
               <div id="marksSheetArea" class="d-none">
                 <div class="table-responsive">
                   <table class="table table-bordered align-middle">
-                    <thead class="table-light text-center">
-                      <tr>
-                        <th>Reg No</th>
-                        <th>Name</th>
-                        <th>Quran</th>
-                        <th>Tajweed</th>
-                        <th>Fiqh</th>
-                        <th>Aqeedah</th>
-                        <th>Tareekh</th>
-                        <th>Lisan</th>
-                      </tr>
-                    </thead>
+                    <thead class="table-light text-center"><tr><th>Reg No</th><th>Name</th><th>Quran</th><th>Tajweed</th><th>Fiqh</th><th>Aqeedah</th><th>Tareekh</th><th>Lisan</th></tr></thead>
                     <tbody id="marksTableBody"></tbody>
                   </table>
                 </div>
@@ -608,11 +500,11 @@
           <!-- 6. Performance Tab -->
           <div id="performanceTab" class="content-tab d-none">
             <div class="card p-4">
-              <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+               <!-- Perf details... -->
+               <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
                 <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-star me-2"></i>Student Performance & Tasks</h5>
                 <button class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#customTaskModal"><i class="fa-solid fa-plus me-1"></i> Add Custom Task</button>
               </div>
-
               <div class="row g-3 mb-4">
                 <div class="col-md-6">
                   <label class="form-label">Select Task *</label>
@@ -620,44 +512,23 @@
                     <option value="Completed Homework (+10)|10">Completed Homework (+10 Pts)</option>
                     <option value="Proper Uniform (+5)|5">Proper Uniform (+5 Pts)</option>
                     <option value="Quiz / Competition Winner (+20)|20">Quiz / Competition Winner (+20 Pts)</option>
-                    <option value="Excellent Quran Recitation (+15)|15">Excellent Quran Recitation (+15 Pts)</option>
-                    <option value="Good Conduct & Manners (+10)|10">Good Conduct & Manners (+10 Pts)</option>
-                    <option value="Homework Not Done (-10)|-10">Homework Not Done (-10 Pts)</option>
-                    <option value="Indiscipline (-15)|-15">Indiscipline (-15 Pts)</option>
                   </select>
                 </div>
-                <div class="col-md-6">
-                  <label class="form-label">Select Class *</label>
-                  <select id="perfClassSelect" class="form-select" onchange="loadStudentsForPerfSheet()"></select>
-                </div>
+                <div class="col-md-6"><label class="form-label">Select Class *</label><select id="perfClassSelect" class="form-select" onchange="loadStudentsForPerfSheet()"></select></div>
               </div>
-
               <div id="perfSheetArea" class="d-none">
                 <div class="row g-2 align-items-center mb-2">
-                  <div class="col-md-6">
-                    <input type="text" id="perfStudentSearch" class="form-control form-control-sm" placeholder="Filter student..." oninput="filterPerfStudents()">
-                  </div>
+                  <div class="col-md-6"><input type="text" id="perfStudentSearch" class="form-control form-control-sm" placeholder="Filter student..." oninput="filterPerfStudents()"></div>
                   <div class="col-md-6 text-end">
-                    <div class="form-check d-inline-block">
-                      <input class="form-check-input form-check-input-lg" type="checkbox" id="selectAllPerf" checked onchange="toggleSelectAllPerf()">
-                      <label class="form-check-label fw-bold ms-1" for="selectAllPerf">Select All</label>
-                    </div>
+                    <div class="form-check d-inline-block"><input class="form-check-input form-check-input-lg" type="checkbox" id="selectAllPerf" checked onchange="toggleSelectAllPerf()"><label class="form-check-label fw-bold ms-1" for="selectAllPerf">Select All</label></div>
                   </div>
                 </div>
-
                 <div class="table-responsive">
                   <table class="table table-bordered align-middle">
-                    <thead class="table-light">
-                      <tr>
-                        <th style="width: 80px;">Reg No</th>
-                        <th>Student Name</th>
-                        <th style="width: 150px;" class="text-center">Award (Tick)</th>
-                      </tr>
-                    </thead>
+                    <thead class="table-light"><tr><th style="width: 80px;">Reg No</th><th>Student Name</th><th style="width: 150px;" class="text-center">Award (Tick)</th></tr></thead>
                     <tbody id="perfTableBody"></tbody>
                   </table>
                 </div>
-
                 <button class="btn btn-primary-custom px-4 mt-2" onclick="saveBulkPerformancePoints()"><i class="fa-solid fa-floppy-disk me-1"></i> Save Points</button>
               </div>
             </div>
@@ -665,21 +536,13 @@
 
           <!-- 7. Fees Tab -->
           <div id="feesTab" class="content-tab d-none">
-            <div class="card p-4">
+             <!-- Fees Form... -->
+             <div class="card p-4">
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-receipt"></i> Fee Collection & Receipt</h5>
               <div class="row g-3 mb-4">
-                <div class="col-md-4">
-                  <label class="form-label">Select Class</label>
-                  <select id="feeClassSelect" class="form-select" onchange="loadStudentsForFees()"></select>
-                </div>
-                <div class="col-md-8">
-                  <label class="form-label">Select Student</label>
-                  <select id="feeStudentSelect" class="form-select">
-                    <option value="">-- Select Class First --</option>
-                  </select>
-                </div>
+                <div class="col-md-4"><label class="form-label">Select Class</label><select id="feeClassSelect" class="form-select" onchange="loadStudentsForFees()"></select></div>
+                <div class="col-md-8"><label class="form-label">Select Student</label><select id="feeStudentSelect" class="form-select"><option value="">-- Select Class First --</option></select></div>
               </div>
-
               <form onsubmit="processFeeReceipt(event)">
                 <div class="row g-3">
                   <div class="col-md-4"><label class="form-label">Amount (₹) *</label><input type="number" id="feeAmount" class="form-control" required></div>
@@ -689,11 +552,9 @@
                       <option value="Monthly Fee">Monthly Fee</option>
                       <option value="Admission Fee">Admission Fee</option>
                       <option value="Exam Fee">Exam Fee</option>
-                      <option value="Donation">Donation</option>
                     </select>
                   </div>
                   <div class="col-md-4"><label class="form-label">Manual Receipt No (Book)</label><input type="text" id="manualReceipt" class="form-control text-uppercase" placeholder="Optional"></div>
-                  
                   <div class="col-12 mt-4 d-flex gap-2">
                     <button type="submit" class="btn btn-primary-custom px-4"><i class="fa-solid fa-print me-1"></i> Save & Print Receipt</button>
                     <button type="button" id="whatsappShareBtn" class="btn btn-success px-4 d-none" onclick="shareToWhatsApp()"><i class="fa-brands fa-whatsapp me-1"></i> Send via WhatsApp</button>
@@ -708,27 +569,19 @@
             <div class="card p-4">
               <div class="d-flex justify-content-between align-items-center mb-3">
                   <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-chalkboard-user"></i> Staff Management</h5>
+                  <button class="btn btn-sm btn-outline-success" onclick="openStaffProfileModal(null)"><i class="fa-solid fa-plus me-1"></i> Add Staff Directly</button>
               </div>
 
-              <!-- Pending Approvals Section -->
               <div id="pendingStaffSection" class="mb-4 d-none">
                   <h6 class="fw-bold text-warning mb-2"><i class="fa-solid fa-clock me-1"></i> Pending Staff Approvals</h6>
                   <div class="table-responsive">
                       <table class="table table-bordered align-middle table-warning">
-                          <thead>
-                              <tr>
-                                  <th>Name</th>
-                                  <th>Email</th>
-                                  <th>Phone</th>
-                                  <th style="width: 150px;" class="text-center">Action</th>
-                              </tr>
-                          </thead>
+                          <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th class="text-center">Action</th></tr></thead>
                           <tbody id="pendingStaffTableBody"></tbody>
                       </table>
                   </div>
               </div>
 
-              <!-- Assign Classes Form (used when approving) -->
               <form id="assignClassesForm" onsubmit="assignClassesToStaff(event)" class="mb-4 d-none border p-3 rounded bg-light">
                 <input type="hidden" id="assignStaffId">
                 <h6 class="fw-bold text-primary mb-2">Approve <span id="assignStaffNameDisplay"></span></h6>
@@ -766,7 +619,7 @@
               <div class="table-responsive">
                 <table class="table table-bordered align-middle">
                   <thead class="table-light">
-                    <tr><th style="width: 60px;">SL</th><th>Name</th><th>Role</th><th>Email</th><th>Phone</th><th>Classes</th><th style="width: 90px;" class="text-center">Action</th></tr>
+                    <tr><th style="width: 60px;">SL</th><th>Name</th><th>Role</th><th>Email</th><th>Phone</th><th>Classes</th><th style="width: 120px;" class="text-center">Action</th></tr>
                   </thead>
                   <tbody id="teachersTableBody"></tbody>
                 </table>
@@ -783,18 +636,12 @@
                   <label class="form-label">Current Class</label>
                   <select id="fromClass" class="form-select">
                     <option value="1">Class 1</option><option value="2">Class 2</option><option value="3">Class 3</option>
-                    <option value="4">Class 4</option><option value="5">Class 5</option><option value="6">Class 6</option>
-                    <option value="7">Class 7</option><option value="8">Class 8</option><option value="9">Class 9</option>
-                    <option value="10">Class 10</option><option value="11">Class 11</option>
                   </select>
                 </div>
                 <div class="col-md-4">
                   <label class="form-label">Promote To</label>
                   <select id="toClass" class="form-select">
-                    <option value="2">Class 2</option><option value="3">Class 3</option><option value="4">Class 4</option>
-                    <option value="5">Class 5</option><option value="6">Class 6</option><option value="7">Class 7</option>
-                    <option value="8">Class 8</option><option value="9">Class 9</option><option value="10">Class 10</option>
-                    <option value="11">Class 11</option><option value="12">Class 12</option><option value="Passed Out">Passed Out</option>
+                    <option value="2">Class 2</option><option value="3">Class 3</option><option value="Passed Out">Passed Out</option>
                   </select>
                 </div>
                 <div class="col-md-4 d-flex align-items-end"><button class="btn btn-warning w-100" onclick="promoteStudents()"><i class="fa-solid fa-arrow-up-right-dots me-1"></i> Promote Class</button></div>
@@ -802,6 +649,164 @@
             </div>
           </div>
 
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- --- MODALS --- -->
+
+  <!-- Advanced Staff Profile Modal (Add/Edit) -->
+  <div class="modal fade" id="staffProfileModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-madrassa text-white">
+          <h5 class="modal-title fw-bold" id="staffModalTitle">Staff Profile</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-0">
+          <form id="staffProfileForm" onsubmit="saveStaffProfile(event)">
+            <input type="hidden" id="spDocId">
+
+            <!-- Authentication Section (Only for Direct Add) -->
+            <div id="spAuthSection" class="p-3 bg-light border-bottom">
+               <h6 class="fw-bold text-danger mb-2"><i class="fa-solid fa-key me-1"></i> Account Setup (For New Staff)</h6>
+               <div class="row g-2">
+                   <div class="col-md-6">
+                       <label class="form-label small">Email Address *</label>
+                       <input type="email" id="spAuthEmail" class="form-control">
+                   </div>
+                   <div class="col-md-6">
+                       <label class="form-label small">Password *</label>
+                       <input type="text" id="spAuthPassword" class="form-control" placeholder="Min 6 characters">
+                   </div>
+               </div>
+            </div>
+
+            <div class="px-3 pt-3">
+              <!-- Tabs Navigation -->
+              <ul class="nav nav-tabs" id="staffTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-personal" type="button" role="tab">Personal Info</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-contact" type="button" role="tab">Contact</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-education" type="button" role="tab">Education</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-employment" type="button" role="tab">Employment</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-bank" type="button" role="tab">Bank Details</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-transfer" type="button" role="tab">Relieving</button>
+                </li>
+              </ul>
+
+              <!-- Tabs Content -->
+              <div class="tab-content p-3 border border-top-0 rounded-bottom mb-3" style="background:#fff;">
+                
+                <!-- 1. Personal Tab -->
+                <div class="tab-pane fade show active" id="tab-personal" role="tabpanel">
+                  <div class="row g-3">
+                    <div class="col-md-12"><label class="form-label small">Full Name *</label><input type="text" id="spName" class="form-control text-uppercase" required></div>
+                    <div class="col-md-4"><label class="form-label small">Gender</label><select id="spGender" class="form-select"><option value="Male">Male</option><option value="Female">Female</option></select></div>
+                    <div class="col-md-4"><label class="form-label small">Date of Birth</label><input type="date" id="spDob" class="form-control"></div>
+                    <div class="col-md-4"><label class="form-label small">Blood Group</label><select id="spBlood" class="form-select"><option value="">Select</option><option value="A+">A+</option><option value="A-">A-</option><option value="B+">B+</option><option value="B-">B-</option><option value="O+">O+</option><option value="O-">O-</option><option value="AB+">AB+</option><option value="AB-">AB-</option></select></div>
+                    <div class="col-md-4"><label class="form-label small">Father's / Spouse's Name</label><input type="text" id="spGuardian" class="form-control text-uppercase"></div>
+                    <div class="col-md-4"><label class="form-label small">Marital Status</label><select id="spMarital" class="form-select"><option value="Single">Single</option><option value="Married">Married</option></select></div>
+                    <div class="col-md-4"><label class="form-label small">Aadhaar Number</label><input type="text" id="spAadhaar" class="form-control"></div>
+                  </div>
+                </div>
+
+                <!-- 2. Contact Tab -->
+                <div class="tab-pane fade" id="tab-contact" role="tabpanel">
+                  <div class="row g-3">
+                    <div class="col-md-4"><label class="form-label small">Mobile Number *</label><input type="tel" id="spPhone" class="form-control" required></div>
+                    <div class="col-md-4"><label class="form-label small">WhatsApp Number</label><input type="tel" id="spWhatsapp" class="form-control"></div>
+                    <div class="col-md-4"><label class="form-label small">Emergency Contact Number</label><input type="tel" id="spEmergency" class="form-control"></div>
+                    <div class="col-md-12"><label class="form-label small">House Name / Number</label><input type="text" id="spHouse" class="form-control text-uppercase"></div>
+                    <div class="col-md-4"><label class="form-label small">Post Office (PO)</label><input type="text" id="spPo" class="form-control text-uppercase"></div>
+                    <div class="col-md-4"><label class="form-label small">Pincode</label><input type="text" id="spPin" class="form-control"></div>
+                    <div class="col-md-4"><label class="form-label small">District</label><input type="text" id="spDistrict" class="form-control text-uppercase"></div>
+                    <div class="col-md-4"><label class="form-label small">State</label><input type="text" id="spState" class="form-control text-uppercase" value="KERALA"></div>
+                  </div>
+                </div>
+
+                <!-- 3. Education Tab -->
+                <div class="tab-pane fade" id="tab-education" role="tabpanel">
+                  <div class="row g-3">
+                    <div class="col-md-6"><label class="form-label small">Religious Education Qualifications</label><input type="text" id="spRelEdu" class="form-control text-uppercase" placeholder="e.g. Baqavi, Darimi, Faizy"></div>
+                    <div class="col-md-6"><label class="form-label small">General Education Qualifications</label><input type="text" id="spGenEdu" class="form-control text-uppercase" placeholder="e.g. SSLC, B.A, B.Ed"></div>
+                    <div class="col-md-6"><label class="form-label small">Languages Known</label><input type="text" id="spLanguages" class="form-control text-uppercase" placeholder="Malayalam, English, Arabic"></div>
+                    <div class="col-md-6"><label class="form-label small">Key Skills</label><input type="text" id="spSkills" class="form-control text-uppercase"></div>
+                    <div class="col-md-12"><label class="form-label small">Awards & Achievements</label><input type="text" id="spAwards" class="form-control text-uppercase"></div>
+                  </div>
+                </div>
+
+                <!-- 4. Employment Tab -->
+                <div class="tab-pane fade" id="tab-employment" role="tabpanel">
+                  <div class="row g-3">
+                    <div class="col-md-4"><label class="form-label small">System Role *</label><select id="spRole" class="form-select" required><option value="teacher">Teacher (മുഅല്ലിം)</option><option value="principal">Principal (സദർ)</option></select></div>
+                    <div class="col-md-4"><label class="form-label small">Designation</label><input type="text" id="spDesignation" class="form-control text-uppercase" placeholder="e.g. Senior Teacher"></div>
+                    <div class="col-md-4"><label class="form-label small">Muallim Registration (MSR) No</label><input type="text" id="spMsr" class="form-control text-uppercase"></div>
+                    <div class="col-md-4"><label class="form-label small">Employment Type</label><select id="spEmpType" class="form-select"><option value="Full Time">Full Time</option><option value="Part Time">Part Time</option></select></div>
+                    <div class="col-md-4"><label class="form-label small">Teaching Experience (Years)</label><input type="number" id="spExp" class="form-control"></div>
+                    <div class="col-md-4"><label class="form-label small">Date of Joining</label><input type="date" id="spDoj" class="form-control"></div>
+                    
+                    <div class="col-md-12" id="spClassesDiv">
+                      <label class="form-label small">Assigned Classes (Select Multiple)</label>
+                      <div class="d-flex flex-wrap gap-2">
+                        <!-- Render checkboxes directly for ease in modal -->
+                        <div class="form-check"><input type="checkbox" class="form-check-input sp-class-cb" value="1" id="spc1"><label class="form-check-label" for="spc1">Class 1</label></div>
+                        <div class="form-check"><input type="checkbox" class="form-check-input sp-class-cb" value="2" id="spc2"><label class="form-check-label" for="spc2">Class 2</label></div>
+                        <div class="form-check"><input type="checkbox" class="form-check-input sp-class-cb" value="3" id="spc3"><label class="form-check-label" for="spc3">Class 3</label></div>
+                        <div class="form-check"><input type="checkbox" class="form-check-input sp-class-cb" value="4" id="spc4"><label class="form-check-label" for="spc4">Class 4</label></div>
+                        <div class="form-check"><input type="checkbox" class="form-check-input sp-class-cb" value="5" id="spc5"><label class="form-check-label" for="spc5">Class 5</label></div>
+                        <div class="form-check"><input type="checkbox" class="form-check-input sp-class-cb" value="6" id="spc6"><label class="form-check-label" for="spc6">Class 6</label></div>
+                        <div class="form-check"><input type="checkbox" class="form-check-input sp-class-cb" value="7" id="spc7"><label class="form-check-label" for="spc7">Class 7</label></div>
+                        <div class="form-check"><input type="checkbox" class="form-check-input sp-class-cb" value="8" id="spc8"><label class="form-check-label" for="spc8">Class 8</label></div>
+                        <div class="form-check"><input type="checkbox" class="form-check-input sp-class-cb" value="9" id="spc9"><label class="form-check-label" for="spc9">Class 9</label></div>
+                        <div class="form-check"><input type="checkbox" class="form-check-input sp-class-cb" value="10" id="spc10"><label class="form-check-label" for="spc10">Class 10</label></div>
+                        <div class="form-check"><input type="checkbox" class="form-check-input sp-class-cb" value="11" id="spc11"><label class="form-check-label" for="spc11">Class 11</label></div>
+                        <div class="form-check"><input type="checkbox" class="form-check-input sp-class-cb" value="12" id="spc12"><label class="form-check-label" for="spc12">Class 12</label></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 5. Bank Details Tab -->
+                <div class="tab-pane fade" id="tab-bank" role="tabpanel">
+                  <div class="row g-3">
+                    <div class="col-md-6"><label class="form-label small">Account Holder Name</label><input type="text" id="spAccName" class="form-control text-uppercase"></div>
+                    <div class="col-md-6"><label class="form-label small">Account Number</label><input type="text" id="spAccNo" class="form-control"></div>
+                    <div class="col-md-4"><label class="form-label small">IFSC Code</label><input type="text" id="spIfsc" class="form-control text-uppercase"></div>
+                    <div class="col-md-4"><label class="form-label small">Bank Name</label><input type="text" id="spBank" class="form-control text-uppercase"></div>
+                    <div class="col-md-4"><label class="form-label small">Branch</label><input type="text" id="spBranch" class="form-control text-uppercase"></div>
+                  </div>
+                </div>
+
+                <!-- 6. Transfer / Relieving Tab -->
+                <div class="tab-pane fade" id="tab-transfer" role="tabpanel">
+                  <div class="alert alert-secondary small py-2 mb-3">Fill this section only if the staff is transferred or leaving the institution.</div>
+                  <div class="row g-3">
+                    <div class="col-md-6"><label class="form-label small">Transferred From</label><input type="text" id="spTransFrom" class="form-control text-uppercase"></div>
+                    <div class="col-md-6"><label class="form-label small">Transferred To</label><input type="text" id="spTransTo" class="form-control text-uppercase"></div>
+                    <div class="col-md-4"><label class="form-label small">Date of Leaving</label><input type="date" id="spDol" class="form-control"></div>
+                    <div class="col-md-8"><label class="form-label small">Reason for Leaving</label><input type="text" id="spReason" class="form-control text-uppercase"></div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-success" onclick="document.getElementById('staffProfileForm').requestSubmit()"><i class="fa-solid fa-save me-1"></i> Save Profile Details</button>
         </div>
       </div>
     </div>
@@ -826,9 +831,7 @@
                 <label class="form-label">Class *</label>
                 <select id="editCurrentClass" class="form-select" required>
                   <option value="1">Class 1</option><option value="2">Class 2</option><option value="3">Class 3</option>
-                  <option value="4">Class 4</option><option value="5">Class 5</option><option value="6">Class 6</option>
-                  <option value="7">Class 7</option><option value="8">Class 8</option><option value="9">Class 9</option>
-                  <option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option>
+                  <option value="4">Class 4</option><option value="5">Class 5</option>
                 </select>
               </div>
               <div class="col-md-3"><label class="form-label">Date of Birth</label><input type="date" id="editDob" class="form-control"></div>
@@ -888,80 +891,6 @@
               </div>
             </div>
           </form>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal: Custom Task -->
-  <div class="modal fade" id="customTaskModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content border-0 shadow">
-        <div class="modal-header bg-madrassa text-white">
-          <h5 class="modal-title fw-bold">Add Custom Task</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body p-4">
-          <form onsubmit="addNewCustomTask(event)">
-            <div class="mb-3">
-              <label class="form-label">Task Name *</label>
-              <input type="text" id="newTaskName" class="form-control text-uppercase" placeholder="e.g. Reading Competition" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Points (+ or -) *</label>
-              <input type="number" id="newTaskPoints" class="form-control" placeholder="e.g. 10 or -5" required>
-            </div>
-            <div class="text-end">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-              <button type="submit" class="btn btn-primary-custom px-4">Add Task</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Printable Digital Receipt Component -->
-  <div id="printableReceipt" class="p-4 bg-white border d-none m-auto" style="max-width: 480px;">
-    <div class="text-center border-bottom pb-3 mb-3">
-      <h4 class="fw-bold mb-1" id="recMadrassaName">Smart Madrasa</h4>
-      <p class="small text-muted mb-0">Fee Receipt</p>
-    </div>
-    <div class="d-flex justify-content-between mb-2">
-      <span>Receipt No: <b id="recNo">#1</b></span>
-      <span id="recDate">Date</span>
-    </div>
-    <div class="d-flex justify-content-between mb-2">
-      <span>Student: <b id="recStudentName">-</b></span>
-      <span>Reg No: <b id="recAdmNo">101</b></span>
-    </div>
-    <div class="d-flex justify-content-between mb-2">
-      <span>Class: <b id="recClass">-</b></span>
-      <span id="recManualBox" class="d-none">Manual No: <b id="recManualNo">-</b></span>
-    </div>
-    <div class="mb-2">Item: <span id="recFeeType">Monthly Fee</span></div>
-    <div class="mb-3 border-top pt-2 d-flex justify-content-between align-items-center">
-      <span class="fw-bold">Amount Paid:</span>
-      <h4 class="fw-bold text-success mb-0" id="recAmount">₹0</h4>
-    </div>
-    <div class="text-center mt-3 pt-2 border-top">
-      <small class="text-muted">Issued by: <span id="recCollector">Staff</span></small>
-    </div>
-  </div>
-
-  <!-- Bulk Import Modal -->
-  <div class="modal fade" id="bulkImportModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content border-0 shadow">
-        <div class="modal-header bg-madrassa text-white">
-          <h5 class="modal-title fw-bold"><i class="fa-solid fa-file-csv me-1"></i> Bulk Import (Excel/CSV)</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body p-4">
-          <p class="text-muted small">Select the CSV file downloaded from Google Sheets.</p>
-          <input type="file" id="csvFileInput" class="form-control mb-3" accept=".csv">
-          <div id="bulkStatus" class="alert alert-info d-none"></div>
-          <button class="btn btn-success w-100" onclick="handleBulkUpload()"><i class="fa-solid fa-cloud-arrow-up me-1"></i> Import Data</button>
         </div>
       </div>
     </div>
