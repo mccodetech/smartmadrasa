@@ -88,7 +88,7 @@ onAuthStateChanged(auth, async (user) => {
         // Handle pending users
         if (!isSuperAdmin && userData.status === "pending") {
            let alertMsg = "Your registration is pending approval.";
-           if(userData.role === 'admin') alertMsg = "Your Madrasa registration is pending approval from the Super Admin / Developer. Please contact support.";
+           if(userData.role === 'admin') alertMsg = "Your Madrasa registration is pending approval from the Super Admin. Please contact support.";
            else if(userData.role === 'principal') alertMsg = "Your Principal registration is pending approval from your Institution Admin.";
            else alertMsg = "Your Staff registration is pending approval from your Principal.";
            
@@ -99,7 +99,7 @@ onAuthStateChanged(auth, async (user) => {
 
         currentInstitutionId = userData.institutionId;
         currentUserRole = userData.role || (isSuperAdmin ? "superadmin" : "teacher");
-        currentUserAssignedClasses = userData.assignedClasses || (userData.assignedClass ? [userData.assignedClass] : []);
+        currentUserAssignedClasses = userData.assignedClasses || [];
 
         const instNameEl = document.getElementById("displayMadrassaName");
         if (instNameEl) instNameEl.innerText = isSuperAdmin ? "Smart Madrasa - Master Control Center" : (userData.institutionName || "Smart Madrasa");
@@ -128,17 +128,13 @@ onAuthStateChanged(auth, async (user) => {
         } else {
           if (superMasterBtn) superMasterBtn.classList.add("d-none");
           if (userRoleEl) {
-              if (currentUserRole === "admin") {
-                  userRoleEl.innerText = "Admin";
-              } else if (currentUserRole === "principal") {
-                  userRoleEl.innerText = "Principal";
-              } else {
-                  userRoleEl.innerText = `Teacher (${currentUserAssignedClasses.map(c=>'Class '+c).join(', ')})`;
-              }
+              if (currentUserRole === "admin") userRoleEl.innerText = "Admin";
+              else if (currentUserRole === "principal") userRoleEl.innerText = "Principal";
+              else userRoleEl.innerText = `Teacher (${currentUserAssignedClasses.map(c=>'Class '+c).join(', ')})`;
           }
         }
 
-        // Reset visibility for all menus first
+        // Reset visibility
         if (tMenuBtn) tMenuBtn.classList.add("d-none");
         if (pMenuBtn) pMenuBtn.classList.add("d-none");
         if (adminActions) adminActions.classList.add("d-none");
@@ -151,11 +147,8 @@ onAuthStateChanged(auth, async (user) => {
         if (performanceMenuBtn) performanceMenuBtn.classList.remove("d-none");
         if (feesMenuBtn) feesMenuBtn.classList.remove("d-none");
 
-
         if (currentUserRole === "admin") {
-            // Institution Admin View
             if (instAdminStaffBtn) instAdminStaffBtn.classList.remove("d-none");
-            // Hide other menus until needed
             if (homeMenuBtn) homeMenuBtn.classList.add("d-none");
             if (studentsMenuBtn) studentsMenuBtn.classList.add("d-none");
             if (attendanceMenuBtn) attendanceMenuBtn.classList.add("d-none");
@@ -163,18 +156,14 @@ onAuthStateChanged(auth, async (user) => {
             if (performanceMenuBtn) performanceMenuBtn.classList.add("d-none");
             if (feesMenuBtn) feesMenuBtn.classList.add("d-none");
             showTab('instAdminTab'); 
-            loadPrincipalsList(); // Load only principals and teachers under this admin
+            loadPrincipalsList(); 
 
         } else if (currentUserRole === "principal" || isSuperAdmin) {
-            // Principal or Super Admin viewing a Madrasa
           if (tMenuBtn) tMenuBtn.classList.remove("d-none");
           if (pMenuBtn) pMenuBtn.classList.remove("d-none");
           if (adminActions) adminActions.classList.remove("d-none");
           if (actionCol) actionCol.classList.remove("d-none");
-        } else {
-            // Teacher View
-            // Menus are already hidden by default reset above
-        }
+        } 
 
         document.getElementById("authSection").classList.add("d-none");
         document.getElementById("appSection").classList.remove("d-none");
@@ -247,7 +236,7 @@ window.handleUnifiedLogin = async (e) => {
   const identifier = document.getElementById("loginIdentifier").value.trim();
 
   if (/^\d+$/.test(identifier)) {
-    // Parent / Student Login
+    // Parent Login
     const reg = Number(identifier);
     const mobile = document.getElementById("loginMobile").value.trim().slice(-10);
 
@@ -262,14 +251,12 @@ window.handleUnifiedLogin = async (e) => {
     snap.forEach(d => {
       const data = d.data();
       const sPhone = (data.phone || '').replace(/[^0-9]/g, '').slice(-10);
-      if (sPhone === mobile) {
-          matchedStudent = {id: d.id, ...data};
-      }
+      if (sPhone === mobile) matchedStudent = {id: d.id, ...data};
     });
 
     if (!matchedStudent) return alert("Provided phone number does not match student's records.");
 
-    // Now, let's find siblings
+    // Find siblings
     const siblingsQ = query(collection(db, "students"), where("institutionId", "==", matchedStudent.institutionId));
     const siblingsSnap = await getDocs(siblingsQ);
     
@@ -286,24 +273,20 @@ window.handleUnifiedLogin = async (e) => {
     document.getElementById("authSection").classList.add("d-none");
     document.getElementById("parentViewSection").classList.remove("d-none");
 
-    // Populate dropdown
     const studentSelect = document.getElementById("parentStudentSelect");
     studentSelect.innerHTML = "";
     parentStudentsData.forEach(student => {
         const option = document.createElement("option");
         option.value = student.regNo;
         option.text = `${student.name} (Reg No: ${student.regNo})`;
-        if (student.regNo === reg) {
-            option.selected = true;
-        }
+        if (student.regNo === reg) option.selected = true;
         studentSelect.appendChild(option);
     });
 
-    // Load data for the selected student
     loadParentStudentData(matchedStudent);
 
   } else {
-    // Teacher / Admin Login
+    // Staff Login
     const email = identifier;
     const password = document.getElementById("loginPassword").value;
     if (!password) return alert("Please enter your password.");
@@ -317,9 +300,7 @@ window.handleUnifiedLogin = async (e) => {
 window.switchParentStudent = () => {
     const selectedRegNo = Number(document.getElementById("parentStudentSelect").value);
     const selectedStudent = parentStudentsData.find(s => s.regNo === selectedRegNo);
-    if (selectedStudent) {
-        loadParentStudentData(selectedStudent);
-    }
+    if (selectedStudent) loadParentStudentData(selectedStudent);
 }
 
 async function loadParentStudentData(student) {
@@ -359,11 +340,11 @@ window.handleSignUp = async (e) => {
   try {
     const board = document.getElementById("regBoard").value;
     const instCode = document.getElementById("regInstCode").value.trim().toUpperCase();
-    const instName = document.getElementById("regInstName").value.trim();
-    const userName = document.getElementById("regUserName").value.trim();
+    const instName = document.getElementById("regInstName").value.trim().toUpperCase();
+    const userName = document.getElementById("regUserName").value.trim().toUpperCase();
     const phone = document.getElementById("regPhone").value.trim();
-    const whatsapp = document.getElementById("regWhatsapp").value.trim() || phone; // fallback to phone
-    const email = document.getElementById("regEmail").value.trim();
+    const whatsapp = document.getElementById("regWhatsapp").value.trim() || phone;
+    const email = document.getElementById("regEmail").value.trim().toLowerCase();
     const pwd = document.getElementById("regPassword").value;
     const instId = board + "_" + instCode;
 
@@ -379,9 +360,9 @@ window.handleSignUp = async (e) => {
       institutionCode: instCode,
       institutionBoard: board,
       institutionName: instName,
-      role: "admin", // Institution Admin
+      role: "admin",
       status: isDev ? "active" : "pending",
-      assignedClasses: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
+      assignedClasses: [],
       createdAt: serverTimestamp()
     });
 
@@ -408,20 +389,22 @@ window.handleStaffSignUp = async (e) => {
     if (submitBtn) submitBtn.disabled = true;
   
     try {
-      const role = document.getElementById("staffRole").value; // teacher or principal
-      const instId = document.getElementById("staffInstCode").value.trim(); // User inputs the full ID e.g., CBSE_1145
-      const userName = document.getElementById("staffName").value.trim();
+      const role = document.getElementById("staffRole").value;
+      const board = document.getElementById("staffBoard").value;
+      const instCode = document.getElementById("staffInstCode").value.trim().toUpperCase();
+      const instId = board + "_" + instCode; 
+      
+      const userName = document.getElementById("staffName").value.trim().toUpperCase();
       const phone = document.getElementById("staffPhone").value.trim();
       const whatsapp = document.getElementById("staffWhatsapp").value.trim() || phone;
-      const email = document.getElementById("staffEmail").value.trim();
+      const email = document.getElementById("staffEmail").value.trim().toLowerCase();
       const pwd = document.getElementById("staffPassword").value;
   
-      // Verify if the institution exists
       const instQuery = query(collection(db, "users"), where("institutionId", "==", instId), where("role", "==", "admin"));
       const instSnap = await getDocs(instQuery);
   
       if (instSnap.empty) {
-          alert("Madrasa ID not found. Please check with your Institution Admin.");
+          alert("Madrasa Code/Board combination not found. Please check with your Institution Admin.");
           submitBtn.disabled = false;
           return;
       }
@@ -439,7 +422,7 @@ window.handleStaffSignUp = async (e) => {
         institutionId: instId,
         institutionName: instName,
         role: role, 
-        status: "pending", // Requires admin/principal approval
+        status: "pending", 
         assignedClasses: [],
         createdAt: serverTimestamp()
       });
@@ -456,7 +439,7 @@ window.handleStaffSignUp = async (e) => {
     }
   };
 
-// Load Super Admin Madrasa Master List
+// Load Super Admin Requests
 window.loadSuperAdminRequests = async () => {
   const tbody = document.getElementById("superAdminTableBody");
   tbody.innerHTML = `<tr><td colspan="7" class="text-center">Loading registered madrasas...</td></tr>`;
@@ -499,16 +482,14 @@ window.loadSuperAdminRequests = async () => {
       </tr>
     `;
   });
-
   tbody.innerHTML = html || `<tr><td colspan="7" class="text-center text-muted">No madrasa accounts found.</td></tr>`;
 };
 
-// Super Admin Switch Scope
 window.switchMadrasaScope = (instId, instName) => {
   currentInstitutionId = instId;
   document.getElementById("displayMadrassaName").innerText = instName + " (Super Admin View)";
   document.getElementById("superAdminBackBtn").classList.remove("d-none");
-  showTab('instAdminTab'); // Go to Inst Admin tab to see staff for this madrasa
+  showTab('instAdminTab'); 
   loadPrincipalsList();
 };
 
@@ -521,16 +502,14 @@ window.returnToSuperAdminConsole = () => {
 window.openSuperAdminEditMadrasaModal = (docId) => {
   const m = localMadrasasCache.find(x => x.id === docId);
   if (!m) return;
-
   document.getElementById("saEditDocId").value = docId;
   document.getElementById("saEditBoard").value = m.institutionBoard || '';
   document.getElementById("saEditInstCode").value = m.institutionCode || '';
   document.getElementById("saEditInstName").value = m.institutionName || '';
   document.getElementById("saEditName").value = m.name || '';
   document.getElementById("saEditEmail").value = m.email || '';
-  document.getElementById("saEditPhone").value = m.whatsapp || m.phone || '';
+  document.getElementById("saEditPhone").value = m.phone || '';
   document.getElementById("saEditStatus").value = m.status || 'active';
-
   new bootstrap.Modal(document.getElementById('superAdminEditMadrasaModal')).show();
 };
 
@@ -539,9 +518,9 @@ window.saveEditedMadrasaBySuperAdmin = async (e) => {
   const docId = document.getElementById("saEditDocId").value;
   const board = document.getElementById("saEditBoard").value;
   const code = document.getElementById("saEditInstCode").value.trim().toUpperCase();
-  const instName = document.getElementById("saEditInstName").value.trim();
-  const name = document.getElementById("saEditName").value.trim();
-  const email = document.getElementById("saEditEmail").value.trim();
+  const instName = document.getElementById("saEditInstName").value.trim().toUpperCase();
+  const name = document.getElementById("saEditName").value.trim().toUpperCase();
+  const email = document.getElementById("saEditEmail").value.trim().toLowerCase();
   const phone = document.getElementById("saEditPhone").value.trim();
   const status = document.getElementById("saEditStatus").value;
   const instId = board + "_" + code;
@@ -554,7 +533,7 @@ window.saveEditedMadrasaBySuperAdmin = async (e) => {
       institutionName: instName,
       name: name,
       email: email,
-      whatsapp: phone, // Assuming phone edit updates whatsapp field for contact
+      phone: phone,
       status: status,
       updatedAt: serverTimestamp()
     });
@@ -568,20 +547,17 @@ window.approveMadrasa = async (userId, instName) => {
   if (confirm(`Approve registration for ${instName}?`)) {
     try{
         await updateDoc(doc(db, "users", userId), { status: "active" });
-        // Send WhatsApp if phone exists
         const userDoc = await getDoc(doc(db, "users", userId));
-        if(userDoc.exists() && userDoc.data().phone) {
-             let msg = `Hello ${userDoc.data().name},%0A%0AYour institution *${userDoc.data().institutionName}* has been approved on Smart Madrasa.%0A%0AYour Institution ID is: *${userDoc.data().institutionId}*. Please share this ID with your staff to join.`;
-             const cleanPhone = userDoc.data().phone.replace(/[^0-9]/g, '');
+        if(userDoc.exists() && userDoc.data().whatsapp) {
+             let msg = `Hello ${userDoc.data().name},%0A%0AYour institution *${userDoc.data().institutionName}* has been approved on Smart Madrasa.%0A%0AYour Institution ID is: *${userDoc.data().institutionId}*. Please share this Board & Code with your staff to join.`;
+             const cleanPhone = userDoc.data().whatsapp.replace(/[^0-9]/g, '');
              const waUrl = cleanPhone.length >= 10 ? `https://wa.me/91${cleanPhone.slice(-10)}?text=${msg}` : `https://wa.me/?text=${msg}`;
              window.open(waUrl, "_blank");
         } else {
              alert("Madrasa approved successfully!");
         }
         loadSuperAdminRequests();
-    } catch(e) {
-        alert("Error approving: " + e.message);
-    }
+    } catch(e) { alert("Error approving: " + e.message); }
   }
 };
 
@@ -601,14 +577,6 @@ window.logoutParent = () => {
 
 window.handleLogout = () => signOut(auth);
 
-
-// Registration for Principal (By Inst Admin)
-/* Unused, keeping registerNewTeacher logic for all
-window.registerPrincipal = async (e) => {
-    //...
-};
-*/
-
 // Load Principals & Staff List for Inst Admin
 window.loadPrincipalsList = async () => {
     const tbody = document.getElementById("principalsTableBody");
@@ -618,7 +586,6 @@ window.loadPrincipalsList = async () => {
     tbody.innerHTML = `<tr><td colspan="5" class="text-center">Loading...</td></tr>`;
     pendingTbody.innerHTML = `<tr><td colspan="5" class="text-center">Loading...</td></tr>`;
 
-    // Load Active Staff & Principals
     const qActive = query(collection(db, "users"), where("institutionId", "==", currentInstitutionId), where("status", "==", "active"));
     const snapActive = await getDocs(qActive);
 
@@ -646,7 +613,6 @@ window.loadPrincipalsList = async () => {
     });
     tbody.innerHTML = htmlActive || `<tr><td colspan="5" class="text-center text-muted">No staff/principals assigned yet.</td></tr>`;
 
-    // Load Pending Staff & Principals
     const qPending = query(collection(db, "users"), where("institutionId", "==", currentInstitutionId), where("status", "==", "pending"));
     const snapPending = await getDocs(qPending);
   
@@ -689,11 +655,8 @@ window.openInstAssignClassesForm = (staffId) => {
 
         const classDiv = document.getElementById("instClassAssignDiv");
         
-        if(staff.role === 'principal') {
-             classDiv.classList.add("d-none");
-        } else {
-             classDiv.classList.remove("d-none");
-        }
+        if(staff.role === 'principal') classDiv.classList.add("d-none");
+        else classDiv.classList.remove("d-none");
 
         document.getElementById("instAssignClassesForm").classList.remove("d-none");
         document.querySelectorAll('.inst-approve-class-cb').forEach(cb => cb.checked = false);
@@ -712,10 +675,7 @@ window.instAssignClassesToStaff = async (e) => {
         const checkboxes = document.querySelectorAll('.inst-approve-class-cb:checked');
         assignedClasses = Array.from(checkboxes).map(cb => cb.value);
 
-        if (assignedClasses.length === 0) {
-            alert("Please select at least one class.");
-            return;
-        }
+        if (assignedClasses.length === 0) return alert("Please select at least one class.");
     } else if (role === 'principal') {
         assignedClasses = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
     }
@@ -727,12 +687,10 @@ window.instAssignClassesToStaff = async (e) => {
         });
         
         const staff = pendingStaffCache.find(s => s.id === staffId);
-        if(staff && staff.phone) {
+        if(staff && staff.whatsapp) {
             let msg = `Hello ${staff.name},%0A%0AYour registration as ${role} at *${document.getElementById("displayMadrassaName").innerText}* has been *approved*.%0A%0AYou can now login using your email: ${staff.email}.`;
-            const cleanPhone = staff.phone.replace(/[^0-9]/g, '');
-            const waUrl = cleanPhone.length >= 10 
-              ? `https://wa.me/91${cleanPhone.slice(-10)}?text=${msg}`
-              : `https://wa.me/?text=${msg}`;
+            const cleanPhone = staff.whatsapp.replace(/[^0-9]/g, '');
+            const waUrl = cleanPhone.length >= 10 ? `https://wa.me/91${cleanPhone.slice(-10)}?text=${msg}` : `https://wa.me/?text=${msg}`;
             window.open(waUrl, "_blank");
         } else {
              alert("Approved successfully!");
@@ -740,31 +698,27 @@ window.instAssignClassesToStaff = async (e) => {
 
         document.getElementById("instAssignClassesForm").classList.add("d-none");
         loadPrincipalsList(); 
-    } catch (err) {
-        alert("Error: " + err.message);
-    }
+    } catch (err) { alert("Error: " + err.message); }
 };
 
-
-// Admission, Students, Marks, Attendance, Fees Logic
 window.saveDetailedStudent = async (e) => {
   e.preventDefault();
   try {
     await addDoc(collection(db, "students"), {
       institutionId: currentInstitutionId,
       regNo: Number(document.getElementById("regNo").value) || 0,
-      idNo: document.getElementById("idNo").value,
-      name: document.getElementById("studentName").value,
+      idNo: document.getElementById("idNo").value.toUpperCase(),
+      name: document.getElementById("studentName").value.toUpperCase(),
       currentClass: (document.getElementById("currentClass").value || "1").replace(/Class\s*/i, "").trim(),
       dob: document.getElementById("dob").value,
       joinedDate: document.getElementById("joinedDate").value,
       joinedClass: document.getElementById("joinedClass").value,
-      fatherName: document.getElementById("fatherName").value,
-      motherName: document.getElementById("motherName").value,
-      guardianName: document.getElementById("guardianName").value,
+      fatherName: document.getElementById("fatherName").value.toUpperCase(),
+      motherName: document.getElementById("motherName").value.toUpperCase(),
+      guardianName: document.getElementById("guardianName").value.toUpperCase(),
       phone: document.getElementById("parentPhone").value,
-      place: document.getElementById("place").value,
-      address: document.getElementById("address").value,
+      place: document.getElementById("place").value.toUpperCase(),
+      address: document.getElementById("address").value.toUpperCase(),
       status: "active",
       createdAt: serverTimestamp()
     });
@@ -797,14 +751,14 @@ window.saveEditedStudent = async (e) => {
   try {
     await updateDoc(doc(db, "students", docId), {
       regNo: Number(document.getElementById("editRegNo").value) || 0,
-      idNo: document.getElementById("editIdNo").value,
-      name: document.getElementById("editName").value,
+      idNo: document.getElementById("editIdNo").value.toUpperCase(),
+      name: document.getElementById("editName").value.toUpperCase(),
       currentClass: (document.getElementById("editCurrentClass").value || '1').replace(/Class\s*/i, "").trim(),
       dob: document.getElementById("editDob").value,
       phone: document.getElementById("editPhone").value,
-      fatherName: document.getElementById("editFatherName").value,
-      place: document.getElementById("editPlace").value,
-      address: document.getElementById("editAddress").value,
+      fatherName: document.getElementById("editFatherName").value.toUpperCase(),
+      place: document.getElementById("editPlace").value.toUpperCase(),
+      address: document.getElementById("editAddress").value.toUpperCase(),
       updatedAt: serverTimestamp()
     });
     alert("Student details updated successfully.");
@@ -937,7 +891,6 @@ window.filterStudentsLocal = () => {
   tbody.innerHTML = html || `<tr><td colspan="7" class="text-center text-muted">No matching results found.</td></tr>`;
 };
 
-// Bulk Performance Entry
 window.loadStudentsForPerfSheet = async () => {
   const selClass = document.getElementById("perfClassSelect").value;
   if (!selClass) { document.getElementById("perfSheetArea").classList.add("d-none"); return; }
@@ -1042,7 +995,7 @@ window.saveBulkPerformancePoints = async () => {
 
 window.addNewCustomTask = (e) => {
   e.preventDefault();
-  const name = document.getElementById("newTaskName").value.trim();
+  const name = document.getElementById("newTaskName").value.trim().toUpperCase();
   const pts = document.getElementById("newTaskPoints").value.trim();
   const sign = Number(pts) > 0 ? `+${pts}` : pts;
   const formattedValue = `${name} (${sign} Pts)|${pts}`;
@@ -1086,7 +1039,6 @@ async function loadLeaderboard() {
   }
 }
 
-// Attendance
 window.loadAttendanceSheet = async () => {
   const selClass = document.getElementById("attClassSelect").value;
   if (!selClass) { document.getElementById("attendanceSheetArea").classList.add("d-none"); return; }
@@ -1158,7 +1110,6 @@ window.saveClassAttendance = async () => {
   } catch (err) { alert("Error: " + err.message); }
 };
 
-// Marks
 window.loadMarksEntrySheet = async () => {
   const selClass = document.getElementById("markClassSelect").value;
   if (!selClass) { document.getElementById("marksSheetArea").classList.add("d-none"); return; }
@@ -1232,7 +1183,6 @@ window.saveClassMarks = async () => {
   } catch (err) { alert("Error: " + err.message); }
 };
 
-// Fees
 window.loadStudentsForFees = async () => {
   const selClass = document.getElementById("feeClassSelect").value;
   const select = document.getElementById("feeStudentSelect");
@@ -1262,7 +1212,7 @@ window.processFeeReceipt = async (e) => {
   const phone = opt.getAttribute("data-phone");
   const amount = document.getElementById("feeAmount").value;
   const type = document.getElementById("feeType").value;
-  const manual = document.getElementById("manualReceipt").value.trim();
+  const manual = document.getElementById("manualReceipt").value.trim().toUpperCase();
   const today = new Date().toLocaleDateString();
 
   try {
@@ -1354,7 +1304,6 @@ window.shareToWhatsApp = () => {
   window.open(waUrl, "_blank");
 };
 
-// Bulk CSV Import
 window.handleBulkUpload = () => {
   const fileInput = document.getElementById("csvFileInput");
   const statusDiv = document.getElementById("bulkStatus");
@@ -1378,15 +1327,15 @@ window.handleBulkUpload = () => {
           batch.set(newStudentRef, {
             institutionId: currentInstitutionId,
             regNo: isNaN(regNum) ? 0 : regNum,
-            idNo: row["ID NO."] || "",
-            name: row["NAME"] || "",
+            idNo: (row["ID NO."] || "").toUpperCase(),
+            name: (row["NAME"] || "").toUpperCase(),
             currentClass: (row["CURRENT CLASS"] || "1").replace(/Class\s*/i, "").trim(),
-            address: row["ADDRESS"] || "",
-            place: row["PLACE"] || "",
+            address: (row["ADDRESS"] || "").toUpperCase(),
+            place: (row["PLACE"] || "").toUpperCase(),
             dob: row["D.O.B"] || "",
-            fatherName: row["FATHER NAME"] || "",
-            motherName: row["MOTHER NAME"] || "",
-            guardianName: row["GUARDIAN NAME"] || "",
+            fatherName: (row["FATHER NAME"] || "").toUpperCase(),
+            motherName: (row["MOTHER NAME"] || "").toUpperCase(),
+            guardianName: (row["GUARDIAN NAME"] || "").toUpperCase(),
             phone: phoneVal,
             status: "active",
             createdAt: serverTimestamp()
@@ -1406,59 +1355,6 @@ window.handleBulkUpload = () => {
   });
 };
 
-
-// Register Teacher (By Principal directly)
-/* Unused */
-
-// Open approval form (Principal approving Teacher)
-/* Unused */
-
-window.cancelAssignClasses = () => {
-    document.getElementById("assignClassesForm").classList.add("d-none");
-    document.getElementById("assignStaffId").value = "";
-}
-
-// Assign Classes and Approve (Principal approving Teacher)
-window.assignClassesToStaff = async (e) => {
-    e.preventDefault();
-    const staffId = document.getElementById("assignStaffId").value;
-    
-    const checkboxes = document.querySelectorAll('.approve-class-cb:checked');
-    const assignedClasses = Array.from(checkboxes).map(cb => cb.value);
-
-    if (assignedClasses.length === 0) {
-        alert("Please select at least one class.");
-        return;
-    }
-
-    try {
-        await updateDoc(doc(db, "users", staffId), { 
-            status: "active",
-            assignedClasses: assignedClasses
-        });
-        
-        // Send WhatsApp notification
-        const staff = pendingStaffCache.find(s => s.id === staffId);
-        if(staff && staff.phone) {
-            let msg = `Hello ${staff.name},%0A%0AYour registration as teacher at *${document.getElementById("displayMadrassaName").innerText}* has been *approved*.%0A%0AYou can now login using your email: ${staff.email}.`;
-            const cleanPhone = staff.phone.replace(/[^0-9]/g, '');
-            const waUrl = cleanPhone.length >= 10 
-              ? `https://wa.me/91${cleanPhone.slice(-10)}?text=${msg}`
-              : `https://wa.me/?text=${msg}`;
-            window.open(waUrl, "_blank");
-        } else {
-             alert("Teacher approved and classes assigned successfully!");
-        }
-
-        document.getElementById("assignClassesForm").classList.add("d-none");
-        loadTeachersList(); // Reload lists
-    } catch (err) {
-        alert("Error: " + err.message);
-    }
-};
-
-
-// Teachers List (Viewable by Principal)
 window.loadTeachersList = async () => {
   const tbody = document.getElementById("teachersTableBody");
   const pendingTbody = document.getElementById("pendingStaffTableBody");
@@ -1467,7 +1363,6 @@ window.loadTeachersList = async () => {
   tbody.innerHTML = `<tr><td colspan="7" class="text-center">Loading...</td></tr>`;
   pendingTbody.innerHTML = `<tr><td colspan="4" class="text-center">Loading...</td></tr>`;
   
-  // Load Active Teachers
   const qActive = query(collection(db, "users"), where("institutionId", "==", currentInstitutionId), where("status", "==", "active"), where("role", "==", "teacher"));
   const snapActive = await getDocs(qActive);
 
@@ -1497,7 +1392,6 @@ window.loadTeachersList = async () => {
   });
   tbody.innerHTML = htmlActive || `<tr><td colspan="7" class="text-center text-muted">No active staff registered yet.</td></tr>`;
 
-  // Load Pending Teachers
   const qPending = query(collection(db, "users"), where("institutionId", "==", currentInstitutionId), where("status", "==", "pending"), where("role", "==", "teacher"));
   const snapPending = await getDocs(qPending);
 
@@ -1528,14 +1422,12 @@ window.loadTeachersList = async () => {
   }
 };
 
-
 window.deleteUser = async (userId, name) => {
     if (confirm(`Are you sure you want to remove ${name}?`)) {
         try {
             await deleteDoc(doc(db, "users", userId));
             alert(`${name} removed successfully.`);
             
-            // Reload the list
             if (currentUserRole === 'admin') loadPrincipalsList();
             else if (currentUserRole === 'principal') loadTeachersList();
             else if (currentUserRole === 'superadmin') loadSuperAdminRequests();
