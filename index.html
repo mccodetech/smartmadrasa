@@ -543,7 +543,7 @@
             </div>
           </div>
 
-          <!-- 7. Fees Tab (Updated for New Structure) -->
+          <!-- 7. Fees Tab -->
           <div id="feesTab" class="content-tab d-none">
              <div class="card p-4">
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-receipt"></i> Fee Collection & Receipt</h5>
@@ -674,7 +674,7 @@
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body p-0">
-          <form id="staffProfileForm" onsubmit="saveStaffProfile(event)">
+          <form id="staffProfileForm">
             <input type="hidden" id="spDocId">
 
             <div id="spAuthSection" class="p-3 bg-light border-bottom">
@@ -699,7 +699,7 @@
                 
                 <div class="tab-pane fade show active" id="tab-personal">
                   <div class="row g-3">
-                    <div class="col-md-12"><label class="form-label small">Full Name *</label><input type="text" id="spName" class="form-control text-uppercase" required></div>
+                    <div class="col-md-12"><label class="form-label small">Full Name *</label><input type="text" id="spName" class="form-control text-uppercase"></div>
                     <div class="col-md-4"><label class="form-label small">Gender</label><select id="spGender" class="form-select"><option value="Male">Male</option><option value="Female">Female</option></select></div>
                     <div class="col-md-4"><label class="form-label small">Date of Birth</label><input type="date" id="spDob" class="form-control"></div>
                     <div class="col-md-4"><label class="form-label small">Blood Group</label><select id="spBlood" class="form-select"><option value="">Select</option><option value="A+">A+</option><option value="A-">A-</option><option value="B+">B+</option><option value="B-">B-</option><option value="O+">O+</option><option value="O-">O-</option><option value="AB+">AB+</option><option value="AB-">AB-</option></select></div>
@@ -711,7 +711,7 @@
 
                 <div class="tab-pane fade" id="tab-contact">
                   <div class="row g-3">
-                    <div class="col-md-4"><label class="form-label small">Mobile Number *</label><input type="tel" id="spPhone" class="form-control" required></div>
+                    <div class="col-md-4"><label class="form-label small">Mobile Number *</label><input type="tel" id="spPhone" class="form-control"></div>
                     <div class="col-md-4"><label class="form-label small">WhatsApp Number</label><input type="tel" id="spWhatsapp" class="form-control"></div>
                     <div class="col-md-4"><label class="form-label small">Emergency Contact Number</label><input type="tel" id="spEmergency" class="form-control"></div>
                     <div class="col-md-12"><label class="form-label small">House Name / Number</label><input type="text" id="spHouse" class="form-control text-uppercase"></div>
@@ -734,7 +734,7 @@
 
                 <div class="tab-pane fade" id="tab-employment">
                   <div class="row g-3">
-                    <div class="col-md-4"><label class="form-label small">System Role *</label><select id="spRole" class="form-select" required><option value="teacher">Teacher (മുഅല്ലിം)</option><option value="principal">Principal (സദർ)</option></select></div>
+                    <div class="col-md-4"><label class="form-label small">System Role *</label><select id="spRole" class="form-select"><option value="teacher">Teacher (മുഅല്ലിം)</option><option value="principal">Principal (സദർ)</option></select></div>
                     <div class="col-md-4"><label class="form-label small">Designation</label><input type="text" id="spDesignation" class="form-control text-uppercase" placeholder="e.g. Senior Teacher"></div>
                     <div class="col-md-4"><label class="form-label small">Muallim Registration (MSR) No</label><input type="text" id="spMsr" class="form-control text-uppercase"></div>
                     <div class="col-md-4"><label class="form-label small">Employment Type</label><select id="spEmpType" class="form-select"><option value="Full Time">Full Time</option><option value="Part Time">Part Time</option></select></div>
@@ -787,7 +787,7 @@
         </div>
         <div class="modal-footer bg-light">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-success" onclick="document.getElementById('staffProfileForm').requestSubmit()"><i class="fa-solid fa-save me-1"></i> Save Profile Details</button>
+          <button type="button" class="btn btn-success" onclick="saveStaffProfile(event)"><i class="fa-solid fa-save me-1"></i> Save Profile Details</button>
         </div>
       </div>
     </div>
@@ -802,7 +802,7 @@
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body p-0">
-          <form id="studentProfileForm" onsubmit="saveStudentProfile(event)">
+          <form id="studentProfileForm">
             <input type="hidden" id="stuDocId">
 
             <div class="px-3 pt-3">
@@ -819,10 +819,10 @@
                 
                 <div class="tab-pane fade show active" id="tab-stu-personal">
                   <div class="row g-3">
-                    <div class="col-md-4"><label class="form-label small">Reg No. (Admission No) *</label><input type="number" id="stuRegNo" class="form-control fw-bold" required></div>
+                    <div class="col-md-4"><label class="form-label small">Reg No. (Admission No) *</label><input type="number" id="stuRegNo" class="form-control fw-bold"></div>
                     <div class="col-md-4"><label class="form-label small">ID No.</label><input type="text" id="stuIdNo" class="form-control text-uppercase"></div>
                     <div class="col-md-4"><label class="form-label small">Aadhaar Number</label><input type="text" id="stuAadhaar" class="form-control"></div>
-                    <div class="col-md-12"><label class="form-label small">Student Name *</label><input type="text" id="stuName" class="form-control text-uppercase" required></div>
+                    <div class="col-md-12"><label class="form-label small">Student Name *</label><input type="text" id="stuName" class="form-control text-uppercase"></div>
                     <div class="col-md-4"><label class="form-label small">Gender</label><select id="stuGender" class="form-select"><option value="Male">Male</option><option value="Female">Female</option></select></div>
                     <div class="col-md-4"><label class="form-label small">Date of Birth</label><input type="date" id="stuDob" class="form-control"></div>
                     <div class="col-md-4"><label class="form-label small">Blood Group</label><select id="stuBlood" class="form-select"><option value="">Select</option><option value="A+">A+</option><option value="A-">A-</option><option value="B+">B+</option><option value="B-">B-</option><option value="O+">O+</option><option value="O-">O-</option><option value="AB+">AB+</option><option value="AB-">AB-</option></select></div>
@@ -833,7 +833,7 @@
                   <div class="row g-3">
                     <div class="col-md-6">
                       <label class="form-label small">Current Class *</label>
-                      <select id="stuCurrentClass" class="form-select" required>
+                      <select id="stuCurrentClass" class="form-select">
                         <option value="1">Class 1</option><option value="2">Class 2</option><option value="3">Class 3</option>
                         <option value="4">Class 4</option><option value="5">Class 5</option><option value="6">Class 6</option>
                         <option value="7">Class 7</option><option value="8">Class 8</option><option value="9">Class 9</option>
@@ -849,20 +849,20 @@
 
                 <div class="tab-pane fade" id="tab-stu-family">
                   <div class="row g-3">
-                    <div class="col-md-4"><label class="form-label small">Father's Name *</label><input type="text" id="stuFatherName" class="form-control text-uppercase" required></div>
+                    <div class="col-md-4"><label class="form-label small">Father's Name *</label><input type="text" id="stuFatherName" class="form-control text-uppercase"></div>
                     <div class="col-md-4"><label class="form-label small">Mother's Name</label><input type="text" id="stuMotherName" class="form-control text-uppercase"></div>
                     <div class="col-md-4"><label class="form-label small">Guardian's Name</label><input type="text" id="stuGuardianName" class="form-control text-uppercase"></div>
                     <div class="col-md-4"><label class="form-label small">Relationship with Child</label><input type="text" id="stuRelation" class="form-control text-uppercase" placeholder="e.g. Father, Uncle"></div>
                     <div class="col-md-4"><label class="form-label small">Guardian's Occupation</label><input type="text" id="stuGuardianJob" class="form-control text-uppercase" placeholder="e.g. Business, Teacher"></div>
-                    <div class="col-md-4"><label class="form-label small">Mobile Number *</label><input type="tel" id="stuPhone" class="form-control" placeholder="9847..." required></div>
+                    <div class="col-md-4"><label class="form-label small">Mobile Number *</label><input type="tel" id="stuPhone" class="form-control" placeholder="9847..."></div>
                     <div class="col-md-4"><label class="form-label small">Emergency / WhatsApp Number</label><input type="tel" id="stuEmergency" class="form-control"></div>
                   </div>
                 </div>
 
                 <div class="tab-pane fade" id="tab-stu-address">
                   <div class="row g-3">
-                    <div class="col-md-12"><label class="form-label small">House Name / Number *</label><input type="text" id="stuHouse" class="form-control text-uppercase" required></div>
-                    <div class="col-md-6"><label class="form-label small">Place *</label><input type="text" id="stuPlace" class="form-control text-uppercase" required></div>
+                    <div class="col-md-12"><label class="form-label small">House Name / Number *</label><input type="text" id="stuHouse" class="form-control text-uppercase"></div>
+                    <div class="col-md-6"><label class="form-label small">Place *</label><input type="text" id="stuPlace" class="form-control text-uppercase"></div>
                     <div class="col-md-6"><label class="form-label small">Post Office (PO)</label><input type="text" id="stuPo" class="form-control text-uppercase"></div>
                     <div class="col-md-4"><label class="form-label small">Pincode</label><input type="text" id="stuPin" class="form-control"></div>
                     <div class="col-md-4"><label class="form-label small">District</label><input type="text" id="stuDistrict" class="form-control text-uppercase"></div>
@@ -894,7 +894,7 @@
         </div>
         <div class="modal-footer bg-light">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-success" onclick="document.getElementById('studentProfileForm').requestSubmit()"><i class="fa-solid fa-save me-1"></i> Save Student Details</button>
+          <button type="button" class="btn btn-success" onclick="saveStudentProfile(event)"><i class="fa-solid fa-save me-1"></i> Save Student Details</button>
         </div>
       </div>
     </div>
@@ -970,37 +970,6 @@
               <button type="submit" class="btn btn-primary-custom px-4">Add Task</button>
             </div>
           </form>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Bulk Import Modal -->
-  <div class="modal fade" id="bulkImportModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-      <div class="modal-content border-0 shadow">
-        <div class="modal-header bg-madrassa text-white">
-          <h5 class="modal-title fw-bold"><i class="fa-solid fa-file-csv me-1"></i> Bulk Import Students (Excel/CSV)</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body p-4">
-          <div class="alert alert-info small mb-3">
-              <strong>Instructions:</strong><br>
-              1. Download the format using the button below.<br>
-              2. Open the downloaded file in Excel or Google Sheets.<br>
-              3. Fill in the student details (Do not change the header names).<br>
-              4. Save the file as a CSV (Comma Delimited) format.<br>
-              5. Select the saved file and click 'Import Data'.
-          </div>
-          <div class="d-flex justify-content-between align-items-center mb-3">
-              <button class="btn btn-outline-primary" onclick="downloadCSVFormat()"><i class="fa-solid fa-download me-1"></i> Download CSV Format</button>
-              <input type="file" id="csvFileInput" class="form-control w-50" accept=".csv">
-          </div>
-          <div id="bulkStatus" class="alert d-none"></div>
-        </div>
-        <div class="modal-footer bg-light">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button class="btn btn-success px-4" onclick="handleBulkUpload()"><i class="fa-solid fa-cloud-arrow-up me-1"></i> Import Data</button>
         </div>
       </div>
     </div>
@@ -1088,6 +1057,36 @@
     </div>
   </div>
 
+  <!-- Bulk Import Modal -->
+  <div class="modal fade" id="bulkImportModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-madrassa text-white">
+          <h5 class="modal-title fw-bold"><i class="fa-solid fa-file-csv me-1"></i> Bulk Import Students (Excel/CSV)</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="alert alert-info small mb-3">
+              <strong>Instructions:</strong><br>
+              1. Download the format using the button below.<br>
+              2. Open the downloaded file in Excel or Google Sheets.<br>
+              3. Fill in the student details (Do not change the header names).<br>
+              4. Save the file as a CSV (Comma Delimited) format.<br>
+              5. Select the saved file and click 'Import Data'.
+          </div>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+              <button class="btn btn-outline-primary" onclick="downloadCSVFormat()"><i class="fa-solid fa-download me-1"></i> Download CSV Format</button>
+              <input type="file" id="csvFileInput" class="form-control w-50" accept=".csv">
+          </div>
+          <div id="bulkStatus" class="alert d-none"></div>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-success px-4" onclick="handleBulkUpload()"><i class="fa-solid fa-cloud-arrow-up me-1"></i> Import Data</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script type="module" src="app.js"></script>
