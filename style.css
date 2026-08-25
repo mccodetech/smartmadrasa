@@ -8,9 +8,10 @@
   --text-dark: #0f172a;
   --text-muted: #64748b;
 }
+
 body {
   background-color: var(--bg-body);
-  font-family: 'Plus Jakarta Sans', 'Manjari', sans-serif;
+  font-family: 'Plus Jakarta Sans', sans-serif;
   color: var(--text-dark);
   -webkit-font-smoothing: antialiased;
 }
@@ -19,7 +20,6 @@ body {
 .btn-madrassa { background-color: var(--accent); color: #fff; border: none; font-weight: 500; }
 .btn-madrassa:hover { background-color: var(--primary); color: #fff; }
 
-/* Modern Auth UI */
 .auth-wrapper {
   min-height: 100vh;
   display: flex;
