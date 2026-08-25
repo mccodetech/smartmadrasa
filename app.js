@@ -153,10 +153,9 @@ onAuthStateChanged(auth, async (user) => {
             if (marksMenuBtn) marksMenuBtn.classList.add("d-none");
             if (performanceMenuBtn) performanceMenuBtn.classList.add("d-none");
             
-            // Show Student Action buttons for Admin
             if (adminActions) adminActions.classList.remove("d-none");
             if (actionCol) actionCol.classList.remove("d-none");
-            if (feesMenuBtn) feesMenuBtn.classList.remove("d-none"); // Allow admin to see fees
+            if (feesMenuBtn) feesMenuBtn.classList.remove("d-none");
 
             showTab('instAdminTab'); 
             loadPrincipalsList(); 
@@ -239,7 +238,6 @@ window.handleUnifiedLogin = async (e) => {
   const identifier = document.getElementById("loginIdentifier").value.trim();
 
   if (/^\d+$/.test(identifier)) {
-    // Parent Login
     const reg = Number(identifier);
     const mobile = document.getElementById("loginMobile").value.trim().slice(-10);
 
@@ -259,7 +257,6 @@ window.handleUnifiedLogin = async (e) => {
 
     if (!matchedStudent) return alert("Provided phone number does not match student's records.");
 
-    // Find siblings
     const siblingsQ = query(collection(db, "students"), where("institutionId", "==", matchedStudent.institutionId));
     const siblingsSnap = await getDocs(siblingsQ);
     
@@ -289,7 +286,6 @@ window.handleUnifiedLogin = async (e) => {
     loadParentStudentData(matchedStudent);
 
   } else {
-    // Staff Login
     const email = identifier.toLowerCase();
     const password = document.getElementById("loginPassword").value;
     if (!password) return alert("Please enter your password.");
@@ -351,7 +347,6 @@ window.handleSignUp = async (e) => {
     const pwd = document.getElementById("regPassword").value;
     const instId = board + "_" + instCode;
     
-    // Additional generic fields for Institution
     const address = document.getElementById("regAddress") ? document.getElementById("regAddress").value.trim().toUpperCase() : "";
     const place = document.getElementById("regPlace") ? document.getElementById("regPlace").value.trim().toUpperCase() : "";
     const po = document.getElementById("regPo") ? document.getElementById("regPo").value.trim().toUpperCase() : "";
@@ -717,7 +712,6 @@ window.instAssignClassesToStaff = async (e) => {
         
         const staff = pendingStaffCache.find(s => s.id === staffId);
         if(staff) {
-            // WhatsApp Msg
             if(staff.whatsapp || staff.phone) {
                 const destPhone = staff.whatsapp || staff.phone;
                 let waMsg = `Hello ${staff.name},%0A%0AYour registration as ${role} at *${document.getElementById("displayMadrassaName").innerText}* has been *approved*.%0A%0AYou can now login using your email: ${staff.email}.`;
@@ -728,7 +722,6 @@ window.instAssignClassesToStaff = async (e) => {
                 window.open(waUrl, "_blank");
             }
             
-            // Email Msg
             if(staff.email) {
                 const subject = encodeURIComponent(`Smart Madrasa - ${role.charAt(0).toUpperCase() + role.slice(1)} Registration Approved`);
                 const body = encodeURIComponent(`Hello ${staff.name},\n\nYour registration as ${role} at ${document.getElementById("displayMadrassaName").innerText} has been approved.\n\nYou can now login using your email: ${staff.email}.\n\nRegards,\nInstitution Admin`);
@@ -744,7 +737,7 @@ window.instAssignClassesToStaff = async (e) => {
 };
 
 // ==========================================
-// STUDENT PROFILE MODAL (UI LOGIC)
+// STUDENT PROFILE MODAL (JS VALIDATION)
 // ==========================================
 
 window.openStudentProfileModal = (docId) => {
@@ -807,15 +800,28 @@ window.openStudentProfileModal = (docId) => {
 };
 
 window.saveStudentProfile = async (e) => {
-    e.preventDefault();
+    if(e) e.preventDefault(); // Prevent traditional form submission if accidentally triggered
+    
+    // JS Validation
+    const regNoInput = document.getElementById("stuRegNo").value;
+    const nameInput = document.getElementById("stuName").value.trim();
+    
+    if(!regNoInput || !nameInput) {
+        alert("Registration Number and Student Name are required!");
+        // Switch to the first tab so user can see it
+        const triggerEl = document.querySelector('#studentTabs button[data-bs-target="#tab-stu-personal"]');
+        bootstrap.Tab.getOrCreateInstance(triggerEl).show();
+        return;
+    }
+
     const docId = document.getElementById("stuDocId").value;
     
     const studentData = {
         institutionId: currentInstitutionId,
-        regNo: Number(document.getElementById("stuRegNo").value) || 0,
+        regNo: Number(regNoInput) || 0,
         idNo: document.getElementById("stuIdNo").value.trim().toUpperCase(),
         aadhaar: document.getElementById("stuAadhaar").value.trim(),
-        name: document.getElementById("stuName").value.trim().toUpperCase(),
+        name: nameInput.toUpperCase(),
         gender: document.getElementById("stuGender").value,
         dob: document.getElementById("stuDob").value,
         bloodGroup: document.getElementById("stuBlood").value,
@@ -1289,7 +1295,7 @@ window.saveClassMarks = async () => {
 };
 
 // ==========================================
-// NEW FEES LOGIC
+// FEES LOGIC
 // ==========================================
 
 window.loadStudentsForFees = async () => {
@@ -1315,11 +1321,10 @@ window.loadStudentsForFees = async () => {
       return;
   }
 
-  // Fetch Paid Fees History for this class
+  // Fetch Paid Fees History
   const feeQ = query(collection(db, "feeCollections"), where("institutionId", "==", currentInstitutionId), where("class", "==", selClass.replace(/Class\s*/i, "").trim()));
   const feeSnap = await getDocs(feeQ);
   
-  // Group fees by student to find last payment
   const feeHistory = {};
   feeSnap.forEach(d => {
       const f = d.data();
@@ -1331,16 +1336,13 @@ window.loadStudentsForFees = async () => {
   students.forEach(s => {
     const defaultFee = s.monthlyFeeAmount || 0;
     
-    // Find last paid info
     let lastPaidText = "<span class='text-muted small'>None</span>";
     if(feeHistory[s.regNo] && feeHistory[s.regNo].length > 0) {
-        // Sort by timestamp or date to get latest
         const sortedFees = feeHistory[s.regNo].sort((a,b) => b.receiptNo - a.receiptNo);
         const last = sortedFees[0];
         lastPaidText = `<span class='text-success small fw-bold'>${last.feeType}</span><br><small class='text-muted'>(${last.date})</small>`;
     }
 
-    // JSON encode student data for the button click
     const sDataStr = encodeURIComponent(JSON.stringify({
         id: s.id,
         regNo: s.regNo,
@@ -1374,20 +1376,17 @@ window.loadStudentsForFees = async () => {
 window.openFeeModal = (studentDataStr) => {
     const s = JSON.parse(decodeURIComponent(studentDataStr));
     
-    // Get values from the table inputs
     const typedMonth = document.getElementById(`payType_${s.regNo}`).value.trim();
     let typedAmt = document.getElementById(`payAmt_${s.regNo}`).value.trim();
 
     if(!typedAmt) typedAmt = s.fee;
 
-    // Set Hidden Inputs
     document.getElementById("payStudentId").value = s.id;
     document.getElementById("payStudentReg").value = s.regNo;
     document.getElementById("payStudentName").value = s.name;
     document.getElementById("payStudentClass").value = s.class;
     document.getElementById("payStudentPhone").value = s.phone;
 
-    // Set Visible Inputs
     document.getElementById("payStudentNameDisplay").innerText = `${s.name} (Reg: ${s.regNo})`;
     document.getElementById("payFeeType").value = typedMonth || "MONTHLY FEE";
     document.getElementById("payAmount").value = typedAmt;
@@ -1439,7 +1438,6 @@ window.saveFeePayment = async (e) => {
       timestamp: serverTimestamp()
     });
 
-    // Setup Printable Receipt
     document.getElementById("recMadrassaName").innerText = document.getElementById("displayMadrassaName").innerText;
     document.getElementById("recNo").innerText = "#" + nextReceiptNo;
     document.getElementById("recDate").innerText = today;
@@ -1477,11 +1475,9 @@ window.saveFeePayment = async (e) => {
 
     bootstrap.Modal.getInstance(document.getElementById('feePaymentModal')).hide();
     
-    // Hide App and Show Print View
     document.getElementById("appSection").classList.add("d-none");
     document.getElementById("printableReceipt").classList.remove("d-none");
     
-    // Reload table silently
     loadStudentsForFees();
 
   } catch (err) { alert("Error: " + err.message); }
