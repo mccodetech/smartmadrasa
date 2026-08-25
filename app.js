@@ -2,17 +2,20 @@ window.currentLang = 'en';
 const translations = {
   en: {
     portal_sub: "Digital Madrasa Management Suite",
-    tab_login: "Login",
-    tab_signup: "Register Madrasa",
-    tab_staff_signup: "Staff Register",
+    tab_login: "Sign In",
+    tab_signup: "Sign Up",
+    btn_reg_madrasa: "Register a New Madrasa",
+    sub_reg_madrasa: "For Institution Admins",
+    btn_reg_staff: "Join as Staff / Principal",
+    sub_reg_staff: "Requires existing Madrasa Code",
     lbl_login_input: "Email Address or Student Reg No.",
     lbl_email: "Email Address",
     lbl_pwd: "Password",
     btn_signin: "Sign In",
     parent_login_hint: "Enter student's Reg No. and registered mobile number.",
     reg_approval_notice: "New registrations require Developer / Super Admin approval before activation.",
-    staff_reg_notice: "Staff registration requires approval from the Institution Admin.",
-    btn_submit_staff_reg: "Register as Staff",
+    staff_reg_notice: "Staff/Principal registration requires approval from the Institution Admin.",
+    btn_submit_staff_reg: "Submit Request",
     lbl_regno: "Student Reg No.",
     lbl_phone: "Registered Mobile Number",
     btn_viewdetails: "View Student Details",
@@ -105,16 +108,19 @@ const translations = {
   ml: {
     portal_sub: "സ്മാർട്ട് മദ്റസാ മാനേജ്‌മെന്റ് പോർട്ടൽ",
     tab_login: "ലോഗിൻ",
-    tab_signup: "മദ്റസ രജിസ്ട്രേഷൻ",
-    tab_staff_signup: "സ്റ്റാഫ് രജിസ്ട്രേഷൻ",
+    tab_signup: "സൈൻ അപ്പ് (Sign Up)",
+    btn_reg_madrasa: "പുതിയ മദ്റസ രജിസ്റ്റർ ചെയ്യുക",
+    sub_reg_madrasa: "ഇൻസ്റ്റിറ്റ്യൂഷൻ അഡ്മിൻമാർക്ക് മാത്രം",
+    btn_reg_staff: "മുഅല്ലിം / സ്വദർ മുഅല്ലിം ആയി ചേരുക",
+    sub_reg_staff: "മദ്റസാ കോഡ് ആവശ്യമാണ്",
     lbl_login_input: "ഇമെയിൽ അല്ലെങ്കിൽ കുട്ടിയുടെ Reg No.",
     lbl_email: "ഇമെയിൽ വിലാസം",
     lbl_pwd: "പാസ്‌വേഡ്",
     btn_signin: "പ്രവേശിക്കുക",
     parent_login_hint: "കുട്ടിയുടെ Reg No. വും രജിസ്റ്റർ ചെയ്ത മൊബൈൽ നമ്പറും നൽകുക.",
     reg_approval_notice: "പുതിയ മദ്റസകളുടെ രജിസ്ട്രേഷൻ സൂപ്പർ അഡ്മിൻ അംഗീകരിച്ച ശേഷം മാത്രമേ ആക്റ്റീവ് ആകൂ.",
-    staff_reg_notice: "സ്റ്റാഫ് രജിസ്ട്രേഷൻ ഇൻസ്റ്റിറ്റ്യൂഷൻ അഡ്മിൻ അംഗീകരിച്ച ശേഷം മാത്രമേ ആക്റ്റീവ് ആകൂ.",
-    btn_submit_staff_reg: "സ്റ്റാഫ് ആയി രജിസ്റ്റർ ചെയ്യുക",
+    staff_reg_notice: "അധ്യാപകരുടെ രജിസ്ട്രേഷൻ ഇൻസ്റ്റിറ്റ്യൂഷൻ അഡ്മിൻ അംഗീകരിച്ച ശേഷം മാത്രമേ ആക്റ്റീവ് ആകൂ.",
+    btn_submit_staff_reg: "അംഗീകാരത്തിനായി സമർപ്പിക്കുക",
     lbl_regno: "വിദ്യാർത്ഥിയുടെ Reg No.",
     lbl_phone: "രജിസ്റ്റർ ചെയ്ത മൊബൈൽ നമ്പർ",
     btn_viewdetails: "വിവരങ്ങൾ കാണുക",
@@ -140,7 +146,7 @@ const translations = {
     nav_students: "വിദ്യാർത്ഥികൾ",
     nav_attendance: "ഹാജർ",
     nav_marks: "മാർക്ക് എൻട്രി",
-    nav_staff: "മുഅല്ലിം മാനേജ്‌മെന്റ്",
+    nav_staff: "സ്റ്റാഫ് മാനേജ്‌മെന്റ്",
     nav_promotion: "ക്ലാസ് കയറ്റം",
     home_card_att_sub: "ദിവസേനയുള്ള ഹാജർ രേഖപ്പെടുത്തുക",
     home_card_perf_sub: "പോയിന്റുകളും ക്ലാസ് താരങ്ങളും",
@@ -192,8 +198,8 @@ const translations = {
     btn_whatsapp: "WhatsApp-ൽ അയക്കുക",
     lbl_role: "സ്ഥാനം",
     lbl_assignedclasses: "ചുമതലയുള്ള ക്ലാസുകൾ",
-    btn_addstaff: "മുഅല്ലിമിനെ രജിസ്റ്റർ ചെയ്യുക",
-    staff_list_title: "രജിസ്റ്റർ ചെയ്ത മുഅല്ലിംകളുടെ ലിസ്റ്റ്",
+    btn_addstaff: "ആഡ് ചെയ്യുക",
+    staff_list_title: "രജിസ്റ്റർ ചെയ്ത സ്റ്റാഫ് ലിസ്റ്റ്",
     th_role: "സ്ഥാനം",
     th_email: "ഇമെയിൽ",
     th_assigned: "ക്ലാസുകൾ",
@@ -350,7 +356,7 @@ onAuthStateChanged(auth, async (user) => {
               if (currentUserRole === "admin") {
                   userRoleEl.innerText = window.currentLang === 'ml' ? "അഡ്മിൻ" : "Admin";
               } else if (currentUserRole === "principal") {
-                  userRoleEl.innerText = window.currentLang === 'ml' ? "സ്വദർ മുഅല്ലിം" : "Principal";
+                  userRoleEl.innerText = window.currentLang === 'ml' ? "പ്രിൻസിപ്പൽ" : "Principal";
               } else {
                   userRoleEl.innerText = `Teacher (${currentUserAssignedClasses.map(c=>'Class '+c).join(', ')})`;
               }
@@ -373,7 +379,6 @@ onAuthStateChanged(auth, async (user) => {
 
         if (currentUserRole === "admin") {
             // Institution Admin View
-            if (instAdminStaffBtn) instAdminStaffBtn.classList.remove("d-none");
             if (tMenuBtn) tMenuBtn.classList.remove("d-none"); // Show Staff Management for Admin
             // Hide other menus until needed
             if (homeMenuBtn) homeMenuBtn.classList.add("d-none");
@@ -382,8 +387,8 @@ onAuthStateChanged(auth, async (user) => {
             if (marksMenuBtn) marksMenuBtn.classList.add("d-none");
             if (performanceMenuBtn) performanceMenuBtn.classList.add("d-none");
             if (feesMenuBtn) feesMenuBtn.classList.add("d-none");
-            showTab('instAdminTab');
-            loadPrincipalsList();
+            showTab('teachersTab'); // Default to Staff Management
+            loadTeachersList();
 
         } else if (currentUserRole === "principal" || isSuperAdmin) {
             // Principal or Super Admin viewing a Madrasa
@@ -578,6 +583,7 @@ window.handleSignUp = async (e) => {
     const instName = document.getElementById("regInstName").value.trim();
     const userName = document.getElementById("regUserName").value.trim();
     const phone = document.getElementById("regPhone").value.trim();
+    const whatsapp = document.getElementById("regWhatsapp").value.trim() || phone; // fallback to phone
     const email = document.getElementById("regEmail").value.trim();
     const pwd = document.getElementById("regPassword").value;
     const instId = "MDR_" + instCode;
@@ -588,6 +594,7 @@ window.handleSignUp = async (e) => {
       uid: cred.user.uid,
       name: userName,
       phone: phone,
+      whatsapp: whatsapp,
       email: email,
       institutionId: instId,
       institutionCode: instCode,
@@ -624,6 +631,7 @@ window.handleStaffSignUp = async (e) => {
       const instCode = document.getElementById("staffInstCode").value.trim().toUpperCase();
       const userName = document.getElementById("staffName").value.trim();
       const phone = document.getElementById("staffPhone").value.trim();
+      const whatsapp = document.getElementById("staffWhatsapp").value.trim() || phone;
       const email = document.getElementById("staffEmail").value.trim();
       const pwd = document.getElementById("staffPassword").value;
       const instId = "MDR_" + instCode;
@@ -646,11 +654,12 @@ window.handleStaffSignUp = async (e) => {
         uid: cred.user.uid,
         name: userName,
         phone: phone,
+        whatsapp: whatsapp,
         email: email,
         institutionId: instId,
         institutionCode: instCode,
         institutionName: instName,
-        role: "teacher", // Default role for staff signups
+        role: "teacher", // Default requested role for staff signups
         status: "pending", // Requires admin approval
         assignedClasses: [],
         createdAt: serverTimestamp()
@@ -701,7 +710,7 @@ window.loadSuperAdminRequests = async () => {
         <td><b>${u.institutionName || '-'}</b></td>
         <td>${u.name || '-'}</td>
         <td>${u.email}</td>
-        <td>${u.phone}</td>
+        <td>${u.whatsapp || u.phone}</td>
         <td>${statusBadge}</td>
         <td class="text-center">
           ${approveOrManageBtn}
@@ -720,8 +729,7 @@ window.switchMadrasaScope = (instId, instName) => {
   currentInstitutionId = instId;
   document.getElementById("displayMadrassaName").innerText = instName + " (Super Admin View)";
   document.getElementById("superAdminBackBtn").classList.remove("d-none");
-  showTab('homeDashboardTab');
-  loadLeaderboard();
+  showTab('teachersTab'); // Changed from homeDashboard to teachersTab for Admin scope
   loadTeachersList();
 };
 
@@ -740,7 +748,7 @@ window.openSuperAdminEditMadrasaModal = (docId) => {
   document.getElementById("saEditInstName").value = m.institutionName || '';
   document.getElementById("saEditName").value = m.name || '';
   document.getElementById("saEditEmail").value = m.email || '';
-  document.getElementById("saEditPhone").value = m.phone || '';
+  document.getElementById("saEditPhone").value = m.whatsapp || m.phone || '';
   document.getElementById("saEditStatus").value = m.status || 'active';
 
   new bootstrap.Modal(document.getElementById('superAdminEditMadrasaModal')).show();
@@ -762,7 +770,7 @@ window.saveEditedMadrasaBySuperAdmin = async (e) => {
       institutionName: instName,
       name: name,
       email: email,
-      phone: phone,
+      whatsapp: phone, // Assuming phone edit updates whatsapp field for contact
       status: status,
       updatedAt: serverTimestamp()
     });
@@ -795,68 +803,6 @@ window.logoutParent = () => {
 };
 
 window.handleLogout = () => signOut(auth);
-
-
-// Registration for Principal (By Inst Admin)
-window.registerPrincipal = async (e) => {
-    e.preventDefault();
-    const name = document.getElementById("pName").value.trim();
-    const phone = document.getElementById("pPhone").value.trim();
-    const email = document.getElementById("pEmail").value.trim();
-    const pwd = document.getElementById("pPassword").value;
-
-    try {
-        // Create user in Firebase Auth
-        const cred = await createUserWithEmailAndPassword(auth, email, pwd);
-        
-        // Save user data in Firestore
-        await setDoc(doc(db, "users", cred.user.uid), {
-            uid: cred.user.uid,
-            name: name,
-            phone: phone,
-            email: email,
-            institutionId: currentInstitutionId,
-            role: "principal",
-            assignedClasses: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
-            status: "active",
-            createdAt: serverTimestamp()
-        });
-
-        alert("Principal registered successfully!");
-        e.target.reset();
-        loadPrincipalsList();
-
-    } catch (err) {
-        alert("Registration failed: " + err.message);
-    }
-};
-
-// Load Principals List for Inst Admin
-window.loadPrincipalsList = async () => {
-    const tbody = document.getElementById("principalsTableBody");
-    tbody.innerHTML = `<tr><td colspan="4" class="text-center">Loading...</td></tr>`;
-
-    const q = query(collection(db, "users"), where("institutionId", "==", currentInstitutionId), where("role", "==", "principal"));
-    const snap = await getDocs(q);
-
-    localPrincipalsCache = [];
-    snap.forEach(d => localPrincipalsCache.push({ id: d.id, ...d.data() }));
-
-    let html = "";
-    localPrincipalsCache.forEach(p => {
-        html += `
-            <tr>
-                <td><b>${p.name}</b></td>
-                <td>${p.email}</td>
-                <td>${p.phone}</td>
-                <td class="text-center">
-                    <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${p.id}', '${p.name}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
-                </td>
-            </tr>
-        `;
-    });
-    tbody.innerHTML = html || `<tr><td colspan="4" class="text-center text-muted">No principals assigned yet.</td></tr>`;
-};
 
 
 // Admission, Students, Marks, Attendance, Fees Logic
@@ -1520,11 +1466,12 @@ window.handleBulkUpload = () => {
 };
 
 
-// Register Teacher/Staff (By Admin directly)
+// Register Teacher/Staff (By Admin/Principal directly)
 window.registerNewTeacher = async (e) => {
   e.preventDefault();
   
   const name = document.getElementById("tName").value.trim();
+  const role = document.getElementById("tRole").value; // teacher or principal
   const phone = document.getElementById("tPhone").value.trim();
   const email = document.getElementById("tEmail").value.trim();
   const pwd = document.getElementById("tPassword").value;
@@ -1533,8 +1480,8 @@ window.registerNewTeacher = async (e) => {
   const checkboxes = document.querySelectorAll('.reg-class-cb:checked');
   const assignedClasses = Array.from(checkboxes).map(cb => cb.value);
 
-  if (assignedClasses.length === 0) {
-      alert("Please select at least one class.");
+  if (role === 'teacher' && assignedClasses.length === 0) {
+      alert("Please select at least one class for the teacher.");
       return;
   }
 
@@ -1547,10 +1494,11 @@ window.registerNewTeacher = async (e) => {
           uid: cred.user.uid,
           name: name,
           phone: phone,
+          whatsapp: phone, // Assuming same for direct add
           email: email,
           institutionId: currentInstitutionId,
-          role: "teacher", // They are teachers
-          assignedClasses: assignedClasses,
+          role: role, 
+          assignedClasses: role === 'principal' ? ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"] : assignedClasses,
           status: "active", // Direct registration makes them active
           createdAt: serverTimestamp()
       });
@@ -1558,6 +1506,7 @@ window.registerNewTeacher = async (e) => {
       alert("Staff registered successfully!");
       e.target.reset();
       updateDropdownLabel('reg'); // Reset dropdown label
+      document.getElementById('addStaffFormContainer').classList.add('d-none');
       loadTeachersList();
 
   } catch (err) {
@@ -1571,11 +1520,22 @@ window.openAssignClassesForm = (staffId) => {
     if(staff) {
         document.getElementById("assignStaffId").value = staffId;
         document.getElementById("assignStaffNameDisplay").innerText = staff.name;
+        document.getElementById("assignStaffRole").value = staff.role;
+
+        const classDiv = document.getElementById("classAssignDiv");
+        
+        // Hide class selection if they requested to be a principal
+        if(staff.role === 'principal') {
+             classDiv.classList.add("d-none");
+        } else {
+             classDiv.classList.remove("d-none");
+        }
+
         document.getElementById("assignClassesForm").classList.remove("d-none");
         
         // Reset checkboxes
-        document.querySelectorAll('.reg-class-cb').forEach(cb => cb.checked = false);
-        updateDropdownLabel('reg');
+        document.querySelectorAll('.approve-class-cb').forEach(cb => cb.checked = false);
+        updateDropdownLabel('approve');
     }
 };
 
@@ -1588,12 +1548,20 @@ window.cancelAssignClasses = () => {
 window.assignClassesToStaff = async (e) => {
     e.preventDefault();
     const staffId = document.getElementById("assignStaffId").value;
-    const checkboxes = document.querySelectorAll('.reg-class-cb:checked');
-    const assignedClasses = Array.from(checkboxes).map(cb => cb.value);
+    const role = document.getElementById("assignStaffRole").value;
+    
+    let assignedClasses = [];
 
-    if (assignedClasses.length === 0) {
-        alert("Please select at least one class.");
-        return;
+    if (role === 'teacher') {
+        const checkboxes = document.querySelectorAll('.approve-class-cb:checked');
+        assignedClasses = Array.from(checkboxes).map(cb => cb.value);
+
+        if (assignedClasses.length === 0) {
+            alert("Please select at least one class.");
+            return;
+        }
+    } else if (role === 'principal') {
+        assignedClasses = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
     }
 
     try {
@@ -1601,7 +1569,20 @@ window.assignClassesToStaff = async (e) => {
             status: "active",
             assignedClasses: assignedClasses
         });
-        alert("Staff approved and classes assigned successfully!");
+        
+        // Send WhatsApp notification
+        const staff = pendingStaffCache.find(s => s.id === staffId);
+        if(staff && staff.whatsapp) {
+            let msg = `Hello ${staff.name},%0A%0AYour registration as ${role} at *${document.getElementById("displayMadrassaName").innerText}* has been *approved*.%0A%0AYou can now login using your email: ${staff.email}.`;
+            const cleanPhone = staff.whatsapp.replace(/[^0-9]/g, '');
+            const waUrl = cleanPhone.length >= 10 
+              ? `https://wa.me/91${cleanPhone.slice(-10)}?text=${msg}`
+              : `https://wa.me/?text=${msg}`;
+            window.open(waUrl, "_blank");
+        } else {
+             alert("Staff approved and classes assigned successfully!");
+        }
+
         document.getElementById("assignClassesForm").classList.add("d-none");
         loadTeachersList(); // Reload lists
     } catch (err) {
@@ -1616,26 +1597,34 @@ window.loadTeachersList = async () => {
   const pendingTbody = document.getElementById("pendingStaffTableBody");
   const pendingSection = document.getElementById("pendingStaffSection");
   
-  tbody.innerHTML = `<tr><td colspan="6" class="text-center">Loading...</td></tr>`;
-  pendingTbody.innerHTML = `<tr><td colspan="4" class="text-center">Loading...</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="7" class="text-center">Loading...</td></tr>`;
+  pendingTbody.innerHTML = `<tr><td colspan="5" class="text-center">Loading...</td></tr>`;
   
-  // Load Active Teachers
-  const qActive = query(collection(db, "users"), where("institutionId", "==", currentInstitutionId), where("role", "==", "teacher"), where("status", "==", "active"));
+  // Load Active Teachers & Principals
+  const qActive = query(collection(db, "users"), where("institutionId", "==", currentInstitutionId), where("status", "==", "active"));
   const snapActive = await getDocs(qActive);
 
   localTeachersCache = [];
-  snapActive.forEach(d => localTeachersCache.push({ id: d.id, ...d.data() }));
+  snapActive.forEach(d => {
+      if(d.data().role === 'teacher' || d.data().role === 'principal') {
+         localTeachersCache.push({ id: d.id, ...d.data() });
+      }
+  });
 
   let htmlActive = "";
-  localTeachersCache.forEach((t, index) => {
-    const classesBadges = (t.assignedClasses || []).map(c => `<span class="badge bg-light text-dark border me-1">Class ${c}</span>`).join(' ') || '-';
+  let slNo = 1;
+  localTeachersCache.forEach((t) => {
+    const isPrincipal = t.role === "principal";
+    const roleBadge = isPrincipal ? `<span class="badge bg-danger">Principal</span>` : `<span class="badge bg-success">Teacher</span>`;
+    const classesBadges = isPrincipal ? 'All Classes' : (t.assignedClasses || []).map(c => `<span class="badge bg-light text-dark border me-1">Class ${c}</span>`).join(' ') || '-';
     
     htmlActive += `
       <tr>
-        <td>${index + 1}</td>
+        <td>${slNo++}</td>
         <td><b>${t.name}</b></td>
+        <td>${roleBadge}</td>
         <td>${t.email}</td>
-        <td>${t.phone}</td>
+        <td>${t.whatsapp || t.phone}</td>
         <td>${classesBadges}</td>
         <td class="text-center">
             <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${t.id}', '${t.name}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
@@ -1643,15 +1632,19 @@ window.loadTeachersList = async () => {
       </tr>
     `;
   });
-  tbody.innerHTML = htmlActive || `<tr><td colspan="6" class="text-center text-muted">No active staff registered yet.</td></tr>`;
+  tbody.innerHTML = htmlActive || `<tr><td colspan="7" class="text-center text-muted">No active staff registered yet.</td></tr>`;
 
-  // Load Pending Teachers (Only for Admins)
+  // Load Pending Staff (Only for Admins)
   if (currentUserRole === 'admin') {
-      const qPending = query(collection(db, "users"), where("institutionId", "==", currentInstitutionId), where("role", "==", "teacher"), where("status", "==", "pending"));
+      const qPending = query(collection(db, "users"), where("institutionId", "==", currentInstitutionId), where("status", "==", "pending"));
       const snapPending = await getDocs(qPending);
     
       pendingStaffCache = [];
-      snapPending.forEach(d => pendingStaffCache.push({ id: d.id, ...d.data() }));
+      snapPending.forEach(d => {
+          if(d.data().role === 'teacher' || d.data().role === 'principal') {
+              pendingStaffCache.push({ id: d.id, ...d.data() });
+          }
+      });
     
       if (pendingStaffCache.length > 0) {
           pendingSection.classList.remove("d-none");
@@ -1660,10 +1653,11 @@ window.loadTeachersList = async () => {
             htmlPending += `
               <tr>
                 <td><b>${t.name}</b></td>
+                <td><span class="badge bg-warning text-dark">${t.role}</span></td>
                 <td>${t.email}</td>
-                <td>${t.phone}</td>
+                <td>${t.whatsapp || t.phone}</td>
                 <td class="text-center">
-                    <button class="btn btn-sm btn-success me-1" onclick="openAssignClassesForm('${t.id}')" title="Approve & Assign Class"><i class="fa-solid fa-check"></i></button>
+                    <button class="btn btn-sm btn-success me-1" onclick="openAssignClassesForm('${t.id}')" title="Approve"><i class="fa-solid fa-check"></i></button>
                     <button class="btn btn-sm btn-danger" onclick="deleteUser('${t.id}', '${t.name}')" title="Reject"><i class="fa-solid fa-xmark"></i></button>
                 </td>
               </tr>
@@ -1683,13 +1677,9 @@ window.deleteUser = async (userId, name) => {
             await deleteDoc(doc(db, "users", userId));
             alert(`${name} removed successfully.`);
             
-            // Reload the respective list based on current view
-            if (currentUserRole === 'admin') {
-                loadPrincipalsList();
-                loadTeachersList();
-            } else if (currentUserRole === 'principal') {
-                loadTeachersList();
-            }
+            // Reload the list
+            loadTeachersList();
+            
         } catch (err) {
             alert("Error: " + err.message);
         }
@@ -1710,26 +1700,31 @@ window.promoteStudents = async () => {
   }
 };
 
+window.showSignupForm = (type) => {
+    document.getElementById("signupOptions").classList.add("d-none");
+    if(type === 'madrasa') {
+        document.getElementById("signupForm").classList.remove("d-none");
+    } else {
+        document.getElementById("staffSignupForm").classList.remove("d-none");
+    }
+}
+
 window.switchAuthTab = (type) => {
   document.getElementById("loginForm").classList.add("d-none");
   document.getElementById("signupForm").classList.add("d-none");
   document.getElementById("staffSignupForm").classList.add("d-none");
+  document.getElementById("signupOptions").classList.add("d-none");
 
   document.getElementById("tabBtnLogin").classList.remove("active");
-  document.getElementById("tabBtnRegister").classList.remove("active");
-  document.getElementById("tabBtnStaffRegister").classList.remove("active");
-
+  document.getElementById("tabBtnSignup").classList.remove("active");
 
   if (type === 'login') {
     document.getElementById("loginForm").classList.remove("d-none");
     document.getElementById("tabBtnLogin").classList.add("active");
   } else if (type === 'signup') {
-    document.getElementById("signupForm").classList.remove("d-none");
-    document.getElementById("tabBtnRegister").classList.add("active");
-  } else if (type === 'staffSignup') {
-    document.getElementById("staffSignupForm").classList.remove("d-none");
-    document.getElementById("tabBtnStaffRegister").classList.add("active");
-  }
+    document.getElementById("signupOptions").classList.remove("d-none");
+    document.getElementById("tabBtnSignup").classList.add("active");
+  } 
 };
 
 window.showTab = (tabId) => {
@@ -1748,7 +1743,6 @@ window.showTab = (tabId) => {
 
   if (tabId === 'studentsListTab') loadStudentsByClass();
   if (tabId === 'teachersTab') window.loadTeachersList();
-  if (tabId === 'instAdminTab') window.loadPrincipalsList();
   if (tabId === 'homeDashboardTab') loadLeaderboard();
   if (tabId === 'superAdminTab') window.loadSuperAdminRequests();
 };
