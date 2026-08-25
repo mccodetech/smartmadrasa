@@ -154,7 +154,6 @@ onAuthStateChanged(auth, async (user) => {
             if (performanceMenuBtn) performanceMenuBtn.classList.add("d-none");
             if (feesMenuBtn) feesMenuBtn.classList.add("d-none");
             
-            // Show Student Action buttons for Admin
             if (adminActions) adminActions.classList.remove("d-none");
             if (actionCol) actionCol.classList.remove("d-none");
 
@@ -239,7 +238,6 @@ window.handleUnifiedLogin = async (e) => {
   const identifier = document.getElementById("loginIdentifier").value.trim();
 
   if (/^\d+$/.test(identifier)) {
-    // Parent Login
     const reg = Number(identifier);
     const mobile = document.getElementById("loginMobile").value.trim().slice(-10);
 
@@ -259,7 +257,6 @@ window.handleUnifiedLogin = async (e) => {
 
     if (!matchedStudent) return alert("Provided phone number does not match student's records.");
 
-    // Find siblings
     const siblingsQ = query(collection(db, "students"), where("institutionId", "==", matchedStudent.institutionId));
     const siblingsSnap = await getDocs(siblingsQ);
     
@@ -289,7 +286,6 @@ window.handleUnifiedLogin = async (e) => {
     loadParentStudentData(matchedStudent);
 
   } else {
-    // Staff Login
     const email = identifier.toLowerCase();
     const password = document.getElementById("loginPassword").value;
     if (!password) return alert("Please enter your password.");
@@ -351,7 +347,6 @@ window.handleSignUp = async (e) => {
     const pwd = document.getElementById("regPassword").value;
     const instId = board + "_" + instCode;
     
-    // Additional generic fields for Institution
     const address = document.getElementById("regAddress") ? document.getElementById("regAddress").value.trim().toUpperCase() : "";
     const place = document.getElementById("regPlace") ? document.getElementById("regPlace").value.trim().toUpperCase() : "";
     const po = document.getElementById("regPo") ? document.getElementById("regPo").value.trim().toUpperCase() : "";
@@ -399,7 +394,6 @@ window.handleSignUp = async (e) => {
   }
 };
 
-// Staff Registration (Self-Sign Up)
 window.handleStaffSignUp = async (e) => {
     e.preventDefault();
     const submitBtn = document.getElementById("btnStaffSubmitSignup");
@@ -456,7 +450,6 @@ window.handleStaffSignUp = async (e) => {
     }
   };
 
-// Load Super Admin Requests
 window.loadSuperAdminRequests = async () => {
   const tbody = document.getElementById("superAdminTableBody");
   tbody.innerHTML = `<tr><td colspan="7" class="text-center">Loading registered madrasas...</td></tr>`;
@@ -569,7 +562,6 @@ window.approveMadrasa = async (userId, instName) => {
         if(userDoc.exists()) {
              const data = userDoc.data();
              
-             // 1. WhatsApp Message
              if(data.whatsapp || data.phone) {
                  const destPhone = data.whatsapp || data.phone;
                  let waMsg = `Hello ${data.name},%0A%0AYour institution *${data.institutionName}* has been approved on Smart Madrasa.%0A%0AYour Institution ID is: *${data.institutionId}*. Please share this Board & Code with your staff to join.`;
@@ -578,15 +570,11 @@ window.approveMadrasa = async (userId, instName) => {
                  window.open(waUrl, "_blank");
              }
 
-             // 2. Email Message
              if(data.email) {
                  const subject = encodeURIComponent("Smart Madrasa - Registration Approved");
                  const body = encodeURIComponent(`Hello ${data.name},\n\nYour institution ${data.institutionName} has been approved on Smart Madrasa.\n\nYour Institution ID is: ${data.institutionId}.\n\nPlease share this ID with your staff to join.\n\nRegards,\nSmart Madrasa Admin`);
                  const mailtoUrl = `mailto:${data.email}?subject=${subject}&body=${body}`;
-                 
-                 setTimeout(() => {
-                     window.location.href = mailtoUrl;
-                 }, 800);
+                 setTimeout(() => { window.location.href = mailtoUrl; }, 800);
              }
              
              alert("Madrasa approved successfully! WhatsApp & Email prompts opened.");
@@ -724,7 +712,6 @@ window.instAssignClassesToStaff = async (e) => {
         
         const staff = pendingStaffCache.find(s => s.id === staffId);
         if(staff) {
-            // 1. WhatsApp Message
             if(staff.whatsapp || staff.phone) {
                 const destPhone = staff.whatsapp || staff.phone;
                 let waMsg = `Hello ${staff.name},%0A%0AYour registration as ${role} at *${document.getElementById("displayMadrassaName").innerText}* has been *approved*.%0A%0AYou can now login using your email: ${staff.email}.`;
@@ -735,18 +722,13 @@ window.instAssignClassesToStaff = async (e) => {
                 window.open(waUrl, "_blank");
             }
             
-            // 2. Email Message
             if(staff.email) {
                 const subject = encodeURIComponent(`Smart Madrasa - ${role.charAt(0).toUpperCase() + role.slice(1)} Registration Approved`);
                 const body = encodeURIComponent(`Hello ${staff.name},\n\nYour registration as ${role} at ${document.getElementById("displayMadrassaName").innerText} has been approved.\n\nYou can now login using your email: ${staff.email}.\n\nRegards,\nInstitution Admin`);
                 const mailtoUrl = `mailto:${staff.email}?subject=${subject}&body=${body}`;
-                
-                setTimeout(() => {
-                    window.location.href = mailtoUrl;
-                }, 800);
+                setTimeout(() => { window.location.href = mailtoUrl; }, 800);
             }
-            
-            alert("Approved successfully! WhatsApp & Email prompts opened.");
+            alert("Approved successfully! Prompts opened.");
         }
 
         document.getElementById("instAssignClassesForm").classList.add("d-none");
@@ -755,21 +737,119 @@ window.instAssignClassesToStaff = async (e) => {
 };
 
 // ==========================================
-// STUDENT PROFILE LOGIC (NEW TABS BASED)
+// CSV DOWNLOAD & UPLOAD (CORRECTED ORDER)
+// ==========================================
+
+window.downloadCSVFormat = () => {
+    // Exact requested order
+    const headers = "REG NO.,ID NO.,AADHAAR NUMBER,STUDENT NAME,GENDER,D.O.B,BLOOD GROUP,CURRENT CLASS,JOINED CLASS,JOINED DATE,PRESENCE,FATHER NAME,MOTHER NAME,GUARDIAN NAME,RELATION,GUARDIAN OCCUPATION,MOBILE NUMBER,EMERGENCY NUMBER,HOUSE NAME,PLACE,PO,PINCODE,DISTRICT,STATE,TRANSFERRED TO,REASON FOR LEAVING,DATE OF LEAVING,TC ISSUED,TC DETAILS,IDENTIFICATION MARKS,SPECIAL INFO\n";
+    const sampleData = "101,A123,123456789012,MUHAMMED,Male,2015-05-12,O+,1,1,2021-06-01,Regular,ABDULLA,FATHIMA,ABDULLA,Father,Business,9876543210,9876543211,HOUSE NAME,CALICUT,CALICUT PO,673001,KOZHIKODE,KERALA,,,,,,,,None,\n";
+    const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(headers + sampleData);
+    
+    const link = document.createElement("a");
+    link.setAttribute("href", csvContent);
+    link.setAttribute("download", "student_bulk_import_format.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+};
+
+window.handleBulkUpload = () => {
+  const fileInput = document.getElementById("csvFileInput");
+  const statusDiv = document.getElementById("bulkStatus");
+  if (!fileInput.files.length) return alert("Please select a CSV file.");
+
+  statusDiv.classList.remove("d-none");
+  statusDiv.innerText = "Analyzing file...";
+
+  Papa.parse(fileInput.files[0], {
+    header: true,
+    skipEmptyLines: true,
+    complete: async (results) => {
+      const rows = results.data;
+      try {
+        const batch = writeBatch(db);
+        rows.forEach((row) => {
+          const newStudentRef = doc(collection(db, "students"));
+          const regNum = parseInt(row["REG NO."] || 0, 10);
+          
+          batch.set(newStudentRef, {
+            institutionId: currentInstitutionId,
+            regNo: isNaN(regNum) ? 0 : regNum,
+            idNo: (row["ID NO."] || "").toUpperCase(),
+            aadhaar: row["AADHAAR NUMBER"] || row["AADHAAR"] || "",
+            name: (row["STUDENT NAME"] || row["NAME"] || "").toUpperCase(),
+            gender: row["GENDER"] || "Male",
+            dob: row["D.O.B"] || "",
+            bloodGroup: row["BLOOD GROUP"] || "",
+            
+            currentClass: (row["CURRENT CLASS"] || "1").replace(/Class\s*/i, "").trim(),
+            joinedClass: (row["JOINED CLASS"] || "").toUpperCase(),
+            joinedDate: row["JOINED DATE"] || "",
+            presence: (row["PRESENCE"] || "").toUpperCase(),
+
+            fatherName: (row["FATHER NAME"] || "").toUpperCase(),
+            motherName: (row["MOTHER NAME"] || "").toUpperCase(),
+            guardianName: (row["GUARDIAN NAME"] || "").toUpperCase(),
+            relation: (row["RELATION"] || "").toUpperCase(),
+            guardianOccupation: (row["GUARDIAN OCCUPATION"] || "").toUpperCase(),
+            phone: row["MOBILE NUMBER"] || row["MOBILE NO"] || row["PHONE"] || "",
+            emergencyPhone: row["EMERGENCY NUMBER"] || row["EMERGENCY NO"] || "",
+
+            houseName: (row["HOUSE NAME"] || row["ADDRESS"] || "").toUpperCase(),
+            place: (row["PLACE"] || "").toUpperCase(),
+            postOffice: (row["PO"] || "").toUpperCase(),
+            pincode: row["PINCODE"] || "",
+            district: (row["DISTRICT"] || "").toUpperCase(),
+            state: (row["STATE"] || "KERALA").toUpperCase(),
+
+            transferredTo: (row["TRANSFERRED TO"] || "").toUpperCase(),
+            reasonLeaving: (row["REASON FOR LEAVING"] || "").toUpperCase(),
+            dateOfLeaving: row["DATE OF LEAVING"] || "",
+            tcIssued: row["TC ISSUED"] || row["TC ISSUED(Yes/No)"] || "No",
+            tcDetails: (row["TC DETAILS"] || "").toUpperCase(),
+
+            identificationMarks: (row["IDENTIFICATION MARKS"] || "").toUpperCase(),
+            specialInfo: (row["SPECIAL INFO"] || "").toUpperCase(),
+            
+            status: "active",
+            createdAt: serverTimestamp()
+          });
+        });
+
+        await batch.commit();
+        statusDiv.className = "alert alert-success";
+        statusDiv.innerText = `Successfully imported ${rows.length} students!`;
+        
+        setTimeout(() => {
+            bootstrap.Modal.getInstance(document.getElementById('bulkImportModal')).hide();
+            loadStudentsByClass(true);
+            fileInput.value = "";
+            statusDiv.classList.add("d-none");
+        }, 1500);
+
+      } catch (err) {
+        statusDiv.className = "alert alert-danger";
+        statusDiv.innerText = "Error: " + err.message;
+      }
+    }
+  });
+};
+
+// ==========================================
+// STUDENT PROFILE MODAL (UI LOGIC)
 // ==========================================
 
 window.openStudentProfileModal = (docId) => {
     document.getElementById("studentProfileForm").reset();
 
     if (docId) {
-        // Edit Mode
         const s = localStudentsCache.find(x => x.id === docId);
         if (!s) return;
 
         document.getElementById("stuModalTitle").innerText = `Edit Student: ${s.name}`;
         document.getElementById("stuDocId").value = docId;
 
-        // Tab 1: Personal
         document.getElementById("stuRegNo").value = s.regNo || '';
         document.getElementById("stuIdNo").value = s.idNo || '';
         document.getElementById("stuAadhaar").value = s.aadhaar || '';
@@ -778,13 +858,11 @@ window.openStudentProfileModal = (docId) => {
         document.getElementById("stuDob").value = s.dob || '';
         document.getElementById("stuBlood").value = s.bloodGroup || '';
 
-        // Tab 2: Academic
         document.getElementById("stuCurrentClass").value = (s.currentClass || '1').replace(/Class\s*/i, "").trim();
         document.getElementById("stuJoinedClass").value = s.joinedClass || '';
         document.getElementById("stuDoj").value = s.joinedDate || '';
         document.getElementById("stuPresence").value = s.presence || '';
 
-        // Tab 3: Family
         document.getElementById("stuFatherName").value = s.fatherName || '';
         document.getElementById("stuMotherName").value = s.motherName || '';
         document.getElementById("stuGuardianName").value = s.guardianName || '';
@@ -793,7 +871,6 @@ window.openStudentProfileModal = (docId) => {
         document.getElementById("stuPhone").value = s.phone || '';
         document.getElementById("stuEmergency").value = s.emergencyPhone || '';
 
-        // Tab 4: Address
         document.getElementById("stuHouse").value = s.houseName || s.address || '';
         document.getElementById("stuPlace").value = s.place || '';
         document.getElementById("stuPo").value = s.postOffice || '';
@@ -801,24 +878,20 @@ window.openStudentProfileModal = (docId) => {
         document.getElementById("stuDistrict").value = s.district || '';
         document.getElementById("stuState").value = s.state || 'KERALA';
 
-        // Tab 5: Transfer/TC
         document.getElementById("stuTransTo").value = s.transferredTo || '';
         document.getElementById("stuReason").value = s.reasonLeaving || '';
         document.getElementById("stuDol").value = s.dateOfLeaving || '';
         document.getElementById("stuTcIssued").value = s.tcIssued || 'No';
         document.getElementById("stuTcDetails").value = s.tcDetails || '';
 
-        // Tab 6: Other
         document.getElementById("stuMarks").value = s.identificationMarks || '';
         document.getElementById("stuSpecialInfo").value = s.specialInfo || '';
 
     } else {
-        // Add Mode
         document.getElementById("stuModalTitle").innerText = "New Student Admission";
         document.getElementById("stuDocId").value = "";
     }
 
-    // Always start at first tab
     const triggerEl = document.querySelector('#studentTabs button[data-bs-target="#tab-stu-personal"]');
     bootstrap.Tab.getOrCreateInstance(triggerEl).show();
 
@@ -1428,106 +1501,180 @@ window.shareToWhatsApp = () => {
   window.open(waUrl, "_blank");
 };
 
-// ==========================================
-// CSV DOWNLOAD & UPLOAD (UPDATED)
-// ==========================================
+// Staff Profile Add / Edit Functionality
+window.openStaffProfileModal = (staffId) => {
+  document.getElementById("staffProfileForm").reset();
+  document.querySelectorAll('.sp-class-cb').forEach(cb => cb.checked = false);
 
-window.downloadCSVFormat = () => {
-    const headers = "REG NO.,ID NO.,AADHAAR,STUDENT NAME,GENDER,D.O.B,BLOOD GROUP,CURRENT CLASS,JOINED CLASS,JOINED DATE,PRESENCE,FATHER NAME,MOTHER NAME,GUARDIAN NAME,RELATION,GUARDIAN OCCUPATION,MOBILE NO,EMERGENCY NO,HOUSE NAME,PLACE,PO,PINCODE,DISTRICT,STATE,TRANSFERRED TO,REASON FOR LEAVING,DATE OF LEAVING,TC ISSUED(Yes/No),TC DETAILS,IDENTIFICATION MARKS,SPECIAL INFO\n";
-    const sampleData = "101,A123,123456789012,MUHAMMED,Male,2015-05-12,O+,1,1,2021-06-01,Regular,ABDULLA,FATHIMA,ABDULLA,Father,Business,9876543210,9876543211,HOUSE NAME,CALICUT,CALICUT PO,673001,KOZHIKODE,KERALA,,,,,,,,None,\n";
-    const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(headers + sampleData);
-    
-    const link = document.createElement("a");
-    link.setAttribute("href", csvContent);
-    link.setAttribute("download", "student_bulk_import_format.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-};
+  if (staffId) {
+      const staff = localPrincipalsCache.find(s => s.id === staffId) || localTeachersCache.find(s => s.id === staffId);
+      if(!staff) return;
 
-window.handleBulkUpload = () => {
-  const fileInput = document.getElementById("csvFileInput");
-  const statusDiv = document.getElementById("bulkStatus");
-  if (!fileInput.files.length) return alert("Please select a CSV file.");
+      document.getElementById("staffModalTitle").innerText = `Edit Profile: ${staff.name}`;
+      document.getElementById("spDocId").value = staff.id;
+      document.getElementById("spAuthSection").classList.add("d-none");
 
-  statusDiv.classList.remove("d-none");
-  statusDiv.innerText = "Analyzing file...";
+      document.getElementById("spName").value = staff.name || "";
+      document.getElementById("spGender").value = staff.gender || "Male";
+      document.getElementById("spDob").value = staff.dob || "";
+      document.getElementById("spBlood").value = staff.bloodGroup || "";
+      document.getElementById("spGuardian").value = staff.guardianName || "";
+      document.getElementById("spMarital").value = staff.maritalStatus || "Single";
+      document.getElementById("spAadhaar").value = staff.aadhaar || "";
 
-  Papa.parse(fileInput.files[0], {
-    header: true,
-    skipEmptyLines: true,
-    complete: async (results) => {
-      const rows = results.data;
-      try {
-        const batch = writeBatch(db);
-        rows.forEach((row) => {
-          const newStudentRef = doc(collection(db, "students"));
-          const regNum = parseInt(row["REG NO."] || row["regNo"] || 0, 10);
-          
-          batch.set(newStudentRef, {
-            institutionId: currentInstitutionId,
-            regNo: isNaN(regNum) ? 0 : regNum,
-            idNo: (row["ID NO."] || "").toUpperCase(),
-            aadhaar: row["AADHAAR"] || "",
-            name: (row["STUDENT NAME"] || row["NAME"] || "").toUpperCase(),
-            gender: row["GENDER"] || "Male",
-            dob: row["D.O.B"] || "",
-            bloodGroup: row["BLOOD GROUP"] || "",
-            
-            currentClass: (row["CURRENT CLASS"] || "1").replace(/Class\s*/i, "").trim(),
-            joinedClass: (row["JOINED CLASS"] || "").toUpperCase(),
-            joinedDate: row["JOINED DATE"] || "",
-            presence: (row["PRESENCE"] || "").toUpperCase(),
+      document.getElementById("spPhone").value = staff.phone || "";
+      document.getElementById("spWhatsapp").value = staff.whatsapp || "";
+      document.getElementById("spEmergency").value = staff.emergencyPhone || "";
+      document.getElementById("spHouse").value = staff.houseName || "";
+      document.getElementById("spPo").value = staff.postOffice || "";
+      document.getElementById("spPin").value = staff.pincode || "";
+      document.getElementById("spDistrict").value = staff.district || "";
+      document.getElementById("spState").value = staff.state || "KERALA";
 
-            fatherName: (row["FATHER NAME"] || "").toUpperCase(),
-            motherName: (row["MOTHER NAME"] || "").toUpperCase(),
-            guardianName: (row["GUARDIAN NAME"] || "").toUpperCase(),
-            relation: (row["RELATION"] || "").toUpperCase(),
-            guardianOccupation: (row["GUARDIAN OCCUPATION"] || "").toUpperCase(),
-            phone: row["MOBILE NO"] || row["PHONE"] || "",
-            emergencyPhone: row["EMERGENCY NO"] || "",
+      document.getElementById("spRelEdu").value = staff.religiousEdu || "";
+      document.getElementById("spGenEdu").value = staff.generalEdu || "";
+      document.getElementById("spLanguages").value = staff.languages || "";
+      document.getElementById("spSkills").value = staff.skills || "";
+      document.getElementById("spAwards").value = staff.awards || "";
 
-            houseName: (row["HOUSE NAME"] || row["ADDRESS"] || "").toUpperCase(),
-            place: (row["PLACE"] || "").toUpperCase(),
-            postOffice: (row["PO"] || "").toUpperCase(),
-            pincode: row["PINCODE"] || "",
-            district: (row["DISTRICT"] || "").toUpperCase(),
-            state: (row["STATE"] || "KERALA").toUpperCase(),
+      document.getElementById("spRole").value = staff.role || "teacher";
+      document.getElementById("spDesignation").value = staff.designation || "";
+      document.getElementById("spMsr").value = staff.msrNo || "";
+      document.getElementById("spEmpType").value = staff.employmentType || "Full Time";
+      document.getElementById("spExp").value = staff.experience || "";
+      document.getElementById("spDoj").value = staff.doj || "";
 
-            transferredTo: (row["TRANSFERRED TO"] || "").toUpperCase(),
-            reasonLeaving: (row["REASON FOR LEAVING"] || "").toUpperCase(),
-            dateOfLeaving: row["DATE OF LEAVING"] || "",
-            tcIssued: row["TC ISSUED(Yes/No)"] || "No",
-            tcDetails: (row["TC DETAILS"] || "").toUpperCase(),
-
-            identificationMarks: (row["IDENTIFICATION MARKS"] || "").toUpperCase(),
-            specialInfo: (row["SPECIAL INFO"] || "").toUpperCase(),
-            
-            status: "active",
-            createdAt: serverTimestamp()
+      if(staff.assignedClasses) {
+          staff.assignedClasses.forEach(c => {
+              const cb = document.getElementById("spc" + c);
+              if(cb) cb.checked = true;
           });
-        });
-
-        await batch.commit();
-        statusDiv.className = "alert alert-success";
-        statusDiv.innerText = `Successfully imported ${rows.length} students!`;
-        
-        setTimeout(() => {
-            bootstrap.Modal.getInstance(document.getElementById('bulkImportModal')).hide();
-            loadStudentsByClass(true);
-            fileInput.value = "";
-            statusDiv.classList.add("d-none");
-        }, 1500);
-
-      } catch (err) {
-        statusDiv.className = "alert alert-danger";
-        statusDiv.innerText = "Error: " + err.message;
       }
-    }
-  });
+
+      document.getElementById("spAccName").value = staff.bankAccName || "";
+      document.getElementById("spAccNo").value = staff.bankAccNo || "";
+      document.getElementById("spIfsc").value = staff.bankIfsc || "";
+      document.getElementById("spBank").value = staff.bankName || "";
+      document.getElementById("spBranch").value = staff.bankBranch || "";
+
+      document.getElementById("spTransFrom").value = staff.transferredFrom || "";
+      document.getElementById("spTransTo").value = staff.transferredTo || "";
+      document.getElementById("spDol").value = staff.dol || "";
+      document.getElementById("spReason").value = staff.reasonLeaving || "";
+
+  } else {
+      document.getElementById("staffModalTitle").innerText = "Register New Staff / Principal";
+      document.getElementById("spDocId").value = "";
+      document.getElementById("spAuthSection").classList.remove("d-none"); 
+  }
+
+  const triggerEl = document.querySelector('#staffTabs button[data-bs-target="#tab-personal"]')
+  bootstrap.Tab.getOrCreateInstance(triggerEl).show()
+
+  new bootstrap.Modal(document.getElementById('staffProfileModal')).show();
 };
 
-// ... (Rest of UI functions)
+window.saveStaffProfile = async (e) => {
+  e.preventDefault();
+
+  const staffId = document.getElementById("spDocId").value;
+  const role = document.getElementById("spRole").value;
+  
+  const classCheckboxes = document.querySelectorAll('.sp-class-cb:checked');
+  const assignedClasses = Array.from(classCheckboxes).map(cb => cb.value);
+
+  const profileData = {
+      name: document.getElementById("spName").value.trim().toUpperCase(),
+      gender: document.getElementById("spGender").value,
+      dob: document.getElementById("spDob").value,
+      bloodGroup: document.getElementById("spBlood").value,
+      guardianName: document.getElementById("spGuardian").value.trim().toUpperCase(),
+      maritalStatus: document.getElementById("spMarital").value,
+      aadhaar: document.getElementById("spAadhaar").value.trim(),
+      
+      phone: document.getElementById("spPhone").value.trim(),
+      whatsapp: document.getElementById("spWhatsapp").value.trim(),
+      emergencyPhone: document.getElementById("spEmergency").value.trim(),
+      houseName: document.getElementById("spHouse").value.trim().toUpperCase(),
+      postOffice: document.getElementById("spPo").value.trim().toUpperCase(),
+      pincode: document.getElementById("spPin").value.trim(),
+      district: document.getElementById("spDistrict").value.trim().toUpperCase(),
+      state: document.getElementById("spState").value.trim().toUpperCase(),
+
+      religiousEdu: document.getElementById("spRelEdu").value.trim().toUpperCase(),
+      generalEdu: document.getElementById("spGenEdu").value.trim().toUpperCase(),
+      languages: document.getElementById("spLanguages").value.trim().toUpperCase(),
+      skills: document.getElementById("spSkills").value.trim().toUpperCase(),
+      awards: document.getElementById("spAwards").value.trim().toUpperCase(),
+
+      role: role,
+      designation: document.getElementById("spDesignation").value.trim().toUpperCase(),
+      msrNo: document.getElementById("spMsr").value.trim().toUpperCase(),
+      employmentType: document.getElementById("spEmpType").value,
+      experience: document.getElementById("spExp").value,
+      doj: document.getElementById("spDoj").value,
+      assignedClasses: role === 'principal' ? ["1","2","3","4","5","6","7","8","9","10","11","12"] : assignedClasses,
+
+      bankAccName: document.getElementById("spAccName").value.trim().toUpperCase(),
+      bankAccNo: document.getElementById("spAccNo").value.trim(),
+      bankIfsc: document.getElementById("spIfsc").value.trim().toUpperCase(),
+      bankName: document.getElementById("spBank").value.trim().toUpperCase(),
+      bankBranch: document.getElementById("spBranch").value.trim().toUpperCase(),
+
+      transferredFrom: document.getElementById("spTransFrom").value.trim().toUpperCase(),
+      transferredTo: document.getElementById("spTransTo").value.trim().toUpperCase(),
+      dol: document.getElementById("spDol").value,
+      reasonLeaving: document.getElementById("spReason").value.trim().toUpperCase(),
+      
+      updatedAt: serverTimestamp()
+  };
+
+  try {
+      if (staffId) {
+          await updateDoc(doc(db, "users", staffId), profileData);
+          alert("Profile updated successfully!");
+      } else {
+          const email = document.getElementById("spAuthEmail").value.trim().toLowerCase();
+          const pwd = document.getElementById("spAuthPassword").value;
+          
+          if(!email || !pwd) return alert("Email and Password are required to create a new account.");
+          
+          const cred = await createUserWithEmailAndPassword(auth, email, pwd);
+          
+          profileData.uid = cred.user.uid;
+          profileData.email = email;
+          profileData.institutionId = currentInstitutionId;
+          profileData.status = "active";
+          profileData.createdAt = serverTimestamp();
+
+          await setDoc(doc(db, "users", cred.user.uid), profileData);
+          alert("New staff registered successfully! You will be automatically signed in as the new user.");
+      }
+
+      bootstrap.Modal.getInstance(document.getElementById('staffProfileModal')).hide();
+      
+      if(currentUserRole === 'admin') loadPrincipalsList();
+      else loadTeachersList();
+
+  } catch (err) { alert("Error: " + err.message); }
+};
+
+window.deleteUser = async (userId, name) => {
+    if (confirm(`Are you sure you want to remove ${name}?`)) {
+        try {
+            await deleteDoc(doc(db, "users", userId));
+            alert(`${name} removed successfully.`);
+            
+            if (currentUserRole === 'admin') loadPrincipalsList();
+            else if (currentUserRole === 'principal') loadTeachersList();
+            else if (currentUserRole === 'superadmin') loadSuperAdminRequests();
+            
+        } catch (err) {
+            alert("Error: " + err.message);
+        }
+    }
+};
+
 window.showSignupForm = (type) => {
   document.getElementById("signupOptions").classList.add("d-none");
   if(type === 'madrasa') document.getElementById("signupForm").classList.remove("d-none");
