@@ -149,11 +149,15 @@ onAuthStateChanged(auth, async (user) => {
         if (currentUserRole === "admin") {
             if (instAdminStaffBtn) instAdminStaffBtn.classList.remove("d-none");
             if (homeMenuBtn) homeMenuBtn.classList.add("d-none");
-            if (studentsMenuBtn) studentsMenuBtn.classList.add("d-none");
             if (attendanceMenuBtn) attendanceMenuBtn.classList.add("d-none");
             if (marksMenuBtn) marksMenuBtn.classList.add("d-none");
             if (performanceMenuBtn) performanceMenuBtn.classList.add("d-none");
             if (feesMenuBtn) feesMenuBtn.classList.add("d-none");
+            
+            // Show Student Action buttons for Admin
+            if (adminActions) adminActions.classList.remove("d-none");
+            if (actionCol) actionCol.classList.remove("d-none");
+
             showTab('instAdminTab'); 
             loadPrincipalsList(); 
 
@@ -235,6 +239,7 @@ window.handleUnifiedLogin = async (e) => {
   const identifier = document.getElementById("loginIdentifier").value.trim();
 
   if (/^\d+$/.test(identifier)) {
+    // Parent Login
     const reg = Number(identifier);
     const mobile = document.getElementById("loginMobile").value.trim().slice(-10);
 
@@ -254,6 +259,7 @@ window.handleUnifiedLogin = async (e) => {
 
     if (!matchedStudent) return alert("Provided phone number does not match student's records.");
 
+    // Find siblings
     const siblingsQ = query(collection(db, "students"), where("institutionId", "==", matchedStudent.institutionId));
     const siblingsSnap = await getDocs(siblingsQ);
     
@@ -283,6 +289,7 @@ window.handleUnifiedLogin = async (e) => {
     loadParentStudentData(matchedStudent);
 
   } else {
+    // Staff Login
     const email = identifier;
     const password = document.getElementById("loginPassword").value;
     if (!password) return alert("Please enter your password.");
@@ -433,7 +440,7 @@ window.handleStaffSignUp = async (e) => {
     } finally {
       if (submitBtn) submitBtn.disabled = false;
     }
-};
+  };
 
 // Load Super Admin Requests
 window.loadSuperAdminRequests = async () => {
@@ -853,7 +860,7 @@ function renderPaginatedTable() {
   let html = "";
   pageData.forEach(s => {
     const cleanClass = (s.currentClass || '-').replace(/Class\s*/i, "").trim();
-    const actionCol = (currentUserRole === "principal" || isSuperAdmin) ? `
+    const actionCol = (currentUserRole === "principal" || currentUserRole === "admin" || isSuperAdmin) ? `
       <td class="text-center">
         <button class="btn btn-sm btn-outline-primary me-1" onclick="openEditStudentModal('${s.id}')" title="Edit"><i class="fa-solid fa-pen"></i></button>
         <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${s.id}', '${s.name}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
@@ -902,7 +909,7 @@ window.filterStudentsLocal = () => {
   let html = "";
   filtered.slice(0, 50).forEach(s => {
     const cleanClass = (s.currentClass || '-').replace(/Class\s*/i, "").trim();
-    const actionCol = (currentUserRole === "principal" || isSuperAdmin) ? `
+    const actionCol = (currentUserRole === "principal" || currentUserRole === "admin" || isSuperAdmin) ? `
       <td class="text-center">
         <button class="btn btn-sm btn-outline-primary me-1" onclick="openEditStudentModal('${s.id}')"><i class="fa-solid fa-pen"></i></button>
         <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${s.id}', '${s.name}')"><i class="fa-solid fa-trash"></i></button>
@@ -1340,6 +1347,72 @@ window.shareToWhatsApp = () => {
   window.open(waUrl, "_blank");
 };
 
+// Download CSV Format
+window.downloadCSVFormat = () => {
+    const headers = "REG NO.,ID NO.,NAME,CURRENT CLASS,D.O.B,PHONE,FATHER NAME,MOTHER NAME,GUARDIAN NAME,PLACE,ADDRESS\n";
+    const sampleData = "101,A123,MUHAMMED,Class 1,2015-05-12,9876543210,ABDULLA,FATHIMA,ABDULLA,CALICUT,HOUSE NAME\n";
+    const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(headers + sampleData);
+    
+    const link = document.createElement("a");
+    link.setAttribute("href", csvContent);
+    link.setAttribute("download", "student_bulk_import_format.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+};
+
+// Bulk CSV Import
+window.handleBulkUpload = () => {
+  const fileInput = document.getElementById("csvFileInput");
+  const statusDiv = document.getElementById("bulkStatus");
+  if (!fileInput.files.length) return alert("Please select a CSV file.");
+
+  statusDiv.classList.remove("d-none");
+  statusDiv.innerText = "Analyzing file...";
+
+  Papa.parse(fileInput.files[0], {
+    header: true,
+    skipEmptyLines: true,
+    complete: async (results) => {
+      const rows = results.data;
+      try {
+        const batch = writeBatch(db);
+        rows.forEach((row) => {
+          const newStudentRef = doc(collection(db, "students"));
+          const regNum = parseInt(row["REG NO."] || row["regNo"] || 0, 10);
+          const phoneVal = row["PHONE"] || row["MOBILE"] || row["PHONE NO"] || "";
+
+          batch.set(newStudentRef, {
+            institutionId: currentInstitutionId,
+            regNo: isNaN(regNum) ? 0 : regNum,
+            idNo: (row["ID NO."] || "").toUpperCase(),
+            name: (row["NAME"] || "").toUpperCase(),
+            currentClass: (row["CURRENT CLASS"] || "1").replace(/Class\s*/i, "").trim(),
+            address: (row["ADDRESS"] || "").toUpperCase(),
+            place: (row["PLACE"] || "").toUpperCase(),
+            dob: row["D.O.B"] || "",
+            fatherName: (row["FATHER NAME"] || "").toUpperCase(),
+            motherName: (row["MOTHER NAME"] || "").toUpperCase(),
+            guardianName: (row["GUARDIAN NAME"] || "").toUpperCase(),
+            phone: phoneVal,
+            status: "active",
+            createdAt: serverTimestamp()
+          });
+        });
+
+        await batch.commit();
+        statusDiv.className = "alert alert-success";
+        statusDiv.innerText = `Successfully imported ${rows.length} students!`;
+        bootstrap.Modal.getInstance(document.getElementById('bulkImportModal')).hide();
+        loadStudentsByClass(true);
+      } catch (err) {
+        statusDiv.className = "alert alert-danger";
+        statusDiv.innerText = "Error: " + err.message;
+      }
+    }
+  });
+};
+
 // Staff Profile Add / Edit Functionality
 window.openStaffProfileModal = (staffId) => {
   document.getElementById("staffProfileForm").reset();
@@ -1505,227 +1578,20 @@ window.saveStaffProfile = async (e) => {
   } catch (err) { alert("Error: " + err.message); }
 };
 
-// Load Principals & Staff List for Inst Admin
-window.loadPrincipalsList = async () => {
-  const tbody = document.getElementById("principalsTableBody");
-  const pendingTbody = document.getElementById("instPendingStaffTableBody");
-  const pendingSection = document.getElementById("instPendingStaffSection");
-
-  tbody.innerHTML = `<tr><td colspan="5" class="text-center">Loading...</td></tr>`;
-  pendingTbody.innerHTML = `<tr><td colspan="5" class="text-center">Loading...</td></tr>`;
-
-  const qActive = query(collection(db, "users"), where("institutionId", "==", currentInstitutionId), where("status", "==", "active"));
-  const snapActive = await getDocs(qActive);
-
-  localPrincipalsCache = [];
-  snapActive.forEach(d => {
-      if(d.data().role === 'principal' || d.data().role === 'teacher') {
-          localPrincipalsCache.push({ id: d.id, ...d.data() });
-      }
-  });
-
-  let htmlActive = "";
-  localPrincipalsCache.forEach(p => {
-      const roleBadge = p.role === 'principal' ? `<span class="badge bg-danger">Principal</span>` : `<span class="badge bg-success">Teacher</span>`;
-      htmlActive += `
-          <tr>
-              <td><b>${p.name}</b></td>
-              <td>${roleBadge}</td>
-              <td>${p.email}</td>
-              <td>${p.phone}</td>
-              <td class="text-center">
-                  <button class="btn btn-sm btn-primary me-1" onclick="openStaffProfileModal('${p.id}')" title="Edit Profile"><i class="fa-solid fa-pen"></i></button>
-                  <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${p.id}', '${p.name}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
-              </td>
-          </tr>
-      `;
-  });
-  tbody.innerHTML = htmlActive || `<tr><td colspan="5" class="text-center text-muted">No staff/principals assigned yet.</td></tr>`;
-
-  const qPending = query(collection(db, "users"), where("institutionId", "==", currentInstitutionId), where("status", "==", "pending"));
-  const snapPending = await getDocs(qPending);
-
-  pendingStaffCache = [];
-  snapPending.forEach(d => {
-      if(d.data().role === 'principal' || d.data().role === 'teacher') {
-          pendingStaffCache.push({ id: d.id, ...d.data() });
-      }
-  });
-
-  if (pendingStaffCache.length > 0) {
-      pendingSection.classList.remove("d-none");
-      let htmlPending = "";
-      pendingStaffCache.forEach((t) => {
-        htmlPending += `
-          <tr>
-            <td><b>${t.name}</b></td>
-            <td><span class="badge bg-warning text-dark">${t.role}</span></td>
-            <td>${t.email}</td>
-            <td>${t.phone}</td>
-            <td class="text-center">
-                <button class="btn btn-sm btn-success me-1" onclick="openInstAssignClassesForm('${t.id}')" title="Approve"><i class="fa-solid fa-check"></i></button>
-                <button class="btn btn-sm btn-danger" onclick="deleteUser('${t.id}', '${t.name}')" title="Reject"><i class="fa-solid fa-xmark"></i></button>
-            </td>
-          </tr>
-        `;
-      });
-      pendingTbody.innerHTML = htmlPending;
-  } else {
-       pendingSection.classList.add("d-none");
-  }
-};
-
-window.openInstAssignClassesForm = (staffId) => {
-  const staff = pendingStaffCache.find(s => s.id === staffId);
-  if(staff) {
-      document.getElementById("instAssignStaffId").value = staffId;
-      document.getElementById("instAssignStaffNameDisplay").innerText = staff.name;
-      document.getElementById("instAssignStaffRole").value = staff.role;
-
-      const classDiv = document.getElementById("instClassAssignDiv");
-      
-      if(staff.role === 'principal') classDiv.classList.add("d-none");
-      else classDiv.classList.remove("d-none");
-
-      document.getElementById("instAssignClassesForm").classList.remove("d-none");
-      document.querySelectorAll('.inst-approve-class-cb').forEach(cb => cb.checked = false);
-      updateDropdownLabel('inst-approve');
-  }
-};
-
-window.instAssignClassesToStaff = async (e) => {
-  e.preventDefault();
-  const staffId = document.getElementById("instAssignStaffId").value;
-  const role = document.getElementById("instAssignStaffRole").value;
-  
-  let assignedClasses = [];
-
-  if (role === 'teacher') {
-      const checkboxes = document.querySelectorAll('.inst-approve-class-cb:checked');
-      assignedClasses = Array.from(checkboxes).map(cb => cb.value);
-
-      if (assignedClasses.length === 0) return alert("Please select at least one class.");
-  } else if (role === 'principal') {
-      assignedClasses = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
-  }
-
-  try {
-      await updateDoc(doc(db, "users", staffId), { 
-          status: "active",
-          assignedClasses: assignedClasses
-      });
-      
-      const staff = pendingStaffCache.find(s => s.id === staffId);
-      if(staff) {
-          // WhatsApp Msg
-          if(staff.whatsapp || staff.phone) {
-              const destPhone = staff.whatsapp || staff.phone;
-              let waMsg = `Hello ${staff.name},%0A%0AYour registration as ${role} at *${document.getElementById("displayMadrassaName").innerText}* has been *approved*.%0A%0AYou can now login using your email: ${staff.email}.`;
-              const cleanPhone = destPhone.replace(/[^0-9]/g, '');
-              const waUrl = cleanPhone.length >= 10 
-                ? `https://wa.me/91${cleanPhone.slice(-10)}?text=${waMsg}`
-                : `https://wa.me/?text=${waMsg}`;
-              window.open(waUrl, "_blank");
-          }
-          
-          // Email Msg
-          if(staff.email) {
-              const subject = encodeURIComponent(`Smart Madrasa - ${role.charAt(0).toUpperCase() + role.slice(1)} Registration Approved`);
-              const body = encodeURIComponent(`Hello ${staff.name},\n\nYour registration as ${role} at ${document.getElementById("displayMadrassaName").innerText} has been approved.\n\nYou can now login using your email: ${staff.email}.\n\nRegards,\nInstitution Admin`);
-              const mailtoUrl = `mailto:${staff.email}?subject=${subject}&body=${body}`;
-              setTimeout(() => { window.location.href = mailtoUrl; }, 800);
-          }
-          alert("Approved successfully! Prompts opened.");
-      }
-
-      document.getElementById("instAssignClassesForm").classList.add("d-none");
-      loadPrincipalsList(); 
-  } catch (err) { alert("Error: " + err.message); }
-};
-
-// Teachers List (Viewable by Principal)
-window.loadTeachersList = async () => {
-  const tbody = document.getElementById("teachersTableBody");
-  const pendingTbody = document.getElementById("pendingStaffTableBody");
-  const pendingSection = document.getElementById("pendingStaffSection");
-  
-  tbody.innerHTML = `<tr><td colspan="7" class="text-center">Loading...</td></tr>`;
-  pendingTbody.innerHTML = `<tr><td colspan="4" class="text-center">Loading...</td></tr>`;
-  
-  const qActive = query(collection(db, "users"), where("institutionId", "==", currentInstitutionId), where("status", "==", "active"), where("role", "==", "teacher"));
-  const snapActive = await getDocs(qActive);
-
-  localTeachersCache = [];
-  snapActive.forEach(d => {
-      localTeachersCache.push({ id: d.id, ...d.data() });
-  });
-
-  let htmlActive = "";
-  let slNo = 1;
-  localTeachersCache.forEach((t) => {
-    const classesBadges = (t.assignedClasses || []).map(c => `<span class="badge bg-light text-dark border me-1">Class ${c}</span>`).join(' ') || '-';
-    
-    htmlActive += `
-      <tr>
-        <td>${slNo++}</td>
-        <td><b>${t.name}</b></td>
-        <td><span class="badge bg-success">Teacher</span></td>
-        <td>${t.email}</td>
-        <td>${t.phone}</td>
-        <td>${classesBadges}</td>
-        <td class="text-center">
-            <button class="btn btn-sm btn-primary me-1" onclick="openStaffProfileModal('${t.id}')" title="Edit Profile"><i class="fa-solid fa-pen"></i></button>
-            <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${t.id}', '${t.name}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
-        </td>
-      </tr>
-    `;
-  });
-  tbody.innerHTML = htmlActive || `<tr><td colspan="7" class="text-center text-muted">No active staff registered yet.</td></tr>`;
-
-  const qPending = query(collection(db, "users"), where("institutionId", "==", currentInstitutionId), where("status", "==", "pending"), where("role", "==", "teacher"));
-  const snapPending = await getDocs(qPending);
-
-  pendingStaffCache = [];
-  snapPending.forEach(d => {
-      pendingStaffCache.push({ id: d.id, ...d.data() });
-  });
-
-  if (pendingStaffCache.length > 0) {
-      pendingSection.classList.remove("d-none");
-      let htmlPending = "";
-      pendingStaffCache.forEach((t) => {
-        htmlPending += `
-          <tr>
-            <td><b>${t.name}</b></td>
-            <td>${t.email}</td>
-            <td>${t.phone}</td>
-            <td class="text-center">
-                <button class="btn btn-sm btn-success me-1" onclick="openAssignClassesForm('${t.id}')" title="Approve"><i class="fa-solid fa-check"></i></button>
-                <button class="btn btn-sm btn-danger" onclick="deleteUser('${t.id}', '${t.name}')" title="Reject"><i class="fa-solid fa-xmark"></i></button>
-            </td>
-          </tr>
-        `;
-      });
-      pendingTbody.innerHTML = htmlPending;
-  } else {
-       pendingSection.classList.add("d-none");
-  }
-};
-
 window.deleteUser = async (userId, name) => {
-  if (confirm(`Are you sure you want to remove ${name}?`)) {
-      try {
-          await deleteDoc(doc(db, "users", userId));
-          alert(`${name} removed successfully.`);
-          
-          if (currentUserRole === 'admin') loadPrincipalsList();
-          else if (currentUserRole === 'principal') loadTeachersList();
-          else if (currentUserRole === 'superadmin') loadSuperAdminRequests();
-          
-      } catch (err) {
-          alert("Error: " + err.message);
-      }
-  }
+    if (confirm(`Are you sure you want to remove ${name}?`)) {
+        try {
+            await deleteDoc(doc(db, "users", userId));
+            alert(`${name} removed successfully.`);
+            
+            if (currentUserRole === 'admin') loadPrincipalsList();
+            else if (currentUserRole === 'principal') loadTeachersList();
+            else if (currentUserRole === 'superadmin') loadSuperAdminRequests();
+            
+        } catch (err) {
+            alert("Error: " + err.message);
+        }
+    }
 };
 
 window.promoteStudents = async () => {
