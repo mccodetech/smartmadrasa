@@ -548,13 +548,31 @@ window.approveMadrasa = async (userId, instName) => {
     try{
         await updateDoc(doc(db, "users", userId), { status: "active" });
         const userDoc = await getDoc(doc(db, "users", userId));
-        if(userDoc.exists() && userDoc.data().whatsapp) {
-             let msg = `Hello ${userDoc.data().name},%0A%0AYour institution *${userDoc.data().institutionName}* has been approved on Smart Madrasa.%0A%0AYour Institution ID is: *${userDoc.data().institutionId}*. Please share this Board & Code with your staff to join.`;
-             const cleanPhone = userDoc.data().whatsapp.replace(/[^0-9]/g, '');
-             const waUrl = cleanPhone.length >= 10 ? `https://wa.me/91${cleanPhone.slice(-10)}?text=${msg}` : `https://wa.me/?text=${msg}`;
-             window.open(waUrl, "_blank");
-        } else {
-             alert("Madrasa approved successfully!");
+        
+        if(userDoc.exists()) {
+             const data = userDoc.data();
+             
+             // 1. WhatsApp Message
+             if(data.whatsapp) {
+                 let waMsg = `Hello ${data.name},%0A%0AYour institution *${data.institutionName}* has been approved on Smart Madrasa.%0A%0AYour Institution ID is: *${data.institutionId}*. Please share this Board & Code with your staff to join.`;
+                 const cleanPhone = data.whatsapp.replace(/[^0-9]/g, '');
+                 const waUrl = cleanPhone.length >= 10 ? `https://wa.me/91${cleanPhone.slice(-10)}?text=${waMsg}` : `https://wa.me/?text=${waMsg}`;
+                 window.open(waUrl, "_blank"); // Opens WhatsApp in new tab
+             }
+
+             // 2. Email Message
+             if(data.email) {
+                 const subject = encodeURIComponent("Smart Madrasa - Registration Approved");
+                 const body = encodeURIComponent(`Hello ${data.name},\n\nYour institution ${data.institutionName} has been approved on Smart Madrasa.\n\nYour Institution ID is: ${data.institutionId}.\n\nPlease share this ID with your staff to join.\n\nRegards,\nSmart Madrasa Admin`);
+                 const mailtoUrl = `mailto:${data.email}?subject=${subject}&body=${body}`;
+                 
+                 // Small delay to prevent browser from blocking the second action
+                 setTimeout(() => {
+                     window.location.href = mailtoUrl; // Opens Email App
+                 }, 800);
+             }
+             
+             alert("Madrasa approved successfully! WhatsApp & Email prompts opened.");
         }
         loadSuperAdminRequests();
     } catch(e) { alert("Error approving: " + e.message); }
@@ -687,13 +705,29 @@ window.instAssignClassesToStaff = async (e) => {
         });
         
         const staff = pendingStaffCache.find(s => s.id === staffId);
-        if(staff && staff.whatsapp) {
-            let msg = `Hello ${staff.name},%0A%0AYour registration as ${role} at *${document.getElementById("displayMadrassaName").innerText}* has been *approved*.%0A%0AYou can now login using your email: ${staff.email}.`;
-            const cleanPhone = staff.whatsapp.replace(/[^0-9]/g, '');
-            const waUrl = cleanPhone.length >= 10 ? `https://wa.me/91${cleanPhone.slice(-10)}?text=${msg}` : `https://wa.me/?text=${msg}`;
-            window.open(waUrl, "_blank");
-        } else {
-             alert("Approved successfully!");
+        if(staff) {
+            // 1. WhatsApp Message
+            if(staff.whatsapp) {
+                let waMsg = `Hello ${staff.name},%0A%0AYour registration as ${role} at *${document.getElementById("displayMadrassaName").innerText}* has been *approved*.%0A%0AYou can now login using your email: ${staff.email}.`;
+                const cleanPhone = staff.whatsapp.replace(/[^0-9]/g, '');
+                const waUrl = cleanPhone.length >= 10 
+                  ? `https://wa.me/91${cleanPhone.slice(-10)}?text=${waMsg}`
+                  : `https://wa.me/?text=${waMsg}`;
+                window.open(waUrl, "_blank");
+            }
+            
+            // 2. Email Message
+            if(staff.email) {
+                const subject = encodeURIComponent(`Smart Madrasa - ${role.charAt(0).toUpperCase() + role.slice(1)} Registration Approved`);
+                const body = encodeURIComponent(`Hello ${staff.name},\n\nYour registration as ${role} at ${document.getElementById("displayMadrassaName").innerText} has been approved.\n\nYou can now login using your email: ${staff.email}.\n\nRegards,\nInstitution Admin`);
+                const mailtoUrl = `mailto:${staff.email}?subject=${subject}&body=${body}`;
+                
+                setTimeout(() => {
+                    window.location.href = mailtoUrl;
+                }, 800);
+            }
+            
+            alert("Approved successfully! WhatsApp & Email prompts opened.");
         }
 
         document.getElementById("instAssignClassesForm").classList.add("d-none");
