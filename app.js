@@ -30,7 +30,7 @@ import {
   signOut, onAuthStateChanged 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { 
-  getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, addDoc, getDocs, query, where, writeBatch, runTransaction, serverTimestamp 
+  getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, addDoc, getDocs, query, where, writeBatch, runTransaction, serverTimestamp, orderBy 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -52,6 +52,7 @@ const SUPER_ADMIN_EMAIL = "chembrasseri1@gmail.com";
 let currentInstitutionId = "";
 let currentUserRole = "admin";
 let currentUserAssignedClasses = [];
+let currentUserName = "";
 let isSuperAdmin = false;
 let localStudentsCache = [];
 let localPerfStudentsCache = [];
@@ -62,6 +63,10 @@ let pendingStaffCache = [];
 let lastReceiptWhatsAppPayload = null;
 let currentPage = 1;
 const pageSize = 50;
+
+// Global Setting Variables
+let sysFeePermission = "all"; 
+let sysReqManualReceipt = false;
 
 window.updateDropdownLabel = (type) => {
   const checkboxes = document.querySelectorAll(`.${type}-class-cb:checked`);
@@ -85,7 +90,6 @@ onAuthStateChanged(auth, async (user) => {
 
         isSuperAdmin = (user.email === SUPER_ADMIN_EMAIL);
         
-        // Handle pending users
         if (!isSuperAdmin && userData.status === "pending") {
            let alertMsg = "Your registration is pending approval.";
            if(userData.role === 'admin') alertMsg = "Your Madrasa registration is pending approval from the Super Admin. Please contact support.";
@@ -100,12 +104,13 @@ onAuthStateChanged(auth, async (user) => {
         currentInstitutionId = userData.institutionId;
         currentUserRole = userData.role || (isSuperAdmin ? "superadmin" : "teacher");
         currentUserAssignedClasses = userData.assignedClasses || [];
+        currentUserName = userData.name || "Staff";
 
         const instNameEl = document.getElementById("displayMadrassaName");
         if (instNameEl) instNameEl.innerText = isSuperAdmin ? "Smart Madrasa - Master Control Center" : (userData.institutionName || "Smart Madrasa");
 
         const userNameEl = document.getElementById("displayUserName");
-        if (userNameEl) userNameEl.innerHTML = `<i class="fa-solid fa-user"></i> ${userData.name}`;
+        if (userNameEl) userNameEl.innerHTML = `<i class="fa-solid fa-user"></i> ${currentUserName}`;
         
         const userRoleEl = document.getElementById("displayUserRole");
         const tMenuBtn = document.getElementById("teachersMenuBtn");
@@ -120,6 +125,7 @@ onAuthStateChanged(auth, async (user) => {
         const marksMenuBtn = document.getElementById("marksMenuBtn");
         const performanceMenuBtn = document.getElementById("performanceMenuBtn");
         const feesMenuBtn = document.getElementById("feesMenuBtn");
+        const feeSettingsBtn = document.getElementById("feeSettingsBtn");
 
         if (isSuperAdmin) {
           if (superMasterBtn) superMasterBtn.classList.remove("d-none");
@@ -145,6 +151,16 @@ onAuthStateChanged(auth, async (user) => {
         if (marksMenuBtn) marksMenuBtn.classList.remove("d-none");
         if (performanceMenuBtn) performanceMenuBtn.classList.remove("d-none");
         if (feesMenuBtn) feesMenuBtn.classList.remove("d-none");
+        if (feeSettingsBtn) feeSettingsBtn.classList.add("d-none");
+
+        // Load Institution Settings
+        if(!isSuperAdmin) {
+            const instDoc = await getDoc(doc(db, "settings", currentInstitutionId));
+            if(instDoc.exists()) {
+                sysFeePermission = instDoc.data().feePermission || "all";
+                sysReqManualReceipt = instDoc.data().reqManualReceipt || false;
+            }
+        }
 
         if (currentUserRole === "admin") {
             if (instAdminStaffBtn) instAdminStaffBtn.classList.remove("d-none");
@@ -156,9 +172,17 @@ onAuthStateChanged(auth, async (user) => {
             if (adminActions) adminActions.classList.remove("d-none");
             if (actionCol) actionCol.classList.remove("d-none");
             if (feesMenuBtn) feesMenuBtn.classList.remove("d-none");
+            if (feeSettingsBtn) feeSettingsBtn.classList.remove("d-none");
 
             showTab('instAdminTab'); 
             loadPrincipalsList(); 
+            
+            // Set values in settings tab
+            document.getElementById("reqManualReceipt").checked = sysReqManualReceipt;
+            const rBtns = document.getElementsByName("feePermission");
+            for(let i=0; i<rBtns.length; i++){
+                if(rBtns[i].value === sysFeePermission) rBtns[i].checked = true;
+            }
 
         } else if (currentUserRole === "principal" || isSuperAdmin) {
           if (tMenuBtn) tMenuBtn.classList.remove("d-none");
@@ -231,7 +255,6 @@ function populateClassDropdowns() {
   });
 }
 
-// Unified Smart Login
 let parentStudentsData = [];
 window.handleUnifiedLogin = async (e) => {
   e.preventDefault();
@@ -376,6 +399,12 @@ window.handleSignUp = async (e) => {
       status: isDev ? "active" : "pending",
       assignedClasses: [],
       createdAt: serverTimestamp()
+    });
+
+    // Default Settings
+    await setDoc(doc(db, "settings", instId), {
+        feePermission: "all",
+        reqManualReceipt: false
     });
 
     document.getElementById("signupForm").reset();
@@ -737,7 +766,7 @@ window.instAssignClassesToStaff = async (e) => {
 };
 
 // ==========================================
-// STUDENT PROFILE MODAL (JS VALIDATION)
+// STUDENT PROFILE MODAL
 // ==========================================
 
 window.openStudentProfileModal = (docId) => {
@@ -800,15 +829,13 @@ window.openStudentProfileModal = (docId) => {
 };
 
 window.saveStudentProfile = async (e) => {
-    if(e) e.preventDefault(); // Prevent traditional form submission if accidentally triggered
+    if(e) e.preventDefault(); 
     
-    // JS Validation
     const regNoInput = document.getElementById("stuRegNo").value;
     const nameInput = document.getElementById("stuName").value.trim();
     
     if(!regNoInput || !nameInput) {
         alert("Registration Number and Student Name are required!");
-        // Switch to the first tab so user can see it
         const triggerEl = document.querySelector('#studentTabs button[data-bs-target="#tab-stu-personal"]');
         bootstrap.Tab.getOrCreateInstance(triggerEl).show();
         return;
@@ -1295,13 +1322,48 @@ window.saveClassMarks = async () => {
 };
 
 // ==========================================
-// FEES LOGIC
+// FEES LOGIC (WITH SETTINGS)
 // ==========================================
+
+window.saveFeeSettings = async () => {
+    const perm = document.querySelector('input[name="feePermission"]:checked').value;
+    const reqManual = document.getElementById("reqManualReceipt").checked;
+
+    try {
+        await setDoc(doc(db, "settings", currentInstitutionId), {
+            feePermission: perm,
+            reqManualReceipt: reqManual,
+            updatedAt: serverTimestamp()
+        }, { merge: true });
+        
+        sysFeePermission = perm;
+        sysReqManualReceipt = reqManual;
+        
+        alert("Fee settings saved successfully!");
+    } catch (err) { alert("Error: " + err.message); }
+};
 
 window.loadStudentsForFees = async () => {
   const selClass = document.getElementById("feeClassSelect").value;
   const tableArea = document.getElementById("feesTableArea");
   const tbody = document.getElementById("feesTableBody");
+  const alertArea = document.getElementById("feeCollectionAlert");
+  const collectionArea = document.getElementById("feeCollectionArea");
+
+  // Check Permissions
+  let canCollect = false;
+  if(currentUserRole === "admin") canCollect = true;
+  else if(currentUserRole === "principal" && (sysFeePermission === "principal" || sysFeePermission === "all")) canCollect = true;
+  else if(currentUserRole === "teacher" && sysFeePermission === "all") canCollect = true;
+
+  if(!canCollect) {
+      alertArea.classList.remove("d-none");
+      collectionArea.classList.add("d-none");
+      return;
+  } else {
+      alertArea.classList.add("d-none");
+      collectionArea.classList.remove("d-none");
+  }
 
   if (!selClass) { tableArea.classList.add("d-none"); return; }
   
@@ -1390,7 +1452,16 @@ window.openFeeModal = (studentDataStr) => {
     document.getElementById("payStudentNameDisplay").innerText = `${s.name} (Reg: ${s.regNo})`;
     document.getElementById("payFeeType").value = typedMonth || "MONTHLY FEE";
     document.getElementById("payAmount").value = typedAmt;
-    document.getElementById("payManualReceipt").value = "";
+    
+    const manualInput = document.getElementById("payManualReceiptInput");
+    if(sysReqManualReceipt) {
+        manualInput.required = true;
+        manualInput.placeholder = "Required";
+    } else {
+        manualInput.required = false;
+        manualInput.placeholder = "Optional";
+    }
+    manualInput.value = "";
 
     new bootstrap.Modal(document.getElementById('feePaymentModal')).show();
 };
@@ -1406,7 +1477,7 @@ window.saveFeePayment = async (e) => {
   
   const amount = document.getElementById("payAmount").value;
   const type = document.getElementById("payFeeType").value.trim().toUpperCase();
-  const manual = document.getElementById("payManualReceipt").value.trim().toUpperCase();
+  const manual = document.getElementById("payManualReceiptInput").value.trim().toUpperCase();
   const today = new Date().toLocaleDateString();
 
   try {
@@ -1435,6 +1506,7 @@ window.saveFeePayment = async (e) => {
       manualReceiptNo: manual,
       date: today,
       collectedBy: auth.currentUser.uid,
+      collectedByName: currentUserName,
       timestamp: serverTimestamp()
     });
 
@@ -1446,6 +1518,7 @@ window.saveFeePayment = async (e) => {
     document.getElementById("recClass").innerText = "Class " + sClass;
     document.getElementById("recFeeType").innerText = type;
     document.getElementById("recAmount").innerText = "₹" + amount;
+    document.getElementById("recCollector").innerText = currentUserName;
 
     if (manual) {
       document.getElementById("recManualNo").innerText = manual;
@@ -1503,6 +1576,66 @@ window.shareToWhatsApp = () => {
     : `https://wa.me/?text=${msg}`;
 
   window.open(waUrl, "_blank");
+};
+
+window.generateFeeReport = async () => {
+    const fromStr = document.getElementById("feeReportFrom").value;
+    const toStr = document.getElementById("feeReportTo").value;
+    
+    if(!fromStr || !toStr) return alert("Please select both From and To dates.");
+    
+    const fromDate = new Date(fromStr);
+    fromDate.setHours(0,0,0,0);
+    const toDate = new Date(toStr);
+    toDate.setHours(23,59,59,999);
+
+    const tbody = document.getElementById("feeReportTableBody");
+    const tfoot = document.getElementById("feeReportFooter");
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center">Generating report...</td></tr>`;
+    tfoot.classList.add("d-none");
+
+    try {
+        const q = query(
+            collection(db, "feeCollections"), 
+            where("institutionId", "==", currentInstitutionId),
+            orderBy("timestamp", "desc")
+        );
+        const snap = await getDocs(q);
+        
+        let html = "";
+        let total = 0;
+
+        snap.forEach(d => {
+            const data = d.data();
+            if(data.timestamp) {
+                const docDate = data.timestamp.toDate();
+                if(docDate >= fromDate && docDate <= toDate) {
+                    total += Number(data.amount);
+                    html += `
+                        <tr>
+                            <td>${docDate.toLocaleDateString()}</td>
+                            <td>#${data.receiptNo} ${data.manualReceiptNo ? `<br><small class="text-muted">(${data.manualReceiptNo})</small>` : ''}</td>
+                            <td><b>${data.studentName}</b><br><small class="text-muted">Reg: ${data.regNo}</small></td>
+                            <td>${data.class}</td>
+                            <td>${data.feeType}</td>
+                            <td class="fw-bold text-success">₹${data.amount}</td>
+                            <td>${data.collectedByName || 'Admin'}</td>
+                        </tr>
+                    `;
+                }
+            }
+        });
+
+        if(html === "") {
+            tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">No collections found for the selected dates.</td></tr>`;
+        } else {
+            tbody.innerHTML = html;
+            document.getElementById("feeReportTotal").innerText = `₹${total}`;
+            tfoot.classList.remove("d-none");
+        }
+    } catch(err) {
+        alert("Error generating report: " + err.message);
+    }
 };
 
 // ==========================================
@@ -1605,7 +1738,6 @@ window.handleBulkUpload = () => {
   });
 };
 
-// ... (Rest of UI functions)
 window.showSignupForm = (type) => {
   document.getElementById("signupOptions").classList.add("d-none");
   if(type === 'madrasa') document.getElementById("signupForm").classList.remove("d-none");
