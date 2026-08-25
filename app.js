@@ -290,7 +290,7 @@ window.handleUnifiedLogin = async (e) => {
 
   } else {
     // Staff Login
-    const email = identifier;
+    const email = identifier.toLowerCase();
     const password = document.getElementById("loginPassword").value;
     if (!password) return alert("Please enter your password.");
 
@@ -350,6 +350,14 @@ window.handleSignUp = async (e) => {
     const email = document.getElementById("regEmail").value.trim().toLowerCase();
     const pwd = document.getElementById("regPassword").value;
     const instId = board + "_" + instCode;
+    
+    // Additional generic fields for Institution
+    const address = document.getElementById("regAddress") ? document.getElementById("regAddress").value.trim().toUpperCase() : "";
+    const place = document.getElementById("regPlace") ? document.getElementById("regPlace").value.trim().toUpperCase() : "";
+    const po = document.getElementById("regPo") ? document.getElementById("regPo").value.trim().toUpperCase() : "";
+    const pincode = document.getElementById("regPincode") ? document.getElementById("regPincode").value.trim() : "";
+    const district = document.getElementById("regDistrict") ? document.getElementById("regDistrict").value.trim().toUpperCase() : "";
+    const locationLink = document.getElementById("regLocationLink") ? document.getElementById("regLocationLink").value.trim() : "";
 
     const isDev = (email === SUPER_ADMIN_EMAIL);
     const cred = await createUserWithEmailAndPassword(auth, email, pwd);
@@ -363,6 +371,12 @@ window.handleSignUp = async (e) => {
       institutionCode: instCode,
       institutionBoard: board,
       institutionName: instName,
+      address: address,
+      place: place,
+      po: po,
+      pincode: pincode,
+      district: district,
+      locationLink: locationLink,
       role: "admin",
       status: isDev ? "active" : "pending",
       assignedClasses: [],
