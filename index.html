@@ -69,7 +69,7 @@
               <button class="btn btn-outline-primary p-3 text-start" onclick="showSignupForm('staff')">
                   <i class="fa-solid fa-chalkboard-user fs-4 mb-2 d-block"></i>
                   <strong class="d-block">Join as Staff / Principal</strong>
-                  <small class="text-muted">Requires existing Madrasa ID</small>
+                  <small class="text-muted">Requires existing Madrasa Code</small>
               </button>
           </div>
       </div>
@@ -92,15 +92,15 @@
         </div>
         <div class="mb-2">
           <label class="form-label small fw-semibold">Madrasa Reg / Code</label>
-          <input type="text" id="regInstCode" class="form-control" placeholder="e.g. 1145" required>
+          <input type="text" id="regInstCode" class="form-control text-uppercase" placeholder="e.g. 1145" required>
         </div>
         <div class="mb-2">
           <label class="form-label small fw-semibold">Madrasa Name</label>
-          <input type="text" id="regInstName" class="form-control" placeholder="Madrasa Full Name" required>
+          <input type="text" id="regInstName" class="form-control text-uppercase" placeholder="Madrasa Full Name" required>
         </div>
         <div class="mb-2">
           <label class="form-label small fw-semibold">Institution Admin Name</label>
-          <input type="text" id="regUserName" class="form-control" placeholder="Your Name" required>
+          <input type="text" id="regUserName" class="form-control text-uppercase" placeholder="Your Name" required>
         </div>
         <div class="mb-2">
           <label class="form-label small fw-semibold">Mobile Number</label>
@@ -132,13 +132,30 @@
                 <option value="principal">Principal</option>
             </select>
         </div>
-        <div class="mb-2">
-          <label class="form-label small fw-semibold">Institution Unique ID</label>
-          <input type="text" id="staffInstCode" class="form-control" placeholder="e.g. SKIMVB_1145" required>
+        
+        <!-- Board and Code selection for Staff -->
+        <div class="row g-2 mb-2">
+          <div class="col-6">
+            <label class="form-label small fw-semibold">Board</label>
+            <select id="staffBoard" class="form-select" required>
+                <option value="">Select Board</option>
+                <option value="SKIMVB">SKIMVB</option>
+                <option value="SKSVB">SKSVB</option>
+                <option value="DKIMVB">DKIMVB</option>
+                <option value="MTIK">MTIK</option>
+                <option value="CBSE">CBSE / Other</option>
+                <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="col-6">
+            <label class="form-label small fw-semibold">Madrasa Code</label>
+            <input type="text" id="staffInstCode" class="form-control text-uppercase" placeholder="e.g. 1145" required>
+          </div>
         </div>
+
         <div class="mb-2">
           <label class="form-label small fw-semibold">Full Name</label>
-          <input type="text" id="staffName" class="form-control" placeholder="Your Name" required>
+          <input type="text" id="staffName" class="form-control text-uppercase" placeholder="Your Name" required>
         </div>
         <div class="mb-2">
           <label class="form-label small fw-semibold">Mobile Number</label>
@@ -480,8 +497,8 @@
               <form onsubmit="saveDetailedStudent(event)">
                 <div class="row g-3">
                   <div class="col-md-3"><label class="form-label">Reg No. *</label><input type="number" id="regNo" class="form-control" required></div>
-                  <div class="col-md-3"><label class="form-label">ID No.</label><input type="text" id="idNo" class="form-control"></div>
-                  <div class="col-md-6"><label class="form-label">Full Name *</label><input type="text" id="studentName" class="form-control" required></div>
+                  <div class="col-md-3"><label class="form-label">ID No.</label><input type="text" id="idNo" class="form-control text-uppercase"></div>
+                  <div class="col-md-6"><label class="form-label">Full Name *</label><input type="text" id="studentName" class="form-control text-uppercase" required></div>
                   <div class="col-md-3">
                     <label class="form-label">Class *</label>
                     <select id="currentClass" class="form-select" required>
@@ -493,12 +510,12 @@
                   </div>
                   <div class="col-md-3"><label class="form-label">Date of Birth</label><input type="date" id="dob" class="form-control"></div>
                   <div class="col-md-3"><label class="form-label">Joined Date</label><input type="date" id="joinedDate" class="form-control"></div>
-                  <div class="col-md-4"><label class="form-label">Father Name</label><input type="text" id="fatherName" class="form-control"></div>
-                  <div class="col-md-4"><label class="form-label">Mother Name</label><input type="text" id="motherName" class="form-control"></div>
-                  <div class="col-md-4"><label class="form-label">Guardian Name</label><input type="text" id="guardianName" class="form-control"></div>
+                  <div class="col-md-4"><label class="form-label">Father Name</label><input type="text" id="fatherName" class="form-control text-uppercase"></div>
+                  <div class="col-md-4"><label class="form-label">Mother Name</label><input type="text" id="motherName" class="form-control text-uppercase"></div>
+                  <div class="col-md-4"><label class="form-label">Guardian Name</label><input type="text" id="guardianName" class="form-control text-uppercase"></div>
                   <div class="col-md-4"><label class="form-label">Mobile Number *</label><input type="tel" id="parentPhone" class="form-control" required></div>
-                  <div class="col-md-4"><label class="form-label">Place</label><input type="text" id="place" class="form-control"></div>
-                  <div class="col-md-4"><label class="form-label">Address</label><input type="text" id="address" class="form-control"></div>
+                  <div class="col-md-4"><label class="form-label">Place</label><input type="text" id="place" class="form-control text-uppercase"></div>
+                  <div class="col-md-4"><label class="form-label">Address</label><input type="text" id="address" class="form-control text-uppercase"></div>
                 </div>
                 <div class="mt-4"><button type="submit" class="btn btn-primary-custom px-4"><i class="fa-solid fa-floppy-disk me-1"></i> Save Admission</button></div>
               </form>
@@ -675,7 +692,7 @@
                       <option value="Donation">Donation</option>
                     </select>
                   </div>
-                  <div class="col-md-4"><label class="form-label">Manual Receipt No (Book)</label><input type="text" id="manualReceipt" class="form-control" placeholder="Optional"></div>
+                  <div class="col-md-4"><label class="form-label">Manual Receipt No (Book)</label><input type="text" id="manualReceipt" class="form-control text-uppercase" placeholder="Optional"></div>
                   
                   <div class="col-12 mt-4 d-flex gap-2">
                     <button type="submit" class="btn btn-primary-custom px-4"><i class="fa-solid fa-print me-1"></i> Save & Print Receipt</button>
@@ -803,8 +820,8 @@
             <input type="hidden" id="editDocId">
             <div class="row g-3">
               <div class="col-md-3"><label class="form-label">Reg No. *</label><input type="number" id="editRegNo" class="form-control" required></div>
-              <div class="col-md-3"><label class="form-label">ID No.</label><input type="text" id="editIdNo" class="form-control"></div>
-              <div class="col-md-6"><label class="form-label">Student Name *</label><input type="text" id="editName" class="form-control" required></div>
+              <div class="col-md-3"><label class="form-label">ID No.</label><input type="text" id="editIdNo" class="form-control text-uppercase"></div>
+              <div class="col-md-6"><label class="form-label">Student Name *</label><input type="text" id="editName" class="form-control text-uppercase" required></div>
               <div class="col-md-3">
                 <label class="form-label">Class *</label>
                 <select id="editCurrentClass" class="form-select" required>
@@ -815,10 +832,10 @@
                 </select>
               </div>
               <div class="col-md-3"><label class="form-label">Date of Birth</label><input type="date" id="editDob" class="form-control"></div>
-              <div class="col-md-3"><label class="form-label">Mobile Number</label><input type="tel" id="editPhone" class="form-control"></div>
-              <div class="col-md-3"><label class="form-label">Father / Guardian</label><input type="text" id="editFatherName" class="form-control"></div>
-              <div class="col-md-6"><label class="form-label">Place</label><input type="text" id="editPlace" class="form-control"></div>
-              <div class="col-md-6"><label class="form-label">Address</label><input type="text" id="editAddress" class="form-control"></div>
+              <div class="col-md-3"><label class="form-label">WhatsApp/Phone</label><input type="tel" id="editPhone" class="form-control"></div>
+              <div class="col-md-3"><label class="form-label">Father / Guardian</label><input type="text" id="editFatherName" class="form-control text-uppercase"></div>
+              <div class="col-md-6"><label class="form-label">Place</label><input type="text" id="editPlace" class="form-control text-uppercase"></div>
+              <div class="col-md-6"><label class="form-label">Address</label><input type="text" id="editAddress" class="form-control text-uppercase"></div>
               <div class="col-12 mt-4 text-end">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="submit" class="btn btn-primary-custom px-4">Update Details</button>
@@ -853,9 +870,9 @@
                     <option value="Other">Other</option>
                 </select>
               </div>
-              <div class="col-md-4"><label class="form-label">Madrasa Code *</label><input type="text" id="saEditInstCode" class="form-control" required></div>
-              <div class="col-md-4"><label class="form-label">Madrasa Name *</label><input type="text" id="saEditInstName" class="form-control" required></div>
-              <div class="col-md-4"><label class="form-label">Inst. Admin Name *</label><input type="text" id="saEditName" class="form-control" required></div>
+              <div class="col-md-4"><label class="form-label">Madrasa Code *</label><input type="text" id="saEditInstCode" class="form-control text-uppercase" required></div>
+              <div class="col-md-4"><label class="form-label">Madrasa Name *</label><input type="text" id="saEditInstName" class="form-control text-uppercase" required></div>
+              <div class="col-md-4"><label class="form-label">Inst. Admin Name *</label><input type="text" id="saEditName" class="form-control text-uppercase" required></div>
               <div class="col-md-4"><label class="form-label">Email Address *</label><input type="email" id="saEditEmail" class="form-control" required></div>
               <div class="col-md-4"><label class="form-label">Phone *</label><input type="tel" id="saEditPhone" class="form-control" required></div>
               <div class="col-md-12">
@@ -888,7 +905,7 @@
           <form onsubmit="addNewCustomTask(event)">
             <div class="mb-3">
               <label class="form-label">Task Name *</label>
-              <input type="text" id="newTaskName" class="form-control" placeholder="e.g. Reading Competition" required>
+              <input type="text" id="newTaskName" class="form-control text-uppercase" placeholder="e.g. Reading Competition" required>
             </div>
             <div class="mb-3">
               <label class="form-label">Points (+ or -) *</label>
@@ -951,8 +968,6 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  
-  <!-- JavaScript Link -->
   <script type="module" src="app.js"></script>
 </body>
 </html>
