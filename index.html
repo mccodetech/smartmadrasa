@@ -82,10 +82,10 @@
             <label class="form-label small fw-semibold">Board of Education</label>
             <select id="regBoard" class="form-select" required>
                 <option value="">Select Board</option>
-                <option value="Samastha_EK">Samastha Kerala Islam Matha Vidyabhyasa Board (EK)</option>
-                <option value="Samastha_AP">Samastha Kerala Sunni Vidyabhyasa Board (AP)</option>
-                <option value="Dakshina">Dakshina Kerala Islam Matha Vidyabhyasa Board</option>
-                <option value="Knm">Majlis Taalimul Islami Kerala (KNM)</option>
+                <option value="SKIMVB">SKIMVB (Samastha EK)</option>
+                <option value="SKSVB">SKSVB (Samastha AP)</option>
+                <option value="DKIMVB">DKIMVB (Dakshina Kerala)</option>
+                <option value="MTIK">MTIK (KNM)</option>
                 <option value="CBSE">CBSE / Other Schools</option>
                 <option value="Other">Other</option>
             </select>
@@ -105,6 +105,10 @@
         <div class="mb-2">
           <label class="form-label small fw-semibold">Mobile Number</label>
           <input type="tel" id="regPhone" class="form-control" placeholder="9847..." required>
+        </div>
+        <div class="mb-2">
+            <label class="form-label small fw-semibold">WhatsApp Number (For Approval Notifications)</label>
+            <input type="tel" id="regWhatsapp" class="form-control" placeholder="Optional if same as mobile">
         </div>
         <div class="mb-2">
           <label class="form-label small fw-semibold">Email Address</label>
@@ -130,7 +134,7 @@
         </div>
         <div class="mb-2">
           <label class="form-label small fw-semibold">Institution Unique ID</label>
-          <input type="text" id="staffInstCode" class="form-control" placeholder="e.g. MDR_1145" required>
+          <input type="text" id="staffInstCode" class="form-control" placeholder="e.g. SKIMVB_1145" required>
         </div>
         <div class="mb-2">
           <label class="form-label small fw-semibold">Full Name</label>
@@ -139,6 +143,10 @@
         <div class="mb-2">
           <label class="form-label small fw-semibold">Mobile Number</label>
           <input type="tel" id="staffPhone" class="form-control" placeholder="9847..." required>
+        </div>
+        <div class="mb-2">
+            <label class="form-label small fw-semibold">WhatsApp Number (For Notifications)</label>
+            <input type="tel" id="staffWhatsapp" class="form-control" placeholder="Optional if same as mobile">
         </div>
         <div class="mb-2">
           <label class="form-label small fw-semibold">Email Address</label>
@@ -683,7 +691,6 @@
             <div class="card p-4">
               <div class="d-flex justify-content-between align-items-center mb-3">
                   <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-chalkboard-user"></i> Staff Management</h5>
-                  <button class="btn btn-sm btn-outline-success" onclick="document.getElementById('addStaffFormContainer').classList.toggle('d-none');"><i class="fa-solid fa-plus me-1"></i> Add Staff Directly</button>
               </div>
 
               <!-- Pending Approvals Section -->
@@ -704,42 +711,6 @@
                   </div>
               </div>
 
-              <!-- Add Staff Form -->
-              <div id="addStaffFormContainer" class="mb-4 d-none border p-3 rounded bg-light">
-                  <h6 class="fw-bold mb-3">Add New Teacher</h6>
-                  <form onsubmit="registerNewTeacher(event)">
-                    <div class="row g-3">
-                      <div class="col-md-3"><label class="form-label">Full Name *</label><input type="text" id="tName" class="form-control" required></div>
-                      <div class="col-md-3"><label class="form-label">Mobile Number *</label><input type="tel" id="tPhone" class="form-control" required></div>
-                      <div class="col-md-3"><label class="form-label">Email Address *</label><input type="email" id="tEmail" class="form-control" required></div>
-                      <div class="col-md-3"><label class="form-label">Password *</label><input type="password" id="tPassword" class="form-control" required></div>
-                      <div class="col-md-4">
-                        <label class="form-label">Assign Classes</label>
-                        <div class="dropdown">
-                          <button class="btn btn-outline-secondary dropdown-toggle w-100 text-start d-flex justify-content-between align-items-center" type="button" id="regClassDropdownBtn" data-bs-toggle="dropdown" data-bs-auto-close="outside">
-                            <span id="regClassDropdownLabel">Select Class</span>
-                          </button>
-                          <ul class="dropdown-menu dropdown-checkbox-menu" aria-labelledby="regClassDropdownBtn">
-                            <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 reg-class-cb" value="1" onchange="updateDropdownLabel('reg')"> Class 1</label></li>
-                            <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 reg-class-cb" value="2" onchange="updateDropdownLabel('reg')"> Class 2</label></li>
-                            <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 reg-class-cb" value="3" onchange="updateDropdownLabel('reg')"> Class 3</label></li>
-                            <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 reg-class-cb" value="4" onchange="updateDropdownLabel('reg')"> Class 4</label></li>
-                            <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 reg-class-cb" value="5" onchange="updateDropdownLabel('reg')"> Class 5</label></li>
-                            <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 reg-class-cb" value="6" onchange="updateDropdownLabel('reg')"> Class 6</label></li>
-                            <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 reg-class-cb" value="7" onchange="updateDropdownLabel('reg')"> Class 7</label></li>
-                            <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 reg-class-cb" value="8" onchange="updateDropdownLabel('reg')"> Class 8</label></li>
-                            <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 reg-class-cb" value="9" onchange="updateDropdownLabel('reg')"> Class 9</label></li>
-                            <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 reg-class-cb" value="10" onchange="updateDropdownLabel('reg')"> Class 10</label></li>
-                            <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 reg-class-cb" value="11" onchange="updateDropdownLabel('reg')"> Class 11</label></li>
-                            <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 reg-class-cb" value="12" onchange="updateDropdownLabel('reg')"> Class 12</label></li>
-                          </ul>
-                        </div>
-                      </div>
-                      <div class="col-4 d-flex align-items-end"><button type="submit" class="btn btn-primary-custom w-100"><i class="fa-solid fa-user-plus me-1"></i> Add Teacher</button></div>
-                    </div>
-                  </form>
-              </div>
-
               <!-- Assign Classes Form (used when approving) -->
               <form id="assignClassesForm" onsubmit="assignClassesToStaff(event)" class="mb-4 d-none border p-3 rounded bg-light">
                 <input type="hidden" id="assignStaffId">
@@ -757,6 +728,13 @@
                         <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 approve-class-cb" value="3" onchange="updateDropdownLabel('approve')"> Class 3</label></li>
                         <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 approve-class-cb" value="4" onchange="updateDropdownLabel('approve')"> Class 4</label></li>
                         <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 approve-class-cb" value="5" onchange="updateDropdownLabel('approve')"> Class 5</label></li>
+                        <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 approve-class-cb" value="6" onchange="updateDropdownLabel('approve')"> Class 6</label></li>
+                        <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 approve-class-cb" value="7" onchange="updateDropdownLabel('approve')"> Class 7</label></li>
+                        <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 approve-class-cb" value="8" onchange="updateDropdownLabel('approve')"> Class 8</label></li>
+                        <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 approve-class-cb" value="9" onchange="updateDropdownLabel('approve')"> Class 9</label></li>
+                        <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 approve-class-cb" value="10" onchange="updateDropdownLabel('approve')"> Class 10</label></li>
+                        <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 approve-class-cb" value="11" onchange="updateDropdownLabel('approve')"> Class 11</label></li>
+                        <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 approve-class-cb" value="12" onchange="updateDropdownLabel('approve')"> Class 12</label></li>
                       </ul>
                     </div>
                   </div>
@@ -867,11 +845,11 @@
               <div class="col-md-4">
                 <label class="form-label">Board *</label>
                 <select id="saEditBoard" class="form-select" required>
-                    <option value="Samastha_EK">Samastha (EK)</option>
-                    <option value="Samastha_AP">Samastha (AP)</option>
-                    <option value="Dakshina">Dakshina Kerala</option>
-                    <option value="Knm">KNM</option>
-                    <option value="CBSE">CBSE / Other</option>
+                    <option value="SKIMVB">SKIMVB</option>
+                    <option value="SKSVB">SKSVB</option>
+                    <option value="DKIMVB">DKIMVB</option>
+                    <option value="MTIK">MTIK</option>
+                    <option value="CBSE">CBSE</option>
                     <option value="Other">Other</option>
                 </select>
               </div>
