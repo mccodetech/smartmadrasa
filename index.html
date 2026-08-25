@@ -74,10 +74,11 @@
           </div>
       </div>
 
-      <!-- 2a. Madrasa Registration Form -->
+      <!-- 2a. Madrasa Registration Form (Updated) -->
       <form id="signupForm" class="d-none" onsubmit="handleSignUp(event)">
         <button type="button" class="btn btn-sm btn-link text-decoration-none mb-3 p-0" onclick="switchAuthTab('signup')"><i class="fa-solid fa-arrow-left"></i> Back</button>
         <div class="alert alert-warning py-2 small">New registrations require Developer / Super Admin approval before activation.</div>
+        
         <div class="mb-2">
             <label class="form-label small fw-semibold">Board of Education</label>
             <select id="regBoard" class="form-select" required>
@@ -99,16 +100,24 @@
           <input type="text" id="regInstName" class="form-control text-uppercase" placeholder="Madrasa Full Name" required>
         </div>
         <div class="mb-2">
+          <label class="form-label small fw-semibold">Place / Location</label>
+          <input type="text" id="regPlace" class="form-control text-uppercase" placeholder="Location Name" required>
+        </div>
+        <div class="mb-2">
+          <label class="form-label small fw-semibold">District</label>
+          <input type="text" id="regDistrict" class="form-control text-uppercase" placeholder="District Name" required>
+        </div>
+        <div class="mb-2">
           <label class="form-label small fw-semibold">Institution Admin Name</label>
           <input type="text" id="regUserName" class="form-control text-uppercase" placeholder="Your Name" required>
         </div>
         <div class="mb-2">
           <label class="form-label small fw-semibold">Mobile Number</label>
-          <input type="tel" id="regPhone" class="form-control" placeholder="9847..." required>
+          <input type="tel" id="regPhone" class="form-control" placeholder="9847..." oninput="document.getElementById('regWhatsapp').value = this.value" required>
         </div>
         <div class="mb-2">
-            <label class="form-label small fw-semibold">WhatsApp Number</label>
-            <input type="tel" id="regWhatsapp" class="form-control" placeholder="Optional if same as mobile">
+            <label class="form-label small fw-semibold">WhatsApp Number (For Approval Notifications)</label>
+            <input type="tel" id="regWhatsapp" class="form-control" placeholder="WhatsApp No">
         </div>
         <div class="mb-2">
           <label class="form-label small fw-semibold">Email Address</label>
@@ -121,7 +130,7 @@
         <button type="submit" id="btnSubmitSignup" class="btn btn-primary-custom w-100">Submit for Approval</button>
       </form>
 
-      <!-- 2b. Staff Registration Form -->
+      <!-- 2b. Staff Registration Form (Updated) -->
       <form id="staffSignupForm" class="d-none" onsubmit="handleStaffSignUp(event)">
         <button type="button" class="btn btn-sm btn-link text-decoration-none mb-3 p-0" onclick="switchAuthTab('signup')"><i class="fa-solid fa-arrow-left"></i> Back</button>
         <div class="alert alert-info py-2 small">Registration requires approval from the Institution Admin/Principal.</div>
@@ -132,6 +141,7 @@
                 <option value="principal">Principal</option>
             </select>
         </div>
+        
         <div class="row g-2 mb-2">
           <div class="col-6">
             <label class="form-label small fw-semibold">Board</label>
@@ -150,17 +160,18 @@
             <input type="text" id="staffInstCode" class="form-control text-uppercase" placeholder="e.g. 1145" required>
           </div>
         </div>
+
         <div class="mb-2">
           <label class="form-label small fw-semibold">Full Name</label>
           <input type="text" id="staffName" class="form-control text-uppercase" placeholder="Your Name" required>
         </div>
         <div class="mb-2">
           <label class="form-label small fw-semibold">Mobile Number</label>
-          <input type="tel" id="staffPhone" class="form-control" placeholder="9847..." required>
+          <input type="tel" id="staffPhone" class="form-control" placeholder="9847..." oninput="document.getElementById('staffWhatsapp').value = this.value" required>
         </div>
         <div class="mb-2">
-            <label class="form-label small fw-semibold">WhatsApp Number (For Notifications)</label>
-            <input type="tel" id="staffWhatsapp" class="form-control" placeholder="Optional if same as mobile">
+            <label class="form-label small fw-semibold">WhatsApp Number</label>
+            <input type="tel" id="staffWhatsapp" class="form-control" placeholder="WhatsApp No">
         </div>
         <div class="mb-2">
           <label class="form-label small fw-semibold">Email Address</label>
@@ -187,7 +198,8 @@
     <div class="container py-4">
         <div class="row mb-3">
             <div class="col-12">
-                <select id="parentStudentSelect" class="form-select" onchange="switchParentStudent()"></select>
+                <select id="parentStudentSelect" class="form-select" onchange="switchParentStudent()">
+                </select>
             </div>
         </div>
       <div class="row g-4">
@@ -269,7 +281,7 @@
             <div class="nav flex-column nav-pills gap-1" id="desktopTabMenu">
               <button class="nav-link active text-start" id="homeMenuBtn" onclick="showTab('homeDashboardTab')"><i class="fa-solid fa-house me-2"></i> Home</button>
               <button class="nav-link text-start d-none" id="superAdminMasterBtn" onclick="showTab('superAdminTab')"><i class="fa-solid fa-shield-halved me-2"></i> All Madrasas</button>
-              <button class="nav-link text-start d-none" id="instAdminStaffBtn" onclick="showTab('instAdminTab')"><i class="fa-solid fa-user-tie me-2"></i> Staff & Principals</button>
+              <button class="nav-link text-start d-none" id="instAdminStaffBtn" onclick="showTab('instAdminTab')"><i class="fa-solid fa-user-tie me-2"></i> Manage Staff</button>
               <button class="nav-link text-start" id="studentsMenuBtn" onclick="showTab('studentsListTab')"><i class="fa-solid fa-users me-2"></i> Students</button>
               <button class="nav-link text-start" id="attendanceMenuBtn" onclick="showTab('attendanceTab')"><i class="fa-solid fa-calendar-check me-2"></i> Attendance</button>
               <button class="nav-link text-start" id="marksMenuBtn" onclick="showTab('marksTab')"><i class="fa-solid fa-award me-2"></i> Marks Entry</button>
@@ -294,7 +306,7 @@
               <div class="table-responsive">
                 <table class="table table-hover table-bordered align-middle">
                   <thead class="table-light">
-                    <tr><th>Inst. ID</th><th>Madrasa Name</th><th>Board</th><th>Admin Name</th><th>Email</th><th>Status</th><th class="text-center">Actions</th></tr>
+                    <tr><th>Inst. ID</th><th>Madrasa Name</th><th>Place</th><th>Admin Name</th><th>Email</th><th>Status</th><th class="text-center">Actions</th></tr>
                   </thead>
                   <tbody id="superAdminTableBody"></tbody>
                 </table>
@@ -767,7 +779,6 @@
                     <div class="col-md-12" id="spClassesDiv">
                       <label class="form-label small">Assigned Classes (Select Multiple)</label>
                       <div class="d-flex flex-wrap gap-2">
-                        <!-- Render checkboxes directly for ease in modal -->
                         <div class="form-check"><input type="checkbox" class="form-check-input sp-class-cb" value="1" id="spc1"><label class="form-check-label" for="spc1">Class 1</label></div>
                         <div class="form-check"><input type="checkbox" class="form-check-input sp-class-cb" value="2" id="spc2"><label class="form-check-label" for="spc2">Class 2</label></div>
                         <div class="form-check"><input type="checkbox" class="form-check-input sp-class-cb" value="3" id="spc3"><label class="form-check-label" for="spc3">Class 3</label></div>
@@ -839,6 +850,9 @@
                 <select id="editCurrentClass" class="form-select" required>
                   <option value="1">Class 1</option><option value="2">Class 2</option><option value="3">Class 3</option>
                   <option value="4">Class 4</option><option value="5">Class 5</option>
+                  <option value="6">Class 6</option><option value="7">Class 7</option><option value="8">Class 8</option>
+                  <option value="9">Class 9</option><option value="10">Class 10</option><option value="11">Class 11</option>
+                  <option value="12">Class 12</option>
                 </select>
               </div>
               <div class="col-md-3"><label class="form-label">Date of Birth</label><input type="date" id="editDob" class="form-control"></div>
@@ -928,6 +942,34 @@
           </form>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Printable Digital Receipt Component -->
+  <div id="printableReceipt" class="p-4 bg-white border d-none m-auto" style="max-width: 480px;">
+    <div class="text-center border-bottom pb-3 mb-3">
+      <h4 class="fw-bold mb-1" id="recMadrassaName">Smart Madrasa</h4>
+      <p class="small text-muted mb-0">Fee Receipt</p>
+    </div>
+    <div class="d-flex justify-content-between mb-2">
+      <span>Receipt No: <b id="recNo">#1</b></span>
+      <span id="recDate">Date</span>
+    </div>
+    <div class="d-flex justify-content-between mb-2">
+      <span>Student: <b id="recStudentName">-</b></span>
+      <span>Reg No: <b id="recAdmNo">101</b></span>
+    </div>
+    <div class="d-flex justify-content-between mb-2">
+      <span>Class: <b id="recClass">-</b></span>
+      <span id="recManualBox" class="d-none">Manual No: <b id="recManualNo">-</b></span>
+    </div>
+    <div class="mb-2">Item: <span id="recFeeType">Monthly Fee</span></div>
+    <div class="mb-3 border-top pt-2 d-flex justify-content-between align-items-center">
+      <span class="fw-bold">Amount Paid:</span>
+      <h4 class="fw-bold text-success mb-0" id="recAmount">₹0</h4>
+    </div>
+    <div class="text-center mt-3 pt-2 border-top">
+      <small class="text-muted">Issued by: <span id="recCollector">Staff</span></small>
     </div>
   </div>
 
