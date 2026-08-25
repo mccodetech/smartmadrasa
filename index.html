@@ -99,20 +99,50 @@
           <input type="text" id="regInstName" class="form-control text-uppercase" placeholder="Madrasa Full Name" required>
         </div>
         <div class="mb-2">
+          <label class="form-label small fw-semibold">Address / Building Name</label>
+          <input type="text" id="regAddress" class="form-control text-uppercase" placeholder="Building Name" required>
+        </div>
+        <div class="row g-2 mb-2">
+            <div class="col-6">
+                <label class="form-label small fw-semibold">Place / Location</label>
+                <input type="text" id="regPlace" class="form-control text-uppercase" placeholder="Location Name" required>
+            </div>
+            <div class="col-6">
+                <label class="form-label small fw-semibold">Post Office (PO)</label>
+                <input type="text" id="regPo" class="form-control text-uppercase" placeholder="PO Name" required>
+            </div>
+        </div>
+        <div class="row g-2 mb-2">
+            <div class="col-6">
+                <label class="form-label small fw-semibold">District</label>
+                <input type="text" id="regDistrict" class="form-control text-uppercase" placeholder="District Name" required>
+            </div>
+            <div class="col-6">
+                <label class="form-label small fw-semibold">Pincode</label>
+                <input type="text" id="regPincode" class="form-control" placeholder="Pincode" required>
+            </div>
+        </div>
+        <div class="mb-2">
+          <label class="form-label small fw-semibold">Google Maps Location Link</label>
+          <input type="url" id="regLocationLink" class="form-control" placeholder="Optional (e.g. https://maps.google.com/...)">
+        </div>
+        <div class="mb-2">
           <label class="form-label small fw-semibold">Institution Admin Name</label>
           <input type="text" id="regUserName" class="form-control text-uppercase" placeholder="Your Name" required>
         </div>
-        <div class="mb-2">
-          <label class="form-label small fw-semibold">Mobile Number</label>
-          <input type="tel" id="regPhone" class="form-control" placeholder="9847..." required>
-        </div>
-        <div class="mb-2">
-            <label class="form-label small fw-semibold">WhatsApp Number (For Approval Notifications)</label>
-            <input type="tel" id="regWhatsapp" class="form-control" placeholder="Optional if same as mobile">
+        <div class="row g-2 mb-2">
+            <div class="col-6">
+                <label class="form-label small fw-semibold">Mobile Number</label>
+                <input type="tel" id="regPhone" class="form-control" placeholder="9847..." oninput="document.getElementById('regWhatsapp').value = this.value" required>
+            </div>
+            <div class="col-6">
+                <label class="form-label small fw-semibold">WhatsApp Number</label>
+                <input type="tel" id="regWhatsapp" class="form-control" placeholder="WhatsApp No">
+            </div>
         </div>
         <div class="mb-2">
           <label class="form-label small fw-semibold">Email Address</label>
-          <input type="email" id="regEmail" class="form-control" placeholder="email@madrasa.com" required>
+          <input type="email" id="regEmail" class="form-control" placeholder="email@madrasa.com" oninput="this.value = this.value.toLowerCase()" required>
         </div>
         <div class="mb-3">
           <label class="form-label small fw-semibold">Password</label>
@@ -132,6 +162,7 @@
                 <option value="principal">Principal</option>
             </select>
         </div>
+        
         <div class="row g-2 mb-2">
           <div class="col-6">
             <label class="form-label small fw-semibold">Board</label>
@@ -150,13 +181,14 @@
             <input type="text" id="staffInstCode" class="form-control text-uppercase" placeholder="e.g. 1145" required>
           </div>
         </div>
+
         <div class="mb-2">
           <label class="form-label small fw-semibold">Full Name</label>
           <input type="text" id="staffName" class="form-control text-uppercase" placeholder="Your Name" required>
         </div>
         <div class="mb-2">
           <label class="form-label small fw-semibold">Mobile Number</label>
-          <input type="tel" id="staffPhone" class="form-control" placeholder="9847..." required>
+          <input type="tel" id="staffPhone" class="form-control" placeholder="9847..." oninput="document.getElementById('staffWhatsapp').value = this.value" required>
         </div>
         <div class="mb-2">
             <label class="form-label small fw-semibold">WhatsApp Number (For Notifications)</label>
@@ -164,7 +196,7 @@
         </div>
         <div class="mb-2">
           <label class="form-label small fw-semibold">Email Address</label>
-          <input type="email" id="staffEmail" class="form-control" placeholder="email@staff.com" required>
+          <input type="email" id="staffEmail" class="form-control" placeholder="email@staff.com" oninput="this.value = this.value.toLowerCase()" required>
         </div>
         <div class="mb-3">
           <label class="form-label small fw-semibold">Password</label>
@@ -295,7 +327,7 @@
               <div class="table-responsive">
                 <table class="table table-hover table-bordered align-middle">
                   <thead class="table-light">
-                    <tr><th>Inst. ID</th><th>Madrasa Name</th><th>Board</th><th>Admin Name</th><th>Email</th><th>Status</th><th class="text-center">Actions</th></tr>
+                    <tr><th>Inst. ID</th><th>Madrasa Name</th><th>Place</th><th>Admin Name</th><th>Email</th><th>Status</th><th class="text-center">Actions</th></tr>
                   </thead>
                   <tbody id="superAdminTableBody"></tbody>
                 </table>
@@ -545,7 +577,7 @@
             <div class="card p-4">
               <div class="d-flex justify-content-between align-items-center mb-3">
                   <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-chalkboard-user"></i> Staff Management</h5>
-                  <button class="btn btn-sm btn-outline-success" onclick="openStaffProfileModal(null)"><i class="fa-solid fa-plus me-1"></i> Add Staff</button>
+                  <button class="btn btn-sm btn-outline-success" onclick="openStaffProfileModal(null)"><i class="fa-solid fa-plus me-1"></i> Add Staff Directly</button>
               </div>
 
               <div id="pendingStaffSection" class="mb-4 d-none">
@@ -644,27 +676,49 @@
           <form id="staffProfileForm" onsubmit="saveStaffProfile(event)">
             <input type="hidden" id="spDocId">
 
+            <!-- Authentication Section (Only for Direct Add) -->
             <div id="spAuthSection" class="p-3 bg-light border-bottom">
                <h6 class="fw-bold text-danger mb-2"><i class="fa-solid fa-key me-1"></i> Account Setup (For New Staff)</h6>
                <div class="row g-2">
-                   <div class="col-md-6"><label class="form-label small">Email Address *</label><input type="email" id="spAuthEmail" class="form-control" oninput="this.value = this.value.toLowerCase()"></div>
-                   <div class="col-md-6"><label class="form-label small">Password *</label><input type="text" id="spAuthPassword" class="form-control" placeholder="Min 6 characters"></div>
+                   <div class="col-md-6">
+                       <label class="form-label small">Email Address *</label>
+                       <input type="email" id="spAuthEmail" class="form-control" oninput="this.value = this.value.toLowerCase()">
+                   </div>
+                   <div class="col-md-6">
+                       <label class="form-label small">Password *</label>
+                       <input type="text" id="spAuthPassword" class="form-control" placeholder="Min 6 characters">
+                   </div>
                </div>
             </div>
 
             <div class="px-3 pt-3">
+              <!-- Tabs Navigation -->
               <ul class="nav nav-tabs" id="staffTabs" role="tablist">
-                <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-personal" type="button">Personal Info</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-contact" type="button">Contact</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-education" type="button">Education</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-employment" type="button">Employment</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-bank" type="button">Bank Details</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-transfer" type="button">Relieving</button></li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-personal" type="button" role="tab">Personal Info</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-contact" type="button" role="tab">Contact</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-education" type="button" role="tab">Education</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-employment" type="button" role="tab">Employment</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-bank" type="button" role="tab">Bank Details</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-transfer" type="button" role="tab">Relieving</button>
+                </li>
               </ul>
 
+              <!-- Tabs Content -->
               <div class="tab-content p-3 border border-top-0 rounded-bottom mb-3" style="background:#fff;">
                 
-                <div class="tab-pane fade show active" id="tab-personal">
+                <!-- 1. Personal Tab -->
+                <div class="tab-pane fade show active" id="tab-personal" role="tabpanel">
                   <div class="row g-3">
                     <div class="col-md-12"><label class="form-label small">Full Name *</label><input type="text" id="spName" class="form-control text-uppercase" required></div>
                     <div class="col-md-4"><label class="form-label small">Gender</label><select id="spGender" class="form-select"><option value="Male">Male</option><option value="Female">Female</option></select></div>
@@ -676,7 +730,8 @@
                   </div>
                 </div>
 
-                <div class="tab-pane fade" id="tab-contact">
+                <!-- 2. Contact Tab -->
+                <div class="tab-pane fade" id="tab-contact" role="tabpanel">
                   <div class="row g-3">
                     <div class="col-md-4"><label class="form-label small">Mobile Number *</label><input type="tel" id="spPhone" class="form-control" required></div>
                     <div class="col-md-4"><label class="form-label small">WhatsApp Number</label><input type="tel" id="spWhatsapp" class="form-control"></div>
@@ -689,7 +744,8 @@
                   </div>
                 </div>
 
-                <div class="tab-pane fade" id="tab-education">
+                <!-- 3. Education Tab -->
+                <div class="tab-pane fade" id="tab-education" role="tabpanel">
                   <div class="row g-3">
                     <div class="col-md-6"><label class="form-label small">Religious Education Qualifications</label><input type="text" id="spRelEdu" class="form-control text-uppercase" placeholder="e.g. Baqavi, Darimi, Faizy"></div>
                     <div class="col-md-6"><label class="form-label small">General Education Qualifications</label><input type="text" id="spGenEdu" class="form-control text-uppercase" placeholder="e.g. SSLC, B.A, B.Ed"></div>
@@ -699,7 +755,8 @@
                   </div>
                 </div>
 
-                <div class="tab-pane fade" id="tab-employment">
+                <!-- 4. Employment Tab -->
+                <div class="tab-pane fade" id="tab-employment" role="tabpanel">
                   <div class="row g-3">
                     <div class="col-md-4"><label class="form-label small">System Role *</label><select id="spRole" class="form-select" required><option value="teacher">Teacher (മുഅല്ലിം)</option><option value="principal">Principal (സദർ)</option></select></div>
                     <div class="col-md-4"><label class="form-label small">Designation</label><input type="text" id="spDesignation" class="form-control text-uppercase" placeholder="e.g. Senior Teacher"></div>
@@ -711,6 +768,7 @@
                     <div class="col-md-12" id="spClassesDiv">
                       <label class="form-label small">Assigned Classes (Select Multiple)</label>
                       <div class="d-flex flex-wrap gap-2">
+                        <!-- Render checkboxes directly for ease in modal -->
                         <div class="form-check"><input type="checkbox" class="form-check-input sp-class-cb" value="1" id="spc1"><label class="form-check-label" for="spc1">Class 1</label></div>
                         <div class="form-check"><input type="checkbox" class="form-check-input sp-class-cb" value="2" id="spc2"><label class="form-check-label" for="spc2">Class 2</label></div>
                         <div class="form-check"><input type="checkbox" class="form-check-input sp-class-cb" value="3" id="spc3"><label class="form-check-label" for="spc3">Class 3</label></div>
@@ -728,7 +786,8 @@
                   </div>
                 </div>
 
-                <div class="tab-pane fade" id="tab-bank">
+                <!-- 5. Bank Details Tab -->
+                <div class="tab-pane fade" id="tab-bank" role="tabpanel">
                   <div class="row g-3">
                     <div class="col-md-6"><label class="form-label small">Account Holder Name</label><input type="text" id="spAccName" class="form-control text-uppercase"></div>
                     <div class="col-md-6"><label class="form-label small">Account Number</label><input type="text" id="spAccNo" class="form-control"></div>
@@ -738,7 +797,8 @@
                   </div>
                 </div>
 
-                <div class="tab-pane fade" id="tab-transfer">
+                <!-- 6. Transfer / Relieving Tab -->
+                <div class="tab-pane fade" id="tab-transfer" role="tabpanel">
                   <div class="alert alert-secondary small py-2 mb-3">Fill this section only if the staff is transferred or leaving the institution.</div>
                   <div class="row g-3">
                     <div class="col-md-6"><label class="form-label small">Transferred From</label><input type="text" id="spTransFrom" class="form-control text-uppercase"></div>
@@ -824,6 +884,7 @@
                     <div class="col-md-4"><label class="form-label small">Mother's Name</label><input type="text" id="stuMotherName" class="form-control text-uppercase"></div>
                     <div class="col-md-4"><label class="form-label small">Guardian's Name</label><input type="text" id="stuGuardianName" class="form-control text-uppercase"></div>
                     <div class="col-md-4"><label class="form-label small">Relationship with Child</label><input type="text" id="stuRelation" class="form-control text-uppercase" placeholder="e.g. Father, Uncle"></div>
+                    <div class="col-md-4"><label class="form-label small">Guardian's Occupation</label><input type="text" id="stuGuardianJob" class="form-control text-uppercase" placeholder="e.g. Business, Teacher"></div>
                     <div class="col-md-4"><label class="form-label small">Mobile Number *</label><input type="tel" id="stuPhone" class="form-control" placeholder="9847..." required></div>
                     <div class="col-md-4"><label class="form-label small">Emergency / WhatsApp Number</label><input type="tel" id="stuEmergency" class="form-control"></div>
                   </div>
@@ -857,7 +918,6 @@
                 <div class="tab-pane fade" id="tab-stu-other">
                   <div class="row g-3">
                     <div class="col-md-12"><label class="form-label small">Identification Marks</label><textarea id="stuMarks" class="form-control text-uppercase" rows="2" placeholder="e.g. A black mole on the right cheek"></textarea></div>
-                    <div class="col-md-12"><label class="form-label small">Guardian Opinion / Remarks</label><textarea id="stuGuardianOp" class="form-control text-uppercase" rows="2"></textarea></div>
                     <div class="col-md-12"><label class="form-label small">Special Information</label><textarea id="stuSpecialInfo" class="form-control text-uppercase" rows="2" placeholder="Any medical conditions, allergies, etc."></textarea></div>
                   </div>
                 </div>
