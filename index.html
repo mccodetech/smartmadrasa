@@ -78,7 +78,7 @@
           <input type="text" id="regInstName" class="form-control" placeholder="Madrasa Full Name" required>
         </div>
         <div class="mb-2">
-          <label class="form-label small fw-semibold" data-i18n="lbl_principal">Principal / Secretary Name</label>
+          <label class="form-label small fw-semibold" data-i18n="lbl_principal">Institution Admin Name</label>
           <input type="text" id="regUserName" class="form-control" placeholder="Name" required>
         </div>
         <div class="mb-2">
@@ -107,6 +107,12 @@
       </div>
     </nav>
     <div class="container py-4">
+        <div class="row mb-3">
+            <div class="col-12">
+                <select id="parentStudentSelect" class="form-select" onchange="switchParentStudent()">
+                </select>
+            </div>
+        </div>
       <div class="row g-4">
         <div class="col-md-4">
           <div class="card p-4 text-center">
@@ -189,13 +195,14 @@
             <div class="nav flex-column nav-pills gap-1" id="desktopTabMenu">
               <button class="nav-link active text-start" id="homeMenuBtn" onclick="showTab('homeDashboardTab')"><i class="fa-solid fa-house me-2"></i> <span data-i18n="nav_home">Home</span></button>
               <button class="nav-link text-start d-none" id="superAdminMasterBtn" onclick="showTab('superAdminTab')"><i class="fa-solid fa-shield-halved me-2"></i> <span>All Madrasas</span></button>
-              <button class="nav-link text-start" onclick="showTab('studentsListTab')"><i class="fa-solid fa-users me-2"></i> <span data-i18n="nav_students">Students</span></button>
-              <button class="nav-link text-start" onclick="showTab('attendanceTab')"><i class="fa-solid fa-calendar-check me-2"></i> <span data-i18n="nav_attendance">Attendance</span></button>
-              <button class="nav-link text-start" onclick="showTab('marksTab')"><i class="fa-solid fa-award me-2"></i> <span data-i18n="nav_marks">Marks Entry</span></button>
-              <button class="nav-link text-start" onclick="showTab('performanceTab')"><i class="fa-solid fa-star me-2"></i> <span data-i18n="nav_perf">Performance</span></button>
-              <button class="nav-link text-start" onclick="showTab('feesTab')"><i class="fa-solid fa-receipt me-2"></i> <span data-i18n="nav_fees">Fees & Receipts</span></button>
-              <button class="nav-link text-start" id="teachersMenuBtn" onclick="showTab('teachersTab')"><i class="fa-solid fa-chalkboard-user me-2"></i> <span data-i18n="nav_staff">Staff Management</span></button>
-              <button class="nav-link text-start" id="promotionMenuBtn" onclick="showTab('promotionTab')"><i class="fa-solid fa-graduation-cap me-2"></i> <span data-i18n="nav_promotion">Class Promotion</span></button>
+              <button class="nav-link text-start d-none" id="instAdminStaffBtn" onclick="showTab('instAdminTab')"><i class="fa-solid fa-user-tie me-2"></i> <span>Assign Principal</span></button>
+              <button class="nav-link text-start" id="studentsMenuBtn" onclick="showTab('studentsListTab')"><i class="fa-solid fa-users me-2"></i> <span data-i18n="nav_students">Students</span></button>
+              <button class="nav-link text-start" id="attendanceMenuBtn" onclick="showTab('attendanceTab')"><i class="fa-solid fa-calendar-check me-2"></i> <span data-i18n="nav_attendance">Attendance</span></button>
+              <button class="nav-link text-start" id="marksMenuBtn" onclick="showTab('marksTab')"><i class="fa-solid fa-award me-2"></i> <span data-i18n="nav_marks">Marks Entry</span></button>
+              <button class="nav-link text-start" id="performanceMenuBtn" onclick="showTab('performanceTab')"><i class="fa-solid fa-star me-2"></i> <span data-i18n="nav_perf">Performance</span></button>
+              <button class="nav-link text-start" id="feesMenuBtn" onclick="showTab('feesTab')"><i class="fa-solid fa-receipt me-2"></i> <span data-i18n="nav_fees">Fees & Receipts</span></button>
+              <button class="nav-link text-start d-none" id="teachersMenuBtn" onclick="showTab('teachersTab')"><i class="fa-solid fa-chalkboard-user me-2"></i> <span data-i18n="nav_staff">Staff Management</span></button>
+              <button class="nav-link text-start d-none" id="promotionMenuBtn" onclick="showTab('promotionTab')"><i class="fa-solid fa-graduation-cap me-2"></i> <span data-i18n="nav_promotion">Class Promotion</span></button>
             </div>
           </div>
         </div>
@@ -218,7 +225,7 @@
                     <tr>
                       <th>Code</th>
                       <th>Madrasa Name</th>
-                      <th>Principal / Secretary</th>
+                      <th>Inst. Admin Name</th>
                       <th>Email</th>
                       <th>Phone</th>
                       <th>Status</th>
@@ -228,6 +235,33 @@
                   <tbody id="superAdminTableBody">
                     <tr><td colspan="7" class="text-center text-muted">Loading registered madrasas...</td></tr>
                   </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- 0.1 Institution Admin Console (Assign Principal) -->
+          <div id="instAdminTab" class="content-tab d-none">
+            <div class="card p-4">
+              <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-user-tie"></i> Assign Principal (Sadar Muallim)</h5>
+              <p class="text-muted small">As the Institution Admin, you can assign a Principal here. The Principal will then manage the teachers and students.</p>
+              <form onsubmit="registerPrincipal(event)" class="mb-4">
+                <div class="row g-3">
+                  <div class="col-md-4"><label class="form-label" data-i18n="lbl_fullname">Principal Name *</label><input type="text" id="pName" class="form-control" required></div>
+                  <div class="col-md-4"><label class="form-label" data-i18n="lbl_phone">Mobile Number *</label><input type="tel" id="pPhone" class="form-control" required></div>
+                  <div class="col-md-4"><label class="form-label" data-i18n="lbl_email">Email Address *</label><input type="email" id="pEmail" class="form-control" required></div>
+                  <div class="col-md-4"><label class="form-label" data-i18n="lbl_pwd">Password *</label><input type="password" id="pPassword" class="form-control" required></div>
+                  <div class="col-12 text-end"><button type="submit" class="btn btn-primary-custom px-4"><i class="fa-solid fa-user-plus me-1"></i> Register Principal</button></div>
+                </div>
+              </form>
+
+              <h6 class="fw-bold mt-4 mb-2">Assigned Principals</h6>
+              <div class="table-responsive">
+                <table class="table table-bordered align-middle">
+                  <thead class="table-light">
+                    <tr><th>Name</th><th>Email</th><th>Phone</th><th style="width: 90px;" class="text-center">Action</th></tr>
+                  </thead>
+                  <tbody id="principalsTableBody"></tbody>
                 </table>
               </div>
             </div>
@@ -559,19 +593,10 @@
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-chalkboard-user"></i> <span data-i18n="nav_staff">Staff Management</span></h5>
               <form onsubmit="registerNewTeacher(event)" class="mb-4">
                 <div class="row g-3">
-                  <div class="col-md-3"><label class="form-label">MSR No.</label><input type="text" id="tMsrNo" class="form-control" placeholder="e.g. MSR-5021"></div>
-                  <div class="col-md-3">
-                    <label class="form-label" data-i18n="lbl_role">Role</label>
-                    <select id="tRoleSelect" class="form-select">
-                      <option value="teacher">Teacher (മുഅല്ലിം)</option>
-                      <option value="admin">Principal (സ്വദർ മുഅല്ലിം)</option>
-                    </select>
-                  </div>
-                  <div class="col-md-3"><label class="form-label" data-i18n="lbl_fullname">Full Name *</label><input type="text" id="tName" class="form-control" required></div>
-                  <div class="col-md-3"><label class="form-label" data-i18n="lbl_phone">Mobile Number *</label><input type="tel" id="tPhone" class="form-control" required></div>
+                  <div class="col-md-4"><label class="form-label" data-i18n="lbl_fullname">Full Name *</label><input type="text" id="tName" class="form-control" required></div>
+                  <div class="col-md-4"><label class="form-label" data-i18n="lbl_phone">Mobile Number *</label><input type="tel" id="tPhone" class="form-control" required></div>
                   <div class="col-md-4"><label class="form-label" data-i18n="lbl_email">Email Address *</label><input type="email" id="tEmail" class="form-control" required></div>
                   <div class="col-md-4"><label class="form-label" data-i18n="lbl_pwd">Password *</label><input type="password" id="tPassword" class="form-control" required></div>
-
                   <div class="col-md-4">
                     <label class="form-label" data-i18n="lbl_assignedclasses">Assigned Classes</label>
                     <div class="dropdown">
@@ -594,8 +619,7 @@
                       </ul>
                     </div>
                   </div>
-
-                  <div class="col-12 text-end"><button type="submit" class="btn btn-primary-custom px-4"><i class="fa-solid fa-user-plus me-1"></i> <span data-i18n="btn_addstaff">Register Staff</span></button></div>
+                  <div class="col-4 d-flex align-items-end"><button type="submit" class="btn btn-primary-custom w-100"><i class="fa-solid fa-user-plus me-1"></i> <span data-i18n="btn_addstaff">Register Staff</span></button></div>
                 </div>
               </form>
 
@@ -603,7 +627,7 @@
               <div class="table-responsive">
                 <table class="table table-bordered align-middle">
                   <thead class="table-light">
-                    <tr><th style="width: 60px;">SL</th><th>MSR No</th><th data-i18n="th_name">Name</th><th data-i18n="th_role">Role</th><th data-i18n="th_email">Email</th><th data-i18n="th_phone">Phone</th><th data-i18n="th_assigned">Classes</th><th style="width: 90px;" class="text-center" data-i18n="th_actions">Action</th></tr>
+                    <tr><th style="width: 60px;">SL</th><th data-i18n="th_name">Name</th><th data-i18n="th_email">Email</th><th data-i18n="th_phone">Phone</th><th data-i18n="th_assigned">Classes</th><th style="width: 90px;" class="text-center" data-i18n="th_actions">Action</th></tr>
                   </thead>
                   <tbody id="teachersTableBody"></tbody>
                 </table>
@@ -698,7 +722,7 @@
             <div class="row g-3">
               <div class="col-md-4"><label class="form-label">Madrasa Code *</label><input type="text" id="saEditInstCode" class="form-control" required></div>
               <div class="col-md-8"><label class="form-label">Madrasa Name *</label><input type="text" id="saEditInstName" class="form-control" required></div>
-              <div class="col-md-4"><label class="form-label">Principal / Secretary *</label><input type="text" id="saEditName" class="form-control" required></div>
+              <div class="col-md-4"><label class="form-label">Inst. Admin Name *</label><input type="text" id="saEditName" class="form-control" required></div>
               <div class="col-md-4"><label class="form-label">Email Address *</label><input type="email" id="saEditEmail" class="form-control" required></div>
               <div class="col-md-4"><label class="form-label">Phone Number *</label><input type="tel" id="saEditPhone" class="form-control" required></div>
               <div class="col-md-12">
