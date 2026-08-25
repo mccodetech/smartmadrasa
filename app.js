@@ -64,9 +64,11 @@ let lastReceiptWhatsAppPayload = null;
 let currentPage = 1;
 const pageSize = 50;
 
-// Global Setting Variables
 let sysFeePermission = "all"; 
 let sysReqManualReceipt = false;
+
+// We need a map to quickly look up institution names for Super Admin
+let instIdToNameMap = {};
 
 window.updateDropdownLabel = (type) => {
   const checkboxes = document.querySelectorAll(`.${type}-class-cb:checked`);
@@ -130,6 +132,14 @@ onAuthStateChanged(auth, async (user) => {
         if (isSuperAdmin) {
           if (superMasterBtn) superMasterBtn.classList.remove("d-none");
           if (userRoleEl) userRoleEl.innerText = "Super Admin";
+          
+          // Pre-fetch all institution names for super admin to show in students table
+          const qAllAdmins = query(collection(db, "users"), where("role", "==", "admin"));
+          const adminSnaps = await getDocs(qAllAdmins);
+          adminSnaps.forEach(a => {
+              instIdToNameMap[a.data().institutionId] = a.data().institutionName;
+          });
+
         } else {
           if (superMasterBtn) superMasterBtn.classList.add("d-none");
           if (userRoleEl) {
@@ -153,7 +163,6 @@ onAuthStateChanged(auth, async (user) => {
         if (feesMenuBtn) feesMenuBtn.classList.remove("d-none");
         if (feeSettingsBtn) feeSettingsBtn.classList.add("d-none");
 
-        // Load Institution Settings
         if(!isSuperAdmin) {
             const instDoc = await getDoc(doc(db, "settings", currentInstitutionId));
             if(instDoc.exists()) {
@@ -177,7 +186,6 @@ onAuthStateChanged(auth, async (user) => {
             showTab('instAdminTab'); 
             loadPrincipalsList(); 
             
-            // Set values in settings tab
             document.getElementById("reqManualReceipt").checked = sysReqManualReceipt;
             const rBtns = document.getElementsByName("feePermission");
             for(let i=0; i<rBtns.length; i++){
@@ -401,7 +409,6 @@ window.handleSignUp = async (e) => {
       createdAt: serverTimestamp()
     });
 
-    // Default Settings
     await setDoc(doc(db, "settings", instId), {
         feePermission: "all",
         reqManualReceipt: false
@@ -629,7 +636,6 @@ window.logoutParent = () => {
 
 window.handleLogout = () => signOut(auth);
 
-// Load Principals & Staff List for Inst Admin
 window.loadPrincipalsList = async () => {
     const tbody = document.getElementById("principalsTableBody");
     const pendingTbody = document.getElementById("instPendingStaffTableBody");
@@ -764,10 +770,6 @@ window.instAssignClassesToStaff = async (e) => {
         loadPrincipalsList(); 
     } catch (err) { alert("Error: " + err.message); }
 };
-
-// ==========================================
-// STUDENT PROFILE MODAL
-// ==========================================
 
 window.openStudentProfileModal = (docId) => {
     document.getElementById("studentProfileForm").reset();
@@ -962,10 +964,17 @@ function renderPaginatedTable() {
         <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${s.id}', '${s.name}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
       </td>` : ``;
 
+    // ADDED: Display Institution Name if Super Admin is logged in.
+    let instBadge = '';
+    if(isSuperAdmin) {
+       const instName = instIdToNameMap[s.institutionId] || s.institutionId;
+       instBadge = `<br><span class="badge bg-secondary" style="font-size: 0.65rem;">${instName}</span>`;
+    }
+
     html += `
       <tr>
         <td><b class="text-success">${s.regNo || '-'}</b></td>
-        <td><b>${s.name || '-'}</b></td>
+        <td><b>${s.name || '-'}</b>${instBadge}</td>
         <td><span class="badge bg-success">Class ${cleanClass}</span></td>
         <td>${s.fatherName || s.guardianName || '-'}</td>
         <td>${s.place || '-'}</td>
@@ -1011,10 +1020,16 @@ window.filterStudentsLocal = () => {
         <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${s.id}', '${s.name}')"><i class="fa-solid fa-trash"></i></button>
       </td>` : ``;
 
+    let instBadge = '';
+    if(isSuperAdmin) {
+       const instName = instIdToNameMap[s.institutionId] || s.institutionId;
+       instBadge = `<br><span class="badge bg-secondary" style="font-size: 0.65rem;">${instName}</span>`;
+    }
+
     html += `
       <tr>
         <td><b class="text-success">${s.regNo || '-'}</b></td>
-        <td><b>${s.name || '-'}</b></td>
+        <td><b>${s.name || '-'}</b>${instBadge}</td>
         <td><span class="badge bg-success">Class ${cleanClass}</span></td>
         <td>${s.fatherName || s.guardianName || '-'}</td>
         <td>${s.place || '-'}</td>
@@ -1321,10 +1336,6 @@ window.saveClassMarks = async () => {
   } catch (err) { alert("Error: " + err.message); }
 };
 
-// ==========================================
-// FEES LOGIC (WITH SETTINGS)
-// ==========================================
-
 window.saveFeeSettings = async () => {
     const perm = document.querySelector('input[name="feePermission"]:checked').value;
     const reqManual = document.getElementById("reqManualReceipt").checked;
@@ -1350,7 +1361,6 @@ window.loadStudentsForFees = async () => {
   const alertArea = document.getElementById("feeCollectionAlert");
   const collectionArea = document.getElementById("feeCollectionArea");
 
-  // Check Permissions
   let canCollect = false;
   if(currentUserRole === "admin") canCollect = true;
   else if(currentUserRole === "principal" && (sysFeePermission === "principal" || sysFeePermission === "all")) canCollect = true;
@@ -1370,7 +1380,6 @@ window.loadStudentsForFees = async () => {
   tableArea.classList.remove("d-none");
   tbody.innerHTML = `<tr><td colspan="7" class="text-center">Loading...</td></tr>`;
 
-  // Fetch Students
   const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", selClass.replace(/Class\s*/i, "").trim()));
   const snap = await getDocs(q);
 
@@ -1383,7 +1392,6 @@ window.loadStudentsForFees = async () => {
       return;
   }
 
-  // Fetch Paid Fees History
   const feeQ = query(collection(db, "feeCollections"), where("institutionId", "==", currentInstitutionId), where("class", "==", selClass.replace(/Class\s*/i, "").trim()));
   const feeSnap = await getDocs(feeQ);
   
@@ -1637,10 +1645,6 @@ window.generateFeeReport = async () => {
         alert("Error generating report: " + err.message);
     }
 };
-
-// ==========================================
-// CSV DOWNLOAD & UPLOAD
-// ==========================================
 
 window.downloadCSVFormat = () => {
     const headers = "REG NO.,ID NO.,AADHAAR NUMBER,STUDENT NAME,GENDER,D.O.B,BLOOD GROUP,CURRENT CLASS,JOINED CLASS,JOINED DATE,PRESENCE,MONTHLY FEE,FATHER NAME,MOTHER NAME,GUARDIAN NAME,RELATION,GUARDIAN OCCUPATION,MOBILE NUMBER,EMERGENCY NUMBER,HOUSE NAME,PLACE,PO,PINCODE,DISTRICT,STATE,TRANSFERRED TO,REASON FOR LEAVING,DATE OF LEAVING,TC ISSUED,TC DETAILS,IDENTIFICATION MARKS,SPECIAL INFO\n";
