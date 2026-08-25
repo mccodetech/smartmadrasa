@@ -1533,3 +1533,174 @@ window.showTab = (tabId) => {
   if (tabId === 'homeDashboardTab') loadLeaderboard();
   if (tabId === 'superAdminTab') window.loadSuperAdminRequests();
 };
+// Open 6-Tab Profile Modal for Add/Edit
+window.openStaffProfileModal = (staffId) => {
+    document.getElementById("staffProfileForm").reset();
+    document.querySelectorAll('.sp-class-cb').forEach(cb => cb.checked = false);
+
+    if (staffId) {
+        // Edit Mode
+        const staff = localPrincipalsCache.find(s => s.id === staffId) || localTeachersCache.find(s => s.id === staffId);
+        if(!staff) return;
+
+        document.getElementById("staffModalTitle").innerText = `Edit Profile: ${staff.name}`;
+        document.getElementById("spDocId").value = staff.id;
+        document.getElementById("spAuthSection").classList.add("d-none"); // Hide password setup
+
+        // Map Firestore data to form fields
+        document.getElementById("spName").value = staff.name || "";
+        document.getElementById("spGender").value = staff.gender || "Male";
+        document.getElementById("spDob").value = staff.dob || "";
+        document.getElementById("spBlood").value = staff.bloodGroup || "";
+        document.getElementById("spGuardian").value = staff.guardianName || "";
+        document.getElementById("spMarital").value = staff.maritalStatus || "Single";
+        document.getElementById("spAadhaar").value = staff.aadhaar || "";
+
+        document.getElementById("spPhone").value = staff.phone || "";
+        document.getElementById("spWhatsapp").value = staff.whatsapp || "";
+        document.getElementById("spEmergency").value = staff.emergencyPhone || "";
+        document.getElementById("spHouse").value = staff.houseName || "";
+        document.getElementById("spPo").value = staff.postOffice || "";
+        document.getElementById("spPin").value = staff.pincode || "";
+        document.getElementById("spDistrict").value = staff.district || "";
+        document.getElementById("spState").value = staff.state || "KERALA";
+
+        document.getElementById("spRelEdu").value = staff.religiousEdu || "";
+        document.getElementById("spGenEdu").value = staff.generalEdu || "";
+        document.getElementById("spLanguages").value = staff.languages || "";
+        document.getElementById("spSkills").value = staff.skills || "";
+        document.getElementById("spAwards").value = staff.awards || "";
+
+        document.getElementById("spRole").value = staff.role || "teacher";
+        document.getElementById("spDesignation").value = staff.designation || "";
+        document.getElementById("spMsr").value = staff.msrNo || "";
+        document.getElementById("spEmpType").value = staff.employmentType || "Full Time";
+        document.getElementById("spExp").value = staff.experience || "";
+        document.getElementById("spDoj").value = staff.doj || "";
+
+        // Check assigned classes
+        if(staff.assignedClasses) {
+            staff.assignedClasses.forEach(c => {
+                const cb = document.getElementById("spc" + c);
+                if(cb) cb.checked = true;
+            });
+        }
+
+        document.getElementById("spAccName").value = staff.bankAccName || "";
+        document.getElementById("spAccNo").value = staff.bankAccNo || "";
+        document.getElementById("spIfsc").value = staff.bankIfsc || "";
+        document.getElementById("spBank").value = staff.bankName || "";
+        document.getElementById("spBranch").value = staff.bankBranch || "";
+
+        document.getElementById("spTransFrom").value = staff.transferredFrom || "";
+        document.getElementById("spTransTo").value = staff.transferredTo || "";
+        document.getElementById("spDol").value = staff.dol || "";
+        document.getElementById("spReason").value = staff.reasonLeaving || "";
+
+    } else {
+        // Add Mode
+        document.getElementById("staffModalTitle").innerText = "Register New Staff / Principal";
+        document.getElementById("spDocId").value = "";
+        document.getElementById("spAuthSection").classList.remove("d-none"); // Show Email & Password
+    }
+
+    // Switch to first tab automatically
+    const triggerEl = document.querySelector('#staffTabs button[data-bs-target="#tab-personal"]')
+    bootstrap.Tab.getOrCreateInstance(triggerEl).show()
+
+    new bootstrap.Modal(document.getElementById('staffProfileModal')).show();
+};
+
+window.saveStaffProfile = async (e) => {
+    e.preventDefault();
+
+    const staffId = document.getElementById("spDocId").value;
+    const role = document.getElementById("spRole").value;
+    
+    // Collect Assigned Classes
+    const classCheckboxes = document.querySelectorAll('.sp-class-cb:checked');
+    const assignedClasses = Array.from(classCheckboxes).map(cb => cb.value);
+
+    // Build the data object
+    const profileData = {
+        name: document.getElementById("spName").value.trim().toUpperCase(),
+        gender: document.getElementById("spGender").value,
+        dob: document.getElementById("spDob").value,
+        bloodGroup: document.getElementById("spBlood").value,
+        guardianName: document.getElementById("spGuardian").value.trim().toUpperCase(),
+        maritalStatus: document.getElementById("spMarital").value,
+        aadhaar: document.getElementById("spAadhaar").value.trim(),
+        
+        phone: document.getElementById("spPhone").value.trim(),
+        whatsapp: document.getElementById("spWhatsapp").value.trim(),
+        emergencyPhone: document.getElementById("spEmergency").value.trim(),
+        houseName: document.getElementById("spHouse").value.trim().toUpperCase(),
+        postOffice: document.getElementById("spPo").value.trim().toUpperCase(),
+        pincode: document.getElementById("spPin").value.trim(),
+        district: document.getElementById("spDistrict").value.trim().toUpperCase(),
+        state: document.getElementById("spState").value.trim().toUpperCase(),
+
+        religiousEdu: document.getElementById("spRelEdu").value.trim().toUpperCase(),
+        generalEdu: document.getElementById("spGenEdu").value.trim().toUpperCase(),
+        languages: document.getElementById("spLanguages").value.trim().toUpperCase(),
+        skills: document.getElementById("spSkills").value.trim().toUpperCase(),
+        awards: document.getElementById("spAwards").value.trim().toUpperCase(),
+
+        role: role,
+        designation: document.getElementById("spDesignation").value.trim().toUpperCase(),
+        msrNo: document.getElementById("spMsr").value.trim().toUpperCase(),
+        employmentType: document.getElementById("spEmpType").value,
+        experience: document.getElementById("spExp").value,
+        doj: document.getElementById("spDoj").value,
+        assignedClasses: role === 'principal' ? ["1","2","3","4","5","6","7","8","9","10","11","12"] : assignedClasses,
+
+        bankAccName: document.getElementById("spAccName").value.trim().toUpperCase(),
+        bankAccNo: document.getElementById("spAccNo").value.trim(),
+        bankIfsc: document.getElementById("spIfsc").value.trim().toUpperCase(),
+        bankName: document.getElementById("spBank").value.trim().toUpperCase(),
+        bankBranch: document.getElementById("spBranch").value.trim().toUpperCase(),
+
+        transferredFrom: document.getElementById("spTransFrom").value.trim().toUpperCase(),
+        transferredTo: document.getElementById("spTransTo").value.trim().toUpperCase(),
+        dol: document.getElementById("spDol").value,
+        reasonLeaving: document.getElementById("spReason").value.trim().toUpperCase(),
+        
+        updatedAt: serverTimestamp()
+    };
+
+    try {
+        if (staffId) {
+            // Update Existing User
+            await updateDoc(doc(db, "users", staffId), profileData);
+            alert("Profile updated successfully!");
+        } else {
+            // Register New User (Requires Auth setup)
+            const email = document.getElementById("spAuthEmail").value.trim().toLowerCase();
+            const pwd = document.getElementById("spAuthPassword").value;
+            
+            if(!email || !pwd) return alert("Email and Password are required to create a new account.");
+            
+            // Note: Creating a new user via client SDK will log out the admin. 
+            // In a real production app, this should be done via Firebase Cloud Functions.
+            const cred = await createUserWithEmailAndPassword(auth, email, pwd);
+            
+            profileData.uid = cred.user.uid;
+            profileData.email = email;
+            profileData.institutionId = currentInstitutionId;
+            profileData.status = "active";
+            profileData.createdAt = serverTimestamp();
+
+            await setDoc(doc(db, "users", cred.user.uid), profileData);
+            alert("New staff registered successfully! You will be automatically signed in as the new user.");
+        }
+
+        bootstrap.Modal.getInstance(document.getElementById('staffProfileModal')).hide();
+        
+        // Reload Table
+        if(currentUserRole === 'admin') loadPrincipalsList();
+        else loadTeachersList();
+
+    } catch (err) {
+        alert("Error: " + err.message);
+    }
+};
