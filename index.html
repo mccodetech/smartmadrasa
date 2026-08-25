@@ -29,7 +29,6 @@
         <button type="button" id="tabBtnSignup" onclick="switchAuthTab('signup')">Sign Up</button>
       </div>
 
-      <!-- 1. Single Unified Smart Login Form -->
       <form id="loginForm" onsubmit="handleUnifiedLogin(event)">
         <div class="mb-3">
           <label class="form-label fw-semibold small">Email or Student Reg No.</label>
@@ -58,7 +57,6 @@
         <button type="submit" id="btnAuthSubmit" class="btn btn-primary-custom w-100 mt-2">Sign In</button>
       </form>
 
-      <!-- 2. Consolidated Sign Up Options -->
       <div id="signupOptions" class="d-none">
           <div class="d-grid gap-3">
               <button class="btn btn-outline-success p-3 text-start" onclick="showSignupForm('madrasa')">
@@ -74,7 +72,6 @@
           </div>
       </div>
 
-      <!-- 2a. Madrasa Registration Form -->
       <form id="signupForm" class="d-none" onsubmit="handleSignUp(event)">
         <button type="button" class="btn btn-sm btn-link text-decoration-none mb-3 p-0" onclick="switchAuthTab('signup')"><i class="fa-solid fa-arrow-left"></i> Back</button>
         <div class="alert alert-warning py-2 small">New registrations require Developer / Super Admin approval before activation.</div>
@@ -124,7 +121,7 @@
         </div>
         <div class="mb-2">
           <label class="form-label small fw-semibold">Google Maps Location Link</label>
-          <input type="url" id="regLocationLink" class="form-control" placeholder="Optional (e.g. https://maps.google.com/...)">
+          <input type="url" id="regLocationLink" class="form-control" placeholder="Optional">
         </div>
         <div class="mb-2">
           <label class="form-label small fw-semibold">Institution Admin Name</label>
@@ -151,7 +148,6 @@
         <button type="submit" id="btnSubmitSignup" class="btn btn-primary-custom w-100">Submit for Approval</button>
       </form>
 
-      <!-- 2b. Staff Registration Form -->
       <form id="staffSignupForm" class="d-none" onsubmit="handleStaffSignUp(event)">
         <button type="button" class="btn btn-sm btn-link text-decoration-none mb-3 p-0" onclick="switchAuthTab('signup')"><i class="fa-solid fa-arrow-left"></i> Back</button>
         <div class="alert alert-info py-2 small">Registration requires approval from the Institution Admin/Principal.</div>
@@ -162,7 +158,6 @@
                 <option value="principal">Principal</option>
             </select>
         </div>
-        
         <div class="row g-2 mb-2">
           <div class="col-6">
             <label class="form-label small fw-semibold">Board</label>
@@ -181,7 +176,6 @@
             <input type="text" id="staffInstCode" class="form-control text-uppercase" placeholder="e.g. 1145" required>
           </div>
         </div>
-
         <div class="mb-2">
           <label class="form-label small fw-semibold">Full Name</label>
           <input type="text" id="staffName" class="form-control text-uppercase" placeholder="Your Name" required>
@@ -191,8 +185,8 @@
           <input type="tel" id="staffPhone" class="form-control" placeholder="9847..." oninput="document.getElementById('staffWhatsapp').value = this.value" required>
         </div>
         <div class="mb-2">
-            <label class="form-label small fw-semibold">WhatsApp Number (For Notifications)</label>
-            <input type="tel" id="staffWhatsapp" class="form-control" placeholder="Optional if same as mobile">
+            <label class="form-label small fw-semibold">WhatsApp Number</label>
+            <input type="tel" id="staffWhatsapp" class="form-control" placeholder="Optional">
         </div>
         <div class="mb-2">
           <label class="form-label small fw-semibold">Email Address</label>
@@ -204,7 +198,6 @@
         </div>
         <button type="submit" id="btnStaffSubmitSignup" class="btn btn-primary-custom w-100">Submit Request</button>
       </form>
-
     </div>
   </div>
 
@@ -218,10 +211,7 @@
     </nav>
     <div class="container py-4">
         <div class="row mb-3">
-            <div class="col-12">
-                <select id="parentStudentSelect" class="form-select" onchange="switchParentStudent()">
-                </select>
-            </div>
+            <div class="col-12"><select id="parentStudentSelect" class="form-select" onchange="switchParentStudent()"></select></div>
         </div>
       <div class="row g-4">
         <div class="col-md-4">
@@ -263,17 +253,11 @@
 
   <!-- Main Management App Screen -->
   <div id="appSection" class="d-none">
-    
-    <!-- Top Navbar -->
     <nav class="navbar navbar-dark bg-madrassa shadow-sm sticky-top">
       <div class="container-fluid px-3">
         <div class="d-flex align-items-center gap-2">
-          <button class="btn btn-outline-light d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas">
-            <i class="fa-solid fa-bars"></i>
-          </button>
-          <a class="navbar-brand fw-bold m-0 d-flex align-items-center gap-2" href="#" onclick="showTab('homeDashboardTab')">
-            <i class="fa-solid fa-kaaba"></i> <span id="displayMadrassaName">Smart Madrasa</span>
-          </a>
+          <button class="btn btn-outline-light d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas"><i class="fa-solid fa-bars"></i></button>
+          <a class="navbar-brand fw-bold m-0 d-flex align-items-center gap-2" href="#" onclick="showTab('homeDashboardTab')"><i class="fa-solid fa-kaaba"></i> <span id="displayMadrassaName">Smart Madrasa</span></a>
         </div>
         <div class="d-flex align-items-center gap-2 text-white">
           <button class="btn btn-sm btn-outline-warning d-none" id="superAdminBackBtn" onclick="returnToSuperAdminConsole()"><i class="fa-solid fa-arrow-left me-1"></i> Console</button>
@@ -283,7 +267,6 @@
       </div>
     </nav>
 
-    <!-- Offcanvas Mobile Drawer -->
     <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarOffcanvas">
       <div class="offcanvas-header bg-madrassa text-white">
         <h5 class="offcanvas-title fw-bold"><i class="fa-solid fa-kaaba me-2"></i> Smart Madrasa</h5>
@@ -309,7 +292,6 @@
               <button class="nav-link text-start" id="performanceMenuBtn" onclick="showTab('performanceTab')"><i class="fa-solid fa-star me-2"></i> Performance</button>
               <button class="nav-link text-start" id="feesMenuBtn" onclick="showTab('feesTab')"><i class="fa-solid fa-receipt me-2"></i> Fees & Receipts</button>
               <button class="nav-link text-start d-none" id="feeSettingsBtn" onclick="showTab('feeSettingsTab')"><i class="fa-solid fa-gear me-2"></i> Fee Settings</button>
-              <button class="nav-link text-start d-none" id="teachersMenuBtn" onclick="showTab('teachersTab')"><i class="fa-solid fa-chalkboard-user me-2"></i> Staff Management</button>
               <button class="nav-link text-start d-none" id="promotionMenuBtn" onclick="showTab('promotionTab')"><i class="fa-solid fa-graduation-cap me-2"></i> Class Promotion</button>
             </div>
           </div>
@@ -322,7 +304,7 @@
           <div id="superAdminTab" class="content-tab d-none">
             <div class="card p-4">
               <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-shield-halved me-2"></i>Madrasa Master Console (Super Admin)</h5>
+                <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-shield-halved me-2"></i>Madrasa Master Console</h5>
                 <button class="btn btn-sm btn-outline-success" onclick="loadSuperAdminRequests()"><i class="fa-solid fa-rotate"></i> Reload</button>
               </div>
               <div class="table-responsive">
@@ -341,7 +323,7 @@
             <div class="card p-4">
               <div class="d-flex justify-content-between align-items-center mb-3">
                   <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-user-tie"></i> Manage Principals & Staff</h5>
-                  <button class="btn btn-sm btn-outline-success" onclick="openStaffProfileModal(null)"><i class="fa-solid fa-plus me-1"></i> Add Staff / Principal</button>
+                  <button class="btn btn-sm btn-outline-success" onclick="openStaffProfileModal(null)"><i class="fa-solid fa-plus me-1"></i> Add Staff</button>
               </div>
               
               <div id="instPendingStaffSection" class="mb-4 d-none">
@@ -544,7 +526,7 @@
             </div>
           </div>
 
-          <!-- 7. Fees Tab (Updated for Fee Settings Control) -->
+          <!-- 7. Fees Tab -->
           <div id="feesTab" class="content-tab d-none">
              <div class="card p-4">
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-receipt"></i> Fee Collection & Receipt</h5>
@@ -567,9 +549,7 @@
                                       <th>Name</th>
                                       <th>Monthly Fee (₹)</th>
                                       <th>Last Paid</th>
-                                      <th>Select Month(s)</th>
-                                      <th>Amount (₹)</th>
-                                      <th>Action</th>
+                                      <th style="width: 120px;" class="text-center">Action</th>
                                   </tr>
                               </thead>
                               <tbody id="feesTableBody"></tbody>
@@ -636,69 +616,6 @@
             </div>
           </div>
 
-          <!-- 8. Teachers Management Tab (For Principal) -->
-          <div id="teachersTab" class="content-tab d-none">
-            <div class="card p-4">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                  <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-chalkboard-user"></i> Staff Management</h5>
-                  <button class="btn btn-sm btn-outline-success" onclick="openStaffProfileModal(null)"><i class="fa-solid fa-plus me-1"></i> Add Staff Directly</button>
-              </div>
-
-              <div id="pendingStaffSection" class="mb-4 d-none">
-                  <h6 class="fw-bold text-warning mb-2"><i class="fa-solid fa-clock me-1"></i> Pending Staff Approvals</h6>
-                  <div class="table-responsive">
-                      <table class="table table-bordered align-middle table-warning">
-                          <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th class="text-center">Action</th></tr></thead>
-                          <tbody id="pendingStaffTableBody"></tbody>
-                      </table>
-                  </div>
-              </div>
-
-              <form id="assignClassesForm" onsubmit="assignClassesToStaff(event)" class="mb-4 d-none border p-3 rounded bg-light">
-                <input type="hidden" id="assignStaffId">
-                <h6 class="fw-bold text-primary mb-2">Approve <span id="assignStaffNameDisplay"></span></h6>
-                <div class="row g-3 align-items-end">
-                  <div class="col-md-6" id="classAssignDiv">
-                    <label class="form-label">Assign Classes</label>
-                    <div class="dropdown">
-                      <button class="btn btn-outline-secondary dropdown-toggle w-100 text-start d-flex justify-content-between align-items-center" type="button" id="approveClassDropdownBtn" data-bs-toggle="dropdown" data-bs-auto-close="outside">
-                        <span id="approveClassDropdownLabel">Select Class</span>
-                      </button>
-                      <ul class="dropdown-menu dropdown-checkbox-menu" aria-labelledby="approveClassDropdownBtn">
-                        <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 approve-class-cb" value="1" onchange="updateDropdownLabel('approve')"> Class 1</label></li>
-                        <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 approve-class-cb" value="2" onchange="updateDropdownLabel('approve')"> Class 2</label></li>
-                        <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 approve-class-cb" value="3" onchange="updateDropdownLabel('approve')"> Class 3</label></li>
-                        <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 approve-class-cb" value="4" onchange="updateDropdownLabel('approve')"> Class 4</label></li>
-                        <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 approve-class-cb" value="5" onchange="updateDropdownLabel('approve')"> Class 5</label></li>
-                        <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 approve-class-cb" value="6" onchange="updateDropdownLabel('approve')"> Class 6</label></li>
-                        <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 approve-class-cb" value="7" onchange="updateDropdownLabel('approve')"> Class 7</label></li>
-                        <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 approve-class-cb" value="8" onchange="updateDropdownLabel('approve')"> Class 8</label></li>
-                        <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 approve-class-cb" value="9" onchange="updateDropdownLabel('approve')"> Class 9</label></li>
-                        <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 approve-class-cb" value="10" onchange="updateDropdownLabel('approve')"> Class 10</label></li>
-                        <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 approve-class-cb" value="11" onchange="updateDropdownLabel('approve')"> Class 11</label></li>
-                        <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 approve-class-cb" value="12" onchange="updateDropdownLabel('approve')"> Class 12</label></li>
-                      </ul>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                      <button type="button" class="btn btn-secondary me-2" onclick="cancelAssignClasses()">Cancel</button>
-                      <button type="submit" class="btn btn-success"><i class="fa-solid fa-check me-1"></i> Confirm Approval</button>
-                  </div>
-                </div>
-              </form>
-
-              <h6 class="fw-bold mt-4 mb-2">Registered Staff Directory</h6>
-              <div class="table-responsive">
-                <table class="table table-bordered align-middle">
-                  <thead class="table-light">
-                    <tr><th style="width: 60px;">SL</th><th>Name</th><th>Role</th><th>Email</th><th>Phone</th><th>Classes</th><th style="width: 120px;" class="text-center">Action</th></tr>
-                  </thead>
-                  <tbody id="teachersTableBody"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
           <!-- 9. Class Promotion -->
           <div id="promotionTab" class="content-tab d-none">
             <div class="card p-4">
@@ -728,7 +645,7 @@
 
   <!-- --- MODALS --- -->
 
-  <!-- Advanced Staff Profile Modal (Add/Edit) -->
+  <!-- Advanced Staff Profile Modal -->
   <div class="modal fade" id="staffProfileModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
       <div class="modal-content border-0 shadow">
@@ -738,8 +655,8 @@
         </div>
         <div class="modal-body p-0">
           <form id="staffProfileForm">
+            <!-- (Staff form content unchanged) -->
             <input type="hidden" id="spDocId">
-
             <div id="spAuthSection" class="p-3 bg-light border-bottom">
                <h6 class="fw-bold text-danger mb-2"><i class="fa-solid fa-key me-1"></i> Account Setup (For New Staff)</h6>
                <div class="row g-2">
@@ -747,7 +664,6 @@
                    <div class="col-md-6"><label class="form-label small">Password *</label><input type="text" id="spAuthPassword" class="form-control" placeholder="Min 6 characters"></div>
                </div>
             </div>
-
             <div class="px-3 pt-3">
               <ul class="nav nav-tabs" id="staffTabs" role="tablist">
                 <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-personal" type="button">Personal Info</button></li>
@@ -757,9 +673,7 @@
                 <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-bank" type="button">Bank Details</button></li>
                 <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-transfer" type="button">Relieving</button></li>
               </ul>
-
               <div class="tab-content p-3 border border-top-0 rounded-bottom mb-3" style="background:#fff;">
-                
                 <div class="tab-pane fade show active" id="tab-personal">
                   <div class="row g-3">
                     <div class="col-md-12"><label class="form-label small">Full Name *</label><input type="text" id="spName" class="form-control text-uppercase"></div>
@@ -771,7 +685,6 @@
                     <div class="col-md-4"><label class="form-label small">Aadhaar Number</label><input type="text" id="spAadhaar" class="form-control"></div>
                   </div>
                 </div>
-
                 <div class="tab-pane fade" id="tab-contact">
                   <div class="row g-3">
                     <div class="col-md-4"><label class="form-label small">Mobile Number *</label><input type="tel" id="spPhone" class="form-control"></div>
@@ -784,7 +697,6 @@
                     <div class="col-md-4"><label class="form-label small">State</label><input type="text" id="spState" class="form-control text-uppercase" value="KERALA"></div>
                   </div>
                 </div>
-
                 <div class="tab-pane fade" id="tab-education">
                   <div class="row g-3">
                     <div class="col-md-6"><label class="form-label small">Religious Education Qualifications</label><input type="text" id="spRelEdu" class="form-control text-uppercase" placeholder="e.g. Baqavi, Darimi, Faizy"></div>
@@ -794,7 +706,6 @@
                     <div class="col-md-12"><label class="form-label small">Awards & Achievements</label><input type="text" id="spAwards" class="form-control text-uppercase"></div>
                   </div>
                 </div>
-
                 <div class="tab-pane fade" id="tab-employment">
                   <div class="row g-3">
                     <div class="col-md-4"><label class="form-label small">System Role *</label><select id="spRole" class="form-select"><option value="teacher">Teacher (മുഅല്ലിം)</option><option value="principal">Principal (സദർ)</option></select></div>
@@ -803,7 +714,6 @@
                     <div class="col-md-4"><label class="form-label small">Employment Type</label><select id="spEmpType" class="form-select"><option value="Full Time">Full Time</option><option value="Part Time">Part Time</option></select></div>
                     <div class="col-md-4"><label class="form-label small">Teaching Experience (Years)</label><input type="number" id="spExp" class="form-control"></div>
                     <div class="col-md-4"><label class="form-label small">Date of Joining</label><input type="date" id="spDoj" class="form-control"></div>
-                    
                     <div class="col-md-12" id="spClassesDiv">
                       <label class="form-label small">Assigned Classes (Select Multiple)</label>
                       <div class="d-flex flex-wrap gap-2">
@@ -823,7 +733,6 @@
                     </div>
                   </div>
                 </div>
-
                 <div class="tab-pane fade" id="tab-bank">
                   <div class="row g-3">
                     <div class="col-md-6"><label class="form-label small">Account Holder Name</label><input type="text" id="spAccName" class="form-control text-uppercase"></div>
@@ -833,7 +742,6 @@
                     <div class="col-md-4"><label class="form-label small">Branch</label><input type="text" id="spBranch" class="form-control text-uppercase"></div>
                   </div>
                 </div>
-
                 <div class="tab-pane fade" id="tab-transfer">
                   <div class="alert alert-secondary small py-2 mb-3">Fill this section only if the staff is transferred or leaving the institution.</div>
                   <div class="row g-3">
@@ -843,7 +751,6 @@
                     <div class="col-md-8"><label class="form-label small">Reason for Leaving</label><input type="text" id="spReason" class="form-control text-uppercase"></div>
                   </div>
                 </div>
-
               </div>
             </div>
           </form>
@@ -856,7 +763,7 @@
     </div>
   </div>
 
-  <!-- Advanced Student Profile Modal (Add/Edit) -->
+  <!-- Advanced Student Profile Modal -->
   <div class="modal fade" id="studentProfileModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
       <div class="modal-content border-0 shadow">
@@ -867,7 +774,6 @@
         <div class="modal-body p-0">
           <form id="studentProfileForm">
             <input type="hidden" id="stuDocId">
-
             <div class="px-3 pt-3">
               <ul class="nav nav-tabs" id="studentTabs" role="tablist">
                 <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-stu-personal" type="button">Personal Info</button></li>
@@ -877,9 +783,8 @@
                 <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-stu-transfer" type="button">Transfer/TC</button></li>
                 <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-stu-other" type="button">Other</button></li>
               </ul>
-
               <div class="tab-content p-3 border border-top-0 rounded-bottom mb-3" style="background:#fff;">
-                
+                <!-- (Student form content unchanged) -->
                 <div class="tab-pane fade show active" id="tab-stu-personal">
                   <div class="row g-3">
                     <div class="col-md-4"><label class="form-label small">Reg No. (Admission No) *</label><input type="number" id="stuRegNo" class="form-control fw-bold"></div>
@@ -891,7 +796,6 @@
                     <div class="col-md-4"><label class="form-label small">Blood Group</label><select id="stuBlood" class="form-select"><option value="">Select</option><option value="A+">A+</option><option value="A-">A-</option><option value="B+">B+</option><option value="B-">B-</option><option value="O+">O+</option><option value="O-">O-</option><option value="AB+">AB+</option><option value="AB-">AB-</option></select></div>
                   </div>
                 </div>
-
                 <div class="tab-pane fade" id="tab-stu-academic">
                   <div class="row g-3">
                     <div class="col-md-6">
@@ -909,7 +813,6 @@
                     <div class="col-md-4"><label class="form-label small fw-bold text-success">Monthly Fee Amount (₹)</label><input type="number" id="stuMonthlyFee" class="form-control border-success" placeholder="e.g. 200"></div>
                   </div>
                 </div>
-
                 <div class="tab-pane fade" id="tab-stu-family">
                   <div class="row g-3">
                     <div class="col-md-4"><label class="form-label small">Father's Name *</label><input type="text" id="stuFatherName" class="form-control text-uppercase"></div>
@@ -921,7 +824,6 @@
                     <div class="col-md-4"><label class="form-label small">Emergency / WhatsApp Number</label><input type="tel" id="stuEmergency" class="form-control"></div>
                   </div>
                 </div>
-
                 <div class="tab-pane fade" id="tab-stu-address">
                   <div class="row g-3">
                     <div class="col-md-12"><label class="form-label small">House Name / Number *</label><input type="text" id="stuHouse" class="form-control text-uppercase"></div>
@@ -932,7 +834,6 @@
                     <div class="col-md-4"><label class="form-label small">State</label><input type="text" id="stuState" class="form-control text-uppercase" value="KERALA"></div>
                   </div>
                 </div>
-
                 <div class="tab-pane fade" id="tab-stu-transfer">
                   <div class="alert alert-secondary small py-2 mb-3">Fill this section only if the student is leaving or transferring to another Madrasa.</div>
                   <div class="row g-3">
@@ -943,14 +844,12 @@
                     <div class="col-md-4"><label class="form-label small">Certificate No & Date</label><input type="text" id="stuTcDetails" class="form-control text-uppercase" placeholder="e.g. TC/123 - 10/05/2026"></div>
                   </div>
                 </div>
-
                 <div class="tab-pane fade" id="tab-stu-other">
                   <div class="row g-3">
                     <div class="col-md-12"><label class="form-label small">Identification Marks</label><textarea id="stuMarks" class="form-control text-uppercase" rows="2" placeholder="e.g. A black mole on the right cheek"></textarea></div>
                     <div class="col-md-12"><label class="form-label small">Special Information</label><textarea id="stuSpecialInfo" class="form-control text-uppercase" rows="2" placeholder="Any medical conditions, allergies, etc."></textarea></div>
                   </div>
                 </div>
-
               </div>
             </div>
           </form>
@@ -963,6 +862,89 @@
     </div>
   </div>
 
+  <!-- Modal: Process Fee Payment (UPDATED UI) -->
+  <div class="modal fade" id="feePaymentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-madrassa text-white">
+          <h5 class="modal-title fw-bold">Process Fee Payment</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <form id="feePaymentForm" onsubmit="saveFeePayment(event)">
+            <input type="hidden" id="payStudentId">
+            <input type="hidden" id="payStudentReg">
+            <input type="hidden" id="payStudentName">
+            <input type="hidden" id="payStudentClass">
+            <input type="hidden" id="payStudentPhone">
+            <input type="hidden" id="payBaseFee">
+            
+            <div class="mb-3">
+                <label class="form-label small fw-bold">Paying For (Student)</label>
+                <div class="form-control bg-light" id="payStudentNameDisplay">-</div>
+            </div>
+
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <label class="form-label small fw-bold">Academic Year</label>
+                    <select id="payAcademicYear" class="form-select">
+                        <option value="2023-2024">2023-2024</option>
+                        <option value="2024-2025" selected>2024-2025</option>
+                        <option value="2025-2026">2025-2026</option>
+                        <option value="2026-2027">2026-2027</option>
+                    </select>
+                </div>
+                <div class="col-6">
+                    <label class="form-label small fw-bold">Fee Category</label>
+                    <select id="payFeeCategory" class="form-select" onchange="calculateFeeAmount()">
+                        <option value="Monthly Fee">Monthly Fee</option>
+                        <option value="Admission Fee">Admission Fee</option>
+                        <option value="Exam Fee">Exam Fee</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Month Selection Area (Visible only if Monthly Fee is selected) -->
+            <div id="monthSelectionDiv" class="mb-3 p-3 border rounded bg-light">
+                <label class="form-label small fw-bold mb-2">Select Month(s)</label>
+                <div class="row g-2">
+                    <div class="col-3"><div class="form-check"><input type="checkbox" class="form-check-input month-cb" value="APR" id="mApr" onchange="calculateFeeAmount()"><label class="form-check-label small" for="mApr">APR</label></div></div>
+                    <div class="col-3"><div class="form-check"><input type="checkbox" class="form-check-input month-cb" value="MAY" id="mMay" onchange="calculateFeeAmount()"><label class="form-check-label small" for="mMay">MAY</label></div></div>
+                    <div class="col-3"><div class="form-check"><input type="checkbox" class="form-check-input month-cb" value="JUN" id="mJun" onchange="calculateFeeAmount()"><label class="form-check-label small" for="mJun">JUN</label></div></div>
+                    <div class="col-3"><div class="form-check"><input type="checkbox" class="form-check-input month-cb" value="JUL" id="mJul" onchange="calculateFeeAmount()"><label class="form-check-label small" for="mJul">JUL</label></div></div>
+                    <div class="col-3"><div class="form-check"><input type="checkbox" class="form-check-input month-cb" value="AUG" id="mAug" onchange="calculateFeeAmount()"><label class="form-check-label small" for="mAug">AUG</label></div></div>
+                    <div class="col-3"><div class="form-check"><input type="checkbox" class="form-check-input month-cb" value="SEP" id="mSep" onchange="calculateFeeAmount()"><label class="form-check-label small" for="mSep">SEP</label></div></div>
+                    <div class="col-3"><div class="form-check"><input type="checkbox" class="form-check-input month-cb" value="OCT" id="mOct" onchange="calculateFeeAmount()"><label class="form-check-label small" for="mOct">OCT</label></div></div>
+                    <div class="col-3"><div class="form-check"><input type="checkbox" class="form-check-input month-cb" value="NOV" id="mNov" onchange="calculateFeeAmount()"><label class="form-check-label small" for="mNov">NOV</label></div></div>
+                    <div class="col-3"><div class="form-check"><input type="checkbox" class="form-check-input month-cb" value="DEC" id="mDec" onchange="calculateFeeAmount()"><label class="form-check-label small" for="mDec">DEC</label></div></div>
+                    <div class="col-3"><div class="form-check"><input type="checkbox" class="form-check-input month-cb" value="JAN" id="mJan" onchange="calculateFeeAmount()"><label class="form-check-label small" for="mJan">JAN</label></div></div>
+                    <div class="col-3"><div class="form-check"><input type="checkbox" class="form-check-input month-cb" value="FEB" id="mFeb" onchange="calculateFeeAmount()"><label class="form-check-label small" for="mFeb">FEB</label></div></div>
+                    <div class="col-3"><div class="form-check"><input type="checkbox" class="form-check-input month-cb" value="MAR" id="mMar" onchange="calculateFeeAmount()"><label class="form-check-label small" for="mMar">MAR</label></div></div>
+                </div>
+            </div>
+            
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                  <label class="form-label small fw-bold">Total Amount (₹) *</label>
+                  <input type="number" id="payAmount" class="form-control fw-bold text-success" required>
+                </div>
+                <div class="col-6">
+                  <label class="form-label small fw-bold">Book Receipt No</label>
+                  <!-- FIXED ID ISSUE HERE -->
+                  <input type="text" id="payManualReceipt" class="form-control text-uppercase" placeholder="Optional">
+                </div>
+            </div>
+
+            <div class="text-end border-top pt-3 mt-2">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-success px-4"><i class="fa-solid fa-check me-1"></i> Save Payment</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Super Admin Madrasa Edit Modal -->
   <div class="modal fade" id="superAdminEditMadrasaModal" tabindex="-1" aria-hidden="true">
@@ -1003,81 +985,6 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="submit" class="btn btn-primary-custom px-4">Save Changes</button>
               </div>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal: Custom Task -->
-  <div class="modal fade" id="customTaskModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content border-0 shadow">
-        <div class="modal-header bg-madrassa text-white">
-          <h5 class="modal-title fw-bold">Add Custom Task</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body p-4">
-          <form onsubmit="addNewCustomTask(event)">
-            <div class="mb-3">
-              <label class="form-label">Task Name *</label>
-              <input type="text" id="newTaskName" class="form-control text-uppercase" placeholder="e.g. Reading Competition" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Points (+ or -) *</label>
-              <input type="number" id="newTaskPoints" class="form-control" placeholder="e.g. 10 or -5" required>
-            </div>
-            <div class="text-end">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-              <button type="submit" class="btn btn-primary-custom px-4">Add Task</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal: Process Fee Payment -->
-  <div class="modal fade" id="feePaymentModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content border-0 shadow">
-        <div class="modal-header bg-madrassa text-white">
-          <h5 class="modal-title fw-bold">Process Fee Payment</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body p-4">
-          <form id="feePaymentForm" onsubmit="saveFeePayment(event)">
-            <input type="hidden" id="payStudentId">
-            <input type="hidden" id="payStudentReg">
-            <input type="hidden" id="payStudentName">
-            <input type="hidden" id="payStudentClass">
-            <input type="hidden" id="payStudentPhone">
-            
-            <div class="mb-3">
-                <label class="form-label small fw-bold">Paying For (Student)</label>
-                <div class="form-control bg-light" id="payStudentNameDisplay">-</div>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label small fw-bold">Fee Type / Selected Month(s)</label>
-              <input type="text" id="payFeeType" class="form-control text-uppercase" placeholder="e.g. JUNE, JULY or ADMISSION FEE" required>
-            </div>
-            
-            <div class="row g-2 mb-3">
-                <div class="col-6">
-                  <label class="form-label small fw-bold">Total Amount (₹) *</label>
-                  <input type="number" id="payAmount" class="form-control fw-bold text-success" required>
-                </div>
-                <div class="col-6">
-                  <label class="form-label small fw-bold">Book Receipt No</label>
-                  <input type="text" id="payManualReceipt" class="form-control text-uppercase" placeholder="Optional" id="payManualReceiptInput">
-                </div>
-            </div>
-
-            <div class="text-end border-top pt-3 mt-2">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-              <button type="submit" class="btn btn-success px-4"><i class="fa-solid fa-check me-1"></i> Save Payment</button>
             </div>
           </form>
         </div>
@@ -1146,6 +1053,34 @@
         <div class="modal-footer bg-light">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
           <button class="btn btn-success px-4" onclick="handleBulkUpload()"><i class="fa-solid fa-cloud-arrow-up me-1"></i> Import Data</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Custom Task -->
+  <div class="modal fade" id="customTaskModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-madrassa text-white">
+          <h5 class="modal-title fw-bold">Add Custom Task</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <form onsubmit="addNewCustomTask(event)">
+            <div class="mb-3">
+              <label class="form-label">Task Name *</label>
+              <input type="text" id="newTaskName" class="form-control text-uppercase" placeholder="e.g. Reading Competition" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Points (+ or -) *</label>
+              <input type="number" id="newTaskPoints" class="form-control" placeholder="e.g. 10 or -5" required>
+            </div>
+            <div class="text-end">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-primary-custom px-4">Add Task</button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
