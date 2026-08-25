@@ -82,11 +82,11 @@
             <label class="form-label small fw-semibold">Board of Education</label>
             <select id="regBoard" class="form-select" required>
                 <option value="">Select Board</option>
-                <option value="SKIMVB">SKIMVB (Samastha EK)</option>
-                <option value="SKSVB">SKSVB (Samastha AP)</option>
-                <option value="DKIMVB">DKIMVB (Dakshina Kerala)</option>
-                <option value="MTIK">MTIK (KNM)</option>
-                <option value="CBSE">CBSE / Other Schools</option>
+                <option value="SKIMVB">SKIMVB</option>
+                <option value="SKSVB">SKSVB</option>
+                <option value="DKIMVB">DKIMVB</option>
+                <option value="MTIK">MTIK</option>
+                <option value="CBSE">CBSE / Other</option>
                 <option value="Other">Other</option>
             </select>
         </div>
@@ -242,7 +242,7 @@
             <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-receipt me-2"></i>Fee Receipts</h5>
             <div class="table-responsive">
               <table class="table table-bordered align-middle">
-                <thead class="table-light"><tr><th>Receipt No</th><th>Date</th><th>Item</th><th>Amount</th></tr></thead>
+                <thead class="table-light"><tr><th>Receipt No</th><th>Date</th><th>Month/Item</th><th>Amount</th></tr></thead>
                 <tbody id="pvFeeTableBody"><tr><td colspan="4" class="text-center text-muted">No fee records found</td></tr></tbody>
               </table>
             </div>
@@ -543,32 +543,33 @@
             </div>
           </div>
 
-          <!-- 7. Fees Tab -->
+          <!-- 7. Fees Tab (Updated for New Structure) -->
           <div id="feesTab" class="content-tab d-none">
              <div class="card p-4">
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-receipt"></i> Fee Collection & Receipt</h5>
               <div class="row g-3 mb-4">
                 <div class="col-md-4"><label class="form-label">Select Class</label><select id="feeClassSelect" class="form-select" onchange="loadStudentsForFees()"></select></div>
-                <div class="col-md-8"><label class="form-label">Select Student</label><select id="feeStudentSelect" class="form-select"><option value="">-- Select Class First --</option></select></div>
               </div>
-              <form onsubmit="processFeeReceipt(event)">
-                <div class="row g-3">
-                  <div class="col-md-4"><label class="form-label">Amount (₹) *</label><input type="number" id="feeAmount" class="form-control" required></div>
-                  <div class="col-md-4">
-                    <label class="form-label">Fee Type</label>
-                    <select id="feeType" class="form-select">
-                      <option value="Monthly Fee">Monthly Fee</option>
-                      <option value="Admission Fee">Admission Fee</option>
-                      <option value="Exam Fee">Exam Fee</option>
-                    </select>
+              
+              <div id="feesTableArea" class="d-none">
+                  <div class="table-responsive">
+                      <table class="table table-bordered align-middle">
+                          <thead class="table-light">
+                              <tr>
+                                  <th>Reg No</th>
+                                  <th>Name</th>
+                                  <th>Monthly Fee (₹)</th>
+                                  <th>Last Paid</th>
+                                  <th>Select Month(s)</th>
+                                  <th>Amount (₹)</th>
+                                  <th>Action</th>
+                              </tr>
+                          </thead>
+                          <tbody id="feesTableBody"></tbody>
+                      </table>
                   </div>
-                  <div class="col-md-4"><label class="form-label">Manual Receipt No (Book)</label><input type="text" id="manualReceipt" class="form-control text-uppercase" placeholder="Optional"></div>
-                  <div class="col-12 mt-4 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary-custom px-4"><i class="fa-solid fa-print me-1"></i> Save & Print Receipt</button>
-                    <button type="button" id="whatsappShareBtn" class="btn btn-success px-4 d-none" onclick="shareToWhatsApp()"><i class="fa-brands fa-whatsapp me-1"></i> Send via WhatsApp</button>
-                  </div>
-                </div>
-              </form>
+              </div>
+
             </div>
           </div>
 
@@ -676,49 +677,27 @@
           <form id="staffProfileForm" onsubmit="saveStaffProfile(event)">
             <input type="hidden" id="spDocId">
 
-            <!-- Authentication Section (Only for Direct Add) -->
             <div id="spAuthSection" class="p-3 bg-light border-bottom">
                <h6 class="fw-bold text-danger mb-2"><i class="fa-solid fa-key me-1"></i> Account Setup (For New Staff)</h6>
                <div class="row g-2">
-                   <div class="col-md-6">
-                       <label class="form-label small">Email Address *</label>
-                       <input type="email" id="spAuthEmail" class="form-control" oninput="this.value = this.value.toLowerCase()">
-                   </div>
-                   <div class="col-md-6">
-                       <label class="form-label small">Password *</label>
-                       <input type="text" id="spAuthPassword" class="form-control" placeholder="Min 6 characters">
-                   </div>
+                   <div class="col-md-6"><label class="form-label small">Email Address *</label><input type="email" id="spAuthEmail" class="form-control" oninput="this.value = this.value.toLowerCase()"></div>
+                   <div class="col-md-6"><label class="form-label small">Password *</label><input type="text" id="spAuthPassword" class="form-control" placeholder="Min 6 characters"></div>
                </div>
             </div>
 
             <div class="px-3 pt-3">
-              <!-- Tabs Navigation -->
               <ul class="nav nav-tabs" id="staffTabs" role="tablist">
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-personal" type="button" role="tab">Personal Info</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-contact" type="button" role="tab">Contact</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-education" type="button" role="tab">Education</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-employment" type="button" role="tab">Employment</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-bank" type="button" role="tab">Bank Details</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-transfer" type="button" role="tab">Relieving</button>
-                </li>
+                <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-personal" type="button">Personal Info</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-contact" type="button">Contact</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-education" type="button">Education</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-employment" type="button">Employment</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-bank" type="button">Bank Details</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-transfer" type="button">Relieving</button></li>
               </ul>
 
-              <!-- Tabs Content -->
               <div class="tab-content p-3 border border-top-0 rounded-bottom mb-3" style="background:#fff;">
                 
-                <!-- 1. Personal Tab -->
-                <div class="tab-pane fade show active" id="tab-personal" role="tabpanel">
+                <div class="tab-pane fade show active" id="tab-personal">
                   <div class="row g-3">
                     <div class="col-md-12"><label class="form-label small">Full Name *</label><input type="text" id="spName" class="form-control text-uppercase" required></div>
                     <div class="col-md-4"><label class="form-label small">Gender</label><select id="spGender" class="form-select"><option value="Male">Male</option><option value="Female">Female</option></select></div>
@@ -730,8 +709,7 @@
                   </div>
                 </div>
 
-                <!-- 2. Contact Tab -->
-                <div class="tab-pane fade" id="tab-contact" role="tabpanel">
+                <div class="tab-pane fade" id="tab-contact">
                   <div class="row g-3">
                     <div class="col-md-4"><label class="form-label small">Mobile Number *</label><input type="tel" id="spPhone" class="form-control" required></div>
                     <div class="col-md-4"><label class="form-label small">WhatsApp Number</label><input type="tel" id="spWhatsapp" class="form-control"></div>
@@ -744,8 +722,7 @@
                   </div>
                 </div>
 
-                <!-- 3. Education Tab -->
-                <div class="tab-pane fade" id="tab-education" role="tabpanel">
+                <div class="tab-pane fade" id="tab-education">
                   <div class="row g-3">
                     <div class="col-md-6"><label class="form-label small">Religious Education Qualifications</label><input type="text" id="spRelEdu" class="form-control text-uppercase" placeholder="e.g. Baqavi, Darimi, Faizy"></div>
                     <div class="col-md-6"><label class="form-label small">General Education Qualifications</label><input type="text" id="spGenEdu" class="form-control text-uppercase" placeholder="e.g. SSLC, B.A, B.Ed"></div>
@@ -755,8 +732,7 @@
                   </div>
                 </div>
 
-                <!-- 4. Employment Tab -->
-                <div class="tab-pane fade" id="tab-employment" role="tabpanel">
+                <div class="tab-pane fade" id="tab-employment">
                   <div class="row g-3">
                     <div class="col-md-4"><label class="form-label small">System Role *</label><select id="spRole" class="form-select" required><option value="teacher">Teacher (മുഅല്ലിം)</option><option value="principal">Principal (സദർ)</option></select></div>
                     <div class="col-md-4"><label class="form-label small">Designation</label><input type="text" id="spDesignation" class="form-control text-uppercase" placeholder="e.g. Senior Teacher"></div>
@@ -768,7 +744,6 @@
                     <div class="col-md-12" id="spClassesDiv">
                       <label class="form-label small">Assigned Classes (Select Multiple)</label>
                       <div class="d-flex flex-wrap gap-2">
-                        <!-- Render checkboxes directly for ease in modal -->
                         <div class="form-check"><input type="checkbox" class="form-check-input sp-class-cb" value="1" id="spc1"><label class="form-check-label" for="spc1">Class 1</label></div>
                         <div class="form-check"><input type="checkbox" class="form-check-input sp-class-cb" value="2" id="spc2"><label class="form-check-label" for="spc2">Class 2</label></div>
                         <div class="form-check"><input type="checkbox" class="form-check-input sp-class-cb" value="3" id="spc3"><label class="form-check-label" for="spc3">Class 3</label></div>
@@ -786,8 +761,7 @@
                   </div>
                 </div>
 
-                <!-- 5. Bank Details Tab -->
-                <div class="tab-pane fade" id="tab-bank" role="tabpanel">
+                <div class="tab-pane fade" id="tab-bank">
                   <div class="row g-3">
                     <div class="col-md-6"><label class="form-label small">Account Holder Name</label><input type="text" id="spAccName" class="form-control text-uppercase"></div>
                     <div class="col-md-6"><label class="form-label small">Account Number</label><input type="text" id="spAccNo" class="form-control"></div>
@@ -797,8 +771,7 @@
                   </div>
                 </div>
 
-                <!-- 6. Transfer / Relieving Tab -->
-                <div class="tab-pane fade" id="tab-transfer" role="tabpanel">
+                <div class="tab-pane fade" id="tab-transfer">
                   <div class="alert alert-secondary small py-2 mb-3">Fill this section only if the staff is transferred or leaving the institution.</div>
                   <div class="row g-3">
                     <div class="col-md-6"><label class="form-label small">Transferred From</label><input type="text" id="spTransFrom" class="form-control text-uppercase"></div>
@@ -833,7 +806,6 @@
             <input type="hidden" id="stuDocId">
 
             <div class="px-3 pt-3">
-              <!-- Tabs Navigation -->
               <ul class="nav nav-tabs" id="studentTabs" role="tablist">
                 <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-stu-personal" type="button">Personal Info</button></li>
                 <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-stu-academic" type="button">Academic</button></li>
@@ -843,10 +815,8 @@
                 <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-stu-other" type="button">Other</button></li>
               </ul>
 
-              <!-- Tabs Content -->
               <div class="tab-content p-3 border border-top-0 rounded-bottom mb-3" style="background:#fff;">
                 
-                <!-- 1. Personal Tab -->
                 <div class="tab-pane fade show active" id="tab-stu-personal">
                   <div class="row g-3">
                     <div class="col-md-4"><label class="form-label small">Reg No. (Admission No) *</label><input type="number" id="stuRegNo" class="form-control fw-bold" required></div>
@@ -859,7 +829,6 @@
                   </div>
                 </div>
 
-                <!-- 2. Academic Tab -->
                 <div class="tab-pane fade" id="tab-stu-academic">
                   <div class="row g-3">
                     <div class="col-md-6">
@@ -872,12 +841,12 @@
                       </select>
                     </div>
                     <div class="col-md-6"><label class="form-label small">Joined Class</label><input type="text" id="stuJoinedClass" class="form-control text-uppercase" placeholder="e.g. Class 1"></div>
-                    <div class="col-md-6"><label class="form-label small">Date of Joining</label><input type="date" id="stuDoj" class="form-control"></div>
-                    <div class="col-md-6"><label class="form-label small">Student's Presence / Attendance Info</label><input type="text" id="stuPresence" class="form-control text-uppercase" placeholder="e.g. Regular"></div>
+                    <div class="col-md-4"><label class="form-label small">Date of Joining</label><input type="date" id="stuDoj" class="form-control"></div>
+                    <div class="col-md-4"><label class="form-label small">Student's Presence</label><input type="text" id="stuPresence" class="form-control text-uppercase" placeholder="e.g. Regular"></div>
+                    <div class="col-md-4"><label class="form-label small fw-bold text-success">Monthly Fee Amount (₹)</label><input type="number" id="stuMonthlyFee" class="form-control border-success" placeholder="e.g. 200"></div>
                   </div>
                 </div>
 
-                <!-- 3. Family Tab -->
                 <div class="tab-pane fade" id="tab-stu-family">
                   <div class="row g-3">
                     <div class="col-md-4"><label class="form-label small">Father's Name *</label><input type="text" id="stuFatherName" class="form-control text-uppercase" required></div>
@@ -890,7 +859,6 @@
                   </div>
                 </div>
 
-                <!-- 4. Address Tab -->
                 <div class="tab-pane fade" id="tab-stu-address">
                   <div class="row g-3">
                     <div class="col-md-12"><label class="form-label small">House Name / Number *</label><input type="text" id="stuHouse" class="form-control text-uppercase" required></div>
@@ -902,7 +870,6 @@
                   </div>
                 </div>
 
-                <!-- 5. Transfer/TC Tab -->
                 <div class="tab-pane fade" id="tab-stu-transfer">
                   <div class="alert alert-secondary small py-2 mb-3">Fill this section only if the student is leaving or transferring to another Madrasa.</div>
                   <div class="row g-3">
@@ -914,7 +881,6 @@
                   </div>
                 </div>
 
-                <!-- 6. Other Tab -->
                 <div class="tab-pane fade" id="tab-stu-other">
                   <div class="row g-3">
                     <div class="col-md-12"><label class="form-label small">Identification Marks</label><textarea id="stuMarks" class="form-control text-uppercase" rows="2" placeholder="e.g. A black mole on the right cheek"></textarea></div>
@@ -1009,34 +975,6 @@
     </div>
   </div>
 
-  <!-- Printable Digital Receipt Component -->
-  <div id="printableReceipt" class="p-4 bg-white border d-none m-auto" style="max-width: 480px;">
-    <div class="text-center border-bottom pb-3 mb-3">
-      <h4 class="fw-bold mb-1" id="recMadrassaName">Smart Madrasa</h4>
-      <p class="small text-muted mb-0">Fee Receipt</p>
-    </div>
-    <div class="d-flex justify-content-between mb-2">
-      <span>Receipt No: <b id="recNo">#1</b></span>
-      <span id="recDate">Date</span>
-    </div>
-    <div class="d-flex justify-content-between mb-2">
-      <span>Student: <b id="recStudentName">-</b></span>
-      <span>Reg No: <b id="recAdmNo">101</b></span>
-    </div>
-    <div class="d-flex justify-content-between mb-2">
-      <span>Class: <b id="recClass">-</b></span>
-      <span id="recManualBox" class="d-none">Manual No: <b id="recManualNo">-</b></span>
-    </div>
-    <div class="mb-2">Item: <span id="recFeeType">Monthly Fee</span></div>
-    <div class="mb-3 border-top pt-2 d-flex justify-content-between align-items-center">
-      <span class="fw-bold">Amount Paid:</span>
-      <h4 class="fw-bold text-success mb-0" id="recAmount">₹0</h4>
-    </div>
-    <div class="text-center mt-3 pt-2 border-top">
-      <small class="text-muted">Issued by: <span id="recCollector">Staff</span></small>
-    </div>
-  </div>
-
   <!-- Bulk Import Modal -->
   <div class="modal fade" id="bulkImportModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -1067,6 +1005,89 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal: Process Fee Payment -->
+  <div class="modal fade" id="feePaymentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-madrassa text-white">
+          <h5 class="modal-title fw-bold">Process Fee Payment</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <form id="feePaymentForm" onsubmit="saveFeePayment(event)">
+            <input type="hidden" id="payStudentId">
+            <input type="hidden" id="payStudentReg">
+            <input type="hidden" id="payStudentName">
+            <input type="hidden" id="payStudentClass">
+            <input type="hidden" id="payStudentPhone">
+            
+            <div class="mb-3">
+                <label class="form-label small fw-bold">Paying For (Student)</label>
+                <div class="form-control bg-light" id="payStudentNameDisplay">-</div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-bold">Fee Type / Selected Month(s)</label>
+              <input type="text" id="payFeeType" class="form-control text-uppercase" placeholder="e.g. JUNE, JULY or ADMISSION FEE" required>
+            </div>
+            
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                  <label class="form-label small fw-bold">Total Amount (₹) *</label>
+                  <input type="number" id="payAmount" class="form-control fw-bold text-success" required>
+                </div>
+                <div class="col-6">
+                  <label class="form-label small fw-bold">Book Receipt No</label>
+                  <input type="text" id="payManualReceipt" class="form-control text-uppercase" placeholder="Optional">
+                </div>
+            </div>
+
+            <div class="text-end border-top pt-3 mt-2">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-success px-4"><i class="fa-solid fa-check me-1"></i> Save Payment</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Printable Digital Receipt Component -->
+  <div id="printableReceipt" class="p-4 bg-white border d-none m-auto" style="max-width: 480px;">
+    <div class="text-center border-bottom pb-3 mb-3">
+      <h4 class="fw-bold mb-1" id="recMadrassaName">Smart Madrasa</h4>
+      <p class="small text-muted mb-0">Fee Receipt</p>
+    </div>
+    <div class="d-flex justify-content-between mb-2">
+      <span>Receipt No: <b id="recNo">#1</b></span>
+      <span id="recDate">Date</span>
+    </div>
+    <div class="d-flex justify-content-between mb-2">
+      <span>Student: <b id="recStudentName">-</b></span>
+      <span>Reg No: <b id="recAdmNo">101</b></span>
+    </div>
+    <div class="d-flex justify-content-between mb-2">
+      <span>Class: <b id="recClass">-</b></span>
+      <span id="recManualBox" class="d-none">Manual No: <b id="recManualNo">-</b></span>
+    </div>
+    <div class="mb-2">Item/Month: <span id="recFeeType">Monthly Fee</span></div>
+    <div class="mb-3 border-top pt-2 d-flex justify-content-between align-items-center">
+      <span class="fw-bold">Amount Paid:</span>
+      <h4 class="fw-bold text-success mb-0" id="recAmount">₹0</h4>
+    </div>
+    <div class="text-center mt-3 pt-2 border-top">
+      <small class="text-muted">Issued by: <span id="recCollector">Staff</span></small>
+    </div>
+    
+    <!-- Action buttons for receipt (Hidden in print) -->
+    <div class="d-print-none mt-4 text-center">
+        <button class="btn btn-primary me-2" onclick="window.print()"><i class="fa-solid fa-print"></i> Print</button>
+        <button id="whatsappShareBtn" class="btn btn-success me-2 d-none" onclick="shareToWhatsApp()"><i class="fa-brands fa-whatsapp"></i> WhatsApp</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('printableReceipt').classList.add('d-none'); document.getElementById('appSection').classList.remove('d-none');"><i class="fa-solid fa-arrow-left"></i> Back</button>
+    </div>
+  </div>
+
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script type="module" src="app.js"></script>
