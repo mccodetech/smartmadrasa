@@ -14,7 +14,7 @@
       --primary-dark: #0a3622;
       --primary-light: #e8f5e9;
       --accent: #198754;
-      --bg-body: #f1f5f9;
+      --bg-body: #f8fafc;
       --card-bg: #ffffff;
       --text-dark: #0f172a;
       --text-muted: #64748b;
@@ -25,6 +25,10 @@
       color: var(--text-dark);
       -webkit-font-smoothing: antialiased;
     }
+    
+    .bg-madrassa { background-color: var(--primary) !important; }
+    .btn-madrassa { background-color: var(--accent); color: #fff; border: none; font-weight: 500; }
+    .btn-madrassa:hover { background-color: var(--primary); color: #fff; }
     
     /* Modern Auth UI */
     .auth-wrapper {
@@ -42,7 +46,6 @@
       box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.08);
       width: 100%;
       max-width: 440px;
-      overflow: hidden;
       padding: 32px 28px;
     }
     .brand-icon {
@@ -58,7 +61,6 @@
       margin: 0 auto 16px auto;
     }
     
-    /* Custom Segmented Tabs */
     .segmented-control {
       background: #f1f5f9;
       border-radius: 12px;
@@ -84,7 +86,6 @@
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     }
     
-    /* Form Inputs */
     .form-control, .form-select {
       border-radius: 10px;
       padding: 10px 14px;
@@ -138,18 +139,17 @@
     </button>
   </div>
 
-  <!-- Unified Modern Auth Screen (Only 2 Tabs: Login & Register) -->
+  <!-- Unified Auth Screen -->
   <div id="authSection" class="auth-wrapper">
     <div class="auth-card">
       <div class="text-center mb-3">
         <div class="brand-icon">
           <i class="fa-solid fa-mosque"></i>
         </div>
-        <h3 class="fw-bold m-0" style="letter-spacing: -0.5px;">Smart Madrasa</h3>
+        <h3 class="fw-bold m-0">Smart Madrasa</h3>
         <p class="text-muted small mt-1" data-i18n="portal_sub">Digital Madrasa Management Suite</p>
       </div>
 
-      <!-- Segmented 2 Tabs -->
       <div class="segmented-control">
         <button type="button" class="active" id="tabBtnLogin" onclick="switchAuthTab('login')" data-i18n="tab_login">Login</button>
         <button type="button" id="tabBtnRegister" onclick="switchAuthTab('signup')" data-i18n="tab_signup">Register Madrasa</button>
@@ -165,7 +165,6 @@
           </div>
         </div>
 
-        <!-- Password Field for Teachers / Admins -->
         <div class="mb-3" id="passwordGroup">
           <label class="form-label fw-semibold small" data-i18n="lbl_pwd">Password</label>
           <div class="input-group">
@@ -174,7 +173,6 @@
           </div>
         </div>
 
-        <!-- Phone Field for Student / Parent Mode (Auto Shown if identifier is numeric) -->
         <div class="mb-3 d-none" id="phoneGroup">
           <label class="form-label fw-semibold small" data-i18n="lbl_phone">Registered Mobile Number</label>
           <div class="input-group">
@@ -267,26 +265,47 @@
 
   <!-- Main Management App Screen -->
   <div id="appSection" class="d-none">
-    <nav class="navbar navbar-expand-lg bg-madrassa navbar-dark shadow-sm">
-      <div class="container-fluid px-4">
-        <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="#" onclick="showTab('homeDashboardTab')">
-          <i class="fa-solid fa-kaaba"></i> <span id="displayMadrassaName">Smart Madrasa</span>
-        </a>
-        <div class="d-flex align-items-center gap-3 text-white">
-          <button class="btn btn-sm btn-outline-warning d-none" id="superAdminBackBtn" onclick="returnToSuperAdminConsole()"><i class="fa-solid fa-arrow-left me-1"></i> Super Admin Console</button>
-          <span class="badge bg-light text-dark" id="displayUserRole">Principal</span>
-          <span class="small" id="displayUserName"><i class="fa-solid fa-user"></i> Staff</span>
-          <button class="btn btn-outline-light btn-sm" onclick="handleLogout()"><i class="fa-solid fa-right-from-bracket"></i> <span data-i18n="btn_logout">Logout</span></button>
+    
+    <!-- Top Navbar with Hamburger Toggle -->
+    <nav class="navbar navbar-dark bg-madrassa shadow-sm sticky-top">
+      <div class="container-fluid px-3">
+        <div class="d-flex align-items-center gap-2">
+          <!-- 3-Line Hamburger Button -->
+          <button class="btn btn-outline-light d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" aria-controls="sidebarOffcanvas">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <a class="navbar-brand fw-bold m-0 d-flex align-items-center gap-2" href="#" onclick="showTab('homeDashboardTab')">
+            <i class="fa-solid fa-kaaba"></i> <span id="displayMadrassaName">Smart Madrasa</span>
+          </a>
+        </div>
+        <div class="d-flex align-items-center gap-2 text-white">
+          <button class="btn btn-sm btn-outline-warning d-none" id="superAdminBackBtn" onclick="returnToSuperAdminConsole()"><i class="fa-solid fa-arrow-left me-1"></i> Console</button>
+          <span class="badge bg-light text-dark d-none d-sm-inline-block" id="displayUserRole">Principal</span>
+          <span class="small d-none d-md-inline-block" id="displayUserName"><i class="fa-solid fa-user"></i> Staff</span>
+          <button class="btn btn-outline-light btn-sm" onclick="handleLogout()"><i class="fa-solid fa-right-from-bracket"></i> <span data-i18n="btn_logout" class="d-none d-sm-inline-block">Logout</span></button>
         </div>
       </div>
     </nav>
 
-    <div class="container-fluid px-4 py-4">
+    <!-- Offcanvas Mobile Drawer Navigation -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarOffcanvas" aria-labelledby="sidebarOffcanvasLabel">
+      <div class="offcanvas-header bg-madrassa text-white">
+        <h5 class="offcanvas-title fw-bold" id="sidebarOffcanvasLabel"><i class="fa-solid fa-kaaba me-2"></i> Smart Madrasa</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body p-3">
+        <div class="nav flex-column nav-pills gap-1" id="mobileTabMenu">
+          <!-- Populated via clone -->
+        </div>
+      </div>
+    </div>
+
+    <div class="container-fluid px-3 px-md-4 py-4">
       <div class="row">
-        <!-- Sidebar Navigation -->
-        <div class="col-md-3 col-lg-2 mb-4">
+        <!-- Desktop Sidebar (Hidden on Mobile) -->
+        <div class="col-lg-2 d-none d-lg-block mb-4">
           <div class="card p-3">
-            <div class="nav flex-column nav-pills gap-1" id="tabMenu">
+            <div class="nav flex-column nav-pills gap-1" id="desktopTabMenu">
               <button class="nav-link active text-start" id="homeMenuBtn" onclick="showTab('homeDashboardTab')"><i class="fa-solid fa-house me-2"></i> <span data-i18n="nav_home">Home</span></button>
               <button class="nav-link text-start d-none" id="superAdminMasterBtn" onclick="showTab('superAdminTab')"><i class="fa-solid fa-shield-halved me-2"></i> <span>All Madrasas</span></button>
               <button class="nav-link text-start" onclick="showTab('studentsListTab')"><i class="fa-solid fa-users me-2"></i> <span data-i18n="nav_students">Students</span></button>
@@ -301,7 +320,7 @@
         </div>
 
         <!-- Content Area -->
-        <div class="col-md-9 col-lg-10">
+        <div class="col-lg-10">
 
           <!-- 0. Super Admin Master Console (All Madrasas) -->
           <div id="superAdminTab" class="content-tab d-none">
@@ -1013,7 +1032,7 @@
         btn_viewdetails: "വിവരങ്ങൾ കാണുക",
         lbl_instcode: "മദ്റസാ നമ്പർ / കോഡ്",
         lbl_instname: "മദ്റസയുടെ പേര്",
-        lbl_principal: "സ്വദർ മുഅല്ലിം / സെക്രട്ടറിയുടെ പേര്",
+        lbl_principal: "സ്വ record / സെക്രട്ടറിയുടെ പേര്",
         btn_createrecord: "അംഗീകാരത്തിനായി സമർപ്പിക്കുക",
         btn_exit: "പുറത്തുകടക്കുക",
         lbl_father: "പിതാവ്:",
@@ -1111,7 +1130,6 @@
       });
     };
 
-    // Auto detect login mode: Email (Teacher) vs Number (Student)
     window.detectLoginMode = () => {
       const val = document.getElementById("loginIdentifier").value.trim();
       const pwdGrp = document.getElementById("passwordGroup");
@@ -1119,15 +1137,22 @@
       const submitBtn = document.getElementById("btnAuthSubmit");
 
       if (/^\d+$/.test(val)) {
-        // Numeric -> Student Mode
         pwdGrp.classList.add("d-none");
         phoneGrp.classList.remove("d-none");
         submitBtn.innerText = window.currentLang === 'ml' ? "വിവരങ്ങൾ കാണുക" : "View Student Details";
       } else {
-        // String / Email -> Teacher / Admin Mode
         pwdGrp.classList.remove("d-none");
         phoneGrp.classList.add("d-none");
         submitBtn.innerText = window.currentLang === 'ml' ? "പ്രവേശിക്കുക" : "Sign In";
+      }
+    };
+
+    // Clone desktop menu to mobile drawer menu
+    window.syncMobileMenu = () => {
+      const desktopMenu = document.getElementById("desktopTabMenu");
+      const mobileMenu = document.getElementById("mobileTabMenu");
+      if (desktopMenu && mobileMenu) {
+        mobileMenu.innerHTML = desktopMenu.innerHTML;
       }
     };
   </script>
@@ -1242,6 +1267,7 @@
             if (attDateEl) attDateEl.valueAsDate = new Date();
 
             populateClassDropdowns();
+            syncMobileMenu();
 
             if (isSuperAdmin) {
               showTab('superAdminTab');
@@ -1295,13 +1321,13 @@
       });
     }
 
-    // Unified Smart Login: Automatically handles Email (Teacher) or Numeric (Student)
+    // Unified Smart Login
     window.handleUnifiedLogin = async (e) => {
       e.preventDefault();
       const identifier = document.getElementById("loginIdentifier").value.trim();
 
       if (/^\d+$/.test(identifier)) {
-        // --- STUDENT / PARENT LOGIN ---
+        // Parent / Student Login
         const reg = Number(identifier);
         const mobile = document.getElementById("loginMobile").value.trim().slice(-10);
 
@@ -1352,7 +1378,7 @@
         document.getElementById("pvPointsTableBody").innerHTML = perfHtml || `<tr><td colspan="3" class="text-center text-muted">No points awarded yet</td></tr>`;
 
       } else {
-        // --- TEACHER / ADMIN LOGIN ---
+        // Teacher / Admin Login
         const email = identifier;
         const password = document.getElementById("loginPassword").value;
         if (!password) return alert("Please enter your password.");
@@ -1363,7 +1389,7 @@
       }
     };
 
-    // New Madrasa Registration
+    // Registration
     window.handleSignUp = async (e) => {
       e.preventDefault();
       const submitBtn = document.getElementById("btnSubmitSignup");
@@ -1411,7 +1437,7 @@
       }
     };
 
-    // Load Super Admin Master List
+    // Load Super Admin Madrasa Master List
     async function loadSuperAdminRequests() {
       const tbody = document.getElementById("superAdminTableBody");
       tbody.innerHTML = `<tr><td colspan="7" class="text-center">Loading registered madrasas...</td></tr>`;
@@ -1458,6 +1484,7 @@
       tbody.innerHTML = html || `<tr><td colspan="7" class="text-center text-muted">No madrasa accounts found.</td></tr>`;
     }
 
+    // Super Admin Switch Scope
     window.switchMadrasaScope = (instId, instName) => {
       currentInstitutionId = instId;
       document.getElementById("displayMadrassaName").innerText = instName + " (Super Admin View)";
@@ -2266,9 +2293,15 @@
       const targetTab = document.getElementById(tabId);
       if (targetTab) targetTab.classList.remove("d-none");
 
-      document.querySelectorAll("#tabMenu .nav-link").forEach(b => b.classList.remove("active"));
-      const activeBtn = document.querySelector(`#tabMenu button[onclick="showTab('${tabId}')"]`);
-      if (activeBtn) activeBtn.classList.add("active");
+      document.querySelectorAll("#desktopTabMenu .nav-link, #mobileTabMenu .nav-link").forEach(b => b.classList.remove("active"));
+      
+      const activeBtns = document.querySelectorAll(`button[onclick="showTab('${tabId}')"]`);
+      activeBtns.forEach(btn => btn.classList.add("active"));
+
+      // Auto close mobile drawer on selection
+      const offcanvasEl = document.getElementById('sidebarOffcanvas');
+      const offcanvasInstance = bootstrap.Offcanvas.getInstance(offcanvasEl);
+      if (offcanvasInstance) offcanvasInstance.hide();
 
       if (tabId === 'studentsListTab') loadStudentsByClass();
       if (tabId === 'teachersTab') loadTeachersList();
