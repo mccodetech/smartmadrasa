@@ -351,7 +351,6 @@ window.handleSignUp = async (e) => {
     const pwd = document.getElementById("regPassword").value;
     const instId = board + "_" + instCode;
     
-    // Additional generic fields for Institution
     const address = document.getElementById("regAddress") ? document.getElementById("regAddress").value.trim().toUpperCase() : "";
     const place = document.getElementById("regPlace") ? document.getElementById("regPlace").value.trim().toUpperCase() : "";
     const po = document.getElementById("regPo") ? document.getElementById("regPo").value.trim().toUpperCase() : "";
@@ -487,7 +486,7 @@ window.loadSuperAdminRequests = async () => {
       <tr>
         <td><b>${u.institutionId || '-'}</b></td>
         <td><b>${u.institutionName || '-'}</b></td>
-        <td>${u.institutionBoard || '-'}</td>
+        <td>${u.place || '-'}</td>
         <td>${u.name || '-'}</td>
         <td>${u.email}</td>
         <td>${statusBadge}</td>
@@ -569,7 +568,7 @@ window.approveMadrasa = async (userId, instName) => {
         if(userDoc.exists()) {
              const data = userDoc.data();
              
-             // 1. WhatsApp Message
+             // WhatsApp Msg
              if(data.whatsapp || data.phone) {
                  const destPhone = data.whatsapp || data.phone;
                  let waMsg = `Hello ${data.name},%0A%0AYour institution *${data.institutionName}* has been approved on Smart Madrasa.%0A%0AYour Institution ID is: *${data.institutionId}*. Please share this Board & Code with your staff to join.`;
@@ -578,15 +577,12 @@ window.approveMadrasa = async (userId, instName) => {
                  window.open(waUrl, "_blank");
              }
 
-             // 2. Email Message
+             // Email Msg
              if(data.email) {
                  const subject = encodeURIComponent("Smart Madrasa - Registration Approved");
                  const body = encodeURIComponent(`Hello ${data.name},\n\nYour institution ${data.institutionName} has been approved on Smart Madrasa.\n\nYour Institution ID is: ${data.institutionId}.\n\nPlease share this ID with your staff to join.\n\nRegards,\nSmart Madrasa Admin`);
                  const mailtoUrl = `mailto:${data.email}?subject=${subject}&body=${body}`;
-                 
-                 setTimeout(() => {
-                     window.location.href = mailtoUrl;
-                 }, 800);
+                 setTimeout(() => { window.location.href = mailtoUrl; }, 800);
              }
              
              alert("Madrasa approved successfully! WhatsApp & Email prompts opened.");
@@ -724,7 +720,7 @@ window.instAssignClassesToStaff = async (e) => {
         
         const staff = pendingStaffCache.find(s => s.id === staffId);
         if(staff) {
-            // 1. WhatsApp Message
+            // WhatsApp Msg
             if(staff.whatsapp || staff.phone) {
                 const destPhone = staff.whatsapp || staff.phone;
                 let waMsg = `Hello ${staff.name},%0A%0AYour registration as ${role} at *${document.getElementById("displayMadrassaName").innerText}* has been *approved*.%0A%0AYou can now login using your email: ${staff.email}.`;
@@ -735,18 +731,14 @@ window.instAssignClassesToStaff = async (e) => {
                 window.open(waUrl, "_blank");
             }
             
-            // 2. Email Message
+            // Email Msg
             if(staff.email) {
                 const subject = encodeURIComponent(`Smart Madrasa - ${role.charAt(0).toUpperCase() + role.slice(1)} Registration Approved`);
                 const body = encodeURIComponent(`Hello ${staff.name},\n\nYour registration as ${role} at ${document.getElementById("displayMadrassaName").innerText} has been approved.\n\nYou can now login using your email: ${staff.email}.\n\nRegards,\nInstitution Admin`);
                 const mailtoUrl = `mailto:${staff.email}?subject=${subject}&body=${body}`;
-                
-                setTimeout(() => {
-                    window.location.href = mailtoUrl;
-                }, 800);
+                setTimeout(() => { window.location.href = mailtoUrl; }, 800);
             }
-            
-            alert("Approved successfully! WhatsApp & Email prompts opened.");
+            alert("Approved successfully! Prompts opened.");
         }
 
         document.getElementById("instAssignClassesForm").classList.add("d-none");
@@ -754,70 +746,137 @@ window.instAssignClassesToStaff = async (e) => {
     } catch (err) { alert("Error: " + err.message); }
 };
 
-window.saveDetailedStudent = async (e) => {
-  e.preventDefault();
-  try {
-    await addDoc(collection(db, "students"), {
-      institutionId: currentInstitutionId,
-      regNo: Number(document.getElementById("regNo").value) || 0,
-      idNo: document.getElementById("idNo").value.toUpperCase(),
-      name: document.getElementById("studentName").value.toUpperCase(),
-      currentClass: (document.getElementById("currentClass").value || "1").replace(/Class\s*/i, "").trim(),
-      dob: document.getElementById("dob").value,
-      joinedDate: document.getElementById("joinedDate").value,
-      joinedClass: document.getElementById("joinedClass").value,
-      fatherName: document.getElementById("fatherName").value.toUpperCase(),
-      motherName: document.getElementById("motherName").value.toUpperCase(),
-      guardianName: document.getElementById("guardianName").value.toUpperCase(),
-      phone: document.getElementById("parentPhone").value,
-      place: document.getElementById("place").value.toUpperCase(),
-      address: document.getElementById("address").value.toUpperCase(),
-      status: "active",
-      createdAt: serverTimestamp()
-    });
-    alert("Student registered successfully.");
-    e.target.reset();
-    loadStudentsByClass(true);
-    showTab('studentsListTab');
-  } catch (err) { alert("Error: " + err.message); }
+// ==========================================
+// STUDENT PROFILE LOGIC (NEW TABS BASED)
+// ==========================================
+
+window.openStudentProfileModal = (docId) => {
+    document.getElementById("studentProfileForm").reset();
+
+    if (docId) {
+        // Edit Mode
+        const s = localStudentsCache.find(x => x.id === docId);
+        if (!s) return;
+
+        document.getElementById("stuModalTitle").innerText = `Edit Student: ${s.name}`;
+        document.getElementById("stuDocId").value = docId;
+
+        // Tab 1: Personal
+        document.getElementById("stuRegNo").value = s.regNo || '';
+        document.getElementById("stuIdNo").value = s.idNo || '';
+        document.getElementById("stuAadhaar").value = s.aadhaar || '';
+        document.getElementById("stuName").value = s.name || '';
+        document.getElementById("stuGender").value = s.gender || 'Male';
+        document.getElementById("stuDob").value = s.dob || '';
+        document.getElementById("stuBlood").value = s.bloodGroup || '';
+
+        // Tab 2: Academic
+        document.getElementById("stuCurrentClass").value = (s.currentClass || '1').replace(/Class\s*/i, "").trim();
+        document.getElementById("stuJoinedClass").value = s.joinedClass || '';
+        document.getElementById("stuDoj").value = s.joinedDate || '';
+        document.getElementById("stuPresence").value = s.presence || '';
+
+        // Tab 3: Family
+        document.getElementById("stuFatherName").value = s.fatherName || '';
+        document.getElementById("stuMotherName").value = s.motherName || '';
+        document.getElementById("stuGuardianName").value = s.guardianName || '';
+        document.getElementById("stuRelation").value = s.relation || '';
+        document.getElementById("stuPhone").value = s.phone || '';
+        document.getElementById("stuEmergency").value = s.emergencyPhone || '';
+
+        // Tab 4: Address
+        document.getElementById("stuHouse").value = s.houseName || s.address || '';
+        document.getElementById("stuPlace").value = s.place || '';
+        document.getElementById("stuPo").value = s.postOffice || '';
+        document.getElementById("stuPin").value = s.pincode || '';
+        document.getElementById("stuDistrict").value = s.district || '';
+        document.getElementById("stuState").value = s.state || 'KERALA';
+
+        // Tab 5: Transfer/TC
+        document.getElementById("stuTransTo").value = s.transferredTo || '';
+        document.getElementById("stuReason").value = s.reasonLeaving || '';
+        document.getElementById("stuDol").value = s.dateOfLeaving || '';
+        document.getElementById("stuTcIssued").value = s.tcIssued || 'No';
+        document.getElementById("stuTcDetails").value = s.tcDetails || '';
+
+        // Tab 6: Other
+        document.getElementById("stuMarks").value = s.identificationMarks || '';
+        document.getElementById("stuGuardianOp").value = s.guardianOpinion || '';
+        document.getElementById("stuSpecialInfo").value = s.specialInfo || '';
+
+    } else {
+        // Add Mode
+        document.getElementById("stuModalTitle").innerText = "New Student Admission";
+        document.getElementById("stuDocId").value = "";
+    }
+
+    // Always start at first tab
+    const triggerEl = document.querySelector('#studentTabs button[data-bs-target="#tab-stu-personal"]');
+    bootstrap.Tab.getOrCreateInstance(triggerEl).show();
+
+    new bootstrap.Modal(document.getElementById('studentProfileModal')).show();
 };
 
-window.openEditStudentModal = (docId) => {
-  const s = localStudentsCache.find(x => x.id === docId);
-  if (!s) return;
-  document.getElementById("editDocId").value = docId;
-  document.getElementById("editRegNo").value = s.regNo || '';
-  document.getElementById("editIdNo").value = s.idNo || '';
-  document.getElementById("editName").value = s.name || '';
-  document.getElementById("editCurrentClass").value = (s.currentClass || '1').replace(/Class\s*/i, "").trim();
-  document.getElementById("editDob").value = s.dob || '';
-  document.getElementById("editPhone").value = s.phone || '';
-  document.getElementById("editFatherName").value = s.fatherName || s.guardianName || '';
-  document.getElementById("editPlace").value = s.place || '';
-  document.getElementById("editAddress").value = s.address || '';
-  new bootstrap.Modal(document.getElementById('studentEditModal')).show();
-};
+window.saveStudentProfile = async (e) => {
+    e.preventDefault();
+    const docId = document.getElementById("stuDocId").value;
+    
+    const studentData = {
+        institutionId: currentInstitutionId,
+        regNo: Number(document.getElementById("stuRegNo").value) || 0,
+        idNo: document.getElementById("stuIdNo").value.trim().toUpperCase(),
+        aadhaar: document.getElementById("stuAadhaar").value.trim(),
+        name: document.getElementById("stuName").value.trim().toUpperCase(),
+        gender: document.getElementById("stuGender").value,
+        dob: document.getElementById("stuDob").value,
+        bloodGroup: document.getElementById("stuBlood").value,
 
-window.saveEditedStudent = async (e) => {
-  e.preventDefault();
-  const docId = document.getElementById("editDocId").value;
-  try {
-    await updateDoc(doc(db, "students", docId), {
-      regNo: Number(document.getElementById("editRegNo").value) || 0,
-      idNo: document.getElementById("editIdNo").value.toUpperCase(),
-      name: document.getElementById("editName").value.toUpperCase(),
-      currentClass: (document.getElementById("editCurrentClass").value || '1').replace(/Class\s*/i, "").trim(),
-      dob: document.getElementById("editDob").value,
-      phone: document.getElementById("editPhone").value,
-      fatherName: document.getElementById("editFatherName").value.toUpperCase(),
-      place: document.getElementById("editPlace").value.toUpperCase(),
-      address: document.getElementById("editAddress").value.toUpperCase(),
-      updatedAt: serverTimestamp()
-    });
-    alert("Student details updated successfully.");
-    bootstrap.Modal.getInstance(document.getElementById('studentEditModal')).hide();
-    loadStudentsByClass(true);
-  } catch (err) { alert("Error: " + err.message); }
+        currentClass: (document.getElementById("stuCurrentClass").value || "1").replace(/Class\s*/i, "").trim(),
+        joinedClass: document.getElementById("stuJoinedClass").value.trim().toUpperCase(),
+        joinedDate: document.getElementById("stuDoj").value,
+        presence: document.getElementById("stuPresence").value.trim().toUpperCase(),
+
+        fatherName: document.getElementById("stuFatherName").value.trim().toUpperCase(),
+        motherName: document.getElementById("stuMotherName").value.trim().toUpperCase(),
+        guardianName: document.getElementById("stuGuardianName").value.trim().toUpperCase(),
+        relation: document.getElementById("stuRelation").value.trim().toUpperCase(),
+        phone: document.getElementById("stuPhone").value.trim(),
+        emergencyPhone: document.getElementById("stuEmergency").value.trim(),
+
+        houseName: document.getElementById("stuHouse").value.trim().toUpperCase(),
+        place: document.getElementById("stuPlace").value.trim().toUpperCase(),
+        postOffice: document.getElementById("stuPo").value.trim().toUpperCase(),
+        pincode: document.getElementById("stuPin").value.trim(),
+        district: document.getElementById("stuDistrict").value.trim().toUpperCase(),
+        state: document.getElementById("stuState").value.trim().toUpperCase(),
+
+        transferredTo: document.getElementById("stuTransTo").value.trim().toUpperCase(),
+        reasonLeaving: document.getElementById("stuReason").value.trim().toUpperCase(),
+        dateOfLeaving: document.getElementById("stuDol").value,
+        tcIssued: document.getElementById("stuTcIssued").value,
+        tcDetails: document.getElementById("stuTcDetails").value.trim().toUpperCase(),
+
+        identificationMarks: document.getElementById("stuMarks").value.trim().toUpperCase(),
+        guardianOpinion: document.getElementById("stuGuardianOp").value.trim().toUpperCase(),
+        specialInfo: document.getElementById("stuSpecialInfo").value.trim().toUpperCase(),
+        
+        status: "active"
+    };
+
+    try {
+        if (docId) {
+            studentData.updatedAt = serverTimestamp();
+            await updateDoc(doc(db, "students", docId), studentData);
+            alert("Student details updated successfully.");
+        } else {
+            studentData.createdAt = serverTimestamp();
+            await addDoc(collection(db, "students"), studentData);
+            alert("New student admitted successfully.");
+        }
+        
+        bootstrap.Modal.getInstance(document.getElementById('studentProfileModal')).hide();
+        loadStudentsByClass(true);
+    } catch (err) { alert("Error: " + err.message); }
 };
 
 window.deleteStudent = async (docId, name) => {
@@ -841,7 +900,7 @@ window.loadStudentsByClass = async (forceRefresh = false) => {
   tbody.innerHTML = `<tr><td colspan="7" class="text-center">Loading data...</td></tr>`;
 
   let q;
-  if (selectedClass === "ALL" && (currentUserRole === "principal" || isSuperAdmin)) {
+  if (selectedClass === "ALL" && (currentUserRole === "principal" || currentUserRole === "admin" || isSuperAdmin)) {
     q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId));
   } else {
     q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", selectedClass.replace(/Class\s*/i, "").trim()));
@@ -876,7 +935,7 @@ function renderPaginatedTable() {
     const cleanClass = (s.currentClass || '-').replace(/Class\s*/i, "").trim();
     const actionCol = (currentUserRole === "principal" || currentUserRole === "admin" || isSuperAdmin) ? `
       <td class="text-center">
-        <button class="btn btn-sm btn-outline-primary me-1" onclick="openEditStudentModal('${s.id}')" title="Edit"><i class="fa-solid fa-pen"></i></button>
+        <button class="btn btn-sm btn-outline-primary me-1" onclick="openStudentProfileModal('${s.id}')" title="Edit"><i class="fa-solid fa-pen"></i></button>
         <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${s.id}', '${s.name}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
       </td>` : ``;
 
@@ -925,7 +984,7 @@ window.filterStudentsLocal = () => {
     const cleanClass = (s.currentClass || '-').replace(/Class\s*/i, "").trim();
     const actionCol = (currentUserRole === "principal" || currentUserRole === "admin" || isSuperAdmin) ? `
       <td class="text-center">
-        <button class="btn btn-sm btn-outline-primary me-1" onclick="openEditStudentModal('${s.id}')"><i class="fa-solid fa-pen"></i></button>
+        <button class="btn btn-sm btn-outline-primary me-1" onclick="openStudentProfileModal('${s.id}')"><i class="fa-solid fa-pen"></i></button>
         <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${s.id}', '${s.name}')"><i class="fa-solid fa-trash"></i></button>
       </td>` : ``;
 
@@ -1361,10 +1420,13 @@ window.shareToWhatsApp = () => {
   window.open(waUrl, "_blank");
 };
 
-// Download CSV Format
+// ==========================================
+// CSV DOWNLOAD & UPLOAD (UPDATED)
+// ==========================================
+
 window.downloadCSVFormat = () => {
-    const headers = "REG NO.,ID NO.,NAME,CURRENT CLASS,D.O.B,PHONE,FATHER NAME,MOTHER NAME,GUARDIAN NAME,PLACE,ADDRESS\n";
-    const sampleData = "101,A123,MUHAMMED,Class 1,2015-05-12,9876543210,ABDULLA,FATHIMA,ABDULLA,CALICUT,HOUSE NAME\n";
+    const headers = "REG NO.,ID NO.,AADHAAR,STUDENT NAME,GENDER,D.O.B,BLOOD GROUP,CURRENT CLASS,JOINED CLASS,JOINED DATE,PRESENCE,FATHER NAME,MOTHER NAME,GUARDIAN NAME,RELATION,MOBILE NO,EMERGENCY NO,HOUSE NAME,PLACE,PO,PINCODE,DISTRICT,STATE,TRANSFERRED TO,REASON FOR LEAVING,DATE OF LEAVING,TC ISSUED(Yes/No),TC DETAILS,IDENTIFICATION MARKS,GUARDIAN OPINION,SPECIAL INFO\n";
+    const sampleData = "101,A123,123456789012,MUHAMMED,Male,2015-05-12,O+,1,1,2021-06-01,Regular,ABDULLA,FATHIMA,ABDULLA,Father,9876543210,9876543211,HOUSE NAME,CALICUT,CALICUT PO,673001,KOZHIKODE,KERALA,,,,,,,,None,Good,\n";
     const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(headers + sampleData);
     
     const link = document.createElement("a");
@@ -1375,7 +1437,6 @@ window.downloadCSVFormat = () => {
     document.body.removeChild(link);
 };
 
-// Bulk CSV Import
 window.handleBulkUpload = () => {
   const fileInput = document.getElementById("csvFileInput");
   const statusDiv = document.getElementById("bulkStatus");
@@ -1394,21 +1455,46 @@ window.handleBulkUpload = () => {
         rows.forEach((row) => {
           const newStudentRef = doc(collection(db, "students"));
           const regNum = parseInt(row["REG NO."] || row["regNo"] || 0, 10);
-          const phoneVal = row["PHONE"] || row["MOBILE"] || row["PHONE NO"] || "";
-
+          
           batch.set(newStudentRef, {
             institutionId: currentInstitutionId,
             regNo: isNaN(regNum) ? 0 : regNum,
             idNo: (row["ID NO."] || "").toUpperCase(),
-            name: (row["NAME"] || "").toUpperCase(),
-            currentClass: (row["CURRENT CLASS"] || "1").replace(/Class\s*/i, "").trim(),
-            address: (row["ADDRESS"] || "").toUpperCase(),
-            place: (row["PLACE"] || "").toUpperCase(),
+            aadhaar: row["AADHAAR"] || "",
+            name: (row["STUDENT NAME"] || row["NAME"] || "").toUpperCase(),
+            gender: row["GENDER"] || "Male",
             dob: row["D.O.B"] || "",
+            bloodGroup: row["BLOOD GROUP"] || "",
+            
+            currentClass: (row["CURRENT CLASS"] || "1").replace(/Class\s*/i, "").trim(),
+            joinedClass: (row["JOINED CLASS"] || "").toUpperCase(),
+            joinedDate: row["JOINED DATE"] || "",
+            presence: (row["PRESENCE"] || "").toUpperCase(),
+
             fatherName: (row["FATHER NAME"] || "").toUpperCase(),
             motherName: (row["MOTHER NAME"] || "").toUpperCase(),
             guardianName: (row["GUARDIAN NAME"] || "").toUpperCase(),
-            phone: phoneVal,
+            relation: (row["RELATION"] || "").toUpperCase(),
+            phone: row["MOBILE NO"] || row["PHONE"] || "",
+            emergencyPhone: row["EMERGENCY NO"] || "",
+
+            houseName: (row["HOUSE NAME"] || row["ADDRESS"] || "").toUpperCase(),
+            place: (row["PLACE"] || "").toUpperCase(),
+            postOffice: (row["PO"] || "").toUpperCase(),
+            pincode: row["PINCODE"] || "",
+            district: (row["DISTRICT"] || "").toUpperCase(),
+            state: (row["STATE"] || "KERALA").toUpperCase(),
+
+            transferredTo: (row["TRANSFERRED TO"] || "").toUpperCase(),
+            reasonLeaving: (row["REASON FOR LEAVING"] || "").toUpperCase(),
+            dateOfLeaving: row["DATE OF LEAVING"] || "",
+            tcIssued: row["TC ISSUED(Yes/No)"] || "No",
+            tcDetails: (row["TC DETAILS"] || "").toUpperCase(),
+
+            identificationMarks: (row["IDENTIFICATION MARKS"] || "").toUpperCase(),
+            guardianOpinion: (row["GUARDIAN OPINION"] || "").toUpperCase(),
+            specialInfo: (row["SPECIAL INFO"] || "").toUpperCase(),
+            
             status: "active",
             createdAt: serverTimestamp()
           });
@@ -1417,8 +1503,14 @@ window.handleBulkUpload = () => {
         await batch.commit();
         statusDiv.className = "alert alert-success";
         statusDiv.innerText = `Successfully imported ${rows.length} students!`;
-        bootstrap.Modal.getInstance(document.getElementById('bulkImportModal')).hide();
-        loadStudentsByClass(true);
+        
+        setTimeout(() => {
+            bootstrap.Modal.getInstance(document.getElementById('bulkImportModal')).hide();
+            loadStudentsByClass(true);
+            fileInput.value = "";
+            statusDiv.classList.add("d-none");
+        }, 1500);
+
       } catch (err) {
         statusDiv.className = "alert alert-danger";
         statusDiv.innerText = "Error: " + err.message;
@@ -1427,201 +1519,7 @@ window.handleBulkUpload = () => {
   });
 };
 
-// Staff Profile Add / Edit Functionality
-window.openStaffProfileModal = (staffId) => {
-  document.getElementById("staffProfileForm").reset();
-  document.querySelectorAll('.sp-class-cb').forEach(cb => cb.checked = false);
-
-  if (staffId) {
-      // Edit Mode
-      const staff = localPrincipalsCache.find(s => s.id === staffId) || localTeachersCache.find(s => s.id === staffId);
-      if(!staff) return;
-
-      document.getElementById("staffModalTitle").innerText = `Edit Profile: ${staff.name}`;
-      document.getElementById("spDocId").value = staff.id;
-      document.getElementById("spAuthSection").classList.add("d-none");
-
-      // Map Firestore data to form fields
-      document.getElementById("spName").value = staff.name || "";
-      document.getElementById("spGender").value = staff.gender || "Male";
-      document.getElementById("spDob").value = staff.dob || "";
-      document.getElementById("spBlood").value = staff.bloodGroup || "";
-      document.getElementById("spGuardian").value = staff.guardianName || "";
-      document.getElementById("spMarital").value = staff.maritalStatus || "Single";
-      document.getElementById("spAadhaar").value = staff.aadhaar || "";
-
-      document.getElementById("spPhone").value = staff.phone || "";
-      document.getElementById("spWhatsapp").value = staff.whatsapp || "";
-      document.getElementById("spEmergency").value = staff.emergencyPhone || "";
-      document.getElementById("spHouse").value = staff.houseName || "";
-      document.getElementById("spPo").value = staff.postOffice || "";
-      document.getElementById("spPin").value = staff.pincode || "";
-      document.getElementById("spDistrict").value = staff.district || "";
-      document.getElementById("spState").value = staff.state || "KERALA";
-
-      document.getElementById("spRelEdu").value = staff.religiousEdu || "";
-      document.getElementById("spGenEdu").value = staff.generalEdu || "";
-      document.getElementById("spLanguages").value = staff.languages || "";
-      document.getElementById("spSkills").value = staff.skills || "";
-      document.getElementById("spAwards").value = staff.awards || "";
-
-      document.getElementById("spRole").value = staff.role || "teacher";
-      document.getElementById("spDesignation").value = staff.designation || "";
-      document.getElementById("spMsr").value = staff.msrNo || "";
-      document.getElementById("spEmpType").value = staff.employmentType || "Full Time";
-      document.getElementById("spExp").value = staff.experience || "";
-      document.getElementById("spDoj").value = staff.doj || "";
-
-      // Check assigned classes
-      if(staff.assignedClasses) {
-          staff.assignedClasses.forEach(c => {
-              const cb = document.getElementById("spc" + c);
-              if(cb) cb.checked = true;
-          });
-      }
-
-      document.getElementById("spAccName").value = staff.bankAccName || "";
-      document.getElementById("spAccNo").value = staff.bankAccNo || "";
-      document.getElementById("spIfsc").value = staff.bankIfsc || "";
-      document.getElementById("spBank").value = staff.bankName || "";
-      document.getElementById("spBranch").value = staff.bankBranch || "";
-
-      document.getElementById("spTransFrom").value = staff.transferredFrom || "";
-      document.getElementById("spTransTo").value = staff.transferredTo || "";
-      document.getElementById("spDol").value = staff.dol || "";
-      document.getElementById("spReason").value = staff.reasonLeaving || "";
-
-  } else {
-      // Add Mode
-      document.getElementById("staffModalTitle").innerText = "Register New Staff / Principal";
-      document.getElementById("spDocId").value = "";
-      document.getElementById("spAuthSection").classList.remove("d-none"); 
-  }
-
-  // Switch to first tab automatically
-  const triggerEl = document.querySelector('#staffTabs button[data-bs-target="#tab-personal"]')
-  bootstrap.Tab.getOrCreateInstance(triggerEl).show()
-
-  new bootstrap.Modal(document.getElementById('staffProfileModal')).show();
-};
-
-window.saveStaffProfile = async (e) => {
-  e.preventDefault();
-
-  const staffId = document.getElementById("spDocId").value;
-  const role = document.getElementById("spRole").value;
-  
-  const classCheckboxes = document.querySelectorAll('.sp-class-cb:checked');
-  const assignedClasses = Array.from(classCheckboxes).map(cb => cb.value);
-
-  const profileData = {
-      name: document.getElementById("spName").value.trim().toUpperCase(),
-      gender: document.getElementById("spGender").value,
-      dob: document.getElementById("spDob").value,
-      bloodGroup: document.getElementById("spBlood").value,
-      guardianName: document.getElementById("spGuardian").value.trim().toUpperCase(),
-      maritalStatus: document.getElementById("spMarital").value,
-      aadhaar: document.getElementById("spAadhaar").value.trim(),
-      
-      phone: document.getElementById("spPhone").value.trim(),
-      whatsapp: document.getElementById("spWhatsapp").value.trim(),
-      emergencyPhone: document.getElementById("spEmergency").value.trim(),
-      houseName: document.getElementById("spHouse").value.trim().toUpperCase(),
-      postOffice: document.getElementById("spPo").value.trim().toUpperCase(),
-      pincode: document.getElementById("spPin").value.trim(),
-      district: document.getElementById("spDistrict").value.trim().toUpperCase(),
-      state: document.getElementById("spState").value.trim().toUpperCase(),
-
-      religiousEdu: document.getElementById("spRelEdu").value.trim().toUpperCase(),
-      generalEdu: document.getElementById("spGenEdu").value.trim().toUpperCase(),
-      languages: document.getElementById("spLanguages").value.trim().toUpperCase(),
-      skills: document.getElementById("spSkills").value.trim().toUpperCase(),
-      awards: document.getElementById("spAwards").value.trim().toUpperCase(),
-
-      role: role,
-      designation: document.getElementById("spDesignation").value.trim().toUpperCase(),
-      msrNo: document.getElementById("spMsr").value.trim().toUpperCase(),
-      employmentType: document.getElementById("spEmpType").value,
-      experience: document.getElementById("spExp").value,
-      doj: document.getElementById("spDoj").value,
-      assignedClasses: role === 'principal' ? ["1","2","3","4","5","6","7","8","9","10","11","12"] : assignedClasses,
-
-      bankAccName: document.getElementById("spAccName").value.trim().toUpperCase(),
-      bankAccNo: document.getElementById("spAccNo").value.trim(),
-      bankIfsc: document.getElementById("spIfsc").value.trim().toUpperCase(),
-      bankName: document.getElementById("spBank").value.trim().toUpperCase(),
-      bankBranch: document.getElementById("spBranch").value.trim().toUpperCase(),
-
-      transferredFrom: document.getElementById("spTransFrom").value.trim().toUpperCase(),
-      transferredTo: document.getElementById("spTransTo").value.trim().toUpperCase(),
-      dol: document.getElementById("spDol").value,
-      reasonLeaving: document.getElementById("spReason").value.trim().toUpperCase(),
-      
-      updatedAt: serverTimestamp()
-  };
-
-  try {
-      if (staffId) {
-          // Update Existing User
-          await updateDoc(doc(db, "users", staffId), profileData);
-          alert("Profile updated successfully!");
-      } else {
-          // Register New User
-          const email = document.getElementById("spAuthEmail").value.trim().toLowerCase();
-          const pwd = document.getElementById("spAuthPassword").value;
-          
-          if(!email || !pwd) return alert("Email and Password are required to create a new account.");
-          
-          const cred = await createUserWithEmailAndPassword(auth, email, pwd);
-          
-          profileData.uid = cred.user.uid;
-          profileData.email = email;
-          profileData.institutionId = currentInstitutionId;
-          profileData.status = "active";
-          profileData.createdAt = serverTimestamp();
-
-          await setDoc(doc(db, "users", cred.user.uid), profileData);
-          alert("New staff registered successfully! You will be automatically signed in as the new user.");
-      }
-
-      bootstrap.Modal.getInstance(document.getElementById('staffProfileModal')).hide();
-      
-      if(currentUserRole === 'admin') loadPrincipalsList();
-      else loadTeachersList();
-
-  } catch (err) { alert("Error: " + err.message); }
-};
-
-window.deleteUser = async (userId, name) => {
-    if (confirm(`Are you sure you want to remove ${name}?`)) {
-        try {
-            await deleteDoc(doc(db, "users", userId));
-            alert(`${name} removed successfully.`);
-            
-            if (currentUserRole === 'admin') loadPrincipalsList();
-            else if (currentUserRole === 'principal') loadTeachersList();
-            else if (currentUserRole === 'superadmin') loadSuperAdminRequests();
-            
-        } catch (err) {
-            alert("Error: " + err.message);
-        }
-    }
-};
-
-window.promoteStudents = async () => {
-  const from = document.getElementById("fromClass").value;
-  const to = document.getElementById("toClass").value;
-  if (confirm(`Promote all students from Class ${from} to Class ${to}?`)) {
-    const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", from));
-    const snap = await getDocs(q);
-    const batch = writeBatch(db);
-    snap.forEach(d => batch.update(doc(db, "students", d.id), { currentClass: to }));
-    await batch.commit();
-    alert(`Students promoted to Class ${to}.`);
-    loadStudentsByClass(true);
-  }
-};
-
+// ... (Rest of UI functions)
 window.showSignupForm = (type) => {
   document.getElementById("signupOptions").classList.add("d-none");
   if(type === 'madrasa') document.getElementById("signupForm").classList.remove("d-none");
