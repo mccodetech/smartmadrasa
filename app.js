@@ -92,6 +92,7 @@ onAuthStateChanged(auth, async (user) => {
 
         isSuperAdmin = (user.email === SUPER_ADMIN_EMAIL);
         
+        // Handle pending users
         if (!isSuperAdmin && userData.status === "pending") {
            let alertMsg = "Your registration is pending approval.";
            if(userData.role === 'admin') alertMsg = "Your Madrasa registration is pending approval from the Super Admin. Please contact support.";
@@ -213,7 +214,7 @@ onAuthStateChanged(auth, async (user) => {
         } else if (currentUserRole === "principal") {
           showTab('homeDashboardTab');
           loadLeaderboard();
-          loadTeachersList();
+          loadPrincipalsList(); // LOAD STAFF LIST PROPERLY
         } else if (currentUserRole === "teacher") {
           showTab('homeDashboardTab');
           loadLeaderboard();
@@ -361,7 +362,6 @@ async function loadParentStudentData(student) {
     document.getElementById("pvPointsTableBody").innerHTML = perfHtml || `<tr><td colspan="3" class="text-center text-muted">No points awarded yet</td></tr>`;
 }
 
-// Institution Registration
 window.handleSignUp = async (e) => {
   e.preventDefault();
   const submitBtn = document.getElementById("btnSubmitSignup");
@@ -636,13 +636,16 @@ window.logoutParent = () => {
 
 window.handleLogout = () => signOut(auth);
 
+// Load Principals & Staff List for Inst Admin
 window.loadPrincipalsList = async () => {
     const tbody = document.getElementById("principalsTableBody");
     const pendingTbody = document.getElementById("instPendingStaffTableBody");
     const pendingSection = document.getElementById("instPendingStaffSection");
 
+    if(!tbody) return;
+
     tbody.innerHTML = `<tr><td colspan="5" class="text-center">Loading...</td></tr>`;
-    pendingTbody.innerHTML = `<tr><td colspan="5" class="text-center">Loading...</td></tr>`;
+    if(pendingTbody) pendingTbody.innerHTML = `<tr><td colspan="5" class="text-center">Loading...</td></tr>`;
 
     const qActive = query(collection(db, "users"), where("institutionId", "==", currentInstitutionId), where("status", "==", "active"));
     const snapActive = await getDocs(qActive);
@@ -682,7 +685,7 @@ window.loadPrincipalsList = async () => {
         }
     });
   
-    if (pendingStaffCache.length > 0) {
+    if (pendingStaffCache.length > 0 && pendingSection && pendingTbody) {
         pendingSection.classList.remove("d-none");
         let htmlPending = "";
         pendingStaffCache.forEach((t) => {
@@ -700,7 +703,7 @@ window.loadPrincipalsList = async () => {
           `;
         });
         pendingTbody.innerHTML = htmlPending;
-    } else {
+    } else if (pendingSection) {
          pendingSection.classList.add("d-none");
     }
 };
@@ -770,6 +773,10 @@ window.instAssignClassesToStaff = async (e) => {
         loadPrincipalsList(); 
     } catch (err) { alert("Error: " + err.message); }
 };
+
+// ==========================================
+// STUDENT PROFILE MODAL (JS VALIDATION)
+// ==========================================
 
 window.openStudentProfileModal = (docId) => {
     document.getElementById("studentProfileForm").reset();
@@ -964,7 +971,6 @@ function renderPaginatedTable() {
         <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${s.id}', '${s.name}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
       </td>` : ``;
 
-    // ADDED: Display Institution Name if Super Admin is logged in.
     let instBadge = '';
     if(isSuperAdmin) {
        const instName = instIdToNameMap[s.institutionId] || s.institutionId;
@@ -1336,6 +1342,10 @@ window.saveClassMarks = async () => {
   } catch (err) { alert("Error: " + err.message); }
 };
 
+// ==========================================
+// FEES LOGIC (WITH SETTINGS)
+// ==========================================
+
 window.saveFeeSettings = async () => {
     const perm = document.querySelector('input[name="feePermission"]:checked').value;
     const reqManual = document.getElementById("reqManualReceipt").checked;
@@ -1361,6 +1371,7 @@ window.loadStudentsForFees = async () => {
   const alertArea = document.getElementById("feeCollectionAlert");
   const collectionArea = document.getElementById("feeCollectionArea");
 
+  // Check Permissions
   let canCollect = false;
   if(currentUserRole === "admin") canCollect = true;
   else if(currentUserRole === "principal" && (sysFeePermission === "principal" || sysFeePermission === "all")) canCollect = true;
@@ -1378,8 +1389,9 @@ window.loadStudentsForFees = async () => {
   if (!selClass) { tableArea.classList.add("d-none"); return; }
   
   tableArea.classList.remove("d-none");
-  tbody.innerHTML = `<tr><td colspan="7" class="text-center">Loading...</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="5" class="text-center">Loading...</td></tr>`;
 
+  // Fetch Students
   const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", selClass.replace(/Class\s*/i, "").trim()));
   const snap = await getDocs(q);
 
@@ -1388,10 +1400,11 @@ window.loadStudentsForFees = async () => {
   students.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
 
   if(students.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">No students in this class.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">No students in this class.</td></tr>`;
       return;
   }
 
+  // Fetch Paid Fees History
   const feeQ = query(collection(db, "feeCollections"), where("institutionId", "==", currentInstitutionId), where("class", "==", selClass.replace(/Class\s*/i, "").trim()));
   const feeSnap = await getDocs(feeQ);
   
@@ -1422,20 +1435,15 @@ window.loadStudentsForFees = async () => {
         fee: defaultFee
     }));
 
+    // Cleaned up table UI: Only Pay button. Month/Amount selection moved to Modal
     html += `
       <tr>
         <td><b>${s.regNo || '-'}</b></td>
         <td><b>${s.name}</b></td>
         <td class="text-primary fw-bold">₹${defaultFee}</td>
         <td>${lastPaidText}</td>
-        <td>
-            <input type="text" id="payType_${s.regNo}" class="form-control form-control-sm text-uppercase" placeholder="e.g. JUNE or ADM FEE">
-        </td>
-        <td>
-            <input type="number" id="payAmt_${s.regNo}" class="form-control form-control-sm fw-bold" value="${defaultFee}">
-        </td>
-        <td>
-            <button class="btn btn-sm btn-success w-100" onclick="openFeeModal('${sDataStr}')">Pay</button>
+        <td class="text-center">
+            <button class="btn btn-sm btn-success w-100" onclick="openFeeModal('${sDataStr}')">Pay Fee</button>
         </td>
       </tr>
     `;
@@ -1443,25 +1451,43 @@ window.loadStudentsForFees = async () => {
   tbody.innerHTML = html;
 };
 
+// Auto calculate fee when months are clicked in the modal
+window.calculateFeeAmount = () => {
+    const category = document.getElementById("payFeeCategory").value;
+    const baseFee = Number(document.getElementById("payBaseFee").value) || 0;
+    const monthDiv = document.getElementById("monthSelectionDiv");
+    let total = 0;
+
+    if(category === "Monthly Fee") {
+        monthDiv.classList.remove("d-none");
+        const checkedCount = document.querySelectorAll(".month-cb:checked").length;
+        total = baseFee * checkedCount;
+    } else {
+        monthDiv.classList.add("d-none");
+        total = baseFee; // Default to base fee for other categories, can be manually edited
+    }
+    
+    document.getElementById("payAmount").value = total;
+}
+
 window.openFeeModal = (studentDataStr) => {
     const s = JSON.parse(decodeURIComponent(studentDataStr));
     
-    const typedMonth = document.getElementById(`payType_${s.regNo}`).value.trim();
-    let typedAmt = document.getElementById(`payAmt_${s.regNo}`).value.trim();
-
-    if(!typedAmt) typedAmt = s.fee;
+    document.getElementById("feePaymentForm").reset();
 
     document.getElementById("payStudentId").value = s.id;
     document.getElementById("payStudentReg").value = s.regNo;
     document.getElementById("payStudentName").value = s.name;
     document.getElementById("payStudentClass").value = s.class;
     document.getElementById("payStudentPhone").value = s.phone;
+    document.getElementById("payBaseFee").value = s.fee;
 
     document.getElementById("payStudentNameDisplay").innerText = `${s.name} (Reg: ${s.regNo})`;
-    document.getElementById("payFeeType").value = typedMonth || "MONTHLY FEE";
-    document.getElementById("payAmount").value = typedAmt;
+    document.getElementById("payFeeCategory").value = "Monthly Fee";
+    document.getElementById("monthSelectionDiv").classList.remove("d-none");
     
-    const manualInput = document.getElementById("payManualReceiptInput");
+    // Set manual receipt requirement based on settings
+    const manualInput = document.getElementById("payManualReceipt");
     if(sysReqManualReceipt) {
         manualInput.required = true;
         manualInput.placeholder = "Required";
@@ -1469,7 +1495,8 @@ window.openFeeModal = (studentDataStr) => {
         manualInput.required = false;
         manualInput.placeholder = "Optional";
     }
-    manualInput.value = "";
+
+    calculateFeeAmount(); // Reset amount to 0 since no months are checked initially
 
     new bootstrap.Modal(document.getElementById('feePaymentModal')).show();
 };
@@ -1484,9 +1511,23 @@ window.saveFeePayment = async (e) => {
   const phone = document.getElementById("payStudentPhone").value;
   
   const amount = document.getElementById("payAmount").value;
-  const type = document.getElementById("payFeeType").value.trim().toUpperCase();
-  const manual = document.getElementById("payManualReceiptInput").value.trim().toUpperCase();
+  const academicYear = document.getElementById("payAcademicYear").value;
+  const category = document.getElementById("payFeeCategory").value;
+  const manual = document.getElementById("payManualReceipt").value.trim().toUpperCase();
   const today = new Date().toLocaleDateString();
+
+  let finalFeeTypeStr = category;
+  
+  // If it's a monthly fee, gather the selected months
+  if(category === "Monthly Fee") {
+      const checkedMonths = Array.from(document.querySelectorAll(".month-cb:checked")).map(cb => cb.value);
+      if(checkedMonths.length === 0) {
+          return alert("Please select at least one month for Monthly Fee.");
+      }
+      finalFeeTypeStr = `Monthly Fee (${academicYear}): ${checkedMonths.join(', ')}`;
+  } else {
+      finalFeeTypeStr = `${category} (${academicYear})`;
+  }
 
   try {
     const counterRef = doc(db, "counters", currentInstitutionId + "_receipts");
@@ -1510,7 +1551,7 @@ window.saveFeePayment = async (e) => {
       studentName: name,
       class: sClass,
       amount: Number(amount),
-      feeType: type,
+      feeType: finalFeeTypeStr,
       manualReceiptNo: manual,
       date: today,
       collectedBy: auth.currentUser.uid,
@@ -1524,7 +1565,7 @@ window.saveFeePayment = async (e) => {
     document.getElementById("recStudentName").innerText = name;
     document.getElementById("recAdmNo").innerText = reg;
     document.getElementById("recClass").innerText = "Class " + sClass;
-    document.getElementById("recFeeType").innerText = type;
+    document.getElementById("recFeeType").innerText = finalFeeTypeStr;
     document.getElementById("recAmount").innerText = "₹" + amount;
     document.getElementById("recCollector").innerText = currentUserName;
 
@@ -1543,7 +1584,7 @@ window.saveFeePayment = async (e) => {
       reg: reg,
       class: sClass,
       amount: amount,
-      type: type,
+      type: finalFeeTypeStr,
       manual: manual,
       date: today
     };
