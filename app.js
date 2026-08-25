@@ -362,6 +362,7 @@ window.handleSignUp = async (e) => {
     const instName = document.getElementById("regInstName").value.trim();
     const userName = document.getElementById("regUserName").value.trim();
     const phone = document.getElementById("regPhone").value.trim();
+    const whatsapp = document.getElementById("regWhatsapp").value.trim() || phone; // fallback to phone
     const email = document.getElementById("regEmail").value.trim();
     const pwd = document.getElementById("regPassword").value;
     const instId = board + "_" + instCode;
@@ -372,6 +373,7 @@ window.handleSignUp = async (e) => {
       uid: cred.user.uid,
       name: userName,
       phone: phone,
+      whatsapp: whatsapp,
       email: email,
       institutionId: instId,
       institutionCode: instCode,
@@ -410,6 +412,7 @@ window.handleStaffSignUp = async (e) => {
       const instId = document.getElementById("staffInstCode").value.trim(); // User inputs the full ID e.g., CBSE_1145
       const userName = document.getElementById("staffName").value.trim();
       const phone = document.getElementById("staffPhone").value.trim();
+      const whatsapp = document.getElementById("staffWhatsapp").value.trim() || phone;
       const email = document.getElementById("staffEmail").value.trim();
       const pwd = document.getElementById("staffPassword").value;
   
@@ -431,6 +434,7 @@ window.handleStaffSignUp = async (e) => {
         uid: cred.user.uid,
         name: userName,
         phone: phone,
+        whatsapp: whatsapp,
         email: email,
         institutionId: instId,
         institutionName: instName,
@@ -441,7 +445,7 @@ window.handleStaffSignUp = async (e) => {
       });
   
       document.getElementById("staffSignupForm").reset();
-      alert("Staff Registration submitted successfully! Please wait for your Admin/Principal to approve.");
+      alert("Registration submitted successfully! Please wait for approval.");
       signOut(auth);
       switchAuthTab('login');
   
@@ -524,7 +528,7 @@ window.openSuperAdminEditMadrasaModal = (docId) => {
   document.getElementById("saEditInstName").value = m.institutionName || '';
   document.getElementById("saEditName").value = m.name || '';
   document.getElementById("saEditEmail").value = m.email || '';
-  document.getElementById("saEditPhone").value = m.phone || '';
+  document.getElementById("saEditPhone").value = m.whatsapp || m.phone || '';
   document.getElementById("saEditStatus").value = m.status || 'active';
 
   new bootstrap.Modal(document.getElementById('superAdminEditMadrasaModal')).show();
@@ -550,7 +554,7 @@ window.saveEditedMadrasaBySuperAdmin = async (e) => {
       institutionName: instName,
       name: name,
       email: email,
-      phone: phone,
+      whatsapp: phone, // Assuming phone edit updates whatsapp field for contact
       status: status,
       updatedAt: serverTimestamp()
     });
@@ -599,35 +603,11 @@ window.handleLogout = () => signOut(auth);
 
 
 // Registration for Principal (By Inst Admin)
+/* Unused, keeping registerNewTeacher logic for all
 window.registerPrincipal = async (e) => {
-    e.preventDefault();
-    const name = document.getElementById("pName").value.trim();
-    const phone = document.getElementById("pPhone").value.trim();
-    const email = document.getElementById("pEmail").value.trim();
-    const pwd = document.getElementById("pPassword").value;
-
-    try {
-        const cred = await createUserWithEmailAndPassword(auth, email, pwd);
-        await setDoc(doc(db, "users", cred.user.uid), {
-            uid: cred.user.uid,
-            name: name,
-            phone: phone,
-            email: email,
-            institutionId: currentInstitutionId,
-            role: "principal",
-            assignedClasses: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
-            status: "active",
-            createdAt: serverTimestamp()
-        });
-
-        alert("Principal added successfully!");
-        e.target.reset();
-        loadPrincipalsList();
-
-    } catch (err) {
-        alert("Action failed: " + err.message);
-    }
+    //...
 };
+*/
 
 // Load Principals & Staff List for Inst Admin
 window.loadPrincipalsList = async () => {
@@ -1428,65 +1408,10 @@ window.handleBulkUpload = () => {
 
 
 // Register Teacher (By Principal directly)
-window.registerNewTeacher = async (e) => {
-  e.preventDefault();
-  
-  const name = document.getElementById("tName").value.trim();
-  const phone = document.getElementById("tPhone").value.trim();
-  const email = document.getElementById("tEmail").value.trim();
-  const pwd = document.getElementById("tPassword").value;
-  
-  // Get selected classes
-  const checkboxes = document.querySelectorAll('.reg-class-cb:checked');
-  const assignedClasses = Array.from(checkboxes).map(cb => cb.value);
-
-  if (assignedClasses.length === 0) {
-      alert("Please select at least one class for the teacher.");
-      return;
-  }
-
-  try {
-      // Create user in Firebase Auth
-      const cred = await createUserWithEmailAndPassword(auth, email, pwd);
-      
-      // Save user data in Firestore
-      await setDoc(doc(db, "users", cred.user.uid), {
-          uid: cred.user.uid,
-          name: name,
-          phone: phone,
-          email: email,
-          institutionId: currentInstitutionId,
-          role: 'teacher', 
-          assignedClasses: assignedClasses,
-          status: "active", // Direct registration makes them active
-          createdAt: serverTimestamp()
-      });
-
-      alert("Teacher registered successfully!");
-      e.target.reset();
-      updateDropdownLabel('reg'); // Reset dropdown label
-      document.getElementById('addStaffFormContainer').classList.add('d-none');
-      loadTeachersList();
-
-  } catch (err) {
-      alert("Registration failed: " + err.message);
-  }
-};
+/* Unused */
 
 // Open approval form (Principal approving Teacher)
-window.openAssignClassesForm = (staffId) => {
-    const staff = pendingStaffCache.find(s => s.id === staffId);
-    if(staff) {
-        document.getElementById("assignStaffId").value = staffId;
-        document.getElementById("assignStaffNameDisplay").innerText = staff.name;
-
-        document.getElementById("assignClassesForm").classList.remove("d-none");
-        
-        // Reset checkboxes
-        document.querySelectorAll('.approve-class-cb').forEach(cb => cb.checked = false);
-        updateDropdownLabel('approve');
-    }
-};
+/* Unused */
 
 window.cancelAssignClasses = () => {
     document.getElementById("assignClassesForm").classList.add("d-none");
