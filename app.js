@@ -15,7 +15,7 @@ const translations = {
     btn_viewdetails: "View Student Details",
     lbl_instcode: "Madrasa Reg / Code",
     lbl_instname: "Madrasa Name",
-    lbl_principal: "Principal / Secretary Name",
+    lbl_principal: "Institution Admin Name",
     btn_createrecord: "Submit for Approval",
     btn_exit: "Exit",
     lbl_father: "Father:",
@@ -114,7 +114,7 @@ const translations = {
     btn_viewdetails: "വിവരങ്ങൾ കാണുക",
     lbl_instcode: "മദ്റസാ നമ്പർ / കോഡ്",
     lbl_instname: "മദ്റസയുടെ പേര്",
-    lbl_principal: "സ്വ record / സെക്രട്ടറിയുടെ പേര്",
+    lbl_principal: "ഇൻസ്റ്റിറ്റ്യൂഷൻ അഡ്മിൻ്റെ പേര്",
     btn_createrecord: "അംഗീകാരത്തിനായി സമർപ്പിക്കുക",
     btn_exit: "പുറത്തുകടക്കുക",
     lbl_father: "പിതാവ്:",
@@ -270,6 +270,7 @@ let isSuperAdmin = false;
 let localStudentsCache = [];
 let localPerfStudentsCache = [];
 let localTeachersCache = [];
+let localPrincipalsCache = [];
 let localMadrasasCache = [];
 let lastReceiptWhatsAppPayload = null;
 let currentPage = 1;
@@ -303,7 +304,7 @@ onAuthStateChanged(auth, async (user) => {
         }
 
         currentInstitutionId = userData.institutionId;
-        currentUserRole = userData.role || (isSuperAdmin ? "admin" : "teacher");
+        currentUserRole = userData.role || (isSuperAdmin ? "superadmin" : "teacher");
         currentUserAssignedClasses = userData.assignedClasses || (userData.assignedClass ? [userData.assignedClass] : []);
 
         const instNameEl = document.getElementById("displayMadrassaName");
@@ -318,25 +319,67 @@ onAuthStateChanged(auth, async (user) => {
         const adminActions = document.getElementById("adminStudentActions");
         const actionCol = document.getElementById("actionHeaderCol");
         const superMasterBtn = document.getElementById("superAdminMasterBtn");
+        const instAdminStaffBtn = document.getElementById("instAdminStaffBtn");
+        const homeMenuBtn = document.getElementById("homeMenuBtn");
+        const studentsMenuBtn = document.getElementById("studentsMenuBtn");
+        const attendanceMenuBtn = document.getElementById("attendanceMenuBtn");
+        const marksMenuBtn = document.getElementById("marksMenuBtn");
+        const performanceMenuBtn = document.getElementById("performanceMenuBtn");
+        const feesMenuBtn = document.getElementById("feesMenuBtn");
+
 
         if (isSuperAdmin) {
           if (superMasterBtn) superMasterBtn.classList.remove("d-none");
           if (userRoleEl) userRoleEl.innerText = "Super Admin";
         } else {
           if (superMasterBtn) superMasterBtn.classList.add("d-none");
-          if (userRoleEl) userRoleEl.innerText = currentUserRole === "admin" ? (window.currentLang === 'ml' ? "സ്വദർ മുഅല്ലിം" : "Principal") : `Teacher (${currentUserAssignedClasses.map(c=>'Class '+c).join(', ')})`;
+          if (userRoleEl) {
+              if (currentUserRole === "admin") {
+                  userRoleEl.innerText = window.currentLang === 'ml' ? "അഡ്മിൻ" : "Admin";
+              } else if (currentUserRole === "principal") {
+                  userRoleEl.innerText = window.currentLang === 'ml' ? "സ്വദർ മുഅല്ലിം" : "Principal";
+              } else {
+                  userRoleEl.innerText = `Teacher (${currentUserAssignedClasses.map(c=>'Class '+c).join(', ')})`;
+              }
+          }
         }
 
-        if (currentUserRole === "admin" || isSuperAdmin) {
+        // Reset visibility for all menus first
+        if (tMenuBtn) tMenuBtn.classList.add("d-none");
+        if (pMenuBtn) pMenuBtn.classList.add("d-none");
+        if (adminActions) adminActions.classList.add("d-none");
+        if (actionCol) actionCol.classList.add("d-none");
+        if (instAdminStaffBtn) instAdminStaffBtn.classList.add("d-none");
+        if (homeMenuBtn) homeMenuBtn.classList.remove("d-none");
+        if (studentsMenuBtn) studentsMenuBtn.classList.remove("d-none");
+        if (attendanceMenuBtn) attendanceMenuBtn.classList.remove("d-none");
+        if (marksMenuBtn) marksMenuBtn.classList.remove("d-none");
+        if (performanceMenuBtn) performanceMenuBtn.classList.remove("d-none");
+        if (feesMenuBtn) feesMenuBtn.classList.remove("d-none");
+
+
+        if (currentUserRole === "admin") {
+            // Institution Admin View
+            if (instAdminStaffBtn) instAdminStaffBtn.classList.remove("d-none");
+            // Hide other menus until Principal is clicked, or keep them hidden for Admin
+             if (homeMenuBtn) homeMenuBtn.classList.add("d-none");
+            if (studentsMenuBtn) studentsMenuBtn.classList.add("d-none");
+            if (attendanceMenuBtn) attendanceMenuBtn.classList.add("d-none");
+            if (marksMenuBtn) marksMenuBtn.classList.add("d-none");
+            if (performanceMenuBtn) performanceMenuBtn.classList.add("d-none");
+            if (feesMenuBtn) feesMenuBtn.classList.add("d-none");
+            showTab('instAdminTab');
+            loadPrincipalsList();
+
+        } else if (currentUserRole === "principal" || isSuperAdmin) {
+            // Principal or Super Admin viewing a Madrasa
           if (tMenuBtn) tMenuBtn.classList.remove("d-none");
           if (pMenuBtn) pMenuBtn.classList.remove("d-none");
           if (adminActions) adminActions.classList.remove("d-none");
           if (actionCol) actionCol.classList.remove("d-none");
         } else {
-          if (tMenuBtn) tMenuBtn.classList.add("d-none");
-          if (pMenuBtn) pMenuBtn.classList.add("d-none");
-          if (adminActions) adminActions.classList.add("d-none");
-          if (actionCol) actionCol.classList.add("d-none");
+            // Teacher View
+            // Menus are already hidden by default reset above
         }
 
         document.getElementById("authSection").classList.add("d-none");
@@ -350,10 +393,10 @@ onAuthStateChanged(auth, async (user) => {
 
         if (isSuperAdmin) {
           showTab('superAdminTab');
-        } else {
+        } else if (currentUserRole !== "admin") {
           showTab('homeDashboardTab');
           loadLeaderboard();
-          if (currentUserRole === "admin") loadTeachersList();
+          if (currentUserRole === "principal") loadTeachersList();
         }
       }
     } catch (e) {
@@ -369,14 +412,14 @@ onAuthStateChanged(auth, async (user) => {
 
 function populateClassDropdowns() {
   const allClasses = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
-  const allowedClasses = (currentUserRole === "admin" || isSuperAdmin) ? allClasses : currentUserAssignedClasses;
+  const allowedClasses = (currentUserRole === "principal" || isSuperAdmin) ? allClasses : currentUserAssignedClasses;
 
   const filterSelect = document.getElementById("filterClassSelect");
   if (filterSelect) {
     filterSelect.innerHTML = "";
-    if (currentUserRole === "admin" || isSuperAdmin) filterSelect.innerHTML += `<option value="ALL">All Classes</option>`;
+    if (currentUserRole === "principal" || isSuperAdmin) filterSelect.innerHTML += `<option value="ALL">All Classes</option>`;
     allowedClasses.forEach(c => filterSelect.innerHTML += `<option value="${c}">Class ${c}</option>`);
-    if (currentUserRole !== "admin" && !isSuperAdmin && allowedClasses.length === 1) filterSelect.value = allowedClasses[0];
+    if (currentUserRole !== "principal" && !isSuperAdmin && allowedClasses.length === 1) filterSelect.value = allowedClasses[0];
   }
 
   const dropdowns = ["attClassSelect", "markClassSelect", "perfClassSelect", "feeClassSelect"];
@@ -384,12 +427,12 @@ function populateClassDropdowns() {
     const select = document.getElementById(id);
     if (select) {
       select.innerHTML = "";
-      if (allowedClasses.length > 1 || currentUserRole === "admin" || isSuperAdmin) {
+      if (allowedClasses.length > 1 || currentUserRole === "principal" || isSuperAdmin) {
         select.innerHTML = `<option value="">-- Select Class --</option>`;
       }
       allowedClasses.forEach(c => select.innerHTML += `<option value="${c}">Class ${c}</option>`);
 
-      if (currentUserRole !== "admin" && !isSuperAdmin && allowedClasses.length === 1) {
+      if (currentUserRole !== "principal" && !isSuperAdmin && allowedClasses.length === 1) {
         select.value = allowedClasses[0];
         if (id === "attClassSelect") loadAttendanceSheet();
         if (id === "markClassSelect") loadMarksEntrySheet();
@@ -401,6 +444,7 @@ function populateClassDropdowns() {
 }
 
 // Unified Smart Login
+let parentStudentsData = [];
 window.handleUnifiedLogin = async (e) => {
   e.preventDefault();
   const identifier = document.getElementById("loginIdentifier").value.trim();
@@ -412,6 +456,17 @@ window.handleUnifiedLogin = async (e) => {
 
     if (!mobile) return alert("Please enter the registered mobile number.");
 
+    // Query by mobile number to find ALL students associated with this parent
+    // Note: This requires the phone number format to be consistent in the database.
+    // For a more robust solution, a separate "Parents" collection mapping to student IDs would be better.
+    // Here we will query students where the phone number ends with the provided mobile number.
+    // However, Firestore doesn't support 'endsWith' queries directly on string fields in a simple way without workarounds.
+    // As a workaround for this specific implementation, we will query all students and filter locally. 
+    // THIS IS NOT RECOMMENDED FOR LARGE DATABASES.
+    
+    // Better approach: We assume the user is trying to log in for a *specific* student first using the Reg No.
+    // Then we find siblings.
+
     const q = query(collection(db, "students"), where("regNo", "==", reg));
     const snap = await getDocs(q);
 
@@ -421,40 +476,45 @@ window.handleUnifiedLogin = async (e) => {
     snap.forEach(d => {
       const data = d.data();
       const sPhone = (data.phone || '').replace(/[^0-9]/g, '').slice(-10);
-      if (sPhone === mobile) matchedStudent = data;
+      if (sPhone === mobile) {
+          matchedStudent = {id: d.id, ...data};
+      }
     });
 
     if (!matchedStudent) return alert("Provided phone number does not match student's records.");
+
+    // Now, let's find siblings (students with the same phone number in the same institution)
+    const siblingsQ = query(collection(db, "students"), where("institutionId", "==", matchedStudent.institutionId));
+    const siblingsSnap = await getDocs(siblingsQ);
+    
+    parentStudentsData = [];
+    siblingsSnap.forEach(d => {
+        const data = d.data();
+        const sPhone = (data.phone || '').replace(/[^0-9]/g, '').slice(-10);
+        if (sPhone === mobile) {
+            parentStudentsData.push({id: d.id, ...data});
+        }
+    });
 
     sessionStorage.setItem("parentLoggedIn", "true");
     document.getElementById("authSection").classList.add("d-none");
     document.getElementById("parentViewSection").classList.remove("d-none");
 
-    document.getElementById("pvStudentName").innerText = matchedStudent.name;
-    document.getElementById("pvClass").innerText = "Class " + (matchedStudent.currentClass || '').replace(/Class\s*/i, "");
-    document.getElementById("pvRegNo").innerText = matchedStudent.regNo;
-    document.getElementById("pvFather").innerText = matchedStudent.fatherName || matchedStudent.guardianName || '-';
-
-    const feeQ = query(collection(db, "feeCollections"), where("institutionId", "==", matchedStudent.institutionId), where("regNo", "==", reg));
-    const feeSnap = await getDocs(feeQ);
-    let feeHtml = "";
-    feeSnap.forEach(fd => {
-      const f = fd.data();
-      feeHtml += `<tr><td>#${f.receiptNo}</td><td>${f.date || '-'}</td><td>${f.feeType}</td><td class="fw-bold text-success">₹${f.amount}</td></tr>`;
+    // Populate dropdown
+    const studentSelect = document.getElementById("parentStudentSelect");
+    studentSelect.innerHTML = "";
+    parentStudentsData.forEach(student => {
+        const option = document.createElement("option");
+        option.value = student.regNo;
+        option.text = `${student.name} (Reg No: ${student.regNo})`;
+        if (student.regNo === reg) {
+            option.selected = true;
+        }
+        studentSelect.appendChild(option);
     });
-    document.getElementById("pvFeeTableBody").innerHTML = feeHtml || `<tr><td colspan="4" class="text-center text-muted">No fee records found</td></tr>`;
 
-    const perfQ = query(collection(db, "performancePoints"), where("institutionId", "==", matchedStudent.institutionId), where("regNo", "==", reg));
-    const perfSnap = await getDocs(perfQ);
-    let totalPts = 0;
-    let perfHtml = "";
-    perfSnap.forEach(pd => {
-      const p = pd.data();
-      totalPts += (Number(p.points) || 0);
-      perfHtml += `<tr><td>${p.date || '-'}</td><td>${p.task}</td><td class="fw-bold ${p.points >= 0 ? 'text-success' : 'text-danger'}">${p.points > 0 ? '+' : ''}${p.points} Pts</td></tr>`;
-    });
-    document.getElementById("pvTotalPoints").innerText = totalPts + " Pts";
-    document.getElementById("pvPointsTableBody").innerHTML = perfHtml || `<tr><td colspan="3" class="text-center text-muted">No points awarded yet</td></tr>`;
+    // Load data for the selected student
+    loadParentStudentData(matchedStudent);
 
   } else {
     // Teacher / Admin Login
@@ -467,6 +527,42 @@ window.handleUnifiedLogin = async (e) => {
     } catch (err) { alert("Sign-in failed: " + err.message); }
   }
 };
+
+window.switchParentStudent = () => {
+    const selectedRegNo = Number(document.getElementById("parentStudentSelect").value);
+    const selectedStudent = parentStudentsData.find(s => s.regNo === selectedRegNo);
+    if (selectedStudent) {
+        loadParentStudentData(selectedStudent);
+    }
+}
+
+async function loadParentStudentData(student) {
+    document.getElementById("pvStudentName").innerText = student.name;
+    document.getElementById("pvClass").innerText = "Class " + (student.currentClass || '').replace(/Class\s*/i, "");
+    document.getElementById("pvRegNo").innerText = student.regNo;
+    document.getElementById("pvFather").innerText = student.fatherName || student.guardianName || '-';
+
+    const feeQ = query(collection(db, "feeCollections"), where("institutionId", "==", student.institutionId), where("regNo", "==", student.regNo));
+    const feeSnap = await getDocs(feeQ);
+    let feeHtml = "";
+    feeSnap.forEach(fd => {
+      const f = fd.data();
+      feeHtml += `<tr><td>#${f.receiptNo}</td><td>${f.date || '-'}</td><td>${f.feeType}</td><td class="fw-bold text-success">₹${f.amount}</td></tr>`;
+    });
+    document.getElementById("pvFeeTableBody").innerHTML = feeHtml || `<tr><td colspan="4" class="text-center text-muted">No fee records found</td></tr>`;
+
+    const perfQ = query(collection(db, "performancePoints"), where("institutionId", "==", student.institutionId), where("regNo", "==", student.regNo));
+    const perfSnap = await getDocs(perfQ);
+    let totalPts = 0;
+    let perfHtml = "";
+    perfSnap.forEach(pd => {
+      const p = pd.data();
+      totalPts += (Number(p.points) || 0);
+      perfHtml += `<tr><td>${p.date || '-'}</td><td>${p.task}</td><td class="fw-bold ${p.points >= 0 ? 'text-success' : 'text-danger'}">${p.points > 0 ? '+' : ''}${p.points} Pts</td></tr>`;
+    });
+    document.getElementById("pvTotalPoints").innerText = totalPts + " Pts";
+    document.getElementById("pvPointsTableBody").innerHTML = perfHtml || `<tr><td colspan="3" class="text-center text-muted">No points awarded yet</td></tr>`;
+}
 
 // Registration
 window.handleSignUp = async (e) => {
@@ -494,7 +590,7 @@ window.handleSignUp = async (e) => {
       institutionId: instId,
       institutionCode: instCode,
       institutionName: instName,
-      role: "admin",
+      role: "admin", // This person is the Institution Admin
       status: isDev ? "active" : "pending",
       assignedClasses: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
       createdAt: serverTimestamp()
@@ -644,6 +740,69 @@ window.logoutParent = () => {
 
 window.handleLogout = () => signOut(auth);
 
+
+// Registration for Principal (By Inst Admin)
+window.registerPrincipal = async (e) => {
+    e.preventDefault();
+    const name = document.getElementById("pName").value.trim();
+    const phone = document.getElementById("pPhone").value.trim();
+    const email = document.getElementById("pEmail").value.trim();
+    const pwd = document.getElementById("pPassword").value;
+
+    try {
+        // Create user in Firebase Auth
+        const cred = await createUserWithEmailAndPassword(auth, email, pwd);
+        
+        // Save user data in Firestore
+        await setDoc(doc(db, "users", cred.user.uid), {
+            uid: cred.user.uid,
+            name: name,
+            phone: phone,
+            email: email,
+            institutionId: currentInstitutionId,
+            role: "principal",
+            assignedClasses: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
+            status: "active",
+            createdAt: serverTimestamp()
+        });
+
+        alert("Principal registered successfully!");
+        e.target.reset();
+        loadPrincipalsList();
+
+    } catch (err) {
+        alert("Registration failed: " + err.message);
+    }
+};
+
+// Load Principals List for Inst Admin
+window.loadPrincipalsList = async () => {
+    const tbody = document.getElementById("principalsTableBody");
+    tbody.innerHTML = `<tr><td colspan="4" class="text-center">Loading...</td></tr>`;
+
+    const q = query(collection(db, "users"), where("institutionId", "==", currentInstitutionId), where("role", "==", "principal"));
+    const snap = await getDocs(q);
+
+    localPrincipalsCache = [];
+    snap.forEach(d => localPrincipalsCache.push({ id: d.id, ...d.data() }));
+
+    let html = "";
+    localPrincipalsCache.forEach(p => {
+        html += `
+            <tr>
+                <td><b>${p.name}</b></td>
+                <td>${p.email}</td>
+                <td>${p.phone}</td>
+                <td class="text-center">
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${p.id}', '${p.name}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                </td>
+            </tr>
+        `;
+    });
+    tbody.innerHTML = html || `<tr><td colspan="4" class="text-center text-muted">No principals assigned yet.</td></tr>`;
+};
+
+
 // Admission, Students, Marks, Attendance, Fees Logic
 window.saveDetailedStudent = async (e) => {
   e.preventDefault();
@@ -723,7 +882,7 @@ window.deleteStudent = async (docId, name) => {
 
 window.loadStudentsByClass = async (forceRefresh = false) => {
   let selectedClass = document.getElementById("filterClassSelect").value;
-  if (currentUserRole !== "admin" && !isSuperAdmin && (!selectedClass || selectedClass === "ALL")) {
+  if (currentUserRole !== "principal" && !isSuperAdmin && (!selectedClass || selectedClass === "ALL")) {
     selectedClass = currentUserAssignedClasses[0] || "1";
     document.getElementById("filterClassSelect").value = selectedClass;
   }
@@ -732,7 +891,7 @@ window.loadStudentsByClass = async (forceRefresh = false) => {
   tbody.innerHTML = `<tr><td colspan="7" class="text-center">Loading data...</td></tr>`;
 
   let q;
-  if (selectedClass === "ALL" && (currentUserRole === "admin" || isSuperAdmin)) {
+  if (selectedClass === "ALL" && (currentUserRole === "principal" || isSuperAdmin)) {
     q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId));
   } else {
     q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", selectedClass.replace(/Class\s*/i, "").trim()));
@@ -765,7 +924,7 @@ function renderPaginatedTable() {
   let html = "";
   pageData.forEach(s => {
     const cleanClass = (s.currentClass || '-').replace(/Class\s*/i, "").trim();
-    const actionCol = (currentUserRole === "admin" || isSuperAdmin) ? `
+    const actionCol = (currentUserRole === "principal" || isSuperAdmin) ? `
       <td class="text-center">
         <button class="btn btn-sm btn-outline-primary me-1" onclick="openEditStudentModal('${s.id}')" title="Edit"><i class="fa-solid fa-pen"></i></button>
         <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${s.id}', '${s.name}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
@@ -814,7 +973,7 @@ window.filterStudentsLocal = () => {
   let html = "";
   filtered.slice(0, 50).forEach(s => {
     const cleanClass = (s.currentClass || '-').replace(/Class\s*/i, "").trim();
-    const actionCol = (currentUserRole === "admin" || isSuperAdmin) ? `
+    const actionCol = (currentUserRole === "principal" || isSuperAdmin) ? `
       <td class="text-center">
         <button class="btn btn-sm btn-outline-primary me-1" onclick="openEditStudentModal('${s.id}')"><i class="fa-solid fa-pen"></i></button>
         <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${s.id}', '${s.name}')"><i class="fa-solid fa-trash"></i></button>
@@ -1304,10 +1463,59 @@ window.handleBulkUpload = () => {
   });
 };
 
-// Teachers List
+
+// Register Teacher/Staff (By Principal)
+window.registerNewTeacher = async (e) => {
+  e.preventDefault();
+  
+  const name = document.getElementById("tName").value.trim();
+  const phone = document.getElementById("tPhone").value.trim();
+  const email = document.getElementById("tEmail").value.trim();
+  const pwd = document.getElementById("tPassword").value;
+  
+  // Get selected classes
+  const checkboxes = document.querySelectorAll('.reg-class-cb:checked');
+  const assignedClasses = Array.from(checkboxes).map(cb => cb.value);
+
+  if (assignedClasses.length === 0) {
+      alert("Please select at least one class.");
+      return;
+  }
+
+  try {
+      // Create user in Firebase Auth
+      const cred = await createUserWithEmailAndPassword(auth, email, pwd);
+      
+      // Save user data in Firestore
+      await setDoc(doc(db, "users", cred.user.uid), {
+          uid: cred.user.uid,
+          name: name,
+          phone: phone,
+          email: email,
+          institutionId: currentInstitutionId,
+          role: "teacher", // They are teachers
+          assignedClasses: assignedClasses,
+          status: "active",
+          createdAt: serverTimestamp()
+      });
+
+      alert("Staff registered successfully!");
+      e.target.reset();
+      updateDropdownLabel('reg'); // Reset dropdown label
+      loadTeachersList();
+
+  } catch (err) {
+      alert("Registration failed: " + err.message);
+  }
+};
+
+// Teachers List (Viewable by Principal)
 window.loadTeachersList = async () => {
   const tbody = document.getElementById("teachersTableBody");
-  const q = query(collection(db, "users"), where("institutionId", "==", currentInstitutionId));
+  tbody.innerHTML = `<tr><td colspan="6" class="text-center">Loading...</td></tr>`;
+  
+  // Only query users with role 'teacher' in the same institution
+  const q = query(collection(db, "users"), where("institutionId", "==", currentInstitutionId), where("role", "==", "teacher"));
   const snap = await getDocs(q);
 
   localTeachersCache = [];
@@ -1315,26 +1523,41 @@ window.loadTeachersList = async () => {
 
   let html = "";
   localTeachersCache.forEach((t, index) => {
-    const isPrincipal = t.role === "admin";
-    const roleBadge = isPrincipal ? `<span class="badge bg-danger">Principal</span>` : `<span class="badge bg-success">Teacher</span>`;
     const classesBadges = (t.assignedClasses || []).map(c => `<span class="badge bg-light text-dark border me-1">Class ${c}</span>`).join(' ') || '-';
     
     html += `
       <tr>
         <td>${index + 1}</td>
-        <td><b>${t.msrNo || '-'}</b></td>
         <td><b>${t.name}</b></td>
-        <td>${roleBadge}</td>
         <td>${t.email}</td>
         <td>${t.phone}</td>
         <td>${classesBadges}</td>
         <td class="text-center">
-          <button class="btn btn-sm btn-outline-primary" onclick="openEditTeacherModal('${t.id}')"><i class="fa-solid fa-pen"></i></button>
+            <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${t.id}', '${t.name}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
         </td>
       </tr>
     `;
   });
-  tbody.innerHTML = html || `<tr><td colspan="8" class="text-center text-muted">No staff registered.</td></tr>`;
+  tbody.innerHTML = html || `<tr><td colspan="6" class="text-center text-muted">No staff registered yet.</td></tr>`;
+};
+
+
+window.deleteUser = async (userId, name) => {
+    if (confirm(`Are you sure you want to remove ${name}?`)) {
+        try {
+            await deleteDoc(doc(db, "users", userId));
+            alert(`${name} removed successfully.`);
+            
+            // Reload the respective list based on current view
+            if (currentUserRole === 'admin') {
+                loadPrincipalsList();
+            } else if (currentUserRole === 'principal') {
+                loadTeachersList();
+            }
+        } catch (err) {
+            alert("Error: " + err.message);
+        }
+    }
 };
 
 window.promoteStudents = async () => {
@@ -1383,6 +1606,7 @@ window.showTab = (tabId) => {
 
   if (tabId === 'studentsListTab') loadStudentsByClass();
   if (tabId === 'teachersTab') window.loadTeachersList();
+  if (tabId === 'instAdminTab') window.loadPrincipalsList();
   if (tabId === 'homeDashboardTab') loadLeaderboard();
   if (tabId === 'superAdminTab') window.loadSuperAdminRequests();
 };
