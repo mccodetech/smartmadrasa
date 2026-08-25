@@ -6,27 +6,113 @@
   <title>Smart Madrasa - Academic Suite</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Manjari:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manjari:wght@400;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <style>
     :root {
-      --primary-color: #0d5c3a;
-      --secondary-color: #198754;
-      --bg-surface: #f8fafc;
-      --text-main: #1e293b;
+      --primary: #0f5132;
+      --primary-dark: #0a3622;
+      --primary-light: #e8f5e9;
+      --accent: #198754;
+      --bg-body: #f1f5f9;
+      --card-bg: #ffffff;
+      --text-dark: #0f172a;
+      --text-muted: #64748b;
     }
-    body { 
-      background-color: var(--bg-surface); 
+    body {
+      background-color: var(--bg-body);
       font-family: 'Plus Jakarta Sans', 'Manjari', sans-serif;
-      color: var(--text-main);
+      color: var(--text-dark);
       -webkit-font-smoothing: antialiased;
     }
-    .bg-madrassa { background-color: var(--primary-color) !important; }
-    .btn-madrassa { background-color: var(--secondary-color); color: #fff; border: none; font-weight: 500; }
-    .btn-madrassa:hover { background-color: var(--primary-color); color: #fff; }
+    
+    /* Modern Auth UI */
+    .auth-wrapper {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at top left, #dcfce7 0%, #f1f5f9 60%);
+      padding: 20px;
+    }
+    .auth-card {
+      background: var(--card-bg);
+      border-radius: 20px;
+      border: 1px solid rgba(226, 232, 240, 0.8);
+      box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.08);
+      width: 100%;
+      max-width: 440px;
+      overflow: hidden;
+      padding: 32px 28px;
+    }
+    .brand-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 18px;
+      background: var(--primary-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+      font-size: 28px;
+      margin: 0 auto 16px auto;
+    }
+    
+    /* Custom Segmented Tabs */
+    .segmented-control {
+      background: #f1f5f9;
+      border-radius: 12px;
+      padding: 4px;
+      display: flex;
+      gap: 4px;
+      margin-bottom: 24px;
+    }
+    .segmented-control button {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 8px 16px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      border-radius: 9px;
+      transition: all 0.2s ease;
+    }
+    .segmented-control button.active {
+      background: #ffffff;
+      color: var(--primary);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+    
+    /* Form Inputs */
+    .form-control, .form-select {
+      border-radius: 10px;
+      padding: 10px 14px;
+      border: 1px solid #cbd5e1;
+      font-size: 0.95rem;
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.15);
+    }
+    
+    .btn-primary-custom {
+      background: var(--primary);
+      color: #fff;
+      font-weight: 600;
+      border-radius: 10px;
+      padding: 11px;
+      border: none;
+      transition: all 0.2s;
+    }
+    .btn-primary-custom:hover {
+      background: var(--primary-dark);
+      color: #fff;
+    }
+    
     .card { border-radius: 14px; border: 1px solid #e2e8f0; box-shadow: 0 4px 16px rgba(0,0,0,0.03); }
     .nav-pills .nav-link { color: #475569; font-weight: 600; border-radius: 10px; padding: 10px 14px; }
-    .nav-pills .nav-link.active { background-color: var(--primary-color); color: #fff; }
+    .nav-pills .nav-link.active { background-color: var(--primary); color: #fff; }
     .dashboard-card { cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease; border-radius: 14px; }
     .dashboard-card:hover { transform: translateY(-4px); box-shadow: 0 10px 24px rgba(0,0,0,0.08); }
     .form-check-input-lg { width: 1.4em; height: 1.4em; cursor: pointer; }
@@ -52,76 +138,82 @@
     </button>
   </div>
 
-  <!-- Auth Screen -->
-  <div id="authSection" class="container d-flex justify-content-center align-items-center min-vh-100 py-4">
-    <div class="card p-4 shadow-sm" style="max-width: 440px; width: 100%;">
-      <div class="text-center mb-4">
-        <i class="fa-solid fa-mosque fa-3x text-success mb-2"></i>
-        <h3 class="fw-bold m-0">Smart Madrasa</h3>
-        <p class="text-muted small" data-i18n="portal_sub">Digital Madrasa Management Suite</p>
+  <!-- Unified Modern Auth Screen (Only 2 Tabs: Login & Register) -->
+  <div id="authSection" class="auth-wrapper">
+    <div class="auth-card">
+      <div class="text-center mb-3">
+        <div class="brand-icon">
+          <i class="fa-solid fa-mosque"></i>
+        </div>
+        <h3 class="fw-bold m-0" style="letter-spacing: -0.5px;">Smart Madrasa</h3>
+        <p class="text-muted small mt-1" data-i18n="portal_sub">Digital Madrasa Management Suite</p>
       </div>
 
-      <ul class="nav nav-tabs nav-justified mb-3" id="authTabs">
-        <li class="nav-item"><button class="nav-link active" onclick="switchAuthTab('login')" data-i18n="tab_teacher">Teacher Login</button></li>
-        <li class="nav-item"><button class="nav-link" onclick="switchAuthTab('parent')" data-i18n="tab_parent">Parent</button></li>
-        <li class="nav-item"><button class="nav-link" onclick="switchAuthTab('signup')" data-i18n="tab_signup">Register</button></li>
-      </ul>
+      <!-- Segmented 2 Tabs -->
+      <div class="segmented-control">
+        <button type="button" class="active" id="tabBtnLogin" onclick="switchAuthTab('login')" data-i18n="tab_login">Login</button>
+        <button type="button" id="tabBtnRegister" onclick="switchAuthTab('signup')" data-i18n="tab_signup">Register Madrasa</button>
+      </div>
 
-      <!-- Teacher Login Form -->
-      <form id="loginForm" onsubmit="handleLogin(event)">
+      <!-- 1. Single Unified Smart Login Form -->
+      <form id="loginForm" onsubmit="handleUnifiedLogin(event)">
         <div class="mb-3">
-          <label class="form-label" data-i18n="lbl_email">Email Address</label>
-          <input type="email" id="loginEmail" class="form-control" placeholder="name@madrasa.com" required>
+          <label class="form-label fw-semibold small" data-i18n="lbl_login_input">Email or Student Reg No.</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light text-muted"><i class="fa-solid fa-user-circle"></i></span>
+            <input type="text" id="loginIdentifier" class="form-control" placeholder="name@madrasa.com / 101" oninput="detectLoginMode()" required>
+          </div>
         </div>
-        <div class="mb-3">
-          <label class="form-label" data-i18n="lbl_pwd">Password</label>
-          <input type="password" id="loginPassword" class="form-control" required>
+
+        <!-- Password Field for Teachers / Admins -->
+        <div class="mb-3" id="passwordGroup">
+          <label class="form-label fw-semibold small" data-i18n="lbl_pwd">Password</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light text-muted"><i class="fa-solid fa-lock"></i></span>
+            <input type="password" id="loginPassword" class="form-control" placeholder="••••••••">
+          </div>
         </div>
-        <button type="submit" class="btn btn-madrassa w-100 py-2" data-i18n="btn_signin">Sign In</button>
+
+        <!-- Phone Field for Student / Parent Mode (Auto Shown if identifier is numeric) -->
+        <div class="mb-3 d-none" id="phoneGroup">
+          <label class="form-label fw-semibold small" data-i18n="lbl_phone">Registered Mobile Number</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light text-muted"><i class="fa-solid fa-phone"></i></span>
+            <input type="tel" id="loginMobile" class="form-control" placeholder="9847...">
+          </div>
+        </div>
+
+        <button type="submit" id="btnAuthSubmit" class="btn btn-primary-custom w-100 mt-2" data-i18n="btn_signin">Sign In</button>
       </form>
 
-      <!-- Parent Login Form -->
-      <form id="parentLoginForm" class="d-none" onsubmit="handleParentLogin(event)">
-        <div class="alert alert-info py-2 small" data-i18n="parent_login_hint">Enter student's Reg No. and registered mobile number.</div>
-        <div class="mb-3">
-          <label class="form-label" data-i18n="lbl_regno">Student Reg No.</label>
-          <input type="number" id="parentRegNo" class="form-control" placeholder="Registration No" required>
-        </div>
-        <div class="mb-3">
-          <label class="form-label" data-i18n="lbl_phone">Registered Mobile Number</label>
-          <input type="tel" id="parentMobile" class="form-control" placeholder="9847..." required>
-        </div>
-        <button type="submit" class="btn btn-madrassa w-100 py-2" data-i18n="btn_viewdetails">View Student Details</button>
-      </form>
-
-      <!-- Madrasa Sign Up Form -->
+      <!-- 2. Madrasa Registration Form -->
       <form id="signupForm" class="d-none" onsubmit="handleSignUp(event)">
         <div class="alert alert-warning py-2 small" data-i18n="reg_approval_notice">New registrations require Developer / Super Admin approval before activation.</div>
         <div class="mb-2">
-          <label class="form-label" data-i18n="lbl_instcode">Madrasa Reg / Code</label>
+          <label class="form-label small fw-semibold" data-i18n="lbl_instcode">Madrasa Reg / Code</label>
           <input type="text" id="regInstCode" class="form-control" placeholder="e.g. MDR-1045" required>
         </div>
         <div class="mb-2">
-          <label class="form-label" data-i18n="lbl_instname">Madrasa Name</label>
-          <input type="text" id="regInstName" class="form-control" required>
+          <label class="form-label small fw-semibold" data-i18n="lbl_instname">Madrasa Name</label>
+          <input type="text" id="regInstName" class="form-control" placeholder="Madrasa Full Name" required>
         </div>
         <div class="mb-2">
-          <label class="form-label" data-i18n="lbl_principal">Principal / Secretary Name</label>
-          <input type="text" id="regUserName" class="form-control" required>
+          <label class="form-label small fw-semibold" data-i18n="lbl_principal">Principal / Secretary Name</label>
+          <input type="text" id="regUserName" class="form-control" placeholder="Name" required>
         </div>
         <div class="mb-2">
-          <label class="form-label" data-i18n="lbl_phone">Mobile Number</label>
-          <input type="tel" id="regPhone" class="form-control" required>
+          <label class="form-label small fw-semibold" data-i18n="lbl_phone">Mobile Number</label>
+          <input type="tel" id="regPhone" class="form-control" placeholder="9847..." required>
         </div>
         <div class="mb-2">
-          <label class="form-label" data-i18n="lbl_email">Email Address</label>
-          <input type="email" id="regEmail" class="form-control" required>
+          <label class="form-label small fw-semibold" data-i18n="lbl_email">Email Address</label>
+          <input type="email" id="regEmail" class="form-control" placeholder="email@madrasa.com" required>
         </div>
         <div class="mb-3">
-          <label class="form-label" data-i18n="lbl_pwd">Password</label>
-          <input type="password" id="regPassword" class="form-control" required>
+          <label class="form-label small fw-semibold" data-i18n="lbl_pwd">Password</label>
+          <input type="password" id="regPassword" class="form-control" placeholder="••••••••" required>
         </div>
-        <button type="submit" id="btnSubmitSignup" class="btn btn-madrassa w-100 py-2" data-i18n="btn_createrecord">Submit for Approval</button>
+        <button type="submit" id="btnSubmitSignup" class="btn btn-primary-custom w-100" data-i18n="btn_createrecord">Submit for Approval</button>
       </form>
     </div>
   </div>
@@ -375,7 +467,7 @@
                   <div class="col-md-4"><label class="form-label" data-i18n="lbl_place">Place</label><input type="text" id="place" class="form-control"></div>
                   <div class="col-md-4"><label class="form-label" data-i18n="lbl_address">Address / House Name</label><input type="text" id="address" class="form-control"></div>
                 </div>
-                <div class="mt-4"><button type="submit" class="btn btn-madrassa px-4"><i class="fa-solid fa-floppy-disk me-1"></i> <span data-i18n="btn_save">Save Admission</span></button></div>
+                <div class="mt-4"><button type="submit" class="btn btn-primary-custom px-4"><i class="fa-solid fa-floppy-disk me-1"></i> <span data-i18n="btn_save">Save Admission</span></button></div>
               </form>
             </div>
           </div>
@@ -416,7 +508,7 @@
                     <tbody id="attendanceTableBody"></tbody>
                   </table>
                 </div>
-                <button class="btn btn-madrassa px-4 mt-2" onclick="saveClassAttendance()"><i class="fa-solid fa-check-double me-1"></i> <span data-i18n="btn_saveatt">Save Attendance</span></button>
+                <button class="btn btn-primary-custom px-4 mt-2" onclick="saveClassAttendance()"><i class="fa-solid fa-check-double me-1"></i> <span data-i18n="btn_saveatt">Save Attendance</span></button>
               </div>
             </div>
           </div>
@@ -458,7 +550,7 @@
                     <tbody id="marksTableBody"></tbody>
                   </table>
                 </div>
-                <button class="btn btn-madrassa px-4 mt-2" onclick="saveClassMarks()"><i class="fa-solid fa-floppy-disk me-1"></i> <span data-i18n="btn_savemarks">Save Marks</span></button>
+                <button class="btn btn-primary-custom px-4 mt-2" onclick="saveClassMarks()"><i class="fa-solid fa-floppy-disk me-1"></i> <span data-i18n="btn_savemarks">Save Marks</span></button>
               </div>
             </div>
           </div>
@@ -516,7 +608,7 @@
                   </table>
                 </div>
 
-                <button class="btn btn-madrassa px-4 mt-2" onclick="saveBulkPerformancePoints()"><i class="fa-solid fa-floppy-disk me-1"></i> <span data-i18n="btn_savepoints">Save Points</span></button>
+                <button class="btn btn-primary-custom px-4 mt-2" onclick="saveBulkPerformancePoints()"><i class="fa-solid fa-floppy-disk me-1"></i> <span data-i18n="btn_savepoints">Save Points</span></button>
               </div>
             </div>
           </div>
@@ -553,7 +645,7 @@
                   <div class="col-md-4"><label class="form-label" data-i18n="lbl_manualno">Manual Receipt No (Book)</label><input type="text" id="manualReceipt" class="form-control" placeholder="Optional"></div>
                   
                   <div class="col-12 mt-4 d-flex gap-2">
-                    <button type="submit" class="btn btn-madrassa px-4"><i class="fa-solid fa-print me-1"></i> <span data-i18n="btn_saveprint">Save & Print Receipt</span></button>
+                    <button type="submit" class="btn btn-primary-custom px-4"><i class="fa-solid fa-print me-1"></i> <span data-i18n="btn_saveprint">Save & Print Receipt</span></button>
                     <button type="button" id="whatsappShareBtn" class="btn btn-success px-4 d-none" onclick="shareToWhatsApp()"><i class="fa-brands fa-whatsapp me-1"></i> <span data-i18n="btn_whatsapp">Send via WhatsApp</span></button>
                   </div>
                 </div>
@@ -603,7 +695,7 @@
                     </div>
                   </div>
 
-                  <div class="col-12 text-end"><button type="submit" class="btn btn-madrassa px-4"><i class="fa-solid fa-user-plus me-1"></i> <span data-i18n="btn_addstaff">Register Staff</span></button></div>
+                  <div class="col-12 text-end"><button type="submit" class="btn btn-primary-custom px-4"><i class="fa-solid fa-user-plus me-1"></i> <span data-i18n="btn_addstaff">Register Staff</span></button></div>
                 </div>
               </form>
 
@@ -683,7 +775,7 @@
               <div class="col-md-6"><label class="form-label">Address</label><input type="text" id="editAddress" class="form-control"></div>
               <div class="col-12 mt-4 text-end">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="submit" class="btn btn-madrassa px-4">Update Details</button>
+                <button type="submit" class="btn btn-primary-custom px-4">Update Details</button>
               </div>
             </div>
           </form>
@@ -692,7 +784,7 @@
     </div>
   </div>
 
-  <!-- Super Admin Madrasa Edit Modal (With Email Field Included) -->
+  <!-- Super Admin Madrasa Edit Modal -->
   <div class="modal fade" id="superAdminEditMadrasaModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content border-0 shadow">
@@ -718,7 +810,7 @@
               </div>
               <div class="col-12 mt-4 text-end">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="submit" class="btn btn-madrassa px-4">Save Changes</button>
+                <button type="submit" class="btn btn-primary-custom px-4">Save Changes</button>
               </div>
             </div>
           </form>
@@ -747,7 +839,7 @@
             </div>
             <div class="text-end">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="btn_cancel">Cancel</button>
-              <button type="submit" class="btn btn-madrassa px-4" data-i18n="btn_add">Add Task</button>
+              <button type="submit" class="btn btn-primary-custom px-4" data-i18n="btn_add">Add Task</button>
             </div>
           </form>
         </div>
@@ -809,9 +901,9 @@
     const translations = {
       en: {
         portal_sub: "Digital Madrasa Management Suite",
-        tab_teacher: "Teacher Login",
-        tab_parent: "Parent",
-        tab_signup: "Register",
+        tab_login: "Login",
+        tab_signup: "Register Madrasa",
+        lbl_login_input: "Email Address or Student Reg No.",
         lbl_email: "Email Address",
         lbl_pwd: "Password",
         btn_signin: "Sign In",
@@ -908,9 +1000,9 @@
       },
       ml: {
         portal_sub: "സ്മാർട്ട് മദ്റസാ മാനേജ്‌മെന്റ് പോർട്ടൽ",
-        tab_teacher: "ഉസ്താദ് ലോഗിൻ",
-        tab_parent: "രക്ഷിതാവ്",
-        tab_signup: "രജിസ്ട്രേഷൻ",
+        tab_login: "ലോഗിൻ",
+        tab_signup: "മദ്റസ രജിസ്ട്രേഷൻ",
+        lbl_login_input: "ഇമെയിൽ അല്ലെങ്കിൽ കുട്ടിയുടെ Reg No.",
         lbl_email: "ഇമെയിൽ വിലാസം",
         lbl_pwd: "പാസ്‌വേഡ്",
         btn_signin: "പ്രവേശിക്കുക",
@@ -1017,6 +1109,26 @@
           el.innerText = translations[window.currentLang][key];
         }
       });
+    };
+
+    // Auto detect login mode: Email (Teacher) vs Number (Student)
+    window.detectLoginMode = () => {
+      const val = document.getElementById("loginIdentifier").value.trim();
+      const pwdGrp = document.getElementById("passwordGroup");
+      const phoneGrp = document.getElementById("phoneGroup");
+      const submitBtn = document.getElementById("btnAuthSubmit");
+
+      if (/^\d+$/.test(val)) {
+        // Numeric -> Student Mode
+        pwdGrp.classList.add("d-none");
+        phoneGrp.classList.remove("d-none");
+        submitBtn.innerText = window.currentLang === 'ml' ? "വിവരങ്ങൾ കാണുക" : "View Student Details";
+      } else {
+        // String / Email -> Teacher / Admin Mode
+        pwdGrp.classList.remove("d-none");
+        phoneGrp.classList.add("d-none");
+        submitBtn.innerText = window.currentLang === 'ml' ? "പ്രവേശിക്കുക" : "Sign In";
+      }
     };
   </script>
 
@@ -1183,15 +1295,75 @@
       });
     }
 
-    // Login
-    window.handleLogin = async (e) => {
+    // Unified Smart Login: Automatically handles Email (Teacher) or Numeric (Student)
+    window.handleUnifiedLogin = async (e) => {
       e.preventDefault();
-      try {
-        await signInWithEmailAndPassword(auth, document.getElementById("loginEmail").value, document.getElementById("loginPassword").value);
-      } catch (err) { alert("Sign-in failed: " + err.message); }
+      const identifier = document.getElementById("loginIdentifier").value.trim();
+
+      if (/^\d+$/.test(identifier)) {
+        // --- STUDENT / PARENT LOGIN ---
+        const reg = Number(identifier);
+        const mobile = document.getElementById("loginMobile").value.trim().slice(-10);
+
+        if (!mobile) return alert("Please enter the registered mobile number.");
+
+        const q = query(collection(db, "students"), where("regNo", "==", reg));
+        const snap = await getDocs(q);
+
+        if (snap.empty) return alert("Student record not found. Please check Reg No.");
+
+        let matchedStudent = null;
+        snap.forEach(d => {
+          const data = d.data();
+          const sPhone = (data.phone || '').replace(/[^0-9]/g, '').slice(-10);
+          if (sPhone === mobile) matchedStudent = data;
+        });
+
+        if (!matchedStudent) return alert("Provided phone number does not match student's records.");
+
+        sessionStorage.setItem("parentLoggedIn", "true");
+        document.getElementById("authSection").classList.add("d-none");
+        document.getElementById("parentViewSection").classList.remove("d-none");
+
+        document.getElementById("pvStudentName").innerText = matchedStudent.name;
+        document.getElementById("pvClass").innerText = "Class " + (matchedStudent.currentClass || '').replace(/Class\s*/i, "");
+        document.getElementById("pvRegNo").innerText = matchedStudent.regNo;
+        document.getElementById("pvFather").innerText = matchedStudent.fatherName || matchedStudent.guardianName || '-';
+
+        const feeQ = query(collection(db, "feeCollections"), where("institutionId", "==", matchedStudent.institutionId), where("regNo", "==", reg));
+        const feeSnap = await getDocs(feeQ);
+        let feeHtml = "";
+        feeSnap.forEach(fd => {
+          const f = fd.data();
+          feeHtml += `<tr><td>#${f.receiptNo}</td><td>${f.date || '-'}</td><td>${f.feeType}</td><td class="fw-bold text-success">₹${f.amount}</td></tr>`;
+        });
+        document.getElementById("pvFeeTableBody").innerHTML = feeHtml || `<tr><td colspan="4" class="text-center text-muted">No fee records found</td></tr>`;
+
+        const perfQ = query(collection(db, "performancePoints"), where("institutionId", "==", matchedStudent.institutionId), where("regNo", "==", reg));
+        const perfSnap = await getDocs(perfQ);
+        let totalPts = 0;
+        let perfHtml = "";
+        perfSnap.forEach(pd => {
+          const p = pd.data();
+          totalPts += (Number(p.points) || 0);
+          perfHtml += `<tr><td>${p.date || '-'}</td><td>${p.task}</td><td class="fw-bold ${p.points >= 0 ? 'text-success' : 'text-danger'}">${p.points > 0 ? '+' : ''}${p.points} Pts</td></tr>`;
+        });
+        document.getElementById("pvTotalPoints").innerText = totalPts + " Pts";
+        document.getElementById("pvPointsTableBody").innerHTML = perfHtml || `<tr><td colspan="3" class="text-center text-muted">No points awarded yet</td></tr>`;
+
+      } else {
+        // --- TEACHER / ADMIN LOGIN ---
+        const email = identifier;
+        const password = document.getElementById("loginPassword").value;
+        if (!password) return alert("Please enter your password.");
+
+        try {
+          await signInWithEmailAndPassword(auth, email, password);
+        } catch (err) { alert("Sign-in failed: " + err.message); }
+      }
     };
 
-    // New Madrasa Registration & Complete Form Reset
+    // New Madrasa Registration
     window.handleSignUp = async (e) => {
       e.preventDefault();
       const submitBtn = document.getElementById("btnSubmitSignup");
@@ -1223,7 +1395,6 @@
           createdAt: serverTimestamp()
         });
 
-        // Fully reset registration form
         document.getElementById("signupForm").reset();
 
         if (isDev) {
@@ -1240,7 +1411,7 @@
       }
     };
 
-    // Load Super Admin Madrasa Master List
+    // Load Super Admin Master List
     async function loadSuperAdminRequests() {
       const tbody = document.getElementById("superAdminTableBody");
       tbody.innerHTML = `<tr><td colspan="7" class="text-center">Loading registered madrasas...</td></tr>`;
@@ -1287,7 +1458,6 @@
       tbody.innerHTML = html || `<tr><td colspan="7" class="text-center text-muted">No madrasa accounts found.</td></tr>`;
     }
 
-    // Super Admin Switch Scope
     window.switchMadrasaScope = (instId, instName) => {
       currentInstitutionId = instId;
       document.getElementById("displayMadrassaName").innerText = instName + " (Super Admin View)";
@@ -1303,7 +1473,6 @@
       showTab('superAdminTab');
     };
 
-    // Open Super Admin Edit Madrasa Modal
     window.openSuperAdminEditMadrasaModal = (docId) => {
       const m = localMadrasasCache.find(x => x.id === docId);
       if (!m) return;
@@ -1319,7 +1488,6 @@
       new bootstrap.Modal(document.getElementById('superAdminEditMadrasaModal')).show();
     };
 
-    // Save Super Admin Edited Madrasa
     window.saveEditedMadrasaBySuperAdmin = async (e) => {
       e.preventDefault();
       const docId = document.getElementById("saEditDocId").value;
@@ -1362,57 +1530,6 @@
       }
     };
 
-    // Parent Login
-    window.handleParentLogin = async (e) => {
-      e.preventDefault();
-      const reg = Number(document.getElementById("parentRegNo").value);
-      const mobile = document.getElementById("parentMobile").value.trim().slice(-10);
-
-      const q = query(collection(db, "students"), where("regNo", "==", reg));
-      const snap = await getDocs(q);
-
-      if (snap.empty) return alert("Student record not found. Please verify Reg No.");
-
-      let matchedStudent = null;
-      snap.forEach(d => {
-        const data = d.data();
-        const sPhone = (data.phone || '').replace(/[^0-9]/g, '').slice(-10);
-        if (sPhone === mobile) matchedStudent = data;
-      });
-
-      if (!matchedStudent) return alert("Provided phone number does not match student's records.");
-
-      sessionStorage.setItem("parentLoggedIn", "true");
-      document.getElementById("authSection").classList.add("d-none");
-      document.getElementById("parentViewSection").classList.remove("d-none");
-
-      document.getElementById("pvStudentName").innerText = matchedStudent.name;
-      document.getElementById("pvClass").innerText = "Class " + (matchedStudent.currentClass || '').replace(/Class\s*/i, "");
-      document.getElementById("pvRegNo").innerText = matchedStudent.regNo;
-      document.getElementById("pvFather").innerText = matchedStudent.fatherName || matchedStudent.guardianName || '-';
-
-      const feeQ = query(collection(db, "feeCollections"), where("institutionId", "==", matchedStudent.institutionId), where("regNo", "==", reg));
-      const feeSnap = await getDocs(feeQ);
-      let feeHtml = "";
-      feeSnap.forEach(fd => {
-        const f = fd.data();
-        feeHtml += `<tr><td>#${f.receiptNo}</td><td>${f.date || '-'}</td><td>${f.feeType}</td><td class="fw-bold text-success">₹${f.amount}</td></tr>`;
-      });
-      document.getElementById("pvFeeTableBody").innerHTML = feeHtml || `<tr><td colspan="4" class="text-center text-muted">No fee records found</td></tr>`;
-
-      const perfQ = query(collection(db, "performancePoints"), where("institutionId", "==", matchedStudent.institutionId), where("regNo", "==", reg));
-      const perfSnap = await getDocs(perfQ);
-      let totalPts = 0;
-      let perfHtml = "";
-      perfSnap.forEach(pd => {
-        const p = pd.data();
-        totalPts += (Number(p.points) || 0);
-        perfHtml += `<tr><td>${p.date || '-'}</td><td>${p.task}</td><td class="fw-bold ${p.points >= 0 ? 'text-success' : 'text-danger'}">${p.points > 0 ? '+' : ''}${p.points} Pts</td></tr>`;
-      });
-      document.getElementById("pvTotalPoints").innerText = totalPts + " Pts";
-      document.getElementById("pvPointsTableBody").innerHTML = perfHtml || `<tr><td colspan="3" class="text-center text-muted">No points awarded yet</td></tr>`;
-    };
-
     window.logoutParent = () => {
       sessionStorage.removeItem("parentLoggedIn");
       document.getElementById("parentViewSection").classList.add("d-none");
@@ -1421,7 +1538,7 @@
 
     window.handleLogout = () => signOut(auth);
 
-    // Save Admission Form
+    // Admission, Students, Marks, Attendance, Fees Logic
     window.saveDetailedStudent = async (e) => {
       e.preventDefault();
       try {
@@ -1450,7 +1567,6 @@
       } catch (err) { alert("Error: " + err.message); }
     };
 
-    // Open Edit Modal for Student
     window.openEditStudentModal = (docId) => {
       const s = localStudentsCache.find(x => x.id === docId);
       if (!s) return;
@@ -1467,7 +1583,6 @@
       new bootstrap.Modal(document.getElementById('studentEditModal')).show();
     };
 
-    // Save Edited Student
     window.saveEditedStudent = async (e) => {
       e.preventDefault();
       const docId = document.getElementById("editDocId").value;
@@ -1490,7 +1605,6 @@
       } catch (err) { alert("Error: " + err.message); }
     };
 
-    // Delete Student
     window.deleteStudent = async (docId, name) => {
       if (confirm(`Are you sure you want to delete ${name}?`)) {
         try {
@@ -1501,7 +1615,6 @@
       }
     };
 
-    // Load Students List
     window.loadStudentsByClass = async (forceRefresh = false) => {
       let selectedClass = document.getElementById("filterClassSelect").value;
       if (currentUserRole !== "admin" && !isSuperAdmin && (!selectedClass || selectedClass === "ALL")) {
@@ -2134,15 +2247,18 @@
 
     window.switchAuthTab = (type) => {
       document.getElementById("loginForm").classList.add("d-none");
-      document.getElementById("parentLoginForm").classList.add("d-none");
       document.getElementById("signupForm").classList.add("d-none");
 
-      if (type === 'login') document.getElementById("loginForm").classList.remove("d-none");
-      else if (type === 'parent') document.getElementById("parentLoginForm").classList.remove("d-none");
-      else if (type === 'signup') document.getElementById("signupForm").classList.remove("d-none");
+      document.getElementById("tabBtnLogin").classList.remove("active");
+      document.getElementById("tabBtnRegister").classList.remove("active");
 
-      document.querySelectorAll("#authTabs .nav-link").forEach(b => b.classList.remove("active"));
-      event.target.classList.add("active");
+      if (type === 'login') {
+        document.getElementById("loginForm").classList.remove("d-none");
+        document.getElementById("tabBtnLogin").classList.add("active");
+      } else if (type === 'signup') {
+        document.getElementById("signupForm").classList.remove("d-none");
+        document.getElementById("tabBtnRegister").classList.add("active");
+      }
     };
 
     window.showTab = (tabId) => {
