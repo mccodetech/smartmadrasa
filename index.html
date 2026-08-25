@@ -35,6 +35,7 @@
       <div class="segmented-control">
         <button type="button" class="active" id="tabBtnLogin" onclick="switchAuthTab('login')" data-i18n="tab_login">Login</button>
         <button type="button" id="tabBtnRegister" onclick="switchAuthTab('signup')" data-i18n="tab_signup">Register Madrasa</button>
+        <button type="button" id="tabBtnStaffRegister" onclick="switchAuthTab('staffSignup')" data-i18n="tab_staff_signup">Staff Register</button>
       </div>
 
       <!-- 1. Single Unified Smart Login Form -->
@@ -95,6 +96,33 @@
         </div>
         <button type="submit" id="btnSubmitSignup" class="btn btn-primary-custom w-100" data-i18n="btn_createrecord">Submit for Approval</button>
       </form>
+
+      <!-- 3. Staff Registration Form -->
+      <form id="staffSignupForm" class="d-none" onsubmit="handleStaffSignUp(event)">
+        <div class="alert alert-info py-2 small" data-i18n="staff_reg_notice">Staff registration requires approval from the Institution Admin.</div>
+        <div class="mb-2">
+          <label class="form-label small fw-semibold" data-i18n="lbl_instcode">Madrasa Reg / Code</label>
+          <input type="text" id="staffInstCode" class="form-control" placeholder="e.g. MDR-1045" required>
+        </div>
+        <div class="mb-2">
+          <label class="form-label small fw-semibold" data-i18n="lbl_fullname">Full Name</label>
+          <input type="text" id="staffName" class="form-control" placeholder="Your Name" required>
+        </div>
+        <div class="mb-2">
+          <label class="form-label small fw-semibold" data-i18n="lbl_phone">Mobile Number</label>
+          <input type="tel" id="staffPhone" class="form-control" placeholder="9847..." required>
+        </div>
+        <div class="mb-2">
+          <label class="form-label small fw-semibold" data-i18n="lbl_email">Email Address</label>
+          <input type="email" id="staffEmail" class="form-control" placeholder="email@staff.com" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-semibold" data-i18n="lbl_pwd">Password</label>
+          <input type="password" id="staffPassword" class="form-control" placeholder="••••••••" required>
+        </div>
+        <button type="submit" id="btnStaffSubmitSignup" class="btn btn-primary-custom w-100" data-i18n="btn_submit_staff_reg">Register as Staff</button>
+      </form>
+
     </div>
   </div>
 
@@ -167,7 +195,7 @@
         </div>
         <div class="d-flex align-items-center gap-2 text-white">
           <button class="btn btn-sm btn-outline-warning d-none" id="superAdminBackBtn" onclick="returnToSuperAdminConsole()"><i class="fa-solid fa-arrow-left me-1"></i> Console</button>
-          <span class="badge bg-light text-dark d-none d-sm-inline-block" id="displayUserRole">Principal</span>
+          <span class="badge bg-light text-dark d-none d-sm-inline-block" id="displayUserRole">Admin</span>
           <span class="small d-none d-md-inline-block" id="displayUserName"><i class="fa-solid fa-user"></i> Staff</span>
           <button class="btn btn-outline-light btn-sm" onclick="handleLogout()"><i class="fa-solid fa-right-from-bracket"></i> <span data-i18n="btn_logout" class="d-none d-sm-inline-block">Logout</span></button>
         </div>
@@ -591,14 +619,32 @@
           <div id="teachersTab" class="content-tab d-none">
             <div class="card p-4">
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-chalkboard-user"></i> <span data-i18n="nav_staff">Staff Management</span></h5>
-              <form onsubmit="registerNewTeacher(event)" class="mb-4">
-                <div class="row g-3">
-                  <div class="col-md-4"><label class="form-label" data-i18n="lbl_fullname">Full Name *</label><input type="text" id="tName" class="form-control" required></div>
-                  <div class="col-md-4"><label class="form-label" data-i18n="lbl_phone">Mobile Number *</label><input type="tel" id="tPhone" class="form-control" required></div>
-                  <div class="col-md-4"><label class="form-label" data-i18n="lbl_email">Email Address *</label><input type="email" id="tEmail" class="form-control" required></div>
-                  <div class="col-md-4"><label class="form-label" data-i18n="lbl_pwd">Password *</label><input type="password" id="tPassword" class="form-control" required></div>
-                  <div class="col-md-4">
-                    <label class="form-label" data-i18n="lbl_assignedclasses">Assigned Classes</label>
+              
+              <!-- Pending Approvals Section -->
+              <div id="pendingStaffSection" class="mb-4 d-none">
+                  <h6 class="fw-bold text-warning mb-2"><i class="fa-solid fa-clock me-1"></i> Pending Staff Approvals</h6>
+                  <div class="table-responsive">
+                      <table class="table table-bordered align-middle table-warning">
+                          <thead>
+                              <tr>
+                                  <th data-i18n="th_name">Name</th>
+                                  <th data-i18n="th_email">Email</th>
+                                  <th data-i18n="th_phone">Phone</th>
+                                  <th style="width: 150px;" class="text-center" data-i18n="th_actions">Action</th>
+                              </tr>
+                          </thead>
+                          <tbody id="pendingStaffTableBody"></tbody>
+                      </table>
+                  </div>
+              </div>
+
+              <!-- Assign Classes Form (used when approving or registering directly) -->
+              <form id="assignClassesForm" onsubmit="assignClassesToStaff(event)" class="mb-4 d-none">
+                <input type="hidden" id="assignStaffId">
+                <h6 class="fw-bold text-primary mb-2">Assign Classes to <span id="assignStaffNameDisplay"></span></h6>
+                <div class="row g-3 align-items-end">
+                  <div class="col-md-8">
+                    <label class="form-label" data-i18n="lbl_assignedclasses">Select Classes</label>
                     <div class="dropdown">
                       <button class="btn btn-outline-secondary dropdown-toggle w-100 text-start d-flex justify-content-between align-items-center" type="button" id="regClassDropdownBtn" data-bs-toggle="dropdown" data-bs-auto-close="outside">
                         <span id="regClassDropdownLabel">Select Class</span>
@@ -619,7 +665,10 @@
                       </ul>
                     </div>
                   </div>
-                  <div class="col-4 d-flex align-items-end"><button type="submit" class="btn btn-primary-custom w-100"><i class="fa-solid fa-user-plus me-1"></i> <span data-i18n="btn_addstaff">Register Staff</span></button></div>
+                  <div class="col-md-4">
+                      <button type="button" class="btn btn-secondary me-2" onclick="cancelAssignClasses()">Cancel</button>
+                      <button type="submit" class="btn btn-success"><i class="fa-solid fa-check me-1"></i> Confirm Approval</button>
+                  </div>
                 </div>
               </form>
 
