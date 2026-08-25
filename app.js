@@ -152,10 +152,11 @@ onAuthStateChanged(auth, async (user) => {
             if (attendanceMenuBtn) attendanceMenuBtn.classList.add("d-none");
             if (marksMenuBtn) marksMenuBtn.classList.add("d-none");
             if (performanceMenuBtn) performanceMenuBtn.classList.add("d-none");
-            if (feesMenuBtn) feesMenuBtn.classList.add("d-none");
             
+            // Show Student Action buttons for Admin
             if (adminActions) adminActions.classList.remove("d-none");
             if (actionCol) actionCol.classList.remove("d-none");
+            if (feesMenuBtn) feesMenuBtn.classList.remove("d-none"); // Allow admin to see fees
 
             showTab('instAdminTab'); 
             loadPrincipalsList(); 
@@ -200,14 +201,14 @@ onAuthStateChanged(auth, async (user) => {
 
 function populateClassDropdowns() {
   const allClasses = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
-  const allowedClasses = (currentUserRole === "principal" || isSuperAdmin) ? allClasses : currentUserAssignedClasses;
+  const allowedClasses = (currentUserRole === "principal" || currentUserRole === "admin" || isSuperAdmin) ? allClasses : currentUserAssignedClasses;
 
   const filterSelect = document.getElementById("filterClassSelect");
   if (filterSelect) {
     filterSelect.innerHTML = "";
-    if (currentUserRole === "principal" || isSuperAdmin) filterSelect.innerHTML += `<option value="ALL">All Classes</option>`;
+    if (currentUserRole === "principal" || currentUserRole === "admin" || isSuperAdmin) filterSelect.innerHTML += `<option value="ALL">All Classes</option>`;
     allowedClasses.forEach(c => filterSelect.innerHTML += `<option value="${c}">Class ${c}</option>`);
-    if (currentUserRole !== "principal" && !isSuperAdmin && allowedClasses.length === 1) filterSelect.value = allowedClasses[0];
+    if (currentUserRole !== "principal" && currentUserRole !== "admin" && !isSuperAdmin && allowedClasses.length === 1) filterSelect.value = allowedClasses[0];
   }
 
   const dropdowns = ["attClassSelect", "markClassSelect", "perfClassSelect", "feeClassSelect"];
@@ -215,12 +216,12 @@ function populateClassDropdowns() {
     const select = document.getElementById(id);
     if (select) {
       select.innerHTML = "";
-      if (allowedClasses.length > 1 || currentUserRole === "principal" || isSuperAdmin) {
+      if (allowedClasses.length > 1 || currentUserRole === "principal" || currentUserRole === "admin" || isSuperAdmin) {
         select.innerHTML = `<option value="">-- Select Class --</option>`;
       }
       allowedClasses.forEach(c => select.innerHTML += `<option value="${c}">Class ${c}</option>`);
 
-      if (currentUserRole !== "principal" && !isSuperAdmin && allowedClasses.length === 1) {
+      if (currentUserRole !== "principal" && currentUserRole !== "admin" && !isSuperAdmin && allowedClasses.length === 1) {
         select.value = allowedClasses[0];
         if (id === "attClassSelect") loadAttendanceSheet();
         if (id === "markClassSelect") loadMarksEntrySheet();
@@ -238,6 +239,7 @@ window.handleUnifiedLogin = async (e) => {
   const identifier = document.getElementById("loginIdentifier").value.trim();
 
   if (/^\d+$/.test(identifier)) {
+    // Parent Login
     const reg = Number(identifier);
     const mobile = document.getElementById("loginMobile").value.trim().slice(-10);
 
@@ -257,6 +259,7 @@ window.handleUnifiedLogin = async (e) => {
 
     if (!matchedStudent) return alert("Provided phone number does not match student's records.");
 
+    // Find siblings
     const siblingsQ = query(collection(db, "students"), where("institutionId", "==", matchedStudent.institutionId));
     const siblingsSnap = await getDocs(siblingsQ);
     
@@ -286,6 +289,7 @@ window.handleUnifiedLogin = async (e) => {
     loadParentStudentData(matchedStudent);
 
   } else {
+    // Staff Login
     const email = identifier.toLowerCase();
     const password = document.getElementById("loginPassword").value;
     if (!password) return alert("Please enter your password.");
@@ -347,6 +351,7 @@ window.handleSignUp = async (e) => {
     const pwd = document.getElementById("regPassword").value;
     const instId = board + "_" + instCode;
     
+    // Additional generic fields for Institution
     const address = document.getElementById("regAddress") ? document.getElementById("regAddress").value.trim().toUpperCase() : "";
     const place = document.getElementById("regPlace") ? document.getElementById("regPlace").value.trim().toUpperCase() : "";
     const po = document.getElementById("regPo") ? document.getElementById("regPo").value.trim().toUpperCase() : "";
@@ -712,6 +717,7 @@ window.instAssignClassesToStaff = async (e) => {
         
         const staff = pendingStaffCache.find(s => s.id === staffId);
         if(staff) {
+            // WhatsApp Msg
             if(staff.whatsapp || staff.phone) {
                 const destPhone = staff.whatsapp || staff.phone;
                 let waMsg = `Hello ${staff.name},%0A%0AYour registration as ${role} at *${document.getElementById("displayMadrassaName").innerText}* has been *approved*.%0A%0AYou can now login using your email: ${staff.email}.`;
@@ -722,6 +728,7 @@ window.instAssignClassesToStaff = async (e) => {
                 window.open(waUrl, "_blank");
             }
             
+            // Email Msg
             if(staff.email) {
                 const subject = encodeURIComponent(`Smart Madrasa - ${role.charAt(0).toUpperCase() + role.slice(1)} Registration Approved`);
                 const body = encodeURIComponent(`Hello ${staff.name},\n\nYour registration as ${role} at ${document.getElementById("displayMadrassaName").innerText} has been approved.\n\nYou can now login using your email: ${staff.email}.\n\nRegards,\nInstitution Admin`);
@@ -734,106 +741,6 @@ window.instAssignClassesToStaff = async (e) => {
         document.getElementById("instAssignClassesForm").classList.add("d-none");
         loadPrincipalsList(); 
     } catch (err) { alert("Error: " + err.message); }
-};
-
-// ==========================================
-// CSV DOWNLOAD & UPLOAD (CORRECTED ORDER)
-// ==========================================
-
-window.downloadCSVFormat = () => {
-    // Exact requested order
-    const headers = "REG NO.,ID NO.,AADHAAR NUMBER,STUDENT NAME,GENDER,D.O.B,BLOOD GROUP,CURRENT CLASS,JOINED CLASS,JOINED DATE,PRESENCE,FATHER NAME,MOTHER NAME,GUARDIAN NAME,RELATION,GUARDIAN OCCUPATION,MOBILE NUMBER,EMERGENCY NUMBER,HOUSE NAME,PLACE,PO,PINCODE,DISTRICT,STATE,TRANSFERRED TO,REASON FOR LEAVING,DATE OF LEAVING,TC ISSUED,TC DETAILS,IDENTIFICATION MARKS,SPECIAL INFO\n";
-    const sampleData = "101,A123,123456789012,MUHAMMED,Male,2015-05-12,O+,1,1,2021-06-01,Regular,ABDULLA,FATHIMA,ABDULLA,Father,Business,9876543210,9876543211,HOUSE NAME,CALICUT,CALICUT PO,673001,KOZHIKODE,KERALA,,,,,,,,None,\n";
-    const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(headers + sampleData);
-    
-    const link = document.createElement("a");
-    link.setAttribute("href", csvContent);
-    link.setAttribute("download", "student_bulk_import_format.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-};
-
-window.handleBulkUpload = () => {
-  const fileInput = document.getElementById("csvFileInput");
-  const statusDiv = document.getElementById("bulkStatus");
-  if (!fileInput.files.length) return alert("Please select a CSV file.");
-
-  statusDiv.classList.remove("d-none");
-  statusDiv.innerText = "Analyzing file...";
-
-  Papa.parse(fileInput.files[0], {
-    header: true,
-    skipEmptyLines: true,
-    complete: async (results) => {
-      const rows = results.data;
-      try {
-        const batch = writeBatch(db);
-        rows.forEach((row) => {
-          const newStudentRef = doc(collection(db, "students"));
-          const regNum = parseInt(row["REG NO."] || 0, 10);
-          
-          batch.set(newStudentRef, {
-            institutionId: currentInstitutionId,
-            regNo: isNaN(regNum) ? 0 : regNum,
-            idNo: (row["ID NO."] || "").toUpperCase(),
-            aadhaar: row["AADHAAR NUMBER"] || row["AADHAAR"] || "",
-            name: (row["STUDENT NAME"] || row["NAME"] || "").toUpperCase(),
-            gender: row["GENDER"] || "Male",
-            dob: row["D.O.B"] || "",
-            bloodGroup: row["BLOOD GROUP"] || "",
-            
-            currentClass: (row["CURRENT CLASS"] || "1").replace(/Class\s*/i, "").trim(),
-            joinedClass: (row["JOINED CLASS"] || "").toUpperCase(),
-            joinedDate: row["JOINED DATE"] || "",
-            presence: (row["PRESENCE"] || "").toUpperCase(),
-
-            fatherName: (row["FATHER NAME"] || "").toUpperCase(),
-            motherName: (row["MOTHER NAME"] || "").toUpperCase(),
-            guardianName: (row["GUARDIAN NAME"] || "").toUpperCase(),
-            relation: (row["RELATION"] || "").toUpperCase(),
-            guardianOccupation: (row["GUARDIAN OCCUPATION"] || "").toUpperCase(),
-            phone: row["MOBILE NUMBER"] || row["MOBILE NO"] || row["PHONE"] || "",
-            emergencyPhone: row["EMERGENCY NUMBER"] || row["EMERGENCY NO"] || "",
-
-            houseName: (row["HOUSE NAME"] || row["ADDRESS"] || "").toUpperCase(),
-            place: (row["PLACE"] || "").toUpperCase(),
-            postOffice: (row["PO"] || "").toUpperCase(),
-            pincode: row["PINCODE"] || "",
-            district: (row["DISTRICT"] || "").toUpperCase(),
-            state: (row["STATE"] || "KERALA").toUpperCase(),
-
-            transferredTo: (row["TRANSFERRED TO"] || "").toUpperCase(),
-            reasonLeaving: (row["REASON FOR LEAVING"] || "").toUpperCase(),
-            dateOfLeaving: row["DATE OF LEAVING"] || "",
-            tcIssued: row["TC ISSUED"] || row["TC ISSUED(Yes/No)"] || "No",
-            tcDetails: (row["TC DETAILS"] || "").toUpperCase(),
-
-            identificationMarks: (row["IDENTIFICATION MARKS"] || "").toUpperCase(),
-            specialInfo: (row["SPECIAL INFO"] || "").toUpperCase(),
-            
-            status: "active",
-            createdAt: serverTimestamp()
-          });
-        });
-
-        await batch.commit();
-        statusDiv.className = "alert alert-success";
-        statusDiv.innerText = `Successfully imported ${rows.length} students!`;
-        
-        setTimeout(() => {
-            bootstrap.Modal.getInstance(document.getElementById('bulkImportModal')).hide();
-            loadStudentsByClass(true);
-            fileInput.value = "";
-            statusDiv.classList.add("d-none");
-        }, 1500);
-
-      } catch (err) {
-        statusDiv.className = "alert alert-danger";
-        statusDiv.innerText = "Error: " + err.message;
-      }
-    }
-  });
 };
 
 // ==========================================
@@ -862,6 +769,7 @@ window.openStudentProfileModal = (docId) => {
         document.getElementById("stuJoinedClass").value = s.joinedClass || '';
         document.getElementById("stuDoj").value = s.joinedDate || '';
         document.getElementById("stuPresence").value = s.presence || '';
+        document.getElementById("stuMonthlyFee").value = s.monthlyFeeAmount || '';
 
         document.getElementById("stuFatherName").value = s.fatherName || '';
         document.getElementById("stuMotherName").value = s.motherName || '';
@@ -916,6 +824,7 @@ window.saveStudentProfile = async (e) => {
         joinedClass: document.getElementById("stuJoinedClass").value.trim().toUpperCase(),
         joinedDate: document.getElementById("stuDoj").value,
         presence: document.getElementById("stuPresence").value.trim().toUpperCase(),
+        monthlyFeeAmount: Number(document.getElementById("stuMonthlyFee").value) || 0,
 
         fatherName: document.getElementById("stuFatherName").value.trim().toUpperCase(),
         motherName: document.getElementById("stuMotherName").value.trim().toUpperCase(),
@@ -972,7 +881,7 @@ window.deleteStudent = async (docId, name) => {
 
 window.loadStudentsByClass = async (forceRefresh = false) => {
   let selectedClass = document.getElementById("filterClassSelect").value;
-  if (currentUserRole !== "principal" && !isSuperAdmin && (!selectedClass || selectedClass === "ALL")) {
+  if (currentUserRole !== "principal" && currentUserRole !== "admin" && !isSuperAdmin && (!selectedClass || selectedClass === "ALL")) {
     selectedClass = currentUserAssignedClasses[0] || "1";
     document.getElementById("filterClassSelect").value = selectedClass;
   }
@@ -1379,37 +1288,126 @@ window.saveClassMarks = async () => {
   } catch (err) { alert("Error: " + err.message); }
 };
 
-// Fees
+// ==========================================
+// NEW FEES LOGIC
+// ==========================================
+
 window.loadStudentsForFees = async () => {
   const selClass = document.getElementById("feeClassSelect").value;
-  const select = document.getElementById("feeStudentSelect");
-  if (!selClass) { select.innerHTML = `<option value="">-- Select Class --</option>`; return; }
+  const tableArea = document.getElementById("feesTableArea");
+  const tbody = document.getElementById("feesTableBody");
 
+  if (!selClass) { tableArea.classList.add("d-none"); return; }
+  
+  tableArea.classList.remove("d-none");
+  tbody.innerHTML = `<tr><td colspan="7" class="text-center">Loading...</td></tr>`;
+
+  // Fetch Students
   const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", selClass.replace(/Class\s*/i, "").trim()));
   const snap = await getDocs(q);
 
-  let html = `<option value="">-- Select Student --</option>`;
-  snap.forEach(d => {
-    const s = d.data();
-    html += `<option value="${d.id}" data-reg="${s.regNo}" data-name="${s.name}" data-class="${s.currentClass}" data-phone="${s.phone || ''}">Reg: ${s.regNo} - ${s.name}</option>`;
+  let students = [];
+  snap.forEach(d => students.push({ id: d.id, ...d.data() }));
+  students.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
+
+  if(students.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">No students in this class.</td></tr>`;
+      return;
+  }
+
+  // Fetch Paid Fees History for this class
+  const feeQ = query(collection(db, "feeCollections"), where("institutionId", "==", currentInstitutionId), where("class", "==", selClass.replace(/Class\s*/i, "").trim()));
+  const feeSnap = await getDocs(feeQ);
+  
+  // Group fees by student to find last payment
+  const feeHistory = {};
+  feeSnap.forEach(d => {
+      const f = d.data();
+      if(!feeHistory[f.regNo]) feeHistory[f.regNo] = [];
+      feeHistory[f.regNo].push(f);
   });
-  select.innerHTML = html;
+
+  let html = "";
+  students.forEach(s => {
+    const defaultFee = s.monthlyFeeAmount || 0;
+    
+    // Find last paid info
+    let lastPaidText = "<span class='text-muted small'>None</span>";
+    if(feeHistory[s.regNo] && feeHistory[s.regNo].length > 0) {
+        // Sort by timestamp or date to get latest
+        const sortedFees = feeHistory[s.regNo].sort((a,b) => b.receiptNo - a.receiptNo);
+        const last = sortedFees[0];
+        lastPaidText = `<span class='text-success small fw-bold'>${last.feeType}</span><br><small class='text-muted'>(${last.date})</small>`;
+    }
+
+    // JSON encode student data for the button click
+    const sDataStr = encodeURIComponent(JSON.stringify({
+        id: s.id,
+        regNo: s.regNo,
+        name: s.name,
+        class: s.currentClass,
+        phone: s.phone || '',
+        fee: defaultFee
+    }));
+
+    html += `
+      <tr>
+        <td><b>${s.regNo || '-'}</b></td>
+        <td><b>${s.name}</b></td>
+        <td class="text-primary fw-bold">₹${defaultFee}</td>
+        <td>${lastPaidText}</td>
+        <td>
+            <input type="text" id="payType_${s.regNo}" class="form-control form-control-sm text-uppercase" placeholder="e.g. JUNE or ADM FEE">
+        </td>
+        <td>
+            <input type="number" id="payAmt_${s.regNo}" class="form-control form-control-sm fw-bold" value="${defaultFee}">
+        </td>
+        <td>
+            <button class="btn btn-sm btn-success w-100" onclick="openFeeModal('${sDataStr}')">Pay</button>
+        </td>
+      </tr>
+    `;
+  });
+  tbody.innerHTML = html;
 };
 
-window.processFeeReceipt = async (e) => {
-  e.preventDefault();
-  const sSelect = document.getElementById("feeStudentSelect");
-  const opt = sSelect.options[sSelect.selectedIndex];
-  if (!opt || !opt.value) return alert("Select student.");
+window.openFeeModal = (studentDataStr) => {
+    const s = JSON.parse(decodeURIComponent(studentDataStr));
+    
+    // Get values from the table inputs
+    const typedMonth = document.getElementById(`payType_${s.regNo}`).value.trim();
+    let typedAmt = document.getElementById(`payAmt_${s.regNo}`).value.trim();
 
-  const sId = opt.value;
-  const reg = opt.getAttribute("data-reg");
-  const name = opt.getAttribute("data-name");
-  const sClass = opt.getAttribute("data-class");
-  const phone = opt.getAttribute("data-phone");
-  const amount = document.getElementById("feeAmount").value;
-  const type = document.getElementById("feeType").value;
-  const manual = document.getElementById("manualReceipt").value.trim().toUpperCase();
+    if(!typedAmt) typedAmt = s.fee;
+
+    // Set Hidden Inputs
+    document.getElementById("payStudentId").value = s.id;
+    document.getElementById("payStudentReg").value = s.regNo;
+    document.getElementById("payStudentName").value = s.name;
+    document.getElementById("payStudentClass").value = s.class;
+    document.getElementById("payStudentPhone").value = s.phone;
+
+    // Set Visible Inputs
+    document.getElementById("payStudentNameDisplay").innerText = `${s.name} (Reg: ${s.regNo})`;
+    document.getElementById("payFeeType").value = typedMonth || "MONTHLY FEE";
+    document.getElementById("payAmount").value = typedAmt;
+    document.getElementById("payManualReceipt").value = "";
+
+    new bootstrap.Modal(document.getElementById('feePaymentModal')).show();
+};
+
+window.saveFeePayment = async (e) => {
+  e.preventDefault();
+  
+  const sId = document.getElementById("payStudentId").value;
+  const reg = document.getElementById("payStudentReg").value;
+  const name = document.getElementById("payStudentName").value;
+  const sClass = document.getElementById("payStudentClass").value;
+  const phone = document.getElementById("payStudentPhone").value;
+  
+  const amount = document.getElementById("payAmount").value;
+  const type = document.getElementById("payFeeType").value.trim().toUpperCase();
+  const manual = document.getElementById("payManualReceipt").value.trim().toUpperCase();
   const today = new Date().toLocaleDateString();
 
   try {
@@ -1441,6 +1439,7 @@ window.processFeeReceipt = async (e) => {
       timestamp: serverTimestamp()
     });
 
+    // Setup Printable Receipt
     document.getElementById("recMadrassaName").innerText = document.getElementById("displayMadrassaName").innerText;
     document.getElementById("recNo").innerText = "#" + nextReceiptNo;
     document.getElementById("recDate").innerText = today;
@@ -1470,11 +1469,20 @@ window.processFeeReceipt = async (e) => {
       date: today
     };
 
-    document.getElementById("whatsappShareBtn").classList.remove("d-none");
+    if(phone) {
+         document.getElementById("whatsappShareBtn").classList.remove("d-none");
+    } else {
+         document.getElementById("whatsappShareBtn").classList.add("d-none");
+    }
 
+    bootstrap.Modal.getInstance(document.getElementById('feePaymentModal')).hide();
+    
+    // Hide App and Show Print View
+    document.getElementById("appSection").classList.add("d-none");
     document.getElementById("printableReceipt").classList.remove("d-none");
-    window.print();
-    document.getElementById("printableReceipt").classList.add("d-none");
+    
+    // Reload table silently
+    loadStudentsForFees();
 
   } catch (err) { alert("Error: " + err.message); }
 };
@@ -1488,7 +1496,7 @@ window.shareToWhatsApp = () => {
   msg += `Date: ${p.date}%0A`;
   msg += `Student: *${p.name}* (Reg No: ${p.reg})%0A`;
   msg += `Class: ${p.class}%0A`;
-  msg += `Type: ${p.type}%0A`;
+  msg += `Month/Type: ${p.type}%0A`;
   if (p.manual) msg += `Book Receipt No: ${p.manual}%0A`;
   msg += `Amount Received: *₹${p.amount}*%0A%0A`;
   msg += `_May Allah bless you_`;
@@ -1501,180 +1509,107 @@ window.shareToWhatsApp = () => {
   window.open(waUrl, "_blank");
 };
 
-// Staff Profile Add / Edit Functionality
-window.openStaffProfileModal = (staffId) => {
-  document.getElementById("staffProfileForm").reset();
-  document.querySelectorAll('.sp-class-cb').forEach(cb => cb.checked = false);
+// ==========================================
+// CSV DOWNLOAD & UPLOAD
+// ==========================================
 
-  if (staffId) {
-      const staff = localPrincipalsCache.find(s => s.id === staffId) || localTeachersCache.find(s => s.id === staffId);
-      if(!staff) return;
+window.downloadCSVFormat = () => {
+    const headers = "REG NO.,ID NO.,AADHAAR NUMBER,STUDENT NAME,GENDER,D.O.B,BLOOD GROUP,CURRENT CLASS,JOINED CLASS,JOINED DATE,PRESENCE,MONTHLY FEE,FATHER NAME,MOTHER NAME,GUARDIAN NAME,RELATION,GUARDIAN OCCUPATION,MOBILE NUMBER,EMERGENCY NUMBER,HOUSE NAME,PLACE,PO,PINCODE,DISTRICT,STATE,TRANSFERRED TO,REASON FOR LEAVING,DATE OF LEAVING,TC ISSUED,TC DETAILS,IDENTIFICATION MARKS,SPECIAL INFO\n";
+    const sampleData = "101,A123,123456789012,MUHAMMED,Male,2015-05-12,O+,1,1,2021-06-01,Regular,200,ABDULLA,FATHIMA,ABDULLA,Father,Business,9876543210,9876543211,HOUSE NAME,CALICUT,CALICUT PO,673001,KOZHIKODE,KERALA,,,,,,,,None,\n";
+    const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(headers + sampleData);
+    
+    const link = document.createElement("a");
+    link.setAttribute("href", csvContent);
+    link.setAttribute("download", "student_bulk_import_format.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+};
 
-      document.getElementById("staffModalTitle").innerText = `Edit Profile: ${staff.name}`;
-      document.getElementById("spDocId").value = staff.id;
-      document.getElementById("spAuthSection").classList.add("d-none");
+window.handleBulkUpload = () => {
+  const fileInput = document.getElementById("csvFileInput");
+  const statusDiv = document.getElementById("bulkStatus");
+  if (!fileInput.files.length) return alert("Please select a CSV file.");
 
-      document.getElementById("spName").value = staff.name || "";
-      document.getElementById("spGender").value = staff.gender || "Male";
-      document.getElementById("spDob").value = staff.dob || "";
-      document.getElementById("spBlood").value = staff.bloodGroup || "";
-      document.getElementById("spGuardian").value = staff.guardianName || "";
-      document.getElementById("spMarital").value = staff.maritalStatus || "Single";
-      document.getElementById("spAadhaar").value = staff.aadhaar || "";
+  statusDiv.classList.remove("d-none");
+  statusDiv.innerText = "Analyzing file...";
 
-      document.getElementById("spPhone").value = staff.phone || "";
-      document.getElementById("spWhatsapp").value = staff.whatsapp || "";
-      document.getElementById("spEmergency").value = staff.emergencyPhone || "";
-      document.getElementById("spHouse").value = staff.houseName || "";
-      document.getElementById("spPo").value = staff.postOffice || "";
-      document.getElementById("spPin").value = staff.pincode || "";
-      document.getElementById("spDistrict").value = staff.district || "";
-      document.getElementById("spState").value = staff.state || "KERALA";
+  Papa.parse(fileInput.files[0], {
+    header: true,
+    skipEmptyLines: true,
+    complete: async (results) => {
+      const rows = results.data;
+      try {
+        const batch = writeBatch(db);
+        rows.forEach((row) => {
+          const newStudentRef = doc(collection(db, "students"));
+          const regNum = parseInt(row["REG NO."] || 0, 10);
+          
+          batch.set(newStudentRef, {
+            institutionId: currentInstitutionId,
+            regNo: isNaN(regNum) ? 0 : regNum,
+            idNo: (row["ID NO."] || "").toUpperCase(),
+            aadhaar: row["AADHAAR NUMBER"] || row["AADHAAR"] || "",
+            name: (row["STUDENT NAME"] || row["NAME"] || "").toUpperCase(),
+            gender: row["GENDER"] || "Male",
+            dob: row["D.O.B"] || "",
+            bloodGroup: row["BLOOD GROUP"] || "",
+            
+            currentClass: (row["CURRENT CLASS"] || "1").replace(/Class\s*/i, "").trim(),
+            joinedClass: (row["JOINED CLASS"] || "").toUpperCase(),
+            joinedDate: row["JOINED DATE"] || "",
+            presence: (row["PRESENCE"] || "").toUpperCase(),
+            monthlyFeeAmount: Number(row["MONTHLY FEE"]) || 0,
 
-      document.getElementById("spRelEdu").value = staff.religiousEdu || "";
-      document.getElementById("spGenEdu").value = staff.generalEdu || "";
-      document.getElementById("spLanguages").value = staff.languages || "";
-      document.getElementById("spSkills").value = staff.skills || "";
-      document.getElementById("spAwards").value = staff.awards || "";
+            fatherName: (row["FATHER NAME"] || "").toUpperCase(),
+            motherName: (row["MOTHER NAME"] || "").toUpperCase(),
+            guardianName: (row["GUARDIAN NAME"] || "").toUpperCase(),
+            relation: (row["RELATION"] || "").toUpperCase(),
+            guardianOccupation: (row["GUARDIAN OCCUPATION"] || "").toUpperCase(),
+            phone: row["MOBILE NUMBER"] || row["MOBILE NO"] || row["PHONE"] || "",
+            emergencyPhone: row["EMERGENCY NUMBER"] || row["EMERGENCY NO"] || "",
 
-      document.getElementById("spRole").value = staff.role || "teacher";
-      document.getElementById("spDesignation").value = staff.designation || "";
-      document.getElementById("spMsr").value = staff.msrNo || "";
-      document.getElementById("spEmpType").value = staff.employmentType || "Full Time";
-      document.getElementById("spExp").value = staff.experience || "";
-      document.getElementById("spDoj").value = staff.doj || "";
+            houseName: (row["HOUSE NAME"] || row["ADDRESS"] || "").toUpperCase(),
+            place: (row["PLACE"] || "").toUpperCase(),
+            postOffice: (row["PO"] || "").toUpperCase(),
+            pincode: row["PINCODE"] || "",
+            district: (row["DISTRICT"] || "").toUpperCase(),
+            state: (row["STATE"] || "KERALA").toUpperCase(),
 
-      if(staff.assignedClasses) {
-          staff.assignedClasses.forEach(c => {
-              const cb = document.getElementById("spc" + c);
-              if(cb) cb.checked = true;
+            transferredTo: (row["TRANSFERRED TO"] || "").toUpperCase(),
+            reasonLeaving: (row["REASON FOR LEAVING"] || "").toUpperCase(),
+            dateOfLeaving: row["DATE OF LEAVING"] || "",
+            tcIssued: row["TC ISSUED"] || row["TC ISSUED(Yes/No)"] || "No",
+            tcDetails: (row["TC DETAILS"] || "").toUpperCase(),
+
+            identificationMarks: (row["IDENTIFICATION MARKS"] || "").toUpperCase(),
+            specialInfo: (row["SPECIAL INFO"] || "").toUpperCase(),
+            
+            status: "active",
+            createdAt: serverTimestamp()
           });
+        });
+
+        await batch.commit();
+        statusDiv.className = "alert alert-success";
+        statusDiv.innerText = `Successfully imported ${rows.length} students!`;
+        
+        setTimeout(() => {
+            bootstrap.Modal.getInstance(document.getElementById('bulkImportModal')).hide();
+            loadStudentsByClass(true);
+            fileInput.value = "";
+            statusDiv.classList.add("d-none");
+        }, 1500);
+
+      } catch (err) {
+        statusDiv.className = "alert alert-danger";
+        statusDiv.innerText = "Error: " + err.message;
       }
-
-      document.getElementById("spAccName").value = staff.bankAccName || "";
-      document.getElementById("spAccNo").value = staff.bankAccNo || "";
-      document.getElementById("spIfsc").value = staff.bankIfsc || "";
-      document.getElementById("spBank").value = staff.bankName || "";
-      document.getElementById("spBranch").value = staff.bankBranch || "";
-
-      document.getElementById("spTransFrom").value = staff.transferredFrom || "";
-      document.getElementById("spTransTo").value = staff.transferredTo || "";
-      document.getElementById("spDol").value = staff.dol || "";
-      document.getElementById("spReason").value = staff.reasonLeaving || "";
-
-  } else {
-      document.getElementById("staffModalTitle").innerText = "Register New Staff / Principal";
-      document.getElementById("spDocId").value = "";
-      document.getElementById("spAuthSection").classList.remove("d-none"); 
-  }
-
-  const triggerEl = document.querySelector('#staffTabs button[data-bs-target="#tab-personal"]')
-  bootstrap.Tab.getOrCreateInstance(triggerEl).show()
-
-  new bootstrap.Modal(document.getElementById('staffProfileModal')).show();
-};
-
-window.saveStaffProfile = async (e) => {
-  e.preventDefault();
-
-  const staffId = document.getElementById("spDocId").value;
-  const role = document.getElementById("spRole").value;
-  
-  const classCheckboxes = document.querySelectorAll('.sp-class-cb:checked');
-  const assignedClasses = Array.from(classCheckboxes).map(cb => cb.value);
-
-  const profileData = {
-      name: document.getElementById("spName").value.trim().toUpperCase(),
-      gender: document.getElementById("spGender").value,
-      dob: document.getElementById("spDob").value,
-      bloodGroup: document.getElementById("spBlood").value,
-      guardianName: document.getElementById("spGuardian").value.trim().toUpperCase(),
-      maritalStatus: document.getElementById("spMarital").value,
-      aadhaar: document.getElementById("spAadhaar").value.trim(),
-      
-      phone: document.getElementById("spPhone").value.trim(),
-      whatsapp: document.getElementById("spWhatsapp").value.trim(),
-      emergencyPhone: document.getElementById("spEmergency").value.trim(),
-      houseName: document.getElementById("spHouse").value.trim().toUpperCase(),
-      postOffice: document.getElementById("spPo").value.trim().toUpperCase(),
-      pincode: document.getElementById("spPin").value.trim(),
-      district: document.getElementById("spDistrict").value.trim().toUpperCase(),
-      state: document.getElementById("spState").value.trim().toUpperCase(),
-
-      religiousEdu: document.getElementById("spRelEdu").value.trim().toUpperCase(),
-      generalEdu: document.getElementById("spGenEdu").value.trim().toUpperCase(),
-      languages: document.getElementById("spLanguages").value.trim().toUpperCase(),
-      skills: document.getElementById("spSkills").value.trim().toUpperCase(),
-      awards: document.getElementById("spAwards").value.trim().toUpperCase(),
-
-      role: role,
-      designation: document.getElementById("spDesignation").value.trim().toUpperCase(),
-      msrNo: document.getElementById("spMsr").value.trim().toUpperCase(),
-      employmentType: document.getElementById("spEmpType").value,
-      experience: document.getElementById("spExp").value,
-      doj: document.getElementById("spDoj").value,
-      assignedClasses: role === 'principal' ? ["1","2","3","4","5","6","7","8","9","10","11","12"] : assignedClasses,
-
-      bankAccName: document.getElementById("spAccName").value.trim().toUpperCase(),
-      bankAccNo: document.getElementById("spAccNo").value.trim(),
-      bankIfsc: document.getElementById("spIfsc").value.trim().toUpperCase(),
-      bankName: document.getElementById("spBank").value.trim().toUpperCase(),
-      bankBranch: document.getElementById("spBranch").value.trim().toUpperCase(),
-
-      transferredFrom: document.getElementById("spTransFrom").value.trim().toUpperCase(),
-      transferredTo: document.getElementById("spTransTo").value.trim().toUpperCase(),
-      dol: document.getElementById("spDol").value,
-      reasonLeaving: document.getElementById("spReason").value.trim().toUpperCase(),
-      
-      updatedAt: serverTimestamp()
-  };
-
-  try {
-      if (staffId) {
-          await updateDoc(doc(db, "users", staffId), profileData);
-          alert("Profile updated successfully!");
-      } else {
-          const email = document.getElementById("spAuthEmail").value.trim().toLowerCase();
-          const pwd = document.getElementById("spAuthPassword").value;
-          
-          if(!email || !pwd) return alert("Email and Password are required to create a new account.");
-          
-          const cred = await createUserWithEmailAndPassword(auth, email, pwd);
-          
-          profileData.uid = cred.user.uid;
-          profileData.email = email;
-          profileData.institutionId = currentInstitutionId;
-          profileData.status = "active";
-          profileData.createdAt = serverTimestamp();
-
-          await setDoc(doc(db, "users", cred.user.uid), profileData);
-          alert("New staff registered successfully! You will be automatically signed in as the new user.");
-      }
-
-      bootstrap.Modal.getInstance(document.getElementById('staffProfileModal')).hide();
-      
-      if(currentUserRole === 'admin') loadPrincipalsList();
-      else loadTeachersList();
-
-  } catch (err) { alert("Error: " + err.message); }
-};
-
-window.deleteUser = async (userId, name) => {
-    if (confirm(`Are you sure you want to remove ${name}?`)) {
-        try {
-            await deleteDoc(doc(db, "users", userId));
-            alert(`${name} removed successfully.`);
-            
-            if (currentUserRole === 'admin') loadPrincipalsList();
-            else if (currentUserRole === 'principal') loadTeachersList();
-            else if (currentUserRole === 'superadmin') loadSuperAdminRequests();
-            
-        } catch (err) {
-            alert("Error: " + err.message);
-        }
     }
+  });
 };
 
+// ... (Rest of UI functions)
 window.showSignupForm = (type) => {
   document.getElementById("signupOptions").classList.add("d-none");
   if(type === 'madrasa') document.getElementById("signupForm").classList.remove("d-none");
