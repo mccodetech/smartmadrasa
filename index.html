@@ -74,20 +74,19 @@
           </div>
       </div>
 
-      <!-- 2a. Madrasa Registration Form (Updated) -->
+      <!-- 2a. Madrasa Registration Form -->
       <form id="signupForm" class="d-none" onsubmit="handleSignUp(event)">
         <button type="button" class="btn btn-sm btn-link text-decoration-none mb-3 p-0" onclick="switchAuthTab('signup')"><i class="fa-solid fa-arrow-left"></i> Back</button>
         <div class="alert alert-warning py-2 small">New registrations require Developer / Super Admin approval before activation.</div>
-        
         <div class="mb-2">
             <label class="form-label small fw-semibold">Board of Education</label>
             <select id="regBoard" class="form-select" required>
                 <option value="">Select Board</option>
-                <option value="SKIMVB">SKIMVB (Samastha EK)</option>
-                <option value="SKSVB">SKSVB (Samastha AP)</option>
-                <option value="DKIMVB">DKIMVB (Dakshina Kerala)</option>
-                <option value="MTIK">MTIK (KNM)</option>
-                <option value="CBSE">CBSE / Other Schools</option>
+                <option value="SKIMVB">SKIMVB</option>
+                <option value="SKSVB">SKSVB</option>
+                <option value="DKIMVB">DKIMVB</option>
+                <option value="MTIK">MTIK</option>
+                <option value="CBSE">CBSE / Other</option>
                 <option value="Other">Other</option>
             </select>
         </div>
@@ -100,28 +99,51 @@
           <input type="text" id="regInstName" class="form-control text-uppercase" placeholder="Madrasa Full Name" required>
         </div>
         <div class="mb-2">
-          <label class="form-label small fw-semibold">Place / Location</label>
-          <input type="text" id="regPlace" class="form-control text-uppercase" placeholder="Location Name" required>
+          <label class="form-label small fw-semibold">Address / Building Name</label>
+          <input type="text" id="regAddress" class="form-control text-uppercase" placeholder="Building Name" required>
+        </div>
+        <div class="row g-2 mb-2">
+            <div class="col-6">
+                <label class="form-label small fw-semibold">Place / Location</label>
+                <input type="text" id="regPlace" class="form-control text-uppercase" placeholder="Location Name" required>
+            </div>
+            <div class="col-6">
+                <label class="form-label small fw-semibold">Post Office (PO)</label>
+                <input type="text" id="regPo" class="form-control text-uppercase" placeholder="PO Name" required>
+            </div>
+        </div>
+        <div class="row g-2 mb-2">
+            <div class="col-6">
+                <label class="form-label small fw-semibold">District</label>
+                <input type="text" id="regDistrict" class="form-control text-uppercase" placeholder="District Name" required>
+            </div>
+            <div class="col-6">
+                <label class="form-label small fw-semibold">Pincode</label>
+                <input type="text" id="regPincode" class="form-control" placeholder="Pincode" required>
+            </div>
         </div>
         <div class="mb-2">
-          <label class="form-label small fw-semibold">District</label>
-          <input type="text" id="regDistrict" class="form-control text-uppercase" placeholder="District Name" required>
+          <label class="form-label small fw-semibold">Google Maps Location Link</label>
+          <input type="url" id="regLocationLink" class="form-control" placeholder="Optional (e.g. https://maps.google.com/...)">
         </div>
         <div class="mb-2">
           <label class="form-label small fw-semibold">Institution Admin Name</label>
           <input type="text" id="regUserName" class="form-control text-uppercase" placeholder="Your Name" required>
         </div>
-        <div class="mb-2">
-          <label class="form-label small fw-semibold">Mobile Number</label>
-          <input type="tel" id="regPhone" class="form-control" placeholder="9847..." oninput="document.getElementById('regWhatsapp').value = this.value" required>
-        </div>
-        <div class="mb-2">
-            <label class="form-label small fw-semibold">WhatsApp Number (For Approval Notifications)</label>
-            <input type="tel" id="regWhatsapp" class="form-control" placeholder="WhatsApp No">
+        <div class="row g-2 mb-2">
+            <div class="col-6">
+                <label class="form-label small fw-semibold">Mobile Number</label>
+                <input type="tel" id="regPhone" class="form-control" placeholder="9847..." oninput="document.getElementById('regWhatsapp').value = this.value" required>
+            </div>
+            <div class="col-6">
+                <label class="form-label small fw-semibold">WhatsApp Number</label>
+                <input type="tel" id="regWhatsapp" class="form-control" placeholder="WhatsApp No">
+            </div>
         </div>
         <div class="mb-2">
           <label class="form-label small fw-semibold">Email Address</label>
-          <input type="email" id="regEmail" class="form-control" placeholder="email@madrasa.com" required>
+          <!-- Added oninput to ensure it remains lowercase -->
+          <input type="email" id="regEmail" class="form-control" placeholder="email@madrasa.com" oninput="this.value = this.value.toLowerCase()" required>
         </div>
         <div class="mb-3">
           <label class="form-label small fw-semibold">Password</label>
@@ -130,7 +152,7 @@
         <button type="submit" id="btnSubmitSignup" class="btn btn-primary-custom w-100">Submit for Approval</button>
       </form>
 
-      <!-- 2b. Staff Registration Form (Updated) -->
+      <!-- 2b. Staff Registration Form -->
       <form id="staffSignupForm" class="d-none" onsubmit="handleStaffSignUp(event)">
         <button type="button" class="btn btn-sm btn-link text-decoration-none mb-3 p-0" onclick="switchAuthTab('signup')"><i class="fa-solid fa-arrow-left"></i> Back</button>
         <div class="alert alert-info py-2 small">Registration requires approval from the Institution Admin/Principal.</div>
@@ -170,12 +192,13 @@
           <input type="tel" id="staffPhone" class="form-control" placeholder="9847..." oninput="document.getElementById('staffWhatsapp').value = this.value" required>
         </div>
         <div class="mb-2">
-            <label class="form-label small fw-semibold">WhatsApp Number</label>
-            <input type="tel" id="staffWhatsapp" class="form-control" placeholder="WhatsApp No">
+            <label class="form-label small fw-semibold">WhatsApp Number (For Notifications)</label>
+            <input type="tel" id="staffWhatsapp" class="form-control" placeholder="Optional if same as mobile">
         </div>
         <div class="mb-2">
           <label class="form-label small fw-semibold">Email Address</label>
-          <input type="email" id="staffEmail" class="form-control" placeholder="email@staff.com" required>
+          <!-- Added oninput to ensure it remains lowercase -->
+          <input type="email" id="staffEmail" class="form-control" placeholder="email@staff.com" oninput="this.value = this.value.toLowerCase()" required>
         </div>
         <div class="mb-3">
           <label class="form-label small fw-semibold">Password</label>
@@ -693,7 +716,7 @@
                <div class="row g-2">
                    <div class="col-md-6">
                        <label class="form-label small">Email Address *</label>
-                       <input type="email" id="spAuthEmail" class="form-control">
+                       <input type="email" id="spAuthEmail" class="form-control" oninput="this.value = this.value.toLowerCase()">
                    </div>
                    <div class="col-md-6">
                        <label class="form-label small">Password *</label>
@@ -779,6 +802,7 @@
                     <div class="col-md-12" id="spClassesDiv">
                       <label class="form-label small">Assigned Classes (Select Multiple)</label>
                       <div class="d-flex flex-wrap gap-2">
+                        <!-- Render checkboxes directly for ease in modal -->
                         <div class="form-check"><input type="checkbox" class="form-check-input sp-class-cb" value="1" id="spc1"><label class="form-check-label" for="spc1">Class 1</label></div>
                         <div class="form-check"><input type="checkbox" class="form-check-input sp-class-cb" value="2" id="spc2"><label class="form-check-label" for="spc2">Class 2</label></div>
                         <div class="form-check"><input type="checkbox" class="form-check-input sp-class-cb" value="3" id="spc3"><label class="form-check-label" for="spc3">Class 3</label></div>
@@ -850,9 +874,6 @@
                 <select id="editCurrentClass" class="form-select" required>
                   <option value="1">Class 1</option><option value="2">Class 2</option><option value="3">Class 3</option>
                   <option value="4">Class 4</option><option value="5">Class 5</option>
-                  <option value="6">Class 6</option><option value="7">Class 7</option><option value="8">Class 8</option>
-                  <option value="9">Class 9</option><option value="10">Class 10</option><option value="11">Class 11</option>
-                  <option value="12">Class 12</option>
                 </select>
               </div>
               <div class="col-md-3"><label class="form-label">Date of Birth</label><input type="date" id="editDob" class="form-control"></div>
@@ -897,7 +918,7 @@
               <div class="col-md-4"><label class="form-label">Madrasa Code *</label><input type="text" id="saEditInstCode" class="form-control text-uppercase" required></div>
               <div class="col-md-4"><label class="form-label">Madrasa Name *</label><input type="text" id="saEditInstName" class="form-control text-uppercase" required></div>
               <div class="col-md-4"><label class="form-label">Inst. Admin Name *</label><input type="text" id="saEditName" class="form-control text-uppercase" required></div>
-              <div class="col-md-4"><label class="form-label">Email Address *</label><input type="email" id="saEditEmail" class="form-control" required></div>
+              <div class="col-md-4"><label class="form-label">Email Address *</label><input type="email" id="saEditEmail" class="form-control" oninput="this.value = this.value.toLowerCase()" required></div>
               <div class="col-md-4"><label class="form-label">Phone *</label><input type="tel" id="saEditPhone" class="form-control" required></div>
               <div class="col-md-12">
                 <label class="form-label">Status</label>
@@ -942,34 +963,6 @@
           </form>
         </div>
       </div>
-    </div>
-  </div>
-
-  <!-- Printable Digital Receipt Component -->
-  <div id="printableReceipt" class="p-4 bg-white border d-none m-auto" style="max-width: 480px;">
-    <div class="text-center border-bottom pb-3 mb-3">
-      <h4 class="fw-bold mb-1" id="recMadrassaName">Smart Madrasa</h4>
-      <p class="small text-muted mb-0">Fee Receipt</p>
-    </div>
-    <div class="d-flex justify-content-between mb-2">
-      <span>Receipt No: <b id="recNo">#1</b></span>
-      <span id="recDate">Date</span>
-    </div>
-    <div class="d-flex justify-content-between mb-2">
-      <span>Student: <b id="recStudentName">-</b></span>
-      <span>Reg No: <b id="recAdmNo">101</b></span>
-    </div>
-    <div class="d-flex justify-content-between mb-2">
-      <span>Class: <b id="recClass">-</b></span>
-      <span id="recManualBox" class="d-none">Manual No: <b id="recManualNo">-</b></span>
-    </div>
-    <div class="mb-2">Item: <span id="recFeeType">Monthly Fee</span></div>
-    <div class="mb-3 border-top pt-2 d-flex justify-content-between align-items-center">
-      <span class="fw-bold">Amount Paid:</span>
-      <h4 class="fw-bold text-success mb-0" id="recAmount">₹0</h4>
-    </div>
-    <div class="text-center mt-3 pt-2 border-top">
-      <small class="text-muted">Issued by: <span id="recCollector">Staff</span></small>
     </div>
   </div>
 
