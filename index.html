@@ -38,6 +38,7 @@
             <input type="text" id="loginIdentifier" class="form-control" placeholder="name@madrasa.com / 101" oninput="detectLoginMode()" required>
           </div>
         </div>
+
         <div class="mb-3" id="passwordGroup">
           <label class="form-label fw-semibold small">Password</label>
           <div class="input-group">
@@ -45,6 +46,7 @@
             <input type="password" id="loginPassword" class="form-control" placeholder="••••••••">
           </div>
         </div>
+
         <div class="mb-3 d-none" id="phoneGroup">
           <label class="form-label fw-semibold small">Registered Mobile Number</label>
           <div class="input-group">
@@ -52,6 +54,7 @@
             <input type="tel" id="loginMobile" class="form-control" placeholder="9847...">
           </div>
         </div>
+
         <button type="submit" id="btnAuthSubmit" class="btn btn-primary-custom w-100 mt-2">Sign In</button>
       </form>
 
@@ -66,7 +69,7 @@
               <button class="btn btn-outline-primary p-3 text-start" onclick="showSignupForm('staff')">
                   <i class="fa-solid fa-chalkboard-user fs-4 mb-2 d-block"></i>
                   <strong class="d-block">Join as Staff / Principal</strong>
-                  <small class="text-muted">Requires existing Madrasa Code</small>
+                  <small class="text-muted">Requires existing Madrasa ID</small>
               </button>
           </div>
       </div>
@@ -156,6 +159,10 @@
           <input type="tel" id="staffPhone" class="form-control" placeholder="9847..." required>
         </div>
         <div class="mb-2">
+            <label class="form-label small fw-semibold">WhatsApp Number (For Notifications)</label>
+            <input type="tel" id="staffWhatsapp" class="form-control" placeholder="Optional if same as mobile">
+        </div>
+        <div class="mb-2">
           <label class="form-label small fw-semibold">Email Address</label>
           <input type="email" id="staffEmail" class="form-control" placeholder="email@staff.com" required>
         </div>
@@ -207,6 +214,15 @@
               </table>
             </div>
           </div>
+          <div class="card p-4">
+            <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-star me-2"></i>Performance Tasks History</h5>
+            <div class="table-responsive">
+              <table class="table table-bordered align-middle">
+                <thead class="table-light"><tr><th>Date</th><th>Task / Category</th><th>Points</th></tr></thead>
+                <tbody id="pvPointsTableBody"><tr><td colspan="3" class="text-center text-muted">No points awarded yet</td></tr></tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -253,7 +269,7 @@
             <div class="nav flex-column nav-pills gap-1" id="desktopTabMenu">
               <button class="nav-link active text-start" id="homeMenuBtn" onclick="showTab('homeDashboardTab')"><i class="fa-solid fa-house me-2"></i> Home</button>
               <button class="nav-link text-start d-none" id="superAdminMasterBtn" onclick="showTab('superAdminTab')"><i class="fa-solid fa-shield-halved me-2"></i> All Madrasas</button>
-              <button class="nav-link text-start d-none" id="instAdminStaffBtn" onclick="showTab('instAdminTab')"><i class="fa-solid fa-user-tie me-2"></i> Manage Staff</button>
+              <button class="nav-link text-start d-none" id="instAdminStaffBtn" onclick="showTab('instAdminTab')"><i class="fa-solid fa-user-tie me-2"></i> Staff & Principals</button>
               <button class="nav-link text-start" id="studentsMenuBtn" onclick="showTab('studentsListTab')"><i class="fa-solid fa-users me-2"></i> Students</button>
               <button class="nav-link text-start" id="attendanceMenuBtn" onclick="showTab('attendanceTab')"><i class="fa-solid fa-calendar-check me-2"></i> Attendance</button>
               <button class="nav-link text-start" id="marksMenuBtn" onclick="showTab('marksTab')"><i class="fa-solid fa-award me-2"></i> Marks Entry</button>
@@ -294,7 +310,6 @@
                   <button class="btn btn-sm btn-outline-success" onclick="openStaffProfileModal(null)"><i class="fa-solid fa-plus me-1"></i> Add Staff / Principal</button>
               </div>
               
-              <!-- Pending Staff for Inst Admin -->
               <div id="instPendingStaffSection" class="mb-4 d-none">
                   <h6 class="fw-bold text-warning mb-2"><i class="fa-solid fa-clock me-1"></i> Pending Approvals</h6>
                   <div class="table-responsive">
@@ -305,7 +320,6 @@
                   </div>
               </div>
 
-               <!-- Approval Form -->
               <form id="instAssignClassesForm" onsubmit="instAssignClassesToStaff(event)" class="mb-4 d-none border p-3 rounded bg-light">
                 <input type="hidden" id="instAssignStaffId">
                 <input type="hidden" id="instAssignStaffRole">
@@ -354,7 +368,6 @@
 
           <!-- 1. Home Dashboard -->
           <div id="homeDashboardTab" class="content-tab">
-            <!-- Summary Cards & Leaderboard (Same as before) -->
             <div class="row g-3 mb-4">
                 <div class="col-md-4">
                   <div class="card p-4 text-center dashboard-card border-start border-4 border-success" onclick="showTab('attendanceTab')">
@@ -384,7 +397,6 @@
 
           <!-- 2. Students List Tab -->
           <div id="studentsListTab" class="content-tab d-none">
-            <!-- Student Table details... -->
             <div class="card p-4">
               <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
                 <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-users"></i> Student Directory</h5>
@@ -413,7 +425,6 @@
 
           <!-- 3. Admission Form Tab -->
           <div id="admissionTab" class="content-tab d-none">
-             <!-- Admission Form (Unchanged) -->
              <div class="card p-4">
               <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-address-card"></i> Student Admission Form</h5>
@@ -446,7 +457,6 @@
 
           <!-- 4. Attendance Module -->
           <div id="attendanceTab" class="content-tab d-none">
-             <!-- Attendance details... -->
              <div class="card p-4">
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-calendar-check"></i> Daily Attendance</h5>
               <div class="row g-3 mb-4">
@@ -473,7 +483,6 @@
           <div id="marksTab" class="content-tab d-none">
             <div class="card p-4">
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-award"></i> Examination Marks Entry</h5>
-              <!-- Marks Selection & Table... -->
               <div class="row g-3 mb-4">
                 <div class="col-md-6">
                   <label class="form-label">Select Exam *</label>
@@ -500,7 +509,6 @@
           <!-- 6. Performance Tab -->
           <div id="performanceTab" class="content-tab d-none">
             <div class="card p-4">
-               <!-- Perf details... -->
                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
                 <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-star me-2"></i>Student Performance & Tasks</h5>
                 <button class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#customTaskModal"><i class="fa-solid fa-plus me-1"></i> Add Custom Task</button>
@@ -536,7 +544,6 @@
 
           <!-- 7. Fees Tab -->
           <div id="feesTab" class="content-tab d-none">
-             <!-- Fees Form... -->
              <div class="card p-4">
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-receipt"></i> Fee Collection & Receipt</h5>
               <div class="row g-3 mb-4">
@@ -891,6 +898,55 @@
               </div>
             </div>
           </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Custom Task -->
+  <div class="modal fade" id="customTaskModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-madrassa text-white">
+          <h5 class="modal-title fw-bold">Add Custom Task</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <form onsubmit="addNewCustomTask(event)">
+            <div class="mb-3">
+              <label class="form-label">Task Name *</label>
+              <input type="text" id="newTaskName" class="form-control text-uppercase" placeholder="e.g. Reading Competition" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Points (+ or -) *</label>
+              <input type="number" id="newTaskPoints" class="form-control" placeholder="e.g. 10 or -5" required>
+            </div>
+            <div class="text-end">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-primary-custom px-4">Add Task</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bulk Import Modal -->
+  <div class="modal fade" id="bulkImportModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-madrassa text-white">
+          <h5 class="modal-title fw-bold"><i class="fa-solid fa-file-csv me-1"></i> Bulk Import (Excel/CSV)</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+              <p class="text-muted small m-0">Select the CSV file downloaded from Excel/Google Sheets.</p>
+              <button class="btn btn-sm btn-outline-primary" onclick="downloadCSVFormat()"><i class="fa-solid fa-download me-1"></i> Download Format</button>
+          </div>
+          <input type="file" id="csvFileInput" class="form-control mb-3" accept=".csv">
+          <div id="bulkStatus" class="alert alert-info d-none"></div>
+          <button class="btn btn-success w-100" onclick="handleBulkUpload()"><i class="fa-solid fa-cloud-arrow-up me-1"></i> Import Data</button>
         </div>
       </div>
     </div>
