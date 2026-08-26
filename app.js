@@ -66,8 +66,6 @@ const pageSize = 50;
 
 let sysFeePermission = "all"; 
 let sysReqManualReceipt = false;
-
-// We need a map to quickly look up institution names for Super Admin
 let instIdToNameMap = {};
 
 window.updateDropdownLabel = (type) => {
@@ -92,7 +90,6 @@ onAuthStateChanged(auth, async (user) => {
 
         isSuperAdmin = (user.email === SUPER_ADMIN_EMAIL);
         
-        // Handle pending users
         if (!isSuperAdmin && userData.status === "pending") {
            let alertMsg = "Your registration is pending approval.";
            if(userData.role === 'admin') alertMsg = "Your Madrasa registration is pending approval from the Super Admin. Please contact support.";
@@ -134,7 +131,6 @@ onAuthStateChanged(auth, async (user) => {
           if (superMasterBtn) superMasterBtn.classList.remove("d-none");
           if (userRoleEl) userRoleEl.innerText = "Super Admin";
           
-          // Pre-fetch all institution names for super admin to show in students table
           const qAllAdmins = query(collection(db, "users"), where("role", "==", "admin"));
           const adminSnaps = await getDocs(qAllAdmins);
           adminSnaps.forEach(a => {
@@ -150,7 +146,6 @@ onAuthStateChanged(auth, async (user) => {
           }
         }
 
-        // Reset visibility
         if (tMenuBtn) tMenuBtn.classList.add("d-none");
         if (pMenuBtn) pMenuBtn.classList.add("d-none");
         if (adminActions) adminActions.classList.add("d-none");
@@ -214,7 +209,7 @@ onAuthStateChanged(auth, async (user) => {
         } else if (currentUserRole === "principal") {
           showTab('homeDashboardTab');
           loadLeaderboard();
-          loadPrincipalsList(); // LOAD STAFF LIST PROPERLY
+          loadPrincipalsList(); 
         } else if (currentUserRole === "teacher") {
           showTab('homeDashboardTab');
           loadLeaderboard();
@@ -636,7 +631,6 @@ window.logoutParent = () => {
 
 window.handleLogout = () => signOut(auth);
 
-// Load Principals & Staff List for Inst Admin
 window.loadPrincipalsList = async () => {
     const tbody = document.getElementById("principalsTableBody");
     const pendingTbody = document.getElementById("instPendingStaffTableBody");
@@ -775,7 +769,7 @@ window.instAssignClassesToStaff = async (e) => {
 };
 
 // ==========================================
-// STUDENT PROFILE MODAL (JS VALIDATION)
+// STUDENT PROFILE MODAL
 // ==========================================
 
 window.openStudentProfileModal = (docId) => {
@@ -1047,8 +1041,42 @@ window.filterStudentsLocal = () => {
   tbody.innerHTML = html || `<tr><td colspan="7" class="text-center text-muted">No matching results found.</td></tr>`;
 };
 
+// ==========================================
+// ATTENDANCE, MARKS, PERFORMANCE BUTTON RESETS
+// ==========================================
+
+window.resetAttendanceButton = () => {
+  const btn = document.getElementById("btnSaveAttendance");
+  if(btn) {
+      btn.disabled = false;
+      btn.className = "btn btn-primary-custom px-4 mt-2";
+      btn.innerHTML = `<i class="fa-solid fa-check-double me-1"></i> Save Attendance`;
+  }
+};
+
+window.resetMarksButton = () => {
+  const btn = document.getElementById("btnSaveMarks");
+  if(btn) {
+      btn.disabled = false;
+      btn.className = "btn btn-primary-custom px-4 mt-2";
+      btn.innerHTML = `<i class="fa-solid fa-floppy-disk me-1"></i> Save Marks`;
+  }
+};
+
+window.resetPerfButton = () => {
+  const btn = document.getElementById("btnSavePerf");
+  if(btn) {
+      btn.disabled = false;
+      btn.className = "btn btn-primary-custom px-4 mt-2";
+      btn.innerHTML = `<i class="fa-solid fa-floppy-disk me-1"></i> Save Points`;
+  }
+};
+
+// ==========================================
+
 // Bulk Performance Entry
 window.loadStudentsForPerfSheet = async () => {
+  resetPerfButton();
   const selClass = document.getElementById("perfClassSelect").value;
   if (!selClass) { document.getElementById("perfSheetArea").classList.add("d-none"); return; }
 
@@ -1106,6 +1134,12 @@ window.saveBulkPerformancePoints = async () => {
   const points = Number(pointsStr) || 10;
   const today = new Date().toLocaleDateString();
 
+  const btn = document.getElementById("btnSavePerf");
+  if(btn) {
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-1"></i> Saving...`;
+  }
+
   const checkedRows = document.querySelectorAll("#perfTableBody tr");
   const batch = writeBatch(db);
   let count = 0;
@@ -1134,10 +1168,20 @@ window.saveBulkPerformancePoints = async () => {
     }
   });
 
-  if (!count) return alert("Please select at least one student.");
+  if (!count) {
+      if(btn) {
+          btn.disabled = false;
+          btn.innerHTML = `<i class="fa-solid fa-floppy-disk me-1"></i> Save Points`;
+      }
+      return alert("Please select at least one student.");
+  }
 
   try {
     await batch.commit();
+    if(btn) {
+        btn.className = "btn btn-secondary px-4 mt-2"; 
+        btn.innerHTML = `<i class="fa-solid fa-check me-1"></i> Saved Successfully`;
+    }
     alert(`Successfully awarded '${taskTitle}' points to ${count} students.`);
     
     document.getElementById("perfSheetArea").classList.add("d-none");
@@ -1147,7 +1191,13 @@ window.saveBulkPerformancePoints = async () => {
     if (searchInput) searchInput.value = "";
     
     loadLeaderboard();
-  } catch (err) { alert("Error: " + err.message); }
+  } catch (err) { 
+      if(btn) {
+          btn.disabled = false;
+          btn.innerHTML = `<i class="fa-solid fa-floppy-disk me-1"></i> Save Points`;
+      }
+      alert("Error: " + err.message); 
+  }
 };
 
 window.addNewCustomTask = (e) => {
@@ -1198,6 +1248,7 @@ async function loadLeaderboard() {
 
 // Attendance
 window.loadAttendanceSheet = async () => {
+  resetAttendanceButton();
   const selClass = document.getElementById("attClassSelect").value;
   if (!selClass) { document.getElementById("attendanceSheetArea").classList.add("d-none"); return; }
 
@@ -1240,12 +1291,19 @@ window.updateAttendanceCount = () => {
   const total = document.querySelectorAll(".att-checkbox").length;
   const present = document.querySelectorAll(".att-checkbox:checked").length;
   document.getElementById("attCountInfo").innerText = `Total: ${total} | Present: ${present} | Absent: ${total - present}`;
+  resetAttendanceButton(); // Re-enable save button if they make a change
 };
 
 window.saveClassAttendance = async () => {
   const date = document.getElementById("attDate").value;
   const selClass = document.getElementById("attClassSelect").value;
   if (!date || !selClass) return alert("Select date and class.");
+
+  const btn = document.getElementById("btnSaveAttendance");
+  if(btn) {
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-1"></i> Saving...`;
+  }
 
   const rows = document.querySelectorAll("#attendanceTableBody tr[data-sid]");
   const records = {};
@@ -1264,12 +1322,24 @@ window.saveClassAttendance = async () => {
       recordedBy: auth.currentUser.uid,
       timestamp: serverTimestamp()
     });
+    
+    if(btn) {
+        btn.className = "btn btn-secondary px-4 mt-2"; 
+        btn.innerHTML = `<i class="fa-solid fa-check me-1"></i> Saved Successfully`;
+    }
     alert("Attendance recorded successfully.");
-  } catch (err) { alert("Error: " + err.message); }
+  } catch (err) { 
+      if(btn) {
+          btn.disabled = false;
+          btn.innerHTML = `<i class="fa-solid fa-check-double me-1"></i> Save Attendance`;
+      }
+      alert("Error: " + err.message); 
+  }
 };
 
 // Marks
 window.loadMarksEntrySheet = async () => {
+  resetMarksButton();
   const selClass = document.getElementById("markClassSelect").value;
   if (!selClass) { document.getElementById("marksSheetArea").classList.add("d-none"); return; }
 
@@ -1291,12 +1361,12 @@ window.loadMarksEntrySheet = async () => {
       <tr data-sid="${s.id}" data-reg="${s.regNo}" data-name="${s.name}">
         <td><b>${s.regNo || '-'}</b></td>
         <td>${s.name}</td>
-        <td><input type="number" class="form-control form-control-sm text-center m-quran" style="max-width:70px; margin:auto;"></td>
-        <td><input type="number" class="form-control form-control-sm text-center m-tajweed" style="max-width:70px; margin:auto;"></td>
-        <td><input type="number" class="form-control form-control-sm text-center m-fiqh" style="max-width:70px; margin:auto;"></td>
-        <td><input type="number" class="form-control form-control-sm text-center m-aqeeda" style="max-width:70px; margin:auto;"></td>
-        <td><input type="number" class="form-control form-control-sm text-center m-tareekh" style="max-width:70px; margin:auto;"></td>
-        <td><input type="number" class="form-control form-control-sm text-center m-lisan" style="max-width:70px; margin:auto;"></td>
+        <td><input type="number" class="form-control form-control-sm text-center m-quran" style="max-width:70px; margin:auto;" oninput="resetMarksButton()"></td>
+        <td><input type="number" class="form-control form-control-sm text-center m-tajweed" style="max-width:70px; margin:auto;" oninput="resetMarksButton()"></td>
+        <td><input type="number" class="form-control form-control-sm text-center m-fiqh" style="max-width:70px; margin:auto;" oninput="resetMarksButton()"></td>
+        <td><input type="number" class="form-control form-control-sm text-center m-aqeeda" style="max-width:70px; margin:auto;" oninput="resetMarksButton()"></td>
+        <td><input type="number" class="form-control form-control-sm text-center m-tareekh" style="max-width:70px; margin:auto;" oninput="resetMarksButton()"></td>
+        <td><input type="number" class="form-control form-control-sm text-center m-lisan" style="max-width:70px; margin:auto;" oninput="resetMarksButton()"></td>
       </tr>
     `;
   });
@@ -1307,6 +1377,12 @@ window.saveClassMarks = async () => {
   const exam = document.getElementById("markExamSelect").value;
   const selClass = document.getElementById("markClassSelect").value;
   if (!exam || !selClass) return alert("Select exam and class.");
+
+  const btn = document.getElementById("btnSaveMarks");
+  if(btn) {
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-1"></i> Saving...`;
+  }
 
   const rows = document.querySelectorAll("#marksTableBody tr[data-sid]");
   const batch = writeBatch(db);
@@ -1338,13 +1414,19 @@ window.saveClassMarks = async () => {
 
   try {
     await batch.commit();
+    if(btn) {
+        btn.className = "btn btn-secondary px-4 mt-2"; 
+        btn.innerHTML = `<i class="fa-solid fa-check me-1"></i> Saved Successfully`;
+    }
     alert("Marks saved successfully.");
-  } catch (err) { alert("Error: " + err.message); }
+  } catch (err) { 
+      if(btn) {
+          btn.disabled = false;
+          btn.innerHTML = `<i class="fa-solid fa-floppy-disk me-1"></i> Save Marks`;
+      }
+      alert("Error: " + err.message); 
+  }
 };
-
-// ==========================================
-// FEES LOGIC (WITH SETTINGS)
-// ==========================================
 
 window.saveFeeSettings = async () => {
     const perm = document.querySelector('input[name="feePermission"]:checked').value;
@@ -1371,7 +1453,6 @@ window.loadStudentsForFees = async () => {
   const alertArea = document.getElementById("feeCollectionAlert");
   const collectionArea = document.getElementById("feeCollectionArea");
 
-  // Check Permissions
   let canCollect = false;
   if(currentUserRole === "admin") canCollect = true;
   else if(currentUserRole === "principal" && (sysFeePermission === "principal" || sysFeePermission === "all")) canCollect = true;
@@ -1389,9 +1470,8 @@ window.loadStudentsForFees = async () => {
   if (!selClass) { tableArea.classList.add("d-none"); return; }
   
   tableArea.classList.remove("d-none");
-  tbody.innerHTML = `<tr><td colspan="5" class="text-center">Loading...</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="7" class="text-center">Loading...</td></tr>`;
 
-  // Fetch Students
   const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", selClass.replace(/Class\s*/i, "").trim()));
   const snap = await getDocs(q);
 
@@ -1400,11 +1480,10 @@ window.loadStudentsForFees = async () => {
   students.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
 
   if(students.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">No students in this class.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">No students in this class.</td></tr>`;
       return;
   }
 
-  // Fetch Paid Fees History
   const feeQ = query(collection(db, "feeCollections"), where("institutionId", "==", currentInstitutionId), where("class", "==", selClass.replace(/Class\s*/i, "").trim()));
   const feeSnap = await getDocs(feeQ);
   
@@ -1435,7 +1514,6 @@ window.loadStudentsForFees = async () => {
         fee: defaultFee
     }));
 
-    // Cleaned up table UI: Only Pay button. Month/Amount selection moved to Modal
     html += `
       <tr>
         <td><b>${s.regNo || '-'}</b></td>
@@ -1451,7 +1529,6 @@ window.loadStudentsForFees = async () => {
   tbody.innerHTML = html;
 };
 
-// Auto calculate fee when months are clicked in the modal
 window.calculateFeeAmount = () => {
     const category = document.getElementById("payFeeCategory").value;
     const baseFee = Number(document.getElementById("payBaseFee").value) || 0;
@@ -1464,7 +1541,7 @@ window.calculateFeeAmount = () => {
         total = baseFee * checkedCount;
     } else {
         monthDiv.classList.add("d-none");
-        total = baseFee; // Default to base fee for other categories, can be manually edited
+        total = baseFee;
     }
     
     document.getElementById("payAmount").value = total;
@@ -1486,8 +1563,7 @@ window.openFeeModal = (studentDataStr) => {
     document.getElementById("payFeeCategory").value = "Monthly Fee";
     document.getElementById("monthSelectionDiv").classList.remove("d-none");
     
-    // Set manual receipt requirement based on settings
-    const manualInput = document.getElementById("payManualReceipt");
+    const manualInput = document.getElementById("payManualReceiptInput");
     if(sysReqManualReceipt) {
         manualInput.required = true;
         manualInput.placeholder = "Required";
@@ -1496,7 +1572,7 @@ window.openFeeModal = (studentDataStr) => {
         manualInput.placeholder = "Optional";
     }
 
-    calculateFeeAmount(); // Reset amount to 0 since no months are checked initially
+    calculateFeeAmount();
 
     new bootstrap.Modal(document.getElementById('feePaymentModal')).show();
 };
@@ -1513,12 +1589,11 @@ window.saveFeePayment = async (e) => {
   const amount = document.getElementById("payAmount").value;
   const academicYear = document.getElementById("payAcademicYear").value;
   const category = document.getElementById("payFeeCategory").value;
-  const manual = document.getElementById("payManualReceipt").value.trim().toUpperCase();
+  const manual = document.getElementById("payManualReceiptInput").value.trim().toUpperCase();
   const today = new Date().toLocaleDateString();
 
   let finalFeeTypeStr = category;
   
-  // If it's a monthly fee, gather the selected months
   if(category === "Monthly Fee") {
       const checkedMonths = Array.from(document.querySelectorAll(".month-cb:checked")).map(cb => cb.value);
       if(checkedMonths.length === 0) {
