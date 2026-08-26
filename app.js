@@ -2063,35 +2063,55 @@ window.deleteUser = async (docId, name) => {
   }
 };
 
-window.openInstAssignClassesForm = (staffId) => {
+window.openInstAssignClassesForm = async (staffId) => {
   const staff = pendingStaffCache.find(s => s.id === staffId);
-  if (staff) {
-    document.getElementById("instAssignStaffId").value = staffId;
-    document.getElementById("instAssignStaffNameDisplay").innerText = staff.name;
-    document.getElementById("instAssignStaffRole").value = staff.role;
+  if (!staff) return;
 
-    const classDiv = document.getElementById("instClassAssignDiv");
-    if (staff.role === 'principal') classDiv.classList.add("d-none");
-    else classDiv.classList.remove("d-none");
+  // പ്രിൻസിപ്പൽ ആണെങ്കിൽ നേരിട്ട് അപ്രൂവ് ചെയ്യുക
+  if (staff.role === 'principal') {
+    if (confirm(`Approve ${staff.name} as Principal (സദർ മുഅല്ലിം)?`)) {
+      try {
+        await updateDoc(doc(db, "users", staffId), { 
+          status: "active",
+          assignedClasses: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
+        });
+        showToast("Principal approved successfully!", "success");
+        window.loadPrincipalsList();
+      } catch (err) {
+        showToast("Error approving principal: " + err.message, "error");
+      }
+    }
+    return;
+  }
 
-    document.getElementById("instAssignClassesForm").classList.remove("d-none");
+  // അധ്യാപകനാണെങ്കിൽ ക്ലാസുകൾ അസൈൻ ചെയ്യുന്ന ഫോം കാണിക്കുക
+  const formEl = document.getElementById("instAssignClassesForm");
+  const idEl = document.getElementById("instAssignStaffId");
+  const nameEl = document.getElementById("instAssignStaffNameDisplay");
+  const roleEl = document.getElementById("instAssignStaffRole");
+
+  if (idEl) idEl.value = staffId;
+  if (nameEl) nameEl.innerText = staff.name;
+  if (roleEl) roleEl.value = staff.role;
+
+  if (formEl) {
+    formEl.classList.remove("d-none");
     document.querySelectorAll('.inst-approve-class-cb').forEach(cb => cb.checked = false);
-    updateDropdownLabel('inst-approve');
   }
 };
 
 window.instAssignClassesToStaff = async (e) => {
   e.preventDefault();
-  const staffId = document.getElementById("instAssignStaffId").value;
-  const role = document.getElementById("instAssignStaffRole").value;
+  const staffId = document.getElementById("instAssignStaffId")?.value;
+  const role = document.getElementById("instAssignStaffRole")?.value || 'teacher';
   
   let assignedClasses = [];
 
   if (role === 'teacher') {
     const checkboxes = document.querySelectorAll('.inst-approve-class-cb:checked');
     assignedClasses = Array.from(checkboxes).map(cb => cb.value);
-    if (assignedClasses.length === 0) return showToast("Please select at least one class.", "warning");
-  } else if (role === 'principal') {
+    if (assignedClasses.length === 0) return showToast("Please select at least one class for the teacher.", "warning");
+  } else {
     assignedClasses = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
   }
 
@@ -2102,9 +2122,12 @@ window.instAssignClassesToStaff = async (e) => {
     });
     
     showToast("Staff approved successfully!", "success");
-    document.getElementById("instAssignClassesForm").classList.add("d-none");
-    loadPrincipalsList(); 
-  } catch (err) { showToast("Error: " + err.message, "error"); }
+    const formEl = document.getElementById("instAssignClassesForm");
+    if (formEl) formEl.classList.add("d-none");
+    window.loadPrincipalsList(); 
+  } catch (err) { 
+    showToast("Error: " + err.message, "error"); 
+  }
 };
 
 // ==========================================
