@@ -302,10 +302,12 @@
         <button type="button" class="btn btn-sm btn-link text-decoration-none mb-3 p-0" onclick="switchAuthTab('signup')"><i class="fa-solid fa-arrow-left"></i> Back</button>
         <div class="alert alert-info py-2 small">Registration requires approval from the Institution Admin/Principal.</div>
         <div class="mb-2">
-            <label class="form-label small fw-semibold">Role</label>
+            <label class="form-label small fw-semibold">Role / Designation</label>
             <select id="staffRole" class="form-select" required>
-                <option value="teacher">Teacher</option>
-                <option value="principal">Principal</option>
+                <option value="principal">സദർ മുഅല്ലിം (Principal)</option>
+                <option value="vice_principal">വൈസ് സദർ (Vice Principal)</option>
+                <option value="in_charge">സദർ ഇൻ-ചാർജ് (In-Charge)</option>
+                <option value="teacher" selected>മുഅല്ലിം (Teacher)</option>
             </select>
         </div>
         <div class="row g-2 mb-2">
@@ -483,15 +485,48 @@
                   <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-user-tie"></i> Manage Principals & Staff</h5>
                   <button class="btn btn-sm btn-outline-success" onclick="openStaffProfileModal(null)"><i class="fa-solid fa-plus me-1"></i> Add Staff / Principal</button>
               </div>
+              
+              <!-- Pending Approvals Box -->
               <div id="instPendingStaffSection" class="mb-4 d-none">
                   <h6 class="fw-bold text-warning mb-2"><i class="fa-solid fa-clock me-1"></i> Pending Approvals</h6>
                   <div class="table-responsive">
                       <table class="table table-bordered align-middle table-warning">
-                          <thead><tr><th>Name</th><th>Requested Role</th><th>Email</th><th>Phone</th><th class="text-center">Action</th></tr></thead>
+                          <thead><tr><th>Name</th><th>Requested Role</th><th>Email</th><th>Phone</th><th class="text-center" style="width:120px;">Action</th></tr></thead>
                           <tbody id="instPendingStaffTableBody"></tbody>
                       </table>
                   </div>
               </div>
+
+              <!-- Inline Assign Class Form (Appears when Approving Teacher) -->
+              <form id="instAssignClassesForm" onsubmit="instAssignClassesToStaff(event)" class="mb-4 d-none border p-3 rounded bg-light">
+                <input type="hidden" id="instAssignStaffId">
+                <input type="hidden" id="instAssignStaffRole">
+                <h6 class="fw-bold text-primary mb-2">Approve <span id="instAssignStaffNameDisplay"></span></h6>
+                <div class="row g-3 align-items-end">
+                  <div class="col-md-6" id="instClassAssignDiv">
+                    <label class="form-label fw-bold">Assign Classes (Select Multiple)</label>
+                    <div class="d-flex flex-wrap gap-2">
+                      <div class="form-check"><input type="checkbox" class="form-check-input inst-approve-class-cb" value="1" id="iac1"><label class="form-check-label" for="iac1">Class 1</label></div>
+                      <div class="form-check"><input type="checkbox" class="form-check-input inst-approve-class-cb" value="2" id="iac2"><label class="form-check-label" for="iac2">Class 2</label></div>
+                      <div class="form-check"><input type="checkbox" class="form-check-input inst-approve-class-cb" value="3" id="iac3"><label class="form-check-label" for="iac3">Class 3</label></div>
+                      <div class="form-check"><input type="checkbox" class="form-check-input inst-approve-class-cb" value="4" id="iac4"><label class="form-check-label" for="iac4">Class 4</label></div>
+                      <div class="form-check"><input type="checkbox" class="form-check-input inst-approve-class-cb" value="5" id="iac5"><label class="form-check-label" for="iac5">Class 5</label></div>
+                      <div class="form-check"><input type="checkbox" class="form-check-input inst-approve-class-cb" value="6" id="iac6"><label class="form-check-label" for="iac6">Class 6</label></div>
+                      <div class="form-check"><input type="checkbox" class="form-check-input inst-approve-class-cb" value="7" id="iac7"><label class="form-check-label" for="iac7">Class 7</label></div>
+                      <div class="form-check"><input type="checkbox" class="form-check-input inst-approve-class-cb" value="8" id="iac8"><label class="form-check-label" for="iac8">Class 8</label></div>
+                      <div class="form-check"><input type="checkbox" class="form-check-input inst-approve-class-cb" value="9" id="iac9"><label class="form-check-label" for="iac9">Class 9</label></div>
+                      <div class="form-check"><input type="checkbox" class="form-check-input inst-approve-class-cb" value="10" id="iac10"><label class="form-check-label" for="iac10">Class 10</label></div>
+                      <div class="form-check"><input type="checkbox" class="form-check-input inst-approve-class-cb" value="11" id="iac11"><label class="form-check-label" for="iac11">Class 11</label></div>
+                      <div class="form-check"><input type="checkbox" class="form-check-input inst-approve-class-cb" value="12" id="iac12"><label class="form-check-label" for="iac12">Class 12</label></div>
+                    </div>
+                  </div>
+                  <div class="col-md-6 text-end">
+                      <button type="button" class="btn btn-secondary me-2" onclick="document.getElementById('instAssignClassesForm').classList.add('d-none');">Cancel</button>
+                      <button type="submit" class="btn btn-success"><i class="fa-solid fa-check me-1"></i> Confirm Approval</button>
+                  </div>
+                </div>
+              </form>
+
               <h6 class="fw-bold mt-4 mb-2">Assigned Staff & Principals</h6>
               <div class="table-responsive">
                 <table class="table table-bordered align-middle">
@@ -852,7 +887,16 @@
                 <div class="tab-pane fade" id="tab-employment">
                   <div class="row g-3">
                     <div class="col-md-4"><label class="form-label small">System Role *</label><select id="spRole" class="form-select"><option value="teacher">Teacher (മുഅല്ലിം)</option><option value="principal">Principal (സദർ)</option></select></div>
-                    <div class="col-md-4"><label class="form-label small">Designation</label><input type="text" id="spDesignation" class="form-control text-uppercase" placeholder="e.g. Senior Teacher"></div>
+                    <div class="col-md-4"><label class="form-label small">Designation / പദവി</label>
+                      <select id="spDesignationSelect" class="form-select" onchange="toggleCustomDesignation(this.value)">
+                        <option value="സദർ മുഅല്ലിം">സദർ മുഅല്ലിം (Principal)</option>
+                        <option value="വൈസ് സദർ">വൈസ് സദർ (Vice Principal)</option>
+                        <option value="സദർ ഇൻ-ചാർജ്">സദർ ഇൻ-ചാർജ് (In-Charge)</option>
+                        <option value="മുഅല്ലിം" selected>മുഅല്ലിം (Teacher)</option>
+                        <option value="Other">Other (Specify Below)</option>
+                      </select>
+                      <input type="text" id="spDesignationCustom" class="form-control text-uppercase mt-2 d-none" placeholder="Type Designation">
+                    </div>
                     <div class="col-md-4"><label class="form-label small">Muallim Registration (MSR) No</label><input type="text" id="spMsr" class="form-control text-uppercase"></div>
                     <div class="col-md-4"><label class="form-label small">Employment Type</label><select id="spEmpType" class="form-select"><option value="Full Time">Full Time</option><option value="Part Time">Part Time</option></select></div>
                     <div class="col-md-4"><label class="form-label small">Teaching Experience (Years)</label><input type="number" id="spExp" class="form-control"></div>
