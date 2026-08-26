@@ -286,12 +286,13 @@
               <button class="nav-link active text-start" id="homeMenuBtn" onclick="showTab('homeDashboardTab')"><i class="fa-solid fa-house me-2"></i> Home</button>
               <button class="nav-link text-start d-none" id="superAdminMasterBtn" onclick="showTab('superAdminTab')"><i class="fa-solid fa-shield-halved me-2"></i> All Madrasas</button>
               <button class="nav-link text-start d-none" id="instAdminStaffBtn" onclick="showTab('instAdminTab')"><i class="fa-solid fa-user-tie me-2"></i> Manage Staff</button>
-              <button class="nav-link text-start" id="studentsMenuBtn" onclick="showTab('studentsListTab')"><i class="fa-solid fa-users me-2"></i> Students</button>
-              <button class="nav-link text-start" id="attendanceMenuBtn" onclick="showTab('attendanceTab')"><i class="fa-solid fa-calendar-check me-2"></i> Attendance</button>
-              <button class="nav-link text-start" id="marksMenuBtn" onclick="showTab('marksTab')"><i class="fa-solid fa-award me-2"></i> Marks Entry</button>
-              <button class="nav-link text-start" id="performanceMenuBtn" onclick="showTab('performanceTab')"><i class="fa-solid fa-star me-2"></i> Performance</button>
-              <button class="nav-link text-start" id="feesMenuBtn" onclick="showTab('feesTab')"><i class="fa-solid fa-receipt me-2"></i> Fees & Receipts</button>
+              <button class="nav-link text-start d-none" id="studentsMenuBtn" onclick="showTab('studentsListTab')"><i class="fa-solid fa-users me-2"></i> Students</button>
+              <button class="nav-link text-start d-none" id="attendanceMenuBtn" onclick="showTab('attendanceTab')"><i class="fa-solid fa-calendar-check me-2"></i> Attendance</button>
+              <button class="nav-link text-start d-none" id="marksMenuBtn" onclick="showTab('marksTab')"><i class="fa-solid fa-award me-2"></i> Marks Entry</button>
+              <button class="nav-link text-start d-none" id="performanceMenuBtn" onclick="showTab('performanceTab')"><i class="fa-solid fa-star me-2"></i> Performance</button>
+              <button class="nav-link text-start d-none" id="feesMenuBtn" onclick="showTab('feesTab')"><i class="fa-solid fa-receipt me-2"></i> Fees & Receipts</button>
               <button class="nav-link text-start d-none" id="feeSettingsBtn" onclick="showTab('feeSettingsTab')"><i class="fa-solid fa-gear me-2"></i> Fee Settings</button>
+              <button class="nav-link text-start d-none" id="teachersMenuBtn" onclick="showTab('teachersTab')"><i class="fa-solid fa-chalkboard-user me-2"></i> Staff Management</button>
               <button class="nav-link text-start d-none" id="promotionMenuBtn" onclick="showTab('promotionTab')"><i class="fa-solid fa-graduation-cap me-2"></i> Class Promotion</button>
             </div>
           </div>
@@ -300,6 +301,7 @@
         <!-- Content Area -->
         <div class="col-lg-10">
 
+          <!-- 0. Super Admin Master Console -->
           <div id="superAdminTab" class="content-tab d-none">
             <div class="card p-4">
               <div class="d-flex justify-content-between align-items-center mb-3">
@@ -309,7 +311,16 @@
               <div class="table-responsive">
                 <table class="table table-hover table-bordered align-middle">
                   <thead class="table-light">
-                    <tr><th>Inst. ID</th><th>Madrasa Name</th><th>Place</th><th>Admin Name</th><th>Email</th><th>Status</th><th class="text-center">Actions</th></tr>
+                    <tr>
+                      <th>Inst. ID</th>
+                      <th>Madrasa Name</th>
+                      <th>Place</th>
+                      <th>Admin Name</th>
+                      <th class="text-center">Staff Count</th>
+                      <th class="text-center">Student Count</th>
+                      <th>Status</th>
+                      <th class="text-center">Actions</th>
+                    </tr>
                   </thead>
                   <tbody id="superAdminTableBody"></tbody>
                 </table>
@@ -440,7 +451,6 @@
              <div class="card p-4">
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-calendar-check"></i> Daily Attendance</h5>
               <div class="row g-3 mb-4">
-                <!-- Added onchange="resetAttendanceButton()" to date input -->
                 <div class="col-md-4"><label class="form-label">Date</label><input type="date" id="attDate" class="form-control" onchange="resetAttendanceButton()"></div>
                 <div class="col-md-4"><label class="form-label">Select Class</label><select id="attClassSelect" class="form-select" onchange="loadAttendanceSheet()"></select></div>
               </div>
@@ -455,7 +465,6 @@
                     <tbody id="attendanceTableBody"></tbody>
                   </table>
                 </div>
-                <!-- Added ID to Save button -->
                 <button id="btnSaveAttendance" class="btn btn-primary-custom px-4 mt-2" onclick="saveClassAttendance()"><i class="fa-solid fa-check-double me-1"></i> Save Attendance</button>
               </div>
             </div>
@@ -649,7 +658,6 @@
         <div class="modal-body p-0">
           <form id="staffProfileForm">
             <input type="hidden" id="spDocId">
-
             <div id="spAuthSection" class="p-3 bg-light border-bottom">
                <h6 class="fw-bold text-danger mb-2"><i class="fa-solid fa-key me-1"></i> Account Setup (For New Staff)</h6>
                <div class="row g-2">
@@ -657,7 +665,6 @@
                    <div class="col-md-6"><label class="form-label small">Password *</label><input type="text" id="spAuthPassword" class="form-control" placeholder="Min 6 characters"></div>
                </div>
             </div>
-
             <div class="px-3 pt-3">
               <ul class="nav nav-tabs" id="staffTabs" role="tablist">
                 <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-personal" type="button">Personal Info</button></li>
@@ -667,9 +674,7 @@
                 <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-bank" type="button">Bank Details</button></li>
                 <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-transfer" type="button">Relieving</button></li>
               </ul>
-
               <div class="tab-content p-3 border border-top-0 rounded-bottom mb-3" style="background:#fff;">
-                
                 <div class="tab-pane fade show active" id="tab-personal">
                   <div class="row g-3">
                     <div class="col-md-12"><label class="form-label small">Full Name *</label><input type="text" id="spName" class="form-control text-uppercase"></div>
@@ -681,7 +686,6 @@
                     <div class="col-md-4"><label class="form-label small">Aadhaar Number</label><input type="text" id="spAadhaar" class="form-control"></div>
                   </div>
                 </div>
-
                 <div class="tab-pane fade" id="tab-contact">
                   <div class="row g-3">
                     <div class="col-md-4"><label class="form-label small">Mobile Number *</label><input type="tel" id="spPhone" class="form-control"></div>
@@ -694,7 +698,6 @@
                     <div class="col-md-4"><label class="form-label small">State</label><input type="text" id="spState" class="form-control text-uppercase" value="KERALA"></div>
                   </div>
                 </div>
-
                 <div class="tab-pane fade" id="tab-education">
                   <div class="row g-3">
                     <div class="col-md-6"><label class="form-label small">Religious Education Qualifications</label><input type="text" id="spRelEdu" class="form-control text-uppercase" placeholder="e.g. Baqavi, Darimi, Faizy"></div>
@@ -704,7 +707,6 @@
                     <div class="col-md-12"><label class="form-label small">Awards & Achievements</label><input type="text" id="spAwards" class="form-control text-uppercase"></div>
                   </div>
                 </div>
-
                 <div class="tab-pane fade" id="tab-employment">
                   <div class="row g-3">
                     <div class="col-md-4"><label class="form-label small">System Role *</label><select id="spRole" class="form-select"><option value="teacher">Teacher (മുഅല്ലിം)</option><option value="principal">Principal (സദർ)</option></select></div>
@@ -713,7 +715,6 @@
                     <div class="col-md-4"><label class="form-label small">Employment Type</label><select id="spEmpType" class="form-select"><option value="Full Time">Full Time</option><option value="Part Time">Part Time</option></select></div>
                     <div class="col-md-4"><label class="form-label small">Teaching Experience (Years)</label><input type="number" id="spExp" class="form-control"></div>
                     <div class="col-md-4"><label class="form-label small">Date of Joining</label><input type="date" id="spDoj" class="form-control"></div>
-                    
                     <div class="col-md-12" id="spClassesDiv">
                       <label class="form-label small">Assigned Classes (Select Multiple)</label>
                       <div class="d-flex flex-wrap gap-2">
@@ -733,7 +734,6 @@
                     </div>
                   </div>
                 </div>
-
                 <div class="tab-pane fade" id="tab-bank">
                   <div class="row g-3">
                     <div class="col-md-6"><label class="form-label small">Account Holder Name</label><input type="text" id="spAccName" class="form-control text-uppercase"></div>
@@ -743,7 +743,6 @@
                     <div class="col-md-4"><label class="form-label small">Branch</label><input type="text" id="spBranch" class="form-control text-uppercase"></div>
                   </div>
                 </div>
-
                 <div class="tab-pane fade" id="tab-transfer">
                   <div class="alert alert-secondary small py-2 mb-3">Fill this section only if the staff is transferred or leaving the institution.</div>
                   <div class="row g-3">
@@ -753,7 +752,6 @@
                     <div class="col-md-8"><label class="form-label small">Reason for Leaving</label><input type="text" id="spReason" class="form-control text-uppercase"></div>
                   </div>
                 </div>
-
               </div>
             </div>
           </form>
@@ -776,7 +774,6 @@
         <div class="modal-body p-0">
           <form id="studentProfileForm">
             <input type="hidden" id="stuDocId">
-
             <div class="px-3 pt-3">
               <ul class="nav nav-tabs" id="studentTabs" role="tablist">
                 <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-stu-personal" type="button">Personal Info</button></li>
@@ -786,9 +783,7 @@
                 <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-stu-transfer" type="button">Transfer/TC</button></li>
                 <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-stu-other" type="button">Other</button></li>
               </ul>
-
               <div class="tab-content p-3 border border-top-0 rounded-bottom mb-3" style="background:#fff;">
-                
                 <div class="tab-pane fade show active" id="tab-stu-personal">
                   <div class="row g-3">
                     <div class="col-md-4"><label class="form-label small">Reg No. (Admission No) *</label><input type="number" id="stuRegNo" class="form-control fw-bold"></div>
@@ -800,7 +795,6 @@
                     <div class="col-md-4"><label class="form-label small">Blood Group</label><select id="stuBlood" class="form-select"><option value="">Select</option><option value="A+">A+</option><option value="A-">A-</option><option value="B+">B+</option><option value="B-">B-</option><option value="O+">O+</option><option value="O-">O-</option><option value="AB+">AB+</option><option value="AB-">AB-</option></select></div>
                   </div>
                 </div>
-
                 <div class="tab-pane fade" id="tab-stu-academic">
                   <div class="row g-3">
                     <div class="col-md-6">
@@ -818,7 +812,6 @@
                     <div class="col-md-4"><label class="form-label small fw-bold text-success">Monthly Fee Amount (₹)</label><input type="number" id="stuMonthlyFee" class="form-control border-success" placeholder="e.g. 200"></div>
                   </div>
                 </div>
-
                 <div class="tab-pane fade" id="tab-stu-family">
                   <div class="row g-3">
                     <div class="col-md-4"><label class="form-label small">Father's Name *</label><input type="text" id="stuFatherName" class="form-control text-uppercase"></div>
@@ -830,7 +823,6 @@
                     <div class="col-md-4"><label class="form-label small">Emergency / WhatsApp Number</label><input type="tel" id="stuEmergency" class="form-control"></div>
                   </div>
                 </div>
-
                 <div class="tab-pane fade" id="tab-stu-address">
                   <div class="row g-3">
                     <div class="col-md-12"><label class="form-label small">House Name / Number *</label><input type="text" id="stuHouse" class="form-control text-uppercase"></div>
@@ -841,7 +833,6 @@
                     <div class="col-md-4"><label class="form-label small">State</label><input type="text" id="stuState" class="form-control text-uppercase" value="KERALA"></div>
                   </div>
                 </div>
-
                 <div class="tab-pane fade" id="tab-stu-transfer">
                   <div class="alert alert-secondary small py-2 mb-3">Fill this section only if the student is leaving or transferring to another Madrasa.</div>
                   <div class="row g-3">
@@ -852,14 +843,12 @@
                     <div class="col-md-4"><label class="form-label small">Certificate No & Date</label><input type="text" id="stuTcDetails" class="form-control text-uppercase" placeholder="e.g. TC/123 - 10/05/2026"></div>
                   </div>
                 </div>
-
                 <div class="tab-pane fade" id="tab-stu-other">
                   <div class="row g-3">
                     <div class="col-md-12"><label class="form-label small">Identification Marks</label><textarea id="stuMarks" class="form-control text-uppercase" rows="2" placeholder="e.g. A black mole on the right cheek"></textarea></div>
                     <div class="col-md-12"><label class="form-label small">Special Information</label><textarea id="stuSpecialInfo" class="form-control text-uppercase" rows="2" placeholder="Any medical conditions, allergies, etc."></textarea></div>
                   </div>
                 </div>
-
               </div>
             </div>
           </form>
