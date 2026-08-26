@@ -229,7 +229,7 @@ onAuthStateChanged(auth, async (user) => {
             if (subjectSettingsBtn) subjectSettingsBtn.classList.remove("d-none");
 
             showTab('instAdminTab'); 
-            loadPrincipalsList(); 
+            window.loadPrincipalsList(); 
             
             document.getElementById("reqManualReceipt").checked = sysReqManualReceipt;
             const rBtns = document.getElementsByName("feePermission");
@@ -245,7 +245,7 @@ onAuthStateChanged(auth, async (user) => {
             
             showTab('homeDashboardTab');
             loadLeaderboard();
-            loadPrincipalsList();
+            window.loadPrincipalsList();
           } else if (currentUserRole === "teacher") {
             showTab('homeDashboardTab');
             loadLeaderboard();
@@ -306,7 +306,7 @@ function populateClassDropdowns() {
 }
 
 // ==========================================
-// SUPER ADMIN MASTER CONTROL FUNCTIONS
+// SUPER ADMIN MASTER CONTROL (COUNTING ONLY ACTIVE STUDENTS)
 // ==========================================
 
 window.loadSuperAdminRequests = async () => {
@@ -341,7 +341,8 @@ window.loadSuperAdminRequests = async () => {
       let staffCount = 0;
 
       try {
-        const stuQ = query(collection(db, "students"), where("institutionId", "==", u.institutionId));
+        // COUNT ONLY ACTIVE STUDENTS
+        const stuQ = query(collection(db, "students"), where("institutionId", "==", u.institutionId), where("status", "==", "active"));
         const stuSnap = await getCountFromServer(stuQ);
         stuCount = stuSnap.data().count;
 
@@ -491,7 +492,7 @@ window.returnToSuperAdminConsole = () => {
 };
 
 // ==========================================
-// REGISTRATION & AUTHENTICATION
+// REGISTRATION (SMOOTH RESET WITHOUT STUCKING)
 // ==========================================
 
 window.handleSignUp = async (e) => {
@@ -555,8 +556,8 @@ window.handleSignUp = async (e) => {
     });
 
     await setDoc(doc(db, "settings", instId), {
-      feePermission: "all",
-      reqManualReceipt: false
+        feePermission: "all",
+        reqManualReceipt: false
     });
 
     const form = document.getElementById("signupForm");
@@ -567,7 +568,7 @@ window.handleSignUp = async (e) => {
     } else {
       showToast("Registration submitted! Please wait for Super Admin approval.", "success");
       await signOut(auth);
-      switchAuthTab('login');
+      window.switchAuthTab('login');
     }
   } catch (err) { 
     showToast("Registration failed: " + err.message, "error"); 
@@ -606,7 +607,7 @@ window.handleStaffSignUp = async (e) => {
     }
     
     let instName = "";
-    instSnap.forEach(d => instName = d.data().institutionName);
+    instSnap.forEach(d=> instName = d.data().institutionName);
 
     const cred = await createUserWithEmailAndPassword(auth, email, pwd);
     await setDoc(doc(db, "users", cred.user.uid), {
@@ -626,7 +627,7 @@ window.handleStaffSignUp = async (e) => {
     document.getElementById("staffSignupForm").reset();
     showToast("Request submitted! Please wait for approval.", "success");
     signOut(auth);
-    switchAuthTab('login');
+    window.switchAuthTab('login');
 
   } catch (err) { 
     showToast("Registration failed: " + err.message, "error"); 
@@ -635,7 +636,10 @@ window.handleStaffSignUp = async (e) => {
   }
 };
 
-// Unified Smart Login
+// ==========================================
+// UNIFIED LOGIN
+// ==========================================
+
 let parentStudentsData = [];
 window.handleUnifiedLogin = async (e) => {
   e.preventDefault();
@@ -828,7 +832,7 @@ window.loadMarksEntrySheet = async () => {
   headHtml += `</tr>`;
   thead.innerHTML = headHtml;
 
-  const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", cleanClass));
+  const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", cleanClass), where("status", "==", "active"));
   const snap = await getDocs(q);
 
   let students = [];
@@ -935,7 +939,7 @@ window.loadStudentsForFees = async () => {
   tbody.innerHTML = `<tr><td colspan="5" class="text-center">Loading student fee status...</td></tr>`;
 
   const cleanClass = selClass.replace(/Class\s*/i, "").trim();
-  const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", cleanClass));
+  const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", cleanClass), where("status", "==", "active"));
   const snap = await getDocs(q);
 
   let students = [];
@@ -1273,7 +1277,7 @@ window.loadAttendanceSheet = async () => {
   tbody.innerHTML = `<tr><td colspan="3" class="text-center">Loading students...</td></tr>`;
   area.classList.remove("d-none");
 
-  const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", selClass.replace(/Class\s*/i, "").trim()));
+  const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", selClass.replace(/Class\s*/i, "").trim()), where("status", "==", "active"));
   const snap = await getDocs(q);
 
   let students = [];
@@ -1292,7 +1296,7 @@ window.loadAttendanceSheet = async () => {
       </tr>
     `;
   });
-  tbody.innerHTML = html || `<tr><td colspan="3" class="text-center">No students in this class.</td></tr>`;
+  tbody.innerHTML = html || `<tr><td colspan="3" class="text-center">No active students in this class.</td></tr>`;
   document.getElementById("selectAllAtt").checked = true;
   updateAttendanceCount();
 };
@@ -1376,7 +1380,7 @@ window.loadStudentsForPerfSheet = async () => {
   tbody.innerHTML = `<tr><td colspan="3" class="text-center">Loading students...</td></tr>`;
   area.classList.remove("d-none");
 
-  const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", selClass.replace(/Class\s*/i, "").trim()));
+  const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", selClass.replace(/Class\s*/i, "").trim()), where("status", "==", "active"));
   const snap = await getDocs(q);
 
   localPerfStudentsCache = [];
@@ -1538,7 +1542,7 @@ async function loadLeaderboard() {
 }
 
 // ==========================================
-// STUDENT & STAFF PROFILES / CRUD
+// STUDENT PROFILE / STATUS UPDATE
 // ==========================================
 
 window.openStudentProfileModal = (docId) => {
@@ -1613,7 +1617,15 @@ window.saveStudentProfile = async (e) => {
   }
 
   const docId = document.getElementById("stuDocId").value;
+  const dateOfLeaving = document.getElementById("stuDol").value;
+  const tcIssued = document.getElementById("stuTcIssued").value;
   
+  // Set status dynamically: If TC is issued or student left, set status != active
+  let currentStatus = "active";
+  if (tcIssued === "Yes" || dateOfLeaving) {
+    currentStatus = "transferred";
+  }
+
   const studentData = {
     institutionId: currentInstitutionId,
     regNo: Number(regNoInput) || 0,
@@ -1647,14 +1659,14 @@ window.saveStudentProfile = async (e) => {
 
     transferredTo: document.getElementById("stuTransTo").value.trim().toUpperCase(),
     reasonLeaving: document.getElementById("stuReason").value.trim().toUpperCase(),
-    dateOfLeaving: document.getElementById("stuDol").value,
-    tcIssued: document.getElementById("stuTcIssued").value,
+    dateOfLeaving: dateOfLeaving,
+    tcIssued: tcIssued,
     tcDetails: document.getElementById("stuTcDetails").value.trim().toUpperCase(),
 
     identificationMarks: document.getElementById("stuMarks").value.trim().toUpperCase(),
     specialInfo: document.getElementById("stuSpecialInfo").value.trim().toUpperCase(),
     
-    status: "active"
+    status: currentStatus
   };
 
   try {
@@ -1679,7 +1691,7 @@ window.deleteStudent = async (docId, name) => {
       await deleteDoc(doc(db, "students", docId));
       showToast("Student removed.", "success");
       loadStudentsByClass(true);
-    } catch (err) { showToast("Error: " + err.message, "error"); }
+    } catch (err) { showToast("Error: " + err.message); }
   }
 };
 
@@ -1733,16 +1745,12 @@ function renderPaginatedTable() {
         <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${s.id}', '${s.name}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
       </td>` : ``;
 
-    let instBadge = '';
-    if (isSuperAdmin) {
-      const instName = instIdToNameMap[s.institutionId] || s.institutionId;
-      instBadge = `<br><span class="badge bg-secondary" style="font-size: 0.65rem;">${instName}</span>`;
-    }
+    let statusBadge = s.status === 'active' ? '' : `<span class="badge bg-secondary ms-1">${s.status}</span>`;
 
     html += `
       <tr>
         <td><b class="text-success">${s.regNo || '-'}</b></td>
-        <td><b>${s.name || '-'}</b>${instBadge}</td>
+        <td><b>${s.name || '-'}</b> ${statusBadge}</td>
         <td><span class="badge bg-success">Class ${cleanClass}</span></td>
         <td>${s.fatherName || s.guardianName || '-'}</td>
         <td>${s.place || '-'}</td>
@@ -1788,16 +1796,10 @@ window.filterStudentsLocal = () => {
         <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${s.id}', '${s.name}')"><i class="fa-solid fa-trash"></i></button>
       </td>` : ``;
 
-    let instBadge = '';
-    if (isSuperAdmin) {
-      const instName = instIdToNameMap[s.institutionId] || s.institutionId;
-      instBadge = `<br><span class="badge bg-secondary" style="font-size: 0.65rem;">${instName}</span>`;
-    }
-
     html += `
       <tr>
         <td><b class="text-success">${s.regNo || '-'}</b></td>
-        <td><b>${s.name || '-'}</b>${instBadge}</td>
+        <td><b>${s.name || '-'}</b></td>
         <td><span class="badge bg-success">Class ${cleanClass}</span></td>
         <td>${s.fatherName || s.guardianName || '-'}</td>
         <td>${s.place || '-'}</td>
@@ -1810,7 +1812,7 @@ window.filterStudentsLocal = () => {
 };
 
 // ==========================================
-// STAFF MANAGEMENT
+// STAFF MANAGEMENT WITH MADRASA DESIGNATIONS
 // ==========================================
 
 window.loadPrincipalsList = async () => {
@@ -1828,14 +1830,14 @@ window.loadPrincipalsList = async () => {
 
   localPrincipalsCache = [];
   snapActive.forEach(d => {
-    if (d.data().role === 'principal' || d.data().role === 'teacher') {
+    if (d.data().role !== 'admin') {
       localPrincipalsCache.push({ id: d.id, ...d.data() });
     }
   });
 
   let htmlActive = "";
   localPrincipalsCache.forEach(p => {
-    const roleBadge = p.role === 'principal' ? `<span class="badge bg-danger">Principal</span>` : `<span class="badge bg-success">Teacher</span>`;
+    const roleBadge = `<span class="badge bg-success">${p.designation || p.role}</span>`;
     htmlActive += `
       <tr>
         <td><b>${p.name}</b></td>
@@ -1849,14 +1851,14 @@ window.loadPrincipalsList = async () => {
       </tr>
     `;
   });
-  tbody.innerHTML = htmlActive || `<tr><td colspan="5" class="text-center text-muted">No staff/principals assigned yet.</td></tr>`;
+  tbody.innerHTML = htmlActive || `<tr><td colspan="5" class="text-center text-muted">No staff assigned yet.</td></tr>`;
 
   const qPending = query(collection(db, "users"), where("institutionId", "==", currentInstitutionId), where("status", "==", "pending"));
   const snapPending = await getDocs(qPending);
 
   pendingStaffCache = [];
   snapPending.forEach(d => {
-    if (d.data().role === 'principal' || d.data().role === 'teacher') {
+    if (d.data().role !== 'admin') {
       pendingStaffCache.push({ id: d.id, ...d.data() });
     }
   });
@@ -1868,7 +1870,7 @@ window.loadPrincipalsList = async () => {
       htmlPending += `
         <tr>
           <td><b>${t.name}</b></td>
-          <td><span class="badge bg-warning text-dark">${t.role}</span></td>
+          <td><span class="badge bg-warning text-dark">${t.designation || t.role}</span></td>
           <td>${t.email}</td>
           <td>${t.phone}</td>
           <td class="text-center">
@@ -1920,7 +1922,7 @@ window.openStaffProfileModal = (docId) => {
     document.getElementById("spAwards").value = p.awards || '';
 
     document.getElementById("spRole").value = p.role || 'teacher';
-    document.getElementById("spDesignation").value = p.designation || '';
+    document.getElementById("spDesignation").value = p.designation || 'മുഅല്ലിം';
     document.getElementById("spMsr").value = p.msrNo || '';
     document.getElementById("spEmpType").value = p.employmentType || 'Full Time';
     document.getElementById("spExp").value = p.experience || '';
@@ -1969,6 +1971,7 @@ window.saveStaffProfile = async (e) => {
 
   const docId = document.getElementById("spDocId").value;
   const role = document.getElementById("spRole").value;
+  const designation = document.getElementById("spDesignation").value.trim().toUpperCase() || (role === 'principal' ? 'സദർ മുഅല്ലിം' : 'മുഅല്ലിം');
 
   const assignedClasses = [];
   document.querySelectorAll(".sp-class-cb:checked").forEach(cb => assignedClasses.push(cb.value));
@@ -2000,7 +2003,7 @@ window.saveStaffProfile = async (e) => {
     awards: document.getElementById("spAwards").value.trim().toUpperCase(),
 
     role: role,
-    designation: document.getElementById("spDesignation").value.trim().toUpperCase(),
+    designation: designation,
     msrNo: document.getElementById("spMsr").value.trim().toUpperCase(),
     employmentType: document.getElementById("spEmpType").value,
     experience: Number(document.getElementById("spExp").value) || 0,
@@ -2209,8 +2212,8 @@ window.handleBulkUpload = () => {
 window.promoteStudents = async () => {
   const from = document.getElementById("fromClass").value;
   const to = document.getElementById("toClass").value;
-  if (confirm(`Promote all students from Class ${from} to Class ${to}?`)) {
-    const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", from));
+  if (confirm(`Promote all active students from Class ${from} to Class ${to}?`)) {
+    const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", from), where("status", "==", "active"));
     const snap = await getDocs(q);
     const batch = writeBatch(db);
     snap.forEach(d => batch.update(doc(db, "students", d.id), { currentClass: to }));
