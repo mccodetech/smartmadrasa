@@ -2420,9 +2420,9 @@ window.showTab = (tabId) => {
     if (offcanvasInstance) offcanvasInstance.hide();
   }
 
-  if (tabId === 'studentsListTab') window.loadStudentsByClass();
+  if (tabId === 'studentsListTab') loadStudentsByClass();
   if (tabId === 'instAdminTab') window.loadPrincipalsList();
-  if (tabId === 'homeDashboardTab') window.loadLeaderboard();
+  if (tabId === 'homeDashboardTab') loadLeaderboard();
   if (tabId === 'superAdminTab') window.loadSuperAdminRequests();
   if (tabId === 'subjectSettingsTab') window.loadClassSubjectSettings();
 };
