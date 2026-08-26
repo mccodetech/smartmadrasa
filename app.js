@@ -36,7 +36,15 @@ window.showToast = (message, type = "success") => {
   setTimeout(() => { toast.style.transition = "all 0.4s ease"; toast.style.opacity = "0"; setTimeout(() => toast.remove(), 400); }, 4000);
 };
 
-// ക്ലാസ്സ് ഡ്രോപ്ഡൗണുകൾ പോപ്പുലേറ്റ് ചെയ്യാൻ
+// മൊബൈൽ മെനു സിങ്ക് ചെയ്യാനുള്ള ഫങ്ഷൻ ഇവിടെ ആഡ് ചെയ്തിരിക്കുന്നു
+window.syncMobileMenu = () => {
+  const desktopMenu = document.getElementById("desktopTabMenu");
+  const mobileMenu = document.getElementById("mobileTabMenu");
+  if (desktopMenu && mobileMenu) {
+    mobileMenu.innerHTML = desktopMenu.innerHTML;
+  }
+};
+
 window.populateClassDropdowns = function() {
   const allClasses = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
   const allowedClasses = (window.currentUserRole === "principal" || window.currentUserRole === "admin" || window.isSuperAdmin) ? allClasses : window.currentUserAssignedClasses;
@@ -55,12 +63,6 @@ window.populateClassDropdowns = function() {
       allowedClasses.forEach(c => select.innerHTML += `<option value="${c}">Class ${c}</option>`);
     }
   });
-};
-
-window.syncMobileMenu = () => {
-  const desktopMenu = document.getElementById("desktopTabMenu");
-  const mobileMenu = document.getElementById("mobileTabMenu");
-  if (desktopMenu && mobileMenu) mobileMenu.innerHTML = desktopMenu.innerHTML;
 };
 
 // സെഷൻ പരിശോധന (Auth State Listener & Role Based Menu Visibility)
@@ -110,7 +112,6 @@ onAuthStateChanged(auth, async (user) => {
           }
         }
 
-        // മെനു വിസിബിലിറ്റി സെറ്റ് ചെയ്യൽ
         if (window.isSuperAdmin) {
           if (superMasterBtn) superMasterBtn.classList.remove("d-none");
           if (userRoleEl) userRoleEl.innerText = "Super Admin";
@@ -120,7 +121,6 @@ onAuthStateChanged(auth, async (user) => {
           if (superMasterBtn) superMasterBtn.classList.add("d-none");
           if (userRoleEl) userRoleEl.innerText = window.currentUserRole === "admin" ? "Admin" : (window.currentUserRole === "principal" ? "Principal" : "Teacher");
           
-          // എല്ലാ റോളിനും പൊതുവായി വേണ്ടത്
           if (studentsMenuBtn) studentsMenuBtn.classList.remove("d-none");
           if (feesMenuBtn) feesMenuBtn.classList.remove("d-none");
 
@@ -139,7 +139,7 @@ onAuthStateChanged(auth, async (user) => {
             if (typeof window.loadPrincipalsList === 'function') window.loadPrincipalsList();
           } else {
             if (homeMenuBtn) homeMenuBtn.classList.remove("d-none");
-            if (attendanceMenuBtn) homeMenuBtn.classList.remove("d-none");
+            if (attendanceMenuBtn) attendanceMenuBtn.classList.remove("d-none");
             if (marksMenuBtn) marksMenuBtn.classList.remove("d-none");
             if (performanceMenuBtn) performanceMenuBtn.classList.remove("d-none");
             window.showTab('homeDashboardTab');
