@@ -1,7 +1,7 @@
 // ==========================================
-// ACADEMICS MODULE (academics.js) - Attendance & Marks
+// ACADEMICS MODULE (academics.js) - Attendance & Marks with Auto Points
 // ==========================================
-import { db } from "./firebase-config.js";
+import { db, auth } from "./firebase-config.js";
 import { 
   collection, doc, setDoc, getDoc, getDocs, query, where, addDoc, writeBatch, serverTimestamp 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -173,7 +173,7 @@ window.saveClassMarks = async () => {
 };
 
 // ==========================================
-// ATTENDANCE MODULE
+// ATTENDANCE MODULE (With Auto Points & Auth Fixed)
 // ==========================================
 window.resetAttendanceButton = () => {
   const btn = document.getElementById("btnSaveAttendance");
@@ -243,58 +243,6 @@ window.saveClassAttendance = async () => {
   const btn = document.getElementById("btnSaveAttendance");
   if (btn) {
     btn.disabled = true;
-    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-1"></i> Saving...`;
-  }
-
-  const rows = document.querySelectorAll("#attendanceTableBody tr[data-sid]");
-  const records = {};
-  rows.forEach(r => {
-    const sid = r.getAttribute("data-sid");
-    const isPresent = r.querySelector(".att-checkbox")?.checked;
-    records[sid] = isPresent ? "P" : "A";
-  });
-
-  try {
-    await addDoc(collection(db, "attendance"), {
-      institutionId: currentInstitutionId,
-      date: date,
-      class: selClass.replace(/Class\s*/i, "").trim(),
-      records: records,
-      recordedBy: auth.currentUser.uid,
-      timestamp: serverTimestamp()
-    });
-    
-    if (btn) {
-      btn.className = "btn btn-secondary px-4 mt-2"; 
-      btn.innerHTML = `<i class="fa-solid fa-check me-1"></i> Saved Successfully`;
-    }
-    window.showToast("Attendance recorded successfully!", "success");
-  } catch (err) { 
-    if (btn) {
-      btn.disabled = false;
-      btn.innerHTML = `<i class="fa-solid fa-check-double me-1"></i> Save Attendance`;
-    }
-    window.showToast("Error: " + err.message, "error"); 
-  }
-};
-// ==========================================
-// ATTENDANCE MODULE (academics.js) - With Auto Points
-// ==========================================
-import { db } from "./firebase-config.js";
-import { 
-  collection, doc, getDocs, query, where, addDoc, writeBatch, serverTimestamp 
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-// അറ്റൻഡൻസ് സേവ് ചെയ്യുമ്പോൾ ഓട്ടോമാറ്റിക് പോയിന്റുകൾ കൂടി ആഡ് ചെയ്യാൻ
-window.saveClassAttendance = async () => {
-  const date = document.getElementById("attDate")?.value;
-  const selClass = document.getElementById("attClassSelect")?.value;
-  const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
-  if (!date || !selClass) return alert("Select date and class.");
-
-  const btn = document.getElementById("btnSaveAttendance");
-  if (btn) {
-    btn.disabled = true;
     btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-1"></i> Saving Attendance & Points...`;
   }
 
@@ -305,13 +253,11 @@ window.saveClassAttendance = async () => {
   const batch = writeBatch(db);
   const attendanceRef = doc(collection(db, "attendance"));
 
-  // അറ്റൻഡൻസ് ഡാറ്റ റെഡിയാക്കൽ
   rows.forEach(r => {
     const sid = r.getAttribute("data-sid");
     const isPresent = r.querySelector(".att-checkbox")?.checked;
     records[sid] = isPresent ? "P" : "A";
 
-    // കുട്ടി പ്രസന്റ് ആണെങ്കിൽ ഓട്ടോമാറ്റിക്കായി പെർഫോമൻസ് പോയിന്റ് (+5 Pts) നൽകുക
     if (isPresent) {
       const reg = r.querySelector("b")?.innerText || "";
       const name = r.querySelectorAll("td")[1]?.innerText || "";
@@ -324,20 +270,19 @@ window.saveClassAttendance = async () => {
         studentName: name,
         class: cleanClass,
         task: "Daily Attendance (+5 Pts)",
-        points: 5, // നിങ്ങൾക്ക് ആവശ്യമുള്ള പോയിന്റ് ഇവിടെ മാറ്റാം
+        points: 5,
         date: new Date(date).toLocaleDateString(),
         timestamp: serverTimestamp()
       });
     }
   });
 
-  // അറ്റൻഡൻസ് ഡോക്യുമെന്റ് ബാച്ചിലേക്ക് ചേർക്കുക
   batch.set(attendanceRef, {
     institutionId: currentInstitutionId,
     date: date,
     class: cleanClass,
     records: records,
-    recordedBy: auth.currentUser.uid,
+    recordedBy: auth.currentUser ? auth.currentUser.uid : "unknown",
     timestamp: serverTimestamp()
   });
 
