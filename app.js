@@ -1907,8 +1907,8 @@ window.filterStudentsLocal = () => {
     const cleanClass = (s.currentClass || '-').replace(/Class\s*/i, "").trim();
     const actionCol = (currentUserRole === "principal" || currentUserRole === "admin" || isSuperAdmin) ? `
       <td class="text-center">
-        <button class="btn btn-sm btn-outline-primary me-1" onclick="openStudentProfileModal('${s.id}')" title="Edit"><i class="fa-solid fa-pen"></i></button>
-        <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${s.id}', '${s.name}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
+        <button class="btn btn-sm btn-outline-primary me-1" onclick="openStudentProfileModal('${s.id}')"><i class="fa-solid fa-pen"></i></button>
+        <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${s.id}', '${s.name}')"><i class="fa-solid fa-trash"></i></button>
       </td>` : ``;
 
     html += `
