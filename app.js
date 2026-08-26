@@ -68,6 +68,38 @@ window.showToast = (message, type = "success") => {
   }, 4000);
 };
 
+// Password Toggle Functionality
+window.togglePasswordVisibility = (inputId, btn) => {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const icon = btn.querySelector("i");
+  if (input.type === "password") {
+    input.type = "text";
+    if (icon) {
+      icon.classList.remove("fa-eye");
+      icon.classList.add("fa-eye-slash");
+    }
+  } else {
+    input.type = "password";
+    if (icon) {
+      icon.classList.remove("fa-eye-slash");
+      icon.classList.add("fa-eye");
+    }
+  }
+};
+
+window.toggleCustomDesignation = (val) => {
+  const customInput = document.getElementById("spDesignationCustom");
+  if (!customInput) return;
+  if (val === "Other") {
+    customInput.classList.remove("d-none");
+    customInput.required = true;
+  } else {
+    customInput.classList.add("d-none");
+    customInput.required = false;
+  }
+};
+
 window.detectLoginMode = () => {
   const val = document.getElementById("loginIdentifier").value.trim();
   const pwdGrp = document.getElementById("passwordGroup");
@@ -260,6 +292,9 @@ onAuthStateChanged(auth, async (user) => {
 
         if (!isSuperAdmin) populateClassDropdowns();
         syncMobileMenu();
+      } else {
+        showToast("User profile record not found. Please contact Administrator.", "error");
+        signOut(auth);
       }
     } catch (e) {
       console.error("Auth Load Error:", e);
@@ -271,39 +306,6 @@ onAuthStateChanged(auth, async (user) => {
     }
   }
 });
-
-function populateClassDropdowns() {
-  const allClasses = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
-  const allowedClasses = (currentUserRole === "principal" || currentUserRole === "admin" || isSuperAdmin) ? allClasses : currentUserAssignedClasses;
-
-  const filterSelect = document.getElementById("filterClassSelect");
-  if (filterSelect) {
-    filterSelect.innerHTML = "";
-    if (currentUserRole === "principal" || currentUserRole === "admin" || isSuperAdmin) filterSelect.innerHTML += `<option value="ALL">All Classes</option>`;
-    allowedClasses.forEach(c => filterSelect.innerHTML += `<option value="${c}">Class ${c}</option>`);
-    if (currentUserRole !== "principal" && currentUserRole !== "admin" && !isSuperAdmin && allowedClasses.length === 1) filterSelect.value = allowedClasses[0];
-  }
-
-  const dropdowns = ["attClassSelect", "markClassSelect", "perfClassSelect", "feeClassSelect"];
-  dropdowns.forEach(id => {
-    const select = document.getElementById(id);
-    if (select) {
-      select.innerHTML = "";
-      if (allowedClasses.length > 1 || currentUserRole === "principal" || currentUserRole === "admin" || isSuperAdmin) {
-        select.innerHTML = `<option value="">-- Select Class --</option>`;
-      }
-      allowedClasses.forEach(c => select.innerHTML += `<option value="${c}">Class ${c}</option>`);
-
-      if (currentUserRole !== "principal" && currentUserRole !== "admin" && !isSuperAdmin && allowedClasses.length === 1) {
-        select.value = allowedClasses[0];
-        if (id === "attClassSelect") loadAttendanceSheet();
-        if (id === "markClassSelect") loadMarksEntrySheet();
-        if (id === "perfClassSelect") loadStudentsForPerfSheet();
-        if (id === "feeClassSelect") loadStudentsForFees();
-      }
-    }
-  });
-}
 
 // ==========================================
 // SUPER ADMIN MASTER CONTROL (COUNTING ONLY ACTIVE STUDENTS)
@@ -1620,7 +1622,6 @@ window.saveStudentProfile = async (e) => {
   const dateOfLeaving = document.getElementById("stuDol").value;
   const tcIssued = document.getElementById("stuTcIssued").value;
   
-  // Set status dynamically: If TC is issued or student left, set status != active
   let currentStatus = "active";
   if (tcIssued === "Yes" || dateOfLeaving) {
     currentStatus = "transferred";
@@ -1922,7 +1923,22 @@ window.openStaffProfileModal = (docId) => {
     document.getElementById("spAwards").value = p.awards || '';
 
     document.getElementById("spRole").value = p.role || 'teacher';
-    document.getElementById("spDesignation").value = p.designation || 'മുഅല്ലിം';
+    
+    // Designation mapping
+    const desigSelect = document.getElementById("spDesignationSelect");
+    const desigCustom = document.getElementById("spDesignationCustom");
+    if (["സദർ മുഅല്ലിം", "വൈസ് സദർ", "സദർ ഇൻ-ചാർജ്", "മുഅല്ലിം"].includes(p.designation)) {
+      desigSelect.value = p.designation;
+      desigCustom.classList.add("d-none");
+    } else if (p.designation) {
+      desigSelect.value = "Other";
+      desigCustom.classList.remove("d-none");
+      desigCustom.value = p.designation;
+    } else {
+      desigSelect.value = "മുഅല്ലിം";
+      desigCustom.classList.add("d-none");
+    }
+
     document.getElementById("spMsr").value = p.msrNo || '';
     document.getElementById("spEmpType").value = p.employmentType || 'Full Time';
     document.getElementById("spExp").value = p.experience || '';
@@ -1971,7 +1987,11 @@ window.saveStaffProfile = async (e) => {
 
   const docId = document.getElementById("spDocId").value;
   const role = document.getElementById("spRole").value;
-  const designation = document.getElementById("spDesignation").value.trim().toUpperCase() || (role === 'principal' ? 'സദർ മുഅല്ലിം' : 'മുഅല്ലിം');
+  
+  const desigSelect = document.getElementById("spDesignationSelect").value;
+  const designation = desigSelect === "Other" 
+    ? (document.getElementById("spDesignationCustom").value.trim().toUpperCase() || "മുഅല്ലിം")
+    : desigSelect;
 
   const assignedClasses = [];
   document.querySelectorAll(".sp-class-cb:checked").forEach(cb => assignedClasses.push(cb.value));
@@ -2063,40 +2083,35 @@ window.deleteUser = async (docId, name) => {
   }
 };
 
-window.openInstAssignClassesForm = async (staffId) => {
+window.openInstAssignClassesForm = (staffId) => {
   const staff = pendingStaffCache.find(s => s.id === staffId);
-  if (!staff) return;
-
-  // പ്രിൻസിപ്പൽ ആണെങ്കിൽ നേരിട്ട് അപ്രൂവ് ചെയ്യുക
-  if (staff.role === 'principal') {
-    if (confirm(`Approve ${staff.name} as Principal (സദർ മുഅല്ലിം)?`)) {
-      try {
-        await updateDoc(doc(db, "users", staffId), { 
+  if (staff) {
+    if (staff.role === 'principal') {
+      if (confirm(`Approve ${staff.name} as Principal (സദർ മുഅല്ലിം)?`)) {
+        updateDoc(doc(db, "users", staffId), { 
           status: "active",
           assignedClasses: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
-        });
-        showToast("Principal approved successfully!", "success");
-        window.loadPrincipalsList();
-      } catch (err) {
-        showToast("Error approving principal: " + err.message, "error");
+        }).then(() => {
+          showToast("Principal approved successfully!", "success");
+          window.loadPrincipalsList();
+        }).catch(err => showToast("Error: " + err.message, "error"));
       }
+      return;
     }
-    return;
-  }
 
-  // അധ്യാപകനാണെങ്കിൽ ക്ലാസുകൾ അസൈൻ ചെയ്യുന്ന ഫോം കാണിക്കുക
-  const formEl = document.getElementById("instAssignClassesForm");
-  const idEl = document.getElementById("instAssignStaffId");
-  const nameEl = document.getElementById("instAssignStaffNameDisplay");
-  const roleEl = document.getElementById("instAssignStaffRole");
+    const formEl = document.getElementById("instAssignClassesForm");
+    const idEl = document.getElementById("instAssignStaffId");
+    const nameEl = document.getElementById("instAssignStaffNameDisplay");
+    const roleEl = document.getElementById("instAssignStaffRole");
 
-  if (idEl) idEl.value = staffId;
-  if (nameEl) nameEl.innerText = staff.name;
-  if (roleEl) roleEl.value = staff.role;
+    if (idEl) idEl.value = staffId;
+    if (nameEl) nameEl.innerText = staff.name;
+    if (roleEl) roleEl.value = staff.role;
 
-  if (formEl) {
-    formEl.classList.remove("d-none");
-    document.querySelectorAll('.inst-approve-class-cb').forEach(cb => cb.checked = false);
+    if (formEl) {
+      formEl.classList.remove("d-none");
+      document.querySelectorAll('.inst-approve-class-cb').forEach(cb => cb.checked = false);
+    }
   }
 };
 
@@ -2110,8 +2125,8 @@ window.instAssignClassesToStaff = async (e) => {
   if (role === 'teacher') {
     const checkboxes = document.querySelectorAll('.inst-approve-class-cb:checked');
     assignedClasses = Array.from(checkboxes).map(cb => cb.value);
-    if (assignedClasses.length === 0) return showToast("Please select at least one class for the teacher.", "warning");
-  } else {
+    if (assignedClasses.length === 0) return showToast("Please select at least one class.", "warning");
+  } else if (role === 'principal') {
     assignedClasses = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
   }
 
@@ -2124,10 +2139,8 @@ window.instAssignClassesToStaff = async (e) => {
     showToast("Staff approved successfully!", "success");
     const formEl = document.getElementById("instAssignClassesForm");
     if (formEl) formEl.classList.add("d-none");
-    window.loadPrincipalsList(); 
-  } catch (err) { 
-    showToast("Error: " + err.message, "error"); 
-  }
+    loadPrincipalsList(); 
+  } catch (err) { showToast("Error: " + err.message, "error"); }
 };
 
 // ==========================================
