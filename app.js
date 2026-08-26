@@ -216,9 +216,6 @@ onAuthStateChanged(auth, async (user) => {
         const instNameEl = document.getElementById("displayMadrassaName");
         if (instNameEl) instNameEl.innerText = isSuperAdmin ? "Smart Madrasa - Master Control Center" : (userData.institutionName || "Smart Madrasa");
 
-        const userNameEl = document.getElementById("displayUserName");
-        if (userNameEl) userNameEl.innerHTML = `<i class="fa-solid fa-user"></i> ${currentUserName}`;
-        
         const userRoleEl = document.getElementById("displayUserRole");
         const pMenuBtn = document.getElementById("promotionMenuBtn");
         const adminActions = document.getElementById("adminStudentActions");
@@ -534,7 +531,7 @@ window.returnToSuperAdminConsole = () => {
 };
 
 // ==========================================
-// REGISTRATION (SMOOTH & CLEAN RESET)
+// REGISTRATION
 // ==========================================
 
 window.handleSignUp = async (e) => {
