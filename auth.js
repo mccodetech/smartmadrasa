@@ -174,3 +174,131 @@ window.handleUnifiedLogin = async (e) => {
     }
   }
 };
+
+// ==========================================
+// PARENT PORTAL LOGIN & DATA LOADER
+// ==========================================
+let parentStudentsData = [];
+
+window.handleUnifiedLogin = async (e) => {
+  e.preventDefault();
+  const identifier = document.getElementById("loginIdentifier")?.value.trim();
+
+  if (/^\d+$/.test(identifier)) {
+    const reg = Number(identifier);
+    const mobile = document.getElementById("loginMobile")?.value.trim().slice(-10);
+
+    if (!mobile) return window.showToast("Please enter the registered mobile number.", "warning");
+
+    try {
+      const q = query(collection(db, "students"), where("regNo", "==", reg));
+      const snap = await getDocs(q);
+
+      if (snap.empty) return window.showToast("Student record not found.", "error");
+
+      let matchedStudent = null;
+      snap.forEach(d => {
+        const data = d.data();
+        const sPhone = (data.phone || '').replace(/[^0-9]/g, '').slice(-10);
+        if (sPhone === mobile) matchedStudent = { id: d.id, ...data };
+      });
+
+      if (!matchedStudent) return window.showToast("Phone number does not match.", "error");
+
+      const siblingsQ = query(collection(db, "students"), where("institutionId", "==", matchedStudent.institutionId));
+      const siblingsSnap = await getDocs(siblingsQ);
+      
+      parentStudentsData = [];
+      siblingsSnap.forEach(d => {
+        const data = d.data();
+        const sPhone = (data.phone || '').replace(/[^0-9]/g, '').slice(-10);
+        if (sPhone === mobile) {
+          parentStudentsData.push({ id: d.id, ...data });
+        }
+      });
+
+      sessionStorage.setItem("parentLoggedIn", "true");
+      document.getElementById("authSection")?.classList.add("d-none");
+      document.getElementById("parentViewSection")?.classList.remove("d-none");
+
+      const studentSelect = document.getElementById("parentStudentSelect");
+      if (studentSelect) {
+        studentSelect.innerHTML = "";
+        parentStudentsData.forEach(student => {
+          const option = document.createElement("option");
+          option.value = student.regNo;
+          option.text = `${student.name} (Reg No: ${student.regNo})`;
+          if (student.regNo === reg) option.selected = true;
+          studentSelect.appendChild(option);
+        });
+      }
+
+      loadParentStudentData(matchedStudent);
+    } catch (err) {
+      window.showToast("Login error: " + err.message, "error");
+    }
+
+  } else {
+    try {
+      const email = identifier.toLowerCase();
+      const password = document.getElementById("loginPassword")?.value;
+      if (!password) return window.showToast("Please enter your password.", "warning");
+
+      await signInWithEmailAndPassword(auth, email, password);
+      window.showToast("Signed in successfully!", "success");
+    } catch (err) { 
+      window.showToast("Sign-in failed: " + err.message, "error"); 
+    }
+  }
+};
+
+window.switchParentStudent = () => {
+  const selectedRegNo = Number(document.getElementById("parentStudentSelect")?.value);
+  const selectedStudent = parentStudentsData.find(s => s.regNo === selectedRegNo);
+  if (selectedStudent) loadParentStudentData(selectedStudent);
+};
+
+async function loadParentStudentData(student) {
+  const nameEl = document.getElementById("pvStudentName");
+  const classEl = document.getElementById("pvClass");
+  const regNoEl = document.getElementById("pvRegNo");
+  const fatherEl = document.getElementById("pvFather");
+
+  if (nameEl) nameEl.innerText = student.name;
+  if (classEl) classEl.innerText = "Class " + (student.currentClass || '').replace(/Class\s*/i, "");
+  if (regNoEl) regNoEl.innerText = student.regNo;
+  if (fatherEl) fatherEl.innerText = student.fatherName || student.guardianName || '-';
+
+  try {
+    const feeQ = query(collection(db, "feeCollections"), where("institutionId", "==", student.institutionId), where("regNo", "==", student.regNo));
+    const feeSnap = await getDocs(feeQ);
+    
+    let feeHtml = "";
+    const paidMonths = new Set();
+    const ALL_MONTHS = ["APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC", "JAN", "FEB", "MAR"];
+    
+    feeSnap.forEach(fd => {
+      const f = fd.data();
+      feeHtml += `<tr><td>#${f.receiptNo}</td><td>${f.date || '-'}</td><td>${f.feeType}</td><td class="fw-bold text-success">₹${f.amount}</td></tr>`;
+      ALL_MONTHS.forEach(m => {
+        if (f.feeType && f.feeType.includes(m)) paidMonths.add(m);
+      });
+    });
+    
+    const feeTableBody = document.getElementById("pvFeeTableBody");
+    if (feeTableBody) feeTableBody.innerHTML = feeHtml || `<tr><td colspan="4" class="text-center text-muted">No fee records found</td></tr>`;
+
+    let gridHtml = "";
+    ALL_MONTHS.forEach(m => {
+      if (paidMonths.has(m)) {
+        gridHtml += `<div class="month-badge month-paid">${m}<br><small>PAID</small></div>`;
+      } else {
+        gridHtml += `<div class="month-badge month-pending">${m}<br><small>DUE</small></div>`;
+      }
+    });
+    const monthGrid = document.getElementById("pvFeeMonthGrid");
+    if (monthGrid) monthGrid.innerHTML = gridHtml;
+  } catch (e) {
+    console.error("Error loading parent fee data:", e);
+  }
+}
