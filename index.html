@@ -45,7 +45,7 @@
       border: 1px solid rgba(226, 232, 240, 0.8);
       box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.08);
       width: 100%;
-      max-width: 440px;
+      max-width: 460px;
       padding: 32px 28px;
     }
     .brand-icon {
@@ -295,8 +295,10 @@
           <label class="form-label small fw-semibold">Email Address</label>
           <input type="email" id="regEmail" class="form-control" placeholder="email@madrasa.com" oninput="this.value = this.value.toLowerCase()" required>
         </div>
-        <div class="mb-3">
-          <label class="form-label small fw-semibold">Password</label>
+        
+        <!-- Double Password Entry -->
+        <div class="mb-2">
+          <label class="form-label small fw-semibold">Create Password (Hidden)</label>
           <div class="input-group">
             <input type="password" id="regPassword" class="form-control" placeholder="••••••••" required>
             <button class="btn btn-outline-secondary password-toggle-btn" type="button" onclick="togglePasswordVisibility('regPassword', this)">
@@ -304,6 +306,11 @@
             </button>
           </div>
         </div>
+        <div class="mb-3">
+          <label class="form-label small fw-semibold text-success">Confirm Password (Visible)</label>
+          <input type="text" id="regPasswordConfirm" class="form-control border-success" placeholder="Re-type password here" required>
+        </div>
+
         <button type="submit" id="btnSubmitSignup" class="btn btn-primary-custom w-100">Submit for Approval</button>
       </form>
 
@@ -354,8 +361,10 @@
           <label class="form-label small fw-semibold">Email Address</label>
           <input type="email" id="staffEmail" class="form-control" placeholder="email@staff.com" oninput="this.value = this.value.toLowerCase()" required>
         </div>
-        <div class="mb-3">
-          <label class="form-label small fw-semibold">Password</label>
+
+        <!-- Double Password Entry for Staff -->
+        <div class="mb-2">
+          <label class="form-label small fw-semibold">Create Password (Hidden)</label>
           <div class="input-group">
             <input type="password" id="staffPassword" class="form-control" placeholder="••••••••" required>
             <button class="btn btn-outline-secondary password-toggle-btn" type="button" onclick="togglePasswordVisibility('staffPassword', this)">
@@ -363,6 +372,11 @@
             </button>
           </div>
         </div>
+        <div class="mb-3">
+          <label class="form-label small fw-semibold text-success">Confirm Password (Visible)</label>
+          <input type="text" id="staffPasswordConfirm" class="form-control border-success" placeholder="Re-type password here" required>
+        </div>
+
         <button type="submit" id="btnStaffSubmitSignup" class="btn btn-primary-custom w-100">Submit Request</button>
       </form>
     </div>
@@ -501,7 +515,6 @@
                   <button class="btn btn-sm btn-outline-success" onclick="openStaffProfileModal(null)"><i class="fa-solid fa-plus me-1"></i> Add Staff / Principal</button>
               </div>
               
-              <!-- Pending Approvals Box -->
               <div id="instPendingStaffSection" class="mb-4 d-none">
                   <h6 class="fw-bold text-warning mb-2"><i class="fa-solid fa-clock me-1"></i> Pending Approvals</h6>
                   <div class="table-responsive">
@@ -512,7 +525,6 @@
                   </div>
               </div>
 
-              <!-- Inline Assign Class Form (Appears when Approving Teacher) -->
               <form id="instAssignClassesForm" onsubmit="instAssignClassesToStaff(event)" class="mb-4 d-none border p-3 rounded bg-light">
                 <input type="hidden" id="instAssignStaffId">
                 <input type="hidden" id="instAssignStaffRole">
