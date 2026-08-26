@@ -1,13 +1,13 @@
 // ==========================================
-// AUTHENTICATION MODULE (auth.js)
+// AUTHENTICATION MODULE (auth.js) - Complete & Clean
 // ==========================================
 import { db, auth, SUPER_ADMIN_EMAIL } from "./firebase-config.js";
 import { 
   createUserWithEmailAndPassword, signInWithEmailAndPassword, 
-  signOut, onAuthStateChanged 
+  signOut 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { 
-  doc, setDoc, getDoc, collection, getDocs, query, where, serverTimestamp 
+  doc, setDoc, collection, getDocs, query, where, serverTimestamp 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // പാസ്‌വേഡ് ടോഗിൾ ഫങ്ഷൻ
@@ -26,19 +26,19 @@ window.togglePasswordVisibility = (inputId, btn) => {
 
 // ലോഗിൻ മോഡ് കണ്ടെത്താൻ (ഇമെയിൽ ആണോ സ്റ്റുഡന്റ് റെഗ് നമ്പർ ആണോ എന്ന്)
 window.detectLoginMode = () => {
-  const val = document.getElementById("loginIdentifier").value.trim();
+  const val = document.getElementById("loginIdentifier")?.value.trim() || "";
   const pwdGrp = document.getElementById("passwordGroup");
   const phoneGrp = document.getElementById("phoneGroup");
   const submitBtn = document.getElementById("btnAuthSubmit");
 
   if (/^\d+$/.test(val)) {
-    pwdGrp.classList.add("d-none");
-    phoneGrp.classList.remove("d-none");
-    submitBtn.innerText = "View Student Details";
+    if (pwdGrp) pwdGrp.classList.add("d-none");
+    if (phoneGrp) phoneGrp.classList.remove("d-none");
+    if (submitBtn) submitBtn.innerText = "View Student Details";
   } else {
-    pwdGrp.classList.remove("d-none");
-    phoneGrp.classList.add("d-none");
-    submitBtn.innerText = "Sign In";
+    if (pwdGrp) pwdGrp.classList.remove("d-none");
+    if (phoneGrp) phoneGrp.classList.add("d-none");
+    if (submitBtn) submitBtn.innerText = "Sign In";
   }
 };
 
@@ -59,34 +59,48 @@ window.logoutParent = () => {
 
 // സൈൻ അപ്പ് ഫോം ടോഗിൾ ചെയ്യൽ
 window.showSignupForm = (type) => {
-  document.getElementById("signupOptions").classList.add("d-none");
-  if (type === 'madrasa') document.getElementById("signupForm").classList.remove("d-none");
-  else document.getElementById("staffSignupForm").classList.remove("d-none");
+  const options = document.getElementById("signupOptions");
+  const signupForm = document.getElementById("signupForm");
+  const staffForm = document.getElementById("staffSignupForm");
+
+  if (options) options.classList.add("d-none");
+  if (type === 'madrasa') {
+    if (signupForm) signupForm.classList.remove("d-none");
+  } else {
+    if (staffForm) staffForm.classList.remove("d-none");
+  }
 };
 
 window.switchAuthTab = (type) => {
-  document.getElementById("loginForm").classList.add("d-none");
-  document.getElementById("signupForm").classList.add("d-none");
-  document.getElementById("staffSignupForm").classList.add("d-none");
-  document.getElementById("signupOptions").classList.add("d-none");
-  document.getElementById("tabBtnLogin").classList.remove("active");
-  document.getElementById("tabBtnSignup").classList.remove("active");
+  const loginForm = document.getElementById("loginForm");
+  const signupForm = document.getElementById("signupForm");
+  const staffForm = document.getElementById("staffSignupForm");
+  const signupOptions = document.getElementById("signupOptions");
+  const btnLogin = document.getElementById("tabBtnLogin");
+  const btnSignup = document.getElementById("tabBtnSignup");
+
+  if (loginForm) loginForm.classList.add("d-none");
+  if (signupForm) signupForm.classList.add("d-none");
+  if (staffForm) staffForm.classList.add("d-none");
+  if (signupOptions) signupOptions.classList.add("d-none");
+  if (btnLogin) btnLogin.classList.remove("active");
+  if (btnSignup) btnSignup.classList.remove("active");
 
   if (type === 'login') {
-    document.getElementById("loginForm").classList.remove("d-none");
-    document.getElementById("tabBtnLogin").classList.add("active");
+    if (loginForm) loginForm.classList.remove("d-none");
+    if (btnLogin) btnLogin.classList.add("active");
   } else {
-    document.getElementById("signupOptions").classList.remove("d-none");
-    document.getElementById("tabBtnSignup").classList.add("active");
+    if (signupOptions) signupOptions.classList.remove("d-none");
+    if (btnSignup) btnSignup.classList.add("active");
   } 
 };
 
 // മദ്റസ അഡ്മിൻ രജിസ്ട്രേഷൻ
 window.handleSignUp = async (e) => {
   e.preventDefault();
-  const email = document.getElementById("regEmail").value.trim().toLowerCase();
-  const pwd = document.getElementById("regPassword").value;
-  const pwdConf = document.getElementById("regPasswordConfirm").value;
+  const email = document.getElementById("regEmail")?.value.trim().toLowerCase();
+  const pwd = document.getElementById("regPassword")?.value;
+  const pwdConf = document.getElementById("regPasswordConfirm")?.value;
 
   if (pwd !== pwdConf) {
     window.showToast("Passwords do not match!", "warning");
@@ -94,18 +108,18 @@ window.handleSignUp = async (e) => {
   }
 
   try {
-    const board = document.getElementById("regBoard").value;
-    const code = document.getElementById("regInstCode").value.trim().toUpperCase();
+    const board = document.getElementById("regBoard")?.value;
+    const code = document.getElementById("regInstCode")?.value.trim().toUpperCase();
     const instId = board + "_" + code;
     
     const cred = await createUserWithEmailAndPassword(auth, email, pwd);
     await setDoc(doc(db, "users", cred.user.uid), {
       uid: cred.user.uid,
-      name: document.getElementById("regUserName").value.trim().toUpperCase(),
-      phone: document.getElementById("regPhone").value.trim(),
+      name: document.getElementById("regUserName")?.value.trim().toUpperCase(),
+      phone: document.getElementById("regPhone")?.value.trim(),
       email: email,
       institutionId: instId,
-      institutionName: document.getElementById("regInstName").value.trim().toUpperCase(),
+      institutionName: document.getElementById("regInstName")?.value.trim().toUpperCase(),
       role: "admin",
       status: email === SUPER_ADMIN_EMAIL ? "active" : "pending",
       createdAt: serverTimestamp()
@@ -122,9 +136,9 @@ window.handleSignUp = async (e) => {
 // സ്റ്റാഫ് രജിസ്ട്രേഷൻ
 window.handleStaffSignUp = async (e) => {
   e.preventDefault();
-  const email = document.getElementById("staffEmail").value.trim().toLowerCase();
-  const pwd = document.getElementById("staffPassword").value;
-  const pwdConf = document.getElementById("staffPasswordConfirm").value;
+  const email = document.getElementById("staffEmail")?.value.trim().toLowerCase();
+  const pwd = document.getElementById("staffPassword")?.value;
+  const pwdConf = document.getElementById("staffPasswordConfirm")?.value;
 
   if (pwd !== pwdConf) {
     window.showToast("Passwords do not match!", "warning");
@@ -132,18 +146,18 @@ window.handleStaffSignUp = async (e) => {
   }
 
   try {
-    const board = document.getElementById("staffBoard").value;
-    const code = document.getElementById("staffInstCode").value.trim().toUpperCase();
+    const board = document.getElementById("staffBoard")?.value;
+    const code = document.getElementById("staffInstCode")?.value.trim().toUpperCase();
     const instId = board + "_" + code;
 
     const cred = await createUserWithEmailAndPassword(auth, email, pwd);
     await setDoc(doc(db, "users", cred.user.uid), {
       uid: cred.user.uid,
-      name: document.getElementById("staffName").value.trim().toUpperCase(),
-      phone: document.getElementById("staffPhone").value.trim(),
+      name: document.getElementById("staffName")?.value.trim().toUpperCase(),
+      phone: document.getElementById("staffPhone")?.value.trim(),
       email: email,
       institutionId: instId,
-      role: document.getElementById("staffRole").value,
+      role: document.getElementById("staffRole")?.value,
       status: "pending",
       createdAt: serverTimestamp()
     });
@@ -156,54 +170,47 @@ window.handleStaffSignUp = async (e) => {
   }
 };
 
-// ലോഗിൻ പ്രോസസ്സ്
-window.handleUnifiedLogin = async (e) => {
-  e.preventDefault();
-  const identifier = document.getElementById("loginIdentifier").value.trim();
-
-  if (/^\d+$/.test(identifier)) {
-    window.showToast("Parent portal login active", "info");
-  } else {
-    try {
-      const email = identifier.toLowerCase();
-      const password = document.getElementById("loginPassword").value;
-      await signInWithEmailAndPassword(auth, email, password);
-      window.showToast("Signed in successfully!", "success");
-    } catch (err) {
-      window.showToast("Sign-in failed: " + err.message, "error");
-    }
-  }
-};
-
 // ==========================================
-// PARENT PORTAL LOGIN & DATA LOADER
+// UNIFIED LOGIN & PARENT PORTAL
 // ==========================================
 let parentStudentsData = [];
 
 window.handleUnifiedLogin = async (e) => {
   e.preventDefault();
-  const identifier = document.getElementById("loginIdentifier")?.value.trim();
+  const identifier = document.getElementById("loginIdentifier")?.value.trim() || "";
 
+  // രക്ഷിതാക്കളുടെ ലോഗിൻ (റീജസ്ട്രേഷൻ നമ്പർ വഴി)
   if (/^\d+$/.test(identifier)) {
     const reg = Number(identifier);
     const mobile = document.getElementById("loginMobile")?.value.trim().slice(-10);
 
-    if (!mobile) return window.showToast("Please enter the registered mobile number.", "warning");
+    if (!mobile) {
+      window.showToast("Please enter the registered mobile number.", "warning");
+      return;
+    }
 
     try {
       const q = query(collection(db, "students"), where("regNo", "==", reg));
       const snap = await getDocs(q);
 
-      if (snap.empty) return window.showToast("Student record not found.", "error");
+      if (snap.empty) {
+        window.showToast("Student record not found with this Reg No.", "error");
+        return;
+      }
 
       let matchedStudent = null;
       snap.forEach(d => {
         const data = d.data();
         const sPhone = (data.phone || '').replace(/[^0-9]/g, '').slice(-10);
-        if (sPhone === mobile) matchedStudent = { id: d.id, ...data };
+        if (sPhone === mobile) {
+          matchedStudent = { id: d.id, ...data };
+        }
       });
 
-      if (!matchedStudent) return window.showToast("Phone number does not match.", "error");
+      if (!matchedStudent) {
+        window.showToast("Mobile number does not match our records.", "error");
+        return;
+      }
 
       const siblingsQ = query(collection(db, "students"), where("institutionId", "==", matchedStudent.institutionId));
       const siblingsSnap = await getDocs(siblingsQ);
@@ -218,6 +225,7 @@ window.handleUnifiedLogin = async (e) => {
       });
 
       sessionStorage.setItem("parentLoggedIn", "true");
+      
       document.getElementById("authSection")?.classList.add("d-none");
       document.getElementById("parentViewSection")?.classList.remove("d-none");
 
@@ -234,15 +242,21 @@ window.handleUnifiedLogin = async (e) => {
       }
 
       loadParentStudentData(matchedStudent);
+      window.showToast("Welcome to Parent Portal!", "success");
+
     } catch (err) {
       window.showToast("Login error: " + err.message, "error");
     }
 
   } else {
+    // സ്റ്റാഫ് / അഡ്മിൻ ലോഗിൻ (ഇമെയിൽ വഴി)
     try {
       const email = identifier.toLowerCase();
       const password = document.getElementById("loginPassword")?.value;
-      if (!password) return window.showToast("Please enter your password.", "warning");
+      if (!password) {
+        window.showToast("Please enter your password.", "warning");
+        return;
+      }
 
       await signInWithEmailAndPassword(auth, email, password);
       window.showToast("Signed in successfully!", "success");
@@ -264,9 +278,9 @@ async function loadParentStudentData(student) {
   const regNoEl = document.getElementById("pvRegNo");
   const fatherEl = document.getElementById("pvFather");
 
-  if (nameEl) nameEl.innerText = student.name;
+  if (nameEl) nameEl.innerText = student.name || '-';
   if (classEl) classEl.innerText = "Class " + (student.currentClass || '').replace(/Class\s*/i, "");
-  if (regNoEl) regNoEl.innerText = student.regNo;
+  if (regNoEl) regNoEl.innerText = student.regNo || '-';
   if (fatherEl) fatherEl.innerText = student.fatherName || student.guardianName || '-';
 
   try {
@@ -286,7 +300,9 @@ async function loadParentStudentData(student) {
     });
     
     const feeTableBody = document.getElementById("pvFeeTableBody");
-    if (feeTableBody) feeTableBody.innerHTML = feeHtml || `<tr><td colspan="4" class="text-center text-muted">No fee records found</td></tr>`;
+    if (feeTableBody) {
+      feeTableBody.innerHTML = feeHtml || `<tr><td colspan="4" class="text-center text-muted">No fee records found</td></tr>`;
+    }
 
     let gridHtml = "";
     ALL_MONTHS.forEach(m => {
@@ -298,7 +314,25 @@ async function loadParentStudentData(student) {
     });
     const monthGrid = document.getElementById("pvFeeMonthGrid");
     if (monthGrid) monthGrid.innerHTML = gridHtml;
+
+    // പെർഫോമൻസ് പോയിന്റുകൾ ലോഡ് ചെയ്യാൻ
+    const perfQ = query(collection(db, "performancePoints"), where("institutionId", "==", student.institutionId), where("regNo", "==", student.regNo));
+    const perfSnap = await getDocs(perfQ);
+    let totalPts = 0;
+    let perfHtml = "";
+    perfSnap.forEach(pd => {
+      const p = pd.data();
+      totalPts += (Number(p.points) || 0);
+      perfHtml += `<tr><td>${p.date || '-'}</td><td>${p.task}</td><td class="fw-bold ${p.points >= 0 ? 'text-success' : 'text-danger'}">${p.points > 0 ? '+' : ''}${p.points} Pts</td></tr>`;
+    });
+    const totalPtsEl = document.getElementById("pvTotalPoints");
+    if (totalPtsEl) totalPtsEl.innerText = totalPts + " Pts";
+    
+    const pointsTableBody = document.getElementById("pvPointsTableBody");
+    if (pointsTableBody) {
+      pointsTableBody.innerHTML = perfHtml || `<tr><td colspan="3" class="text-center text-muted">No points awarded yet</td></tr>`;
+    }
   } catch (e) {
-    console.error("Error loading parent fee data:", e);
+    console.error("Error loading parent data:", e);
   }
 }
