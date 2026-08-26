@@ -397,28 +397,46 @@ async function loadParentStudentData(student) {
 window.handleSignUp = async (e) => {
   e.preventDefault();
   const submitBtn = document.getElementById("btnSubmitSignup");
-  if (submitBtn) submitBtn.disabled = true;
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Submitting...";
+  }
 
   try {
-    const board = document.getElementById("regBoard").value;
-    const instCode = document.getElementById("regInstCode").value.trim().toUpperCase();
-    const instName = document.getElementById("regInstName").value.trim().toUpperCase();
-    const userName = document.getElementById("regUserName").value.trim().toUpperCase();
-    const phone = document.getElementById("regPhone").value.trim();
-    const whatsapp = document.getElementById("regWhatsapp").value.trim() || phone;
-    const email = document.getElementById("regEmail").value.trim().toLowerCase();
-    const pwd = document.getElementById("regPassword").value;
+    const board = document.getElementById("regBoard")?.value || "Other";
+    const instCode = (document.getElementById("regInstCode")?.value || "").trim().toUpperCase();
+    const instName = (document.getElementById("regInstName")?.value || "").trim().toUpperCase();
+    const userName = (document.getElementById("regUserName")?.value || "").trim().toUpperCase();
+    const phone = (document.getElementById("regPhone")?.value || "").trim();
+    const whatsapp = (document.getElementById("regWhatsapp")?.value || "").trim() || phone;
+    const email = (document.getElementById("regEmail")?.value || "").trim().toLowerCase();
+    const pwd = document.getElementById("regPassword")?.value || "";
+    
+    // Safety check
+    if (!instCode || !instName || !email || !pwd) {
+      alert("Please fill in all required fields (Code, Name, Email, Password).");
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Submit for Approval";
+      }
+      return;
+    }
+
     const instId = board + "_" + instCode;
     
-    const address = document.getElementById("regAddress") ? document.getElementById("regAddress").value.trim().toUpperCase() : "";
-    const place = document.getElementById("regPlace") ? document.getElementById("regPlace").value.trim().toUpperCase() : "";
-    const po = document.getElementById("regPo") ? document.getElementById("regPo").value.trim().toUpperCase() : "";
-    const pincode = document.getElementById("regPincode") ? document.getElementById("regPincode").value.trim() : "";
-    const district = document.getElementById("regDistrict") ? document.getElementById("regDistrict").value.trim().toUpperCase() : "";
-    const locationLink = document.getElementById("regLocationLink") ? document.getElementById("regLocationLink").value.trim() : "";
+    const address = (document.getElementById("regAddress")?.value || "").trim().toUpperCase();
+    const place = (document.getElementById("regPlace")?.value || "").trim().toUpperCase();
+    const po = (document.getElementById("regPo")?.value || "").trim().toUpperCase();
+    const pincode = (document.getElementById("regPincode")?.value || "").trim();
+    const district = (document.getElementById("regDistrict")?.value || "").trim().toUpperCase();
+    const locationLink = (document.getElementById("regLocationLink")?.value || "").trim();
 
     const isDev = (email === SUPER_ADMIN_EMAIL);
+    
+    // 1. Create Firebase Auth User
     const cred = await createUserWithEmailAndPassword(auth, email, pwd);
+    
+    // 2. Save into Firestore database
     await setDoc(doc(db, "users", cred.user.uid), {
       uid: cred.user.uid,
       name: userName,
@@ -437,28 +455,35 @@ window.handleSignUp = async (e) => {
       locationLink: locationLink,
       role: "admin",
       status: isDev ? "active" : "pending",
-      assignedClasses: [],
+      assignedClasses: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
       createdAt: serverTimestamp()
     });
 
+    // 3. Save default settings for this institution
     await setDoc(doc(db, "settings", instId), {
-        feePermission: "all",
-        reqManualReceipt: false
-    });
+      feePermission: "all",
+      reqManualReceipt: false
+    }, { merge: true });
 
-    document.getElementById("signupForm").reset();
+    // 4. Reset form inputs cleanly
+    const form = document.getElementById("signupForm");
+    if (form) form.reset();
 
     if (isDev) {
       alert("Developer Account registered and activated!");
     } else {
       alert("Registration submitted successfully! Please wait for Super Admin approval before signing in.");
-      signOut(auth);
+      await signOut(auth);
       switchAuthTab('login');
     }
   } catch (err) { 
+    console.error("Signup error:", err);
     alert("Registration failed: " + err.message); 
   } finally {
-    if (submitBtn) submitBtn.disabled = false;
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerText = "Submit for Approval";
+    }
   }
 };
 
@@ -520,65 +545,55 @@ window.handleStaffSignUp = async (e) => {
 
 window.loadSuperAdminRequests = async () => {
   const tbody = document.getElementById("superAdminTableBody");
-  tbody.innerHTML = `<tr><td colspan="8" class="text-center">Loading registered madrasas...</td></tr>`;
+  if (!tbody) return;
+  tbody.innerHTML = `<tr><td colspan="8" class="text-center py-3"><i class="fa-solid fa-spinner fa-spin me-2"></i>Loading registered madrasas...</td></tr>`;
 
-  const q = query(collection(db, "users"), where("role", "==", "admin"));
-  const snap = await getDocs(q);
+  try {
+    const q = query(collection(db, "users"), where("role", "==", "admin"));
+    const snap = await getDocs(q);
 
-  localMadrasasCache = [];
-  snap.forEach(d => {
-    const data = d.data();
-    if (data.email !== SUPER_ADMIN_EMAIL) {
-      localMadrasasCache.push({ id: d.id, ...data });
+    localMadrasasCache = [];
+    snap.forEach(d => {
+      const data = d.data();
+      if (data.email !== SUPER_ADMIN_EMAIL) {
+        localMadrasasCache.push({ id: d.id, ...data });
+      }
+    });
+
+    let html = "";
+    for (const u of localMadrasasCache) {
+      const isPending = (u.status === "pending");
+      const statusBadge = isPending 
+        ? `<span class="badge bg-warning text-dark">Pending Approval</span>` 
+        : `<span class="badge bg-success">Active</span>`;
+
+      const approveOrManageBtn = isPending 
+        ? `<button class="btn btn-sm btn-success me-1" onclick="approveMadrasa('${u.id}', '${u.institutionName}')" title="Approve"><i class="fa-solid fa-check me-1"></i> Approve</button>`
+        : `<button class="btn btn-sm btn-primary me-1" onclick="switchMadrasaScope('${u.institutionId}', '${u.institutionName}')" title="Manage Scope"><i class="fa-solid fa-folder-open me-1"></i> Manage</button>`;
+
+      html += `
+        <tr>
+          <td><b>${u.institutionId || u.institutionCode || '-'}</b></td>
+          <td><b>${u.institutionName || '-'}</b></td>
+          <td>${u.place || '-'}</td>
+          <td>${u.name || '-'}</td>
+          <td>${u.email || '-'}</td>
+          <td>${u.phone || '-'}</td>
+          <td>${statusBadge}</td>
+          <td class="text-center">
+            ${approveOrManageBtn}
+            <button class="btn btn-sm btn-outline-secondary me-1" onclick="openSuperAdminEditMadrasaModal('${u.id}')" title="Edit"><i class="fa-solid fa-pen"></i></button>
+            <button class="btn btn-sm btn-outline-danger" onclick="rejectMadrasa('${u.id}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
+          </td>
+        </tr>
+      `;
     }
-  });
-
-  let html = "";
-  for (const u of localMadrasasCache) {
-    const isPending = (u.status === "pending");
-    const statusBadge = isPending 
-      ? `<span class="badge bg-warning text-dark">Pending</span>` 
-      : `<span class="badge bg-success">Active</span>`;
-
-    const approveOrManageBtn = isPending 
-      ? `<button class="btn btn-sm btn-success me-1" onclick="approveMadrasa('${u.id}', '${u.institutionName}')" title="Approve"><i class="fa-solid fa-check"></i> Approve</button>`
-      : `<button class="btn btn-sm btn-primary me-1" onclick="switchMadrasaScope('${u.institutionId}', '${u.institutionName}')" title="Manage Scope"><i class="fa-solid fa-folder-open"></i> Manage</button>`;
-
-    let stuCount = 0;
-    let staffCount = 0;
-
-    try {
-        const stuQ = query(collection(db, "students"), where("institutionId", "==", u.institutionId));
-        const stuSnap = await getCountFromServer(stuQ);
-        stuCount = stuSnap.data().count;
-
-        const staffQ = query(collection(db, "users"), where("institutionId", "==", u.institutionId));
-        const staffSnap = await getCountFromServer(staffQ);
-        staffCount = Math.max(0, staffSnap.data().count - 1);
-    } catch (e) {
-        console.log("Count error", e);
-    }
-
-    html += `
-      <tr>
-        <td><b>${u.institutionId || '-'}</b></td>
-        <td><b>${u.institutionName || '-'}</b></td>
-        <td>${u.place || '-'}</td>
-        <td>${u.name || '-'}</td>
-        <td class="text-center"><span class="badge bg-info text-dark">${staffCount}</span></td>
-        <td class="text-center"><span class="badge bg-primary">${stuCount}</span></td>
-        <td>${statusBadge}</td>
-        <td class="text-center">
-          ${approveOrManageBtn}
-          <button class="btn btn-sm btn-outline-secondary me-1" onclick="openSuperAdminEditMadrasaModal('${u.id}')" title="Edit Details"><i class="fa-solid fa-pen"></i></button>
-          <button class="btn btn-sm btn-outline-danger" onclick="rejectMadrasa('${u.id}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
-        </td>
-      </tr>
-    `;
+    tbody.innerHTML = html || `<tr><td colspan="8" class="text-center text-muted py-3">No madrasa accounts found.</td></tr>`;
+  } catch (err) {
+    console.error("Error loading master list:", err);
+    tbody.innerHTML = `<tr><td colspan="8" class="text-center text-danger py-3">Error loading data: ${err.message}</td></tr>`;
   }
-  tbody.innerHTML = html || `<tr><td colspan="8" class="text-center text-muted">No madrasa accounts found.</td></tr>`;
 };
-
 window.switchMadrasaScope = (instId, instName) => {
   currentInstitutionId = instId;
   document.getElementById("displayMadrassaName").innerText = instName + " (Super Admin View)";
