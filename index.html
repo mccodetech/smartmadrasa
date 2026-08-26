@@ -454,20 +454,21 @@
 
   <!-- Main App Screen -->
   <div id="appSection" class="d-none">
-    <nav class="navbar navbar-dark bg-madrassa shadow-sm sticky-top py-2">
-      <div class="container-fluid top-header-bar px-2 px-md-3">
+    <nav class="navbar navbar-dark bg-madrassa shadow-sm sticky-top">
+      <div class="container-fluid px-3">
         <div class="d-flex align-items-center gap-2">
-          <button class="btn btn-outline-light btn-sm d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas">
+          <button class="btn btn-outline-light d-lg-none flex-shrink-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas">
             <i class="fa-solid fa-bars"></i>
           </button>
-          <a class="navbar-brand fw-bold m-0 d-flex align-items-center gap-2 top-brand-text" href="#" onclick="showTab('homeDashboardTab')">
-            <i class="fa-solid fa-kaaba"></i> <span id="displayMadrassaName">Smart Madrasa</span>
+          <a class="navbar-brand fw-bold m-0 d-flex align-items-center gap-2" href="#" onclick="showTab('homeDashboardTab')" style="max-width: 65vw;">
+            <i class="fa-solid fa-kaaba flex-shrink-0"></i> 
+            <span id="displayMadrassaName" class="text-wrap" style="font-size: 1rem; line-height: 1.2;">Smart Madrasa</span>
           </a>
         </div>
         <div class="d-flex align-items-center gap-2 text-white">
           <button class="btn btn-sm btn-outline-warning d-none" id="superAdminBackBtn" onclick="returnToSuperAdminConsole()"><i class="fa-solid fa-arrow-left me-1"></i> Console</button>
-          <span class="badge bg-light text-dark d-none d-md-inline-block" id="displayUserRole">Admin</span>
-          <button class="btn btn-outline-light btn-sm" onclick="handleLogout()"><i class="fa-solid fa-right-from-bracket me-md-1"></i> <span class="d-none d-md-inline-block">Logout</span></button>
+          <span class="badge bg-light text-dark d-none d-sm-inline-block" id="displayUserRole">Admin</span>
+          <button class="btn btn-outline-light btn-sm flex-shrink-0" onclick="handleLogout()"><i class="fa-solid fa-right-from-bracket"></i> <span class="d-none d-sm-inline-block">Logout</span></button>
         </div>
       </div>
     </nav>
