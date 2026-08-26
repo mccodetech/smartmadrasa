@@ -2423,3 +2423,23 @@ window.showTab = (tabId) => {
   if (tabId === 'superAdminTab') window.loadSuperAdminRequests();
   if (tabId === 'subjectSettingsTab') window.loadClassSubjectSettings();
 };
+window.deleteAllStudents = async () => {
+  if (confirm("WARNING: Are you sure you want to delete ALL student records for this madrasa? This action cannot be undone!")) {
+    try {
+      showToast("Deleting all students...", "warning");
+      const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId));
+      const snap = await getDocs(q);
+      
+      const batch = writeBatch(db);
+      snap.forEach(d => {
+        batch.delete(doc(db, "students", d.id));
+      });
+      
+      await batch.commit();
+      showToast("All student records deleted successfully.", "success");
+      loadStudentsByClass(true);
+    } catch (err) {
+      showToast("Error deleting students: " + err.message, "error");
+    }
+  }
+};
