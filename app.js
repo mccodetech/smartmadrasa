@@ -572,7 +572,7 @@ window.handleStaffSignUp = async (e) => {
     const instSnap = await getDocs(instQuery);
 
     if (instSnap.empty) {
-      showToast("Madrasa Code not found. Please check Board & Code.", "warning");
+      showToast("Madrasa Code not found. Please check Board & Code with your Admin.", "warning");
       if (submitBtn) {
         submitBtn.disabled = false;
         submitBtn.innerText = "Submit Request";
@@ -588,6 +588,12 @@ window.handleStaffSignUp = async (e) => {
     if (role === "principal") {
       desigTitle = "സദർ മുഅല്ലിം";
       systemRole = "principal";
+    } else if (role === "vice_principal") {
+      desigTitle = "വൈസ് സദർ";
+      systemRole = "teacher";
+    } else if (role === "in_charge") {
+      desigTitle = "സദർ ഇൻ-ചാർജ്";
+      systemRole = "teacher";
     }
 
     const cred = await createUserWithEmailAndPassword(auth, email, pwd);
@@ -2230,7 +2236,7 @@ window.promoteStudents = async () => {
 
 window.downloadCSVFormat = () => {
     const headers = "REG NO.,ID NO.,AADHAAR NUMBER,STUDENT NAME,GENDER,D.O.B,BLOOD GROUP,CURRENT CLASS,JOINED CLASS,JOINED DATE,PRESENCE,MONTHLY FEE,FATHER NAME,MOTHER NAME,GUARDIAN NAME,RELATION,GUARDIAN OCCUPATION,MOBILE NUMBER,EMERGENCY NUMBER,HOUSE NAME,PLACE,PO,PINCODE,DISTRICT,STATE,TRANSFERRED TO,REASON FOR LEAVING,DATE OF LEAVING,TC ISSUED,TC DETAILS,IDENTIFICATION MARKS,SPECIAL INFO\n";
-    const sampleData = "101,A123,,MUHAMMED,Male,2015-05-12,O+,1,1,2021-06-01,Regular,200,ABDULLA,FATHIMA,ABDULLA,Father,Business,9876543210,9876543211,HOUSE NAME,CALICUT,CALICUT PO,673001,KOZHIKODE,KERALA,,,,,,,,None,\n";
+    const sampleData = "101,A123,[Aadhaar Redacted],MUHAMMED,Male,2015-05-12,O+,1,1,2021-06-01,Regular,200,ABDULLA,FATHIMA,ABDULLA,Father,Business,9876543210,9876543211,HOUSE NAME,CALICUT,CALICUT PO,673001,KOZHIKODE,KERALA,,,,,,,,None,\n";
     const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(headers + sampleData);
     
     const link = document.createElement("a");
