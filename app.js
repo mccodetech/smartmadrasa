@@ -152,6 +152,39 @@ window.handleLogout = () => {
   });
 };
 
+function populateClassDropdowns() {
+  const allClasses = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
+  const allowedClasses = (currentUserRole === "principal" || currentUserRole === "admin" || isSuperAdmin) ? allClasses : currentUserAssignedClasses;
+
+  const filterSelect = document.getElementById("filterClassSelect");
+  if (filterSelect) {
+    filterSelect.innerHTML = "";
+    if (currentUserRole === "principal" || currentUserRole === "admin" || isSuperAdmin) filterSelect.innerHTML += `<option value="ALL">All Classes</option>`;
+    allowedClasses.forEach(c => filterSelect.innerHTML += `<option value="${c}">Class ${c}</option>`);
+    if (currentUserRole !== "principal" && currentUserRole !== "admin" && !isSuperAdmin && allowedClasses.length === 1) filterSelect.value = allowedClasses[0];
+  }
+
+  const dropdowns = ["attClassSelect", "markClassSelect", "perfClassSelect", "feeClassSelect"];
+  dropdowns.forEach(id => {
+    const select = document.getElementById(id);
+    if (select) {
+      select.innerHTML = "";
+      if (allowedClasses.length > 1 || currentUserRole === "principal" || currentUserRole === "admin" || isSuperAdmin) {
+        select.innerHTML = `<option value="">-- Select Class --</option>`;
+      }
+      allowedClasses.forEach(c => select.innerHTML += `<option value="${c}">Class ${c}</option>`);
+
+      if (currentUserRole !== "principal" && currentUserRole !== "admin" && !isSuperAdmin && allowedClasses.length === 1) {
+        select.value = allowedClasses[0];
+        if (id === "attClassSelect") loadAttendanceSheet();
+        if (id === "markClassSelect") loadMarksEntrySheet();
+        if (id === "perfClassSelect") loadStudentsForPerfSheet();
+        if (id === "feeClassSelect") loadStudentsForFees();
+      }
+    }
+  });
+}
+
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     try {
@@ -308,7 +341,7 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 // ==========================================
-// SUPER ADMIN MASTER CONTROL (COUNTING ONLY ACTIVE STUDENTS)
+// SUPER ADMIN MASTER CONTROL
 // ==========================================
 
 window.loadSuperAdminRequests = async () => {
@@ -343,7 +376,6 @@ window.loadSuperAdminRequests = async () => {
       let staffCount = 0;
 
       try {
-        // COUNT ONLY ACTIVE STUDENTS
         const stuQ = query(collection(db, "students"), where("institutionId", "==", u.institutionId), where("status", "==", "active"));
         const stuSnap = await getCountFromServer(stuQ);
         stuCount = stuSnap.data().count;
@@ -494,7 +526,7 @@ window.returnToSuperAdminConsole = () => {
 };
 
 // ==========================================
-// REGISTRATION (SMOOTH RESET WITHOUT STUCKING)
+// REGISTRATION (DOUBLE PASSWORD CHECK & PROPER SIGN OUT)
 // ==========================================
 
 window.handleSignUp = async (e) => {
@@ -615,7 +647,6 @@ window.handleStaffSignUp = async (e) => {
     const pwd = document.getElementById("staffPassword")?.value || "";
     const pwdConfirm = document.getElementById("staffPasswordConfirm")?.value || "";
 
-    // 1. Password Confirmation Check
     if (pwd !== pwdConfirm) {
       showToast("Passwords do not match! Please check both fields.", "warning");
       if (submitBtn) {
@@ -634,7 +665,6 @@ window.handleStaffSignUp = async (e) => {
       return;
     }
 
-    // 2. Check if Madrasa exists
     const instQuery = query(collection(db, "users"), where("institutionId", "==", instId), where("role", "==", "admin"));
     const instSnap = await getDocs(instQuery);
 
@@ -650,7 +680,6 @@ window.handleStaffSignUp = async (e) => {
     let instName = "";
     instSnap.forEach(d => instName = d.data().institutionName);
 
-    // Map Malayalam role to system designation
     let desigTitle = "മുഅല്ലിം";
     let systemRole = "teacher";
     if (role === "principal") {
@@ -664,10 +693,8 @@ window.handleStaffSignUp = async (e) => {
       systemRole = "teacher";
     }
 
-    // 3. Create Firebase User
     const cred = await createUserWithEmailAndPassword(auth, email, pwd);
     
-    // 4. Save to Firestore Database
     await setDoc(doc(db, "users", cred.user.uid), {
       uid: cred.user.uid,
       name: userName,
@@ -683,13 +710,10 @@ window.handleStaffSignUp = async (e) => {
       createdAt: serverTimestamp()
     });
 
-    // 5. Clean Reset Form & Switch Tab
     const form = document.getElementById("staffSignupForm");
     if (form) form.reset();
 
     showToast("Request submitted successfully! Please wait for approval.", "success");
-    
-    // Sign out immediately so state stays clean
     await signOut(auth);
     window.switchAuthTab('login');
 
@@ -702,6 +726,7 @@ window.handleStaffSignUp = async (e) => {
     }
   }
 };
+
 // ==========================================
 // UNIFIED LOGIN
 // ==========================================
@@ -916,7 +941,7 @@ window.loadMarksEntrySheet = async () => {
     bodyHtml += `</tr>`;
   });
 
-  tbody.innerHTML = bodyHtml || `<tr><td colspan="${currentSubjects.length + 2}" class="text-center text-muted">No students in this class.</td></tr>`;
+  tbody.innerHTML = bodyHtml || `<tr><td colspan="${currentSubjects.length + 2}" class="text-center text-muted">No active students in this class.</td></tr>`;
 };
 
 window.saveClassMarks = async () => {
@@ -1013,7 +1038,7 @@ window.loadStudentsForFees = async () => {
   students.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
 
   if (students.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">No students in this class.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">No active students in this class.</td></tr>`;
     return;
   }
 
@@ -1470,7 +1495,7 @@ function renderPerfStudentsTable(students) {
       </tr>
     `;
   });
-  tbody.innerHTML = html || `<tr><td colspan="3" class="text-center">No students in this class.</td></tr>`;
+  tbody.innerHTML = html || `<tr><td colspan="3" class="text-center">No active students in this class.</td></tr>`;
   const selectAll = document.getElementById("selectAllPerf");
   if (selectAll) selectAll.checked = true;
 }
@@ -1857,7 +1882,7 @@ window.filterStudentsLocal = () => {
     const cleanClass = (s.currentClass || '-').replace(/Class\s*/i, "").trim();
     const actionCol = (currentUserRole === "principal" || currentUserRole === "admin" || isSuperAdmin) ? `
       <td class="text-center">
-        <button class="btn btn-sm btn-outline-primary me-1" onclick="openStudentProfileModal('${s.id}')"><i class="fa-solid fa-pen"></i></button>
+        <button class="btn btn-sm btn-outline-primary me-1" onclick="openStudentProfileModal('${s.id}')" title="Edit"><i class="fa-solid fa-pen"></i></button>
         <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${s.id}', '${s.name}')"><i class="fa-solid fa-trash"></i></button>
       </td>` : ``;
 
@@ -1988,7 +2013,6 @@ window.openStaffProfileModal = (docId) => {
 
     document.getElementById("spRole").value = p.role || 'teacher';
     
-    // Designation mapping
     const desigSelect = document.getElementById("spDesignationSelect");
     const desigCustom = document.getElementById("spDesignationCustom");
     if (["സദർ മുഅല്ലിം", "വൈസ് സദർ", "സദർ ഇൻ-ചാർജ്", "മുഅല്ലിം"].includes(p.designation)) {
@@ -2298,6 +2322,7 @@ window.handleBulkUpload = () => {
           loadStudentsByClass(true);
           fileInput.value = "";
           statusDiv.classList.add("d-none");
+          showToast(`Imported ${rows.length} students!`, "success");
         }, 1500);
 
       } catch (err) {
@@ -2362,8 +2387,10 @@ window.showTab = (tabId) => {
   activeBtns.forEach(btn => btn.classList.add("active"));
 
   const offcanvasEl = document.getElementById('sidebarOffcanvas');
-  const offcanvasInstance = bootstrap.Offcanvas.getInstance(offcanvasEl);
-  if (offcanvasInstance) offcanvasInstance.hide();
+  if (offcanvasEl) {
+    const offcanvasInstance = bootstrap.Offcanvas.getInstance(offcanvasEl);
+    if (offcanvasInstance) offcanvasInstance.hide();
+  }
 
   if (tabId === 'studentsListTab') loadStudentsByClass();
   if (tabId === 'instAdminTab') window.loadPrincipalsList();
