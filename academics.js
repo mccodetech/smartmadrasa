@@ -1,5 +1,5 @@
 // ==========================================
-// ACADEMICS MODULE (academics.js) - Attendance & Marks with Auto Points
+// ACADEMICS MODULE (academics.js) - Attendance & Marks
 // ==========================================
 import { db, auth } from "./firebase-config.js";
 import { 
@@ -173,7 +173,7 @@ window.saveClassMarks = async () => {
 };
 
 // ==========================================
-// ATTENDANCE MODULE (With Auto Points & Auth Fixed)
+// ATTENDANCE MODULE (With Auto Points)
 // ==========================================
 window.resetAttendanceButton = () => {
   const btn = document.getElementById("btnSaveAttendance");
