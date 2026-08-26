@@ -151,6 +151,27 @@
       cursor: pointer;
     }
 
+    /* Fixed single-line top navbar */
+    .top-header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: nowrap;
+    }
+    .top-brand-text {
+      max-width: 180px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 1rem;
+    }
+    @media (min-width: 768px) {
+      .top-brand-text {
+        max-width: 450px;
+        font-size: 1.15rem;
+      }
+    }
+
     @media print {
       body * { visibility: hidden; }
       #printableReceipt, #printableReceipt * { visibility: visible; }
@@ -296,7 +317,6 @@
           <input type="email" id="regEmail" class="form-control" placeholder="email@madrasa.com" oninput="this.value = this.value.toLowerCase()" required>
         </div>
         
-        <!-- Double Password Entry -->
         <div class="mb-2">
           <label class="form-label small fw-semibold">Create Password (Hidden)</label>
           <div class="input-group">
@@ -362,7 +382,6 @@
           <input type="email" id="staffEmail" class="form-control" placeholder="email@staff.com" oninput="this.value = this.value.toLowerCase()" required>
         </div>
 
-        <!-- Double Password Entry for Staff -->
         <div class="mb-2">
           <label class="form-label small fw-semibold">Create Password (Hidden)</label>
           <div class="input-group">
@@ -435,23 +454,27 @@
 
   <!-- Main App Screen -->
   <div id="appSection" class="d-none">
-    <nav class="navbar navbar-dark bg-madrassa shadow-sm sticky-top">
-      <div class="container-fluid px-3">
+    <nav class="navbar navbar-dark bg-madrassa shadow-sm sticky-top py-2">
+      <div class="container-fluid top-header-bar px-2 px-md-3">
         <div class="d-flex align-items-center gap-2">
-          <button class="btn btn-outline-light d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas"><i class="fa-solid fa-bars"></i></button>
-          <a class="navbar-brand fw-bold m-0 d-flex align-items-center gap-2" href="#" onclick="showTab('homeDashboardTab')"><i class="fa-solid fa-kaaba"></i> <span id="displayMadrassaName">Smart Madrasa</span></a>
+          <button class="btn btn-outline-light btn-sm d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <a class="navbar-brand fw-bold m-0 d-flex align-items-center gap-2 top-brand-text" href="#" onclick="showTab('homeDashboardTab')">
+            <i class="fa-solid fa-kaaba"></i> <span id="displayMadrassaName">Smart Madrasa</span>
+          </a>
         </div>
         <div class="d-flex align-items-center gap-2 text-white">
           <button class="btn btn-sm btn-outline-warning d-none" id="superAdminBackBtn" onclick="returnToSuperAdminConsole()"><i class="fa-solid fa-arrow-left me-1"></i> Console</button>
-          <span class="badge bg-light text-dark d-none d-sm-inline-block" id="displayUserRole">Admin</span>
-          <button class="btn btn-outline-light btn-sm" onclick="handleLogout()"><i class="fa-solid fa-right-from-bracket"></i> <span class="d-none d-sm-inline-block">Logout</span></button>
+          <span class="badge bg-light text-dark d-none d-md-inline-block" id="displayUserRole">Admin</span>
+          <button class="btn btn-outline-light btn-sm" onclick="handleLogout()"><i class="fa-solid fa-right-from-bracket me-md-1"></i> <span class="d-none d-md-inline-block">Logout</span></button>
         </div>
       </div>
     </nav>
 
     <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarOffcanvas">
       <div class="offcanvas-header bg-madrassa text-white">
-        <h5 class="offcanvas-title fw-bold"><i class="fa-solid fa-kaaba me-2"></i> Smart Madrasa</h5>
+        <h5 class="offcanvas-title fw-bold"><i class="fa-solid fa-kaaba me-2"></i> Menu</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
       </div>
       <div class="offcanvas-body p-3">
