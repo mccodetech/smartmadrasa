@@ -6,10 +6,125 @@
   <title>Smart Madrasa - Academic Suite</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manjari:wght@400;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   
   <link rel="stylesheet" href="style.css">
+  <style>
+    :root {
+      --primary: #0f5132;
+      --primary-dark: #0a3622;
+      --primary-light: #e8f5e9;
+      --accent: #198754;
+      --bg-body: #f8fafc;
+      --card-bg: #ffffff;
+      --text-dark: #0f172a;
+      --text-muted: #64748b;
+    }
+    body {
+      background-color: var(--bg-body);
+      font-family: 'Plus Jakarta Sans', 'Manjari', sans-serif;
+      color: var(--text-dark);
+      -webkit-font-smoothing: antialiased;
+    }
+    .bg-madrassa { background-color: var(--primary) !important; }
+    .btn-madrassa { background-color: var(--accent); color: #fff; border: none; font-weight: 500; }
+    .btn-madrassa:hover { background-color: var(--primary); color: #fff; }
+    
+    .auth-wrapper {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at top left, #dcfce7 0%, #f1f5f9 60%);
+      padding: 20px;
+    }
+    .auth-card {
+      background: var(--card-bg);
+      border-radius: 20px;
+      border: 1px solid rgba(226, 232, 240, 0.8);
+      box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.08);
+      width: 100%;
+      max-width: 440px;
+      padding: 32px 28px;
+    }
+    .brand-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 18px;
+      background: var(--primary-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+      font-size: 28px;
+      margin: 0 auto 16px auto;
+    }
+    .segmented-control {
+      background: #f1f5f9;
+      border-radius: 12px;
+      padding: 4px;
+      display: flex;
+      gap: 4px;
+      margin-bottom: 24px;
+    }
+    .segmented-control button {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 8px 16px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      border-radius: 9px;
+      transition: all 0.2s ease;
+    }
+    .segmented-control button.active {
+      background: #ffffff;
+      color: var(--primary);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+    .btn-primary-custom {
+      background: var(--primary);
+      color: #fff;
+      font-weight: 600;
+      border-radius: 10px;
+      padding: 11px;
+      border: none;
+      transition: all 0.2s;
+    }
+    .btn-primary-custom:hover {
+      background: var(--primary-dark);
+      color: #fff;
+    }
+    .card { border-radius: 14px; border: 1px solid #e2e8f0; box-shadow: 0 4px 16px rgba(0,0,0,0.03); }
+    .nav-pills .nav-link { color: #475569; font-weight: 600; border-radius: 10px; padding: 10px 14px; }
+    .nav-pills .nav-link.active { background-color: var(--primary); color: #fff; }
+    .dashboard-card { cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease; border-radius: 14px; }
+    .dashboard-card:hover { transform: translateY(-4px); box-shadow: 0 10px 24px rgba(0,0,0,0.08); }
+    .star-badge { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; font-weight: 700; border-radius: 20px; padding: 4px 12px; }
+    
+    .month-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 8px;
+    }
+    .month-badge {
+      padding: 8px 4px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+    .month-paid { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+    .month-pending { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+
+    @media print {
+      body * { visibility: hidden; }
+      #printableReceipt, #printableReceipt * { visibility: visible; }
+      #printableReceipt { position: absolute; left: 0; top: 0; width: 100%; display: block !important; border: 1px solid #333 !important; }
+    }
+  </style>
 </head>
 <body>
 
@@ -228,8 +343,10 @@
           </div>
         </div>
         <div class="col-md-8">
+          <!-- Monthly Fee Grid for Parent -->
           <div class="card p-4 mb-4">
-            <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-receipt me-2"></i>Fee Receipts</h5>
+            <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-calendar-days me-2"></i>Academic Fee Status</h5>
+            <div id="pvFeeMonthGrid" class="month-grid mb-3"></div>
             <div class="table-responsive">
               <table class="table table-bordered align-middle">
                 <thead class="table-light"><tr><th>Receipt No</th><th>Date</th><th>Month/Item</th><th>Amount</th></tr></thead>
@@ -291,8 +408,8 @@
               <button class="nav-link text-start d-none" id="marksMenuBtn" onclick="showTab('marksTab')"><i class="fa-solid fa-award me-2"></i> Marks Entry</button>
               <button class="nav-link text-start d-none" id="performanceMenuBtn" onclick="showTab('performanceTab')"><i class="fa-solid fa-star me-2"></i> Performance</button>
               <button class="nav-link text-start d-none" id="feesMenuBtn" onclick="showTab('feesTab')"><i class="fa-solid fa-receipt me-2"></i> Fees & Receipts</button>
+              <button class="nav-link text-start d-none" id="subjectSettingsBtn" onclick="showTab('subjectSettingsTab')"><i class="fa-solid fa-book me-2"></i> Subject Settings</button>
               <button class="nav-link text-start d-none" id="feeSettingsBtn" onclick="showTab('feeSettingsTab')"><i class="fa-solid fa-gear me-2"></i> Fee Settings</button>
-              <button class="nav-link text-start d-none" id="teachersMenuBtn" onclick="showTab('teachersTab')"><i class="fa-solid fa-chalkboard-user me-2"></i> Staff Management</button>
               <button class="nav-link text-start d-none" id="promotionMenuBtn" onclick="showTab('promotionTab')"><i class="fa-solid fa-graduation-cap me-2"></i> Class Promotion</button>
             </div>
           </div>
@@ -334,7 +451,6 @@
                   <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-user-tie"></i> Manage Principals & Staff</h5>
                   <button class="btn btn-sm btn-outline-success" onclick="openStaffProfileModal(null)"><i class="fa-solid fa-plus me-1"></i> Add Staff / Principal</button>
               </div>
-              
               <div id="instPendingStaffSection" class="mb-4 d-none">
                   <h6 class="fw-bold text-warning mb-2"><i class="fa-solid fa-clock me-1"></i> Pending Approvals</h6>
                   <div class="table-responsive">
@@ -344,41 +460,6 @@
                       </table>
                   </div>
               </div>
-
-              <form id="instAssignClassesForm" onsubmit="instAssignClassesToStaff(event)" class="mb-4 d-none border p-3 rounded bg-light">
-                <input type="hidden" id="instAssignStaffId">
-                <input type="hidden" id="instAssignStaffRole">
-                <h6 class="fw-bold text-primary mb-2">Approve <span id="instAssignStaffNameDisplay"></span></h6>
-                <div class="row g-3 align-items-end">
-                  <div class="col-md-6" id="instClassAssignDiv">
-                    <label class="form-label">Assign Classes (If Teacher)</label>
-                    <div class="dropdown">
-                      <button class="btn btn-outline-secondary dropdown-toggle w-100 text-start d-flex justify-content-between align-items-center" type="button" id="instApproveClassDropdownBtn" data-bs-toggle="dropdown" data-bs-auto-close="outside">
-                        <span id="instApproveClassDropdownLabel">Select Class</span>
-                      </button>
-                      <ul class="dropdown-menu dropdown-checkbox-menu" aria-labelledby="instApproveClassDropdownBtn">
-                         <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 inst-approve-class-cb" value="1" onchange="updateDropdownLabel('inst-approve')"> Class 1</label></li>
-                         <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 inst-approve-class-cb" value="2" onchange="updateDropdownLabel('inst-approve')"> Class 2</label></li>
-                         <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 inst-approve-class-cb" value="3" onchange="updateDropdownLabel('inst-approve')"> Class 3</label></li>
-                         <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 inst-approve-class-cb" value="4" onchange="updateDropdownLabel('inst-approve')"> Class 4</label></li>
-                         <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 inst-approve-class-cb" value="5" onchange="updateDropdownLabel('inst-approve')"> Class 5</label></li>
-                         <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 inst-approve-class-cb" value="6" onchange="updateDropdownLabel('inst-approve')"> Class 6</label></li>
-                         <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 inst-approve-class-cb" value="7" onchange="updateDropdownLabel('inst-approve')"> Class 7</label></li>
-                         <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 inst-approve-class-cb" value="8" onchange="updateDropdownLabel('inst-approve')"> Class 8</label></li>
-                         <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 inst-approve-class-cb" value="9" onchange="updateDropdownLabel('inst-approve')"> Class 9</label></li>
-                         <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 inst-approve-class-cb" value="10" onchange="updateDropdownLabel('inst-approve')"> Class 10</label></li>
-                         <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 inst-approve-class-cb" value="11" onchange="updateDropdownLabel('inst-approve')"> Class 11</label></li>
-                         <li><label class="dropdown-item dropdown-checkbox-item"><input type="checkbox" class="form-check-input me-2 inst-approve-class-cb" value="12" onchange="updateDropdownLabel('inst-approve')"> Class 12</label></li>
-                      </ul>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                      <button type="button" class="btn btn-secondary me-2" onclick="document.getElementById('instAssignClassesForm').classList.add('d-none');">Cancel</button>
-                      <button type="submit" class="btn btn-success"><i class="fa-solid fa-check me-1"></i> Confirm Approval</button>
-                  </div>
-                </div>
-              </form>
-
               <h6 class="fw-bold mt-4 mb-2">Assigned Staff & Principals</h6>
               <div class="table-responsive">
                 <table class="table table-bordered align-middle">
@@ -446,7 +527,7 @@
             </div>
           </div>
 
-          <!-- 4. Attendance Module -->
+          <!-- Attendance Module -->
           <div id="attendanceTab" class="content-tab d-none">
              <div class="card p-4">
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-calendar-check"></i> Daily Attendance</h5>
@@ -470,7 +551,7 @@
             </div>
           </div>
 
-          <!-- 5. Marks Tab -->
+          <!-- Dynamic Marks Entry Tab -->
           <div id="marksTab" class="content-tab d-none">
             <div class="card p-4">
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-award"></i> Examination Marks Entry</h5>
@@ -488,7 +569,7 @@
               <div id="marksSheetArea" class="d-none">
                 <div class="table-responsive">
                   <table class="table table-bordered align-middle">
-                    <thead class="table-light text-center"><tr><th>Reg No</th><th>Name</th><th>Quran</th><th>Tajweed</th><th>Fiqh</th><th>Aqeedah</th><th>Tareekh</th><th>Lisan</th></tr></thead>
+                    <thead class="table-light text-center" id="marksTableHead"></thead>
                     <tbody id="marksTableBody"></tbody>
                   </table>
                 </div>
@@ -497,7 +578,31 @@
             </div>
           </div>
 
-          <!-- 6. Performance Tab -->
+          <!-- Subject Settings Tab (For Principal / Admin) -->
+          <div id="subjectSettingsTab" class="content-tab d-none">
+            <div class="card p-4">
+              <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-book"></i> Class Subjects Configuration</h5>
+              <div class="alert alert-info small">Configure custom subjects for each class. These subjects will dynamically appear on the Marks Entry table.</div>
+              <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                  <label class="form-label fw-bold">Select Class</label>
+                  <select id="subjectClassSelect" class="form-select" onchange="loadClassSubjectSettings()">
+                    <option value="1">Class 1</option><option value="2">Class 2</option><option value="3">Class 3</option>
+                    <option value="4">Class 4</option><option value="5">Class 5</option><option value="6">Class 6</option>
+                    <option value="7">Class 7</option><option value="8">Class 8</option><option value="9">Class 9</option>
+                    <option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option>
+                  </select>
+                </div>
+              </div>
+              <div id="subjectListArea">
+                <label class="form-label fw-bold">Subjects (Comma Separated)</label>
+                <input type="text" id="customSubjectsInput" class="form-control mb-3" placeholder="e.g. Quran, Tajweed, Fiqh, Aqeedah, Tareekh, Lisan">
+                <button class="btn btn-primary" onclick="saveClassSubjects()"><i class="fa-solid fa-save me-1"></i> Save Subjects</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Performance Tab -->
           <div id="performanceTab" class="content-tab d-none">
             <div class="card p-4">
                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
@@ -533,6 +638,7 @@
             </div>
           </div>
 
+          <!-- Fees Tab with Grid and Tables -->
           <div id="feesTab" class="content-tab d-none">
              <div class="card p-4">
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-receipt"></i> Fee Collection & Receipt</h5>
@@ -554,7 +660,7 @@
                                       <th>Reg No</th>
                                       <th>Name</th>
                                       <th>Monthly Fee (₹)</th>
-                                      <th>Last Paid</th>
+                                      <th>Fee Status (Months)</th>
                                       <th style="width: 120px;" class="text-center">Action</th>
                                   </tr>
                               </thead>
@@ -646,8 +752,7 @@
     </div>
   </div>
 
-  <!-- --- MODALS --- -->
-
+  <!-- MODALS -->
   <div class="modal fade" id="staffProfileModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
       <div class="modal-content border-0 shadow">
@@ -886,10 +991,9 @@
                 <div class="col-6">
                     <label class="form-label small fw-bold">Academic Year</label>
                     <select id="payAcademicYear" class="form-select">
-                        <option value="2023-2024">2023-2024</option>
-                        <option value="2024-2025" selected>2024-2025</option>
+                        <option value="2024-2025">2024-2025</option>
                         <option value="2025-2026">2025-2026</option>
-                        <option value="2026-2027">2026-2027</option>
+                        <option value="2026-2027" selected>2026-2027</option>
                     </select>
                 </div>
                 <div class="col-6">
