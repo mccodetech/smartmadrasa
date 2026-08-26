@@ -13,7 +13,6 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-// ഗ്ലോബൽ വേരിയബിളുകൾ
 window.currentInstitutionId = "";
 window.currentUserRole = "admin";
 window.currentUserAssignedClasses = [];
@@ -58,7 +57,13 @@ window.populateClassDropdowns = function() {
   });
 };
 
-// സെഷൻ പരിശോധന (Auth State Listener)
+window.syncMobileMenu = () => {
+  const desktopMenu = document.getElementById("desktopTabMenu");
+  const mobileMenu = document.getElementById("mobileTabMenu");
+  if (desktopMenu && mobileMenu) mobileMenu.innerHTML = desktopMenu.innerHTML;
+};
+
+// സെഷൻ പരിശോധന (Auth State Listener & Role Based Menu Visibility)
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     try {
@@ -82,7 +87,19 @@ onAuthStateChanged(auth, async (user) => {
         if (instNameEl) instNameEl.innerText = window.isSuperAdmin ? "Smart Madrasa - Master Control Center" : (userData.institutionName || "Smart Madrasa");
 
         const userRoleEl = document.getElementById("displayUserRole");
-        if (userRoleEl) userRoleEl.innerText = window.isSuperAdmin ? "Super Admin" : (window.currentUserRole === "admin" ? "Admin" : window.currentUserRole === "principal" ? "Principal" : "Teacher");
+        const pMenuBtn = document.getElementById("promotionMenuBtn");
+        const adminActions = document.getElementById("adminStudentActions");
+        const actionCol = document.getElementById("actionHeaderCol");
+        const superMasterBtn = document.getElementById("superAdminMasterBtn");
+        const instAdminStaffBtn = document.getElementById("instAdminStaffBtn");
+        const homeMenuBtn = document.getElementById("homeMenuBtn");
+        const studentsMenuBtn = document.getElementById("studentsMenuBtn");
+        const attendanceMenuBtn = document.getElementById("attendanceMenuBtn");
+        const marksMenuBtn = document.getElementById("marksMenuBtn");
+        const performanceMenuBtn = document.getElementById("performanceMenuBtn");
+        const feesMenuBtn = document.getElementById("feesMenuBtn");
+        const feeSettingsBtn = document.getElementById("feeSettingsBtn");
+        const subjectSettingsBtn = document.getElementById("subjectSettingsBtn");
 
         if (!window.isSuperAdmin) {
           const instDoc = await getDoc(doc(db, "settings", window.currentInstitutionId));
@@ -90,6 +107,43 @@ onAuthStateChanged(auth, async (user) => {
             window.sysFeePermission = instDoc.data().feePermission || "all";
             window.sysReqManualReceipt = instDoc.data().reqManualReceipt || false;
             window.customSpecialFunds = instDoc.data().specialFeeCategories || [];
+          }
+        }
+
+        // മെനു വിസിബിലിറ്റി സെറ്റ് ചെയ്യൽ
+        if (window.isSuperAdmin) {
+          if (superMasterBtn) superMasterBtn.classList.remove("d-none");
+          if (userRoleEl) userRoleEl.innerText = "Super Admin";
+          window.showTab('superAdminTab');
+          if (typeof window.loadSuperAdminRequests === 'function') window.loadSuperAdminRequests();
+        } else {
+          if (superMasterBtn) superMasterBtn.classList.add("d-none");
+          if (userRoleEl) userRoleEl.innerText = window.currentUserRole === "admin" ? "Admin" : (window.currentUserRole === "principal" ? "Principal" : "Teacher");
+          
+          // എല്ലാ റോളിനും പൊതുവായി വേണ്ടത്
+          if (studentsMenuBtn) studentsMenuBtn.classList.remove("d-none");
+          if (feesMenuBtn) feesMenuBtn.classList.remove("d-none");
+
+          if (window.currentUserRole === "admin") {
+            if (instAdminStaffBtn) instAdminStaffBtn.classList.remove("d-none");
+            if (homeMenuBtn) homeMenuBtn.classList.remove("d-none");
+            if (attendanceMenuBtn) attendanceMenuBtn.classList.remove("d-none");
+            if (marksMenuBtn) marksMenuBtn.classList.remove("d-none");
+            if (performanceMenuBtn) performanceMenuBtn.classList.remove("d-none");
+            if (feeSettingsBtn) feeSettingsBtn.classList.remove("d-none");
+            if (subjectSettingsBtn) subjectSettingsBtn.classList.remove("d-none");
+            if (adminActions) adminActions.classList.remove("d-none");
+            if (actionCol) actionCol.classList.remove("d-none");
+
+            window.showTab('instAdminTab'); 
+            if (typeof window.loadPrincipalsList === 'function') window.loadPrincipalsList();
+          } else {
+            if (homeMenuBtn) homeMenuBtn.classList.remove("d-none");
+            if (attendanceMenuBtn) homeMenuBtn.classList.remove("d-none");
+            if (marksMenuBtn) marksMenuBtn.classList.remove("d-none");
+            if (performanceMenuBtn) performanceMenuBtn.classList.remove("d-none");
+            window.showTab('homeDashboardTab');
+            if (typeof window.loadLeaderboard === 'function') window.loadLeaderboard();
           }
         }
 
@@ -101,17 +155,6 @@ onAuthStateChanged(auth, async (user) => {
 
         if (!window.isSuperAdmin) window.populateClassDropdowns();
         window.syncMobileMenu();
-
-        if (window.isSuperAdmin) {
-          window.showTab('superAdminTab');
-          if (typeof window.loadSuperAdminRequests === 'function') window.loadSuperAdminRequests();
-        } else if (window.currentUserRole === "admin") {
-          window.showTab('instAdminTab'); 
-          if (typeof window.loadPrincipalsList === 'function') window.loadPrincipalsList();
-        } else {
-          window.showTab('homeDashboardTab');
-          if (typeof window.loadLeaderboard === 'function') window.loadLeaderboard();
-        }
       }
     } catch (e) {
       console.error("Auth initialization error:", e);
