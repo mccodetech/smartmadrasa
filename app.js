@@ -152,7 +152,10 @@ window.handleLogout = () => {
   });
 };
 
-function populateClassDropdowns() {
+// ==========================================
+// POPULATE DROPDOWNS (MOVED BEFORE ON AUTH)
+// ==========================================
+window.populateClassDropdowns = function() {
   const allClasses = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
   const allowedClasses = (currentUserRole === "principal" || currentUserRole === "admin" || isSuperAdmin) ? allClasses : currentUserAssignedClasses;
 
@@ -183,8 +186,11 @@ function populateClassDropdowns() {
       }
     }
   });
-}
+};
 
+// ==========================================
+// AUTH STATE CHANGED
+// ==========================================
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     try {
@@ -213,9 +219,6 @@ onAuthStateChanged(auth, async (user) => {
         const instNameEl = document.getElementById("displayMadrassaName");
         if (instNameEl) instNameEl.innerText = isSuperAdmin ? "Smart Madrasa - Master Control Center" : (userData.institutionName || "Smart Madrasa");
 
-        const userNameEl = document.getElementById("displayUserName");
-        if (userNameEl) userNameEl.innerHTML = `<i class="fa-solid fa-user"></i> ${currentUserName}`;
-        
         const userRoleEl = document.getElementById("displayUserRole");
         const pMenuBtn = document.getElementById("promotionMenuBtn");
         const adminActions = document.getElementById("adminStudentActions");
@@ -296,7 +299,8 @@ onAuthStateChanged(auth, async (user) => {
             showTab('instAdminTab'); 
             window.loadPrincipalsList(); 
             
-            document.getElementById("reqManualReceipt").checked = sysReqManualReceipt;
+            const reqManualEl = document.getElementById("reqManualReceipt");
+            if (reqManualEl) reqManualEl.checked = sysReqManualReceipt;
             const rBtns = document.getElementsByName("feePermission");
             for (let i = 0; i < rBtns.length; i++) {
               if (rBtns[i].value === sysFeePermission) rBtns[i].checked = true;
@@ -323,8 +327,8 @@ onAuthStateChanged(auth, async (user) => {
         const attDateEl = document.getElementById("attDate");
         if (attDateEl) attDateEl.valueAsDate = new Date();
 
-        if (!isSuperAdmin) populateClassDropdowns();
-        syncMobileMenu();
+        if (!isSuperAdmin) window.populateClassDropdowns();
+        window.syncMobileMenu();
       } else {
         showToast("User profile record not found. Please contact Administrator.", "error");
         signOut(auth);
@@ -526,7 +530,7 @@ window.returnToSuperAdminConsole = () => {
 };
 
 // ==========================================
-// REGISTRATION (DOUBLE PASSWORD CHECK & PROPER SIGN OUT)
+// REGISTRATION
 // ==========================================
 
 window.handleSignUp = async (e) => {
@@ -601,8 +605,8 @@ window.handleSignUp = async (e) => {
     });
 
     await setDoc(doc(db, "settings", instId), {
-      feePermission: "all",
-      reqManualReceipt: false
+        feePermission: "all",
+        reqManualReceipt: false
     });
 
     const form = document.getElementById("signupForm");
@@ -1772,7 +1776,7 @@ window.saveStudentProfile = async (e) => {
     
     bootstrap.Modal.getInstance(document.getElementById('studentProfileModal')).hide();
     loadStudentsByClass(true);
-  } catch (err) { showToast("Error: " + err.message, "error"); }
+  } catch (err) { showToast("Error: " + err.message); }
 };
 
 window.deleteStudent = async (docId, name) => {
@@ -1883,7 +1887,7 @@ window.filterStudentsLocal = () => {
     const actionCol = (currentUserRole === "principal" || currentUserRole === "admin" || isSuperAdmin) ? `
       <td class="text-center">
         <button class="btn btn-sm btn-outline-primary me-1" onclick="openStudentProfileModal('${s.id}')" title="Edit"><i class="fa-solid fa-pen"></i></button>
-        <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${s.id}', '${s.name}')"><i class="fa-solid fa-trash"></i></button>
+        <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${s.id}', '${s.name}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
       </td>` : ``;
 
     html += `
@@ -2167,7 +2171,7 @@ window.deleteUser = async (docId, name) => {
       await deleteDoc(doc(db, "users", docId));
       showToast("User removed.", "success");
       loadPrincipalsList();
-    } catch (err) { showToast("Error: " + err.message, "error"); }
+    } catch (err) { showToast("Error: " + err.message); }
   }
 };
 
@@ -2182,7 +2186,7 @@ window.openInstAssignClassesForm = (staffId) => {
         }).then(() => {
           showToast("Principal approved successfully!", "success");
           window.loadPrincipalsList();
-        }).catch(err => showToast("Error: " + err.message, "error"));
+        }).catch(err => showToast("Error: " + err.message));
       }
       return;
     }
@@ -2228,7 +2232,7 @@ window.instAssignClassesToStaff = async (e) => {
     const formEl = document.getElementById("instAssignClassesForm");
     if (formEl) formEl.classList.add("d-none");
     loadPrincipalsList(); 
-  } catch (err) { showToast("Error: " + err.message, "error"); }
+  } catch (err) { showToast("Error: " + err.message); }
 };
 
 // ==========================================
@@ -2322,7 +2326,6 @@ window.handleBulkUpload = () => {
           loadStudentsByClass(true);
           fileInput.value = "";
           statusDiv.classList.add("d-none");
-          showToast(`Imported ${rows.length} students!`, "success");
         }, 1500);
 
       } catch (err) {
