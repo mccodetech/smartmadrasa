@@ -128,6 +128,13 @@
 </head>
 <body>
 
+  <!-- Language Switcher Bar -->
+  <div class="d-flex justify-content-end p-2 px-3 bg-white border-bottom">
+    <button class="btn btn-sm btn-outline-success d-flex align-items-center gap-1" onclick="toggleLanguage()">
+      <i class="fa-solid fa-language"></i> <span id="langSwitchLabel">മലയാളം</span>
+    </button>
+  </div>
+
   <!-- Unified Auth Screen -->
   <div id="authSection" class="auth-wrapper">
     <div class="auth-card">
@@ -343,7 +350,6 @@
           </div>
         </div>
         <div class="col-md-8">
-          <!-- Monthly Fee Grid for Parent -->
           <div class="card p-4 mb-4">
             <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-calendar-days me-2"></i>Academic Fee Status</h5>
             <div id="pvFeeMonthGrid" class="month-grid mb-3"></div>
@@ -554,7 +560,12 @@
           <!-- Dynamic Marks Entry Tab -->
           <div id="marksTab" class="content-tab d-none">
             <div class="card p-4">
-              <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-award"></i> Examination Marks Entry</h5>
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-award"></i> Examination Marks Entry</h5>
+                <button class="btn btn-sm btn-outline-success" onclick="showTab('subjectSettingsTab')">
+                  <i class="fa-solid fa-book me-1"></i> Configure Subjects
+                </button>
+              </div>
               <div class="row g-3 mb-4">
                 <div class="col-md-6">
                   <label class="form-label">Select Exam *</label>
