@@ -513,10 +513,21 @@ window.handleSignUp = async (e) => {
     const phone = (document.getElementById("regPhone")?.value || "").trim();
     const whatsapp = (document.getElementById("regWhatsapp")?.value || "").trim() || phone;
     const email = (document.getElementById("regEmail")?.value || "").trim().toLowerCase();
+    
     const pwd = document.getElementById("regPassword")?.value || "";
+    const pwdConfirm = document.getElementById("regPasswordConfirm")?.value || "";
 
-    if (!instCode || !instName || !email || !pwd) {
-      showToast("Please fill all required fields.", "warning");
+    if (pwd !== pwdConfirm) {
+      showToast("Passwords do not match! Please check both fields.", "warning");
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Submit for Approval";
+      }
+      return;
+    }
+
+    if (pwd.length < 6) {
+      showToast("Password must be at least 6 characters.", "warning");
       if (submitBtn) {
         submitBtn.disabled = false;
         submitBtn.innerText = "Submit for Approval";
@@ -558,8 +569,8 @@ window.handleSignUp = async (e) => {
     });
 
     await setDoc(doc(db, "settings", instId), {
-        feePermission: "all",
-        reqManualReceipt: false
+      feePermission: "all",
+      reqManualReceipt: false
     });
 
     const form = document.getElementById("signupForm");
@@ -585,33 +596,78 @@ window.handleSignUp = async (e) => {
 window.handleStaffSignUp = async (e) => {
   e.preventDefault();
   const submitBtn = document.getElementById("btnStaffSubmitSignup");
-  if (submitBtn) submitBtn.disabled = true;
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Submitting...";
+  }
 
   try {
-    const role = document.getElementById("staffRole").value;
-    const board = document.getElementById("staffBoard").value;
-    const instCode = document.getElementById("staffInstCode").value.trim().toUpperCase();
+    const role = document.getElementById("staffRole")?.value || "teacher";
+    const board = document.getElementById("staffBoard")?.value || "SKIMVB";
+    const instCode = (document.getElementById("staffInstCode")?.value || "").trim().toUpperCase();
     const instId = board + "_" + instCode; 
     
-    const userName = document.getElementById("staffName").value.trim().toUpperCase();
-    const phone = document.getElementById("staffPhone").value.trim();
-    const whatsapp = document.getElementById("staffWhatsapp").value.trim() || phone;
-    const email = document.getElementById("staffEmail").value.trim().toLowerCase();
-    const pwd = document.getElementById("staffPassword").value;
+    const userName = (document.getElementById("staffName")?.value || "").trim().toUpperCase();
+    const phone = (document.getElementById("staffPhone")?.value || "").trim();
+    const whatsapp = (document.getElementById("staffWhatsapp")?.value || "").trim() || phone;
+    const email = (document.getElementById("staffEmail")?.value || "").trim().toLowerCase();
+    
+    const pwd = document.getElementById("staffPassword")?.value || "";
+    const pwdConfirm = document.getElementById("staffPasswordConfirm")?.value || "";
 
+    // 1. Password Confirmation Check
+    if (pwd !== pwdConfirm) {
+      showToast("Passwords do not match! Please check both fields.", "warning");
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Submit Request";
+      }
+      return;
+    }
+
+    if (pwd.length < 6) {
+      showToast("Password must be at least 6 characters long.", "warning");
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Submit Request";
+      }
+      return;
+    }
+
+    // 2. Check if Madrasa exists
     const instQuery = query(collection(db, "users"), where("institutionId", "==", instId), where("role", "==", "admin"));
     const instSnap = await getDocs(instQuery);
 
     if (instSnap.empty) {
-      showToast("Madrasa Code/Board not found.", "warning");
-      submitBtn.disabled = false;
+      showToast("Madrasa Code not found. Please check Board & Code with your Admin.", "warning");
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Submit Request";
+      }
       return;
     }
     
     let instName = "";
-    instSnap.forEach(d=> instName = d.data().institutionName);
+    instSnap.forEach(d => instName = d.data().institutionName);
 
+    // Map Malayalam role to system designation
+    let desigTitle = "മുഅല്ലിം";
+    let systemRole = "teacher";
+    if (role === "principal") {
+      desigTitle = "സദർ മുഅല്ലിം";
+      systemRole = "principal";
+    } else if (role === "vice_principal") {
+      desigTitle = "വൈസ് സദർ";
+      systemRole = "teacher";
+    } else if (role === "in_charge") {
+      desigTitle = "സദർ ഇൻ-ചാർജ്";
+      systemRole = "teacher";
+    }
+
+    // 3. Create Firebase User
     const cred = await createUserWithEmailAndPassword(auth, email, pwd);
+    
+    // 4. Save to Firestore Database
     await setDoc(doc(db, "users", cred.user.uid), {
       uid: cred.user.uid,
       name: userName,
@@ -620,24 +676,32 @@ window.handleStaffSignUp = async (e) => {
       email: email,
       institutionId: instId,
       institutionName: instName,
-      role: role, 
+      role: systemRole,
+      designation: desigTitle,
       status: "pending", 
       assignedClasses: [],
       createdAt: serverTimestamp()
     });
 
-    document.getElementById("staffSignupForm").reset();
-    showToast("Request submitted! Please wait for approval.", "success");
-    signOut(auth);
+    // 5. Clean Reset Form & Switch Tab
+    const form = document.getElementById("staffSignupForm");
+    if (form) form.reset();
+
+    showToast("Request submitted successfully! Please wait for approval.", "success");
+    
+    // Sign out immediately so state stays clean
+    await signOut(auth);
     window.switchAuthTab('login');
 
   } catch (err) { 
     showToast("Registration failed: " + err.message, "error"); 
   } finally {
-    if (submitBtn) submitBtn.disabled = false;
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerText = "Submit Request";
+    }
   }
 };
-
 // ==========================================
 // UNIFIED LOGIN
 // ==========================================
