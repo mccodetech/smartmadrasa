@@ -119,7 +119,6 @@
     .month-paid { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
     .month-pending { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
 
-    /* Modern Floating Toast Notification */
     #appToastContainer {
       position: fixed;
       bottom: 24px;
@@ -148,6 +147,10 @@
       to { transform: translateY(0); opacity: 1; }
     }
 
+    .password-toggle-btn {
+      cursor: pointer;
+    }
+
     @media print {
       body * { visibility: hidden; }
       #printableReceipt, #printableReceipt * { visibility: visible; }
@@ -157,7 +160,6 @@
 </head>
 <body>
 
-  <!-- Toast Container -->
   <div id="appToastContainer"></div>
 
   <!-- Unified Auth Screen -->
@@ -190,6 +192,9 @@
           <div class="input-group">
             <span class="input-group-text bg-light text-muted"><i class="fa-solid fa-lock"></i></span>
             <input type="password" id="loginPassword" class="form-control" placeholder="••••••••">
+            <button class="btn btn-outline-secondary password-toggle-btn" type="button" onclick="togglePasswordVisibility('loginPassword', this)">
+              <i class="fa-solid fa-eye"></i>
+            </button>
           </div>
         </div>
 
@@ -292,7 +297,12 @@
         </div>
         <div class="mb-3">
           <label class="form-label small fw-semibold">Password</label>
-          <input type="password" id="regPassword" class="form-control" placeholder="••••••••" required>
+          <div class="input-group">
+            <input type="password" id="regPassword" class="form-control" placeholder="••••••••" required>
+            <button class="btn btn-outline-secondary password-toggle-btn" type="button" onclick="togglePasswordVisibility('regPassword', this)">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
         </div>
         <button type="submit" id="btnSubmitSignup" class="btn btn-primary-custom w-100">Submit for Approval</button>
       </form>
@@ -346,7 +356,12 @@
         </div>
         <div class="mb-3">
           <label class="form-label small fw-semibold">Password</label>
-          <input type="password" id="staffPassword" class="form-control" placeholder="••••••••" required>
+          <div class="input-group">
+            <input type="password" id="staffPassword" class="form-control" placeholder="••••••••" required>
+            <button class="btn btn-outline-secondary password-toggle-btn" type="button" onclick="togglePasswordVisibility('staffPassword', this)">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
         </div>
         <button type="submit" id="btnStaffSubmitSignup" class="btn btn-primary-custom w-100">Submit Request</button>
       </form>
@@ -468,7 +483,7 @@
                       <th>Place</th>
                       <th>Admin Name</th>
                       <th class="text-center">Staff Count</th>
-                      <th class="text-center">Student Count</th>
+                      <th class="text-center">Active Students</th>
                       <th>Status</th>
                       <th class="text-center">Actions</th>
                     </tr>
@@ -839,7 +854,13 @@
                <h6 class="fw-bold text-danger mb-2"><i class="fa-solid fa-key me-1"></i> Account Setup (For New Staff)</h6>
                <div class="row g-2">
                    <div class="col-md-6"><label class="form-label small">Email Address *</label><input type="email" id="spAuthEmail" class="form-control" oninput="this.value = this.value.toLowerCase()"></div>
-                   <div class="col-md-6"><label class="form-label small">Password *</label><input type="text" id="spAuthPassword" class="form-control" placeholder="Min 6 characters"></div>
+                   <div class="col-md-6">
+                     <label class="form-label small">Password *</label>
+                     <div class="input-group">
+                       <input type="password" id="spAuthPassword" class="form-control" placeholder="Min 6 characters">
+                       <button class="btn btn-outline-secondary password-toggle-btn" type="button" onclick="togglePasswordVisibility('spAuthPassword', this)"><i class="fa-solid fa-eye"></i></button>
+                     </div>
+                   </div>
                </div>
             </div>
             <div class="px-3 pt-3">
