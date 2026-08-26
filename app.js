@@ -624,12 +624,18 @@ window.rejectMadrasa = async (userId) => {
 };
 
 window.logoutParent = () => {
-  sessionStorage.removeItem("parentLoggedIn");
-  document.getElementById("parentViewSection").classList.add("d-none");
-  document.getElementById("authSection").classList.remove("d-none");
+  sessionStorage.clear();
+  window.location.reload();
 };
 
-window.handleLogout = () => signOut(auth);
+window.handleLogout = () => {
+  signOut(auth).then(() => {
+    sessionStorage.clear();
+    window.location.reload();
+  }).catch((error) => {
+    alert("Logout Error: " + error.message);
+  });
+};
 
 window.loadPrincipalsList = async () => {
     const tbody = document.getElementById("principalsTableBody");
