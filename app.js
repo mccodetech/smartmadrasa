@@ -23,14 +23,13 @@ window.syncMobileMenu = () => {
   }
 };
 
-// Firebase Modular Scripts
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { 
   getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, 
   signOut, onAuthStateChanged 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { 
-  getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, addDoc, getDocs, query, where, writeBatch, runTransaction, serverTimestamp, orderBy 
+  getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, addDoc, getDocs, query, where, writeBatch, runTransaction, serverTimestamp, orderBy, getCountFromServer
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -81,6 +80,20 @@ window.updateDropdownLabel = (type) => {
   }
 };
 
+window.logoutParent = () => {
+  sessionStorage.clear();
+  window.location.reload();
+};
+
+window.handleLogout = () => {
+  signOut(auth).then(() => {
+    sessionStorage.clear();
+    window.location.reload();
+  }).catch((error) => {
+    alert("Logout Error: " + error.message);
+  });
+};
+
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     try {
@@ -127,38 +140,6 @@ onAuthStateChanged(auth, async (user) => {
         const feesMenuBtn = document.getElementById("feesMenuBtn");
         const feeSettingsBtn = document.getElementById("feeSettingsBtn");
 
-        if (isSuperAdmin) {
-          if (superMasterBtn) superMasterBtn.classList.remove("d-none");
-          if (userRoleEl) userRoleEl.innerText = "Super Admin";
-          
-          const qAllAdmins = query(collection(db, "users"), where("role", "==", "admin"));
-          const adminSnaps = await getDocs(qAllAdmins);
-          adminSnaps.forEach(a => {
-              instIdToNameMap[a.data().institutionId] = a.data().institutionName;
-          });
-
-        } else {
-          if (superMasterBtn) superMasterBtn.classList.add("d-none");
-          if (userRoleEl) {
-              if (currentUserRole === "admin") userRoleEl.innerText = "Admin";
-              else if (currentUserRole === "principal") userRoleEl.innerText = "Principal";
-              else userRoleEl.innerText = `Teacher (${currentUserAssignedClasses.map(c=>'Class '+c).join(', ')})`;
-          }
-        }
-
-        if (tMenuBtn) tMenuBtn.classList.add("d-none");
-        if (pMenuBtn) pMenuBtn.classList.add("d-none");
-        if (adminActions) adminActions.classList.add("d-none");
-        if (actionCol) actionCol.classList.add("d-none");
-        if (instAdminStaffBtn) instAdminStaffBtn.classList.add("d-none");
-        if (homeMenuBtn) homeMenuBtn.classList.remove("d-none");
-        if (studentsMenuBtn) studentsMenuBtn.classList.remove("d-none");
-        if (attendanceMenuBtn) attendanceMenuBtn.classList.remove("d-none");
-        if (marksMenuBtn) marksMenuBtn.classList.remove("d-none");
-        if (performanceMenuBtn) performanceMenuBtn.classList.remove("d-none");
-        if (feesMenuBtn) feesMenuBtn.classList.remove("d-none");
-        if (feeSettingsBtn) feeSettingsBtn.classList.add("d-none");
-
         if(!isSuperAdmin) {
             const instDoc = await getDoc(doc(db, "settings", currentInstitutionId));
             if(instDoc.exists()) {
@@ -167,33 +148,81 @@ onAuthStateChanged(auth, async (user) => {
             }
         }
 
-        if (currentUserRole === "admin") {
-            if (instAdminStaffBtn) instAdminStaffBtn.classList.remove("d-none");
-            if (homeMenuBtn) homeMenuBtn.classList.add("d-none");
-            if (attendanceMenuBtn) attendanceMenuBtn.classList.add("d-none");
-            if (marksMenuBtn) marksMenuBtn.classList.add("d-none");
-            if (performanceMenuBtn) performanceMenuBtn.classList.add("d-none");
-            
+        if (isSuperAdmin) {
+          if (superMasterBtn) superMasterBtn.classList.remove("d-none");
+          if (userRoleEl) userRoleEl.innerText = "Super Admin";
+          
+          if (homeMenuBtn) homeMenuBtn.classList.add("d-none");
+          if (studentsMenuBtn) studentsMenuBtn.classList.add("d-none");
+          if (attendanceMenuBtn) attendanceMenuBtn.classList.add("d-none");
+          if (marksMenuBtn) marksMenuBtn.classList.add("d-none");
+          if (performanceMenuBtn) performanceMenuBtn.classList.add("d-none");
+          if (feesMenuBtn) feesMenuBtn.classList.add("d-none");
+          if (feeSettingsBtn) feeSettingsBtn.classList.add("d-none");
+          if (teachersMenuBtn) teachersMenuBtn.classList.add("d-none");
+          if (promotionMenuBtn) promotionMenuBtn.classList.add("d-none");
+          if (instAdminStaffBtn) instAdminStaffBtn.classList.add("d-none");
+          if (adminActions) adminActions.classList.add("d-none");
+          if (actionCol) actionCol.classList.add("d-none");
+
+          showTab('superAdminTab');
+
+        } else {
+          if (superMasterBtn) superMasterBtn.classList.add("d-none");
+          if (userRoleEl) {
+              if (currentUserRole === "admin") userRoleEl.innerText = "Admin";
+              else if (currentUserRole === "principal") userRoleEl.innerText = "Principal";
+              else userRoleEl.innerText = `Teacher (${currentUserAssignedClasses.map(c=>'Class '+c).join(', ')})`;
+          }
+          
+          if (tMenuBtn) tMenuBtn.classList.add("d-none");
+          if (pMenuBtn) pMenuBtn.classList.add("d-none");
+          if (adminActions) adminActions.classList.add("d-none");
+          if (actionCol) actionCol.classList.add("d-none");
+          if (instAdminStaffBtn) instAdminStaffBtn.classList.add("d-none");
+          if (homeMenuBtn) homeMenuBtn.classList.remove("d-none");
+          if (studentsMenuBtn) studentsMenuBtn.classList.remove("d-none");
+          if (attendanceMenuBtn) attendanceMenuBtn.classList.remove("d-none");
+          if (marksMenuBtn) marksMenuBtn.classList.remove("d-none");
+          if (performanceMenuBtn) performanceMenuBtn.classList.remove("d-none");
+          if (feesMenuBtn) feesMenuBtn.classList.remove("d-none");
+          if (feeSettingsBtn) feeSettingsBtn.classList.add("d-none");
+
+          if (currentUserRole === "admin") {
+              if (instAdminStaffBtn) instAdminStaffBtn.classList.remove("d-none");
+              if (homeMenuBtn) homeMenuBtn.classList.add("d-none");
+              if (attendanceMenuBtn) attendanceMenuBtn.classList.add("d-none");
+              if (marksMenuBtn) marksMenuBtn.classList.add("d-none");
+              if (performanceMenuBtn) performanceMenuBtn.classList.add("d-none");
+              
+              if (adminActions) adminActions.classList.remove("d-none");
+              if (actionCol) actionCol.classList.remove("d-none");
+              if (feesMenuBtn) feesMenuBtn.classList.remove("d-none");
+              if (feeSettingsBtn) feeSettingsBtn.classList.remove("d-none");
+
+              showTab('instAdminTab'); 
+              loadPrincipalsList(); 
+              
+              document.getElementById("reqManualReceipt").checked = sysReqManualReceipt;
+              const rBtns = document.getElementsByName("feePermission");
+              for(let i=0; i<rBtns.length; i++){
+                  if(rBtns[i].value === sysFeePermission) rBtns[i].checked = true;
+              }
+
+          } else if (currentUserRole === "principal") {
+            if (tMenuBtn) tMenuBtn.classList.remove("d-none");
+            if (pMenuBtn) pMenuBtn.classList.remove("d-none");
             if (adminActions) adminActions.classList.remove("d-none");
             if (actionCol) actionCol.classList.remove("d-none");
-            if (feesMenuBtn) feesMenuBtn.classList.remove("d-none");
-            if (feeSettingsBtn) feeSettingsBtn.classList.remove("d-none");
-
-            showTab('instAdminTab'); 
-            loadPrincipalsList(); 
             
-            document.getElementById("reqManualReceipt").checked = sysReqManualReceipt;
-            const rBtns = document.getElementsByName("feePermission");
-            for(let i=0; i<rBtns.length; i++){
-                if(rBtns[i].value === sysFeePermission) rBtns[i].checked = true;
-            }
-
-        } else if (currentUserRole === "principal" || isSuperAdmin) {
-          if (tMenuBtn) tMenuBtn.classList.remove("d-none");
-          if (pMenuBtn) pMenuBtn.classList.remove("d-none");
-          if (adminActions) adminActions.classList.remove("d-none");
-          if (actionCol) actionCol.classList.remove("d-none");
-        } 
+            showTab('homeDashboardTab');
+            loadLeaderboard();
+            loadPrincipalsList();
+          } else if (currentUserRole === "teacher") {
+            showTab('homeDashboardTab');
+            loadLeaderboard();
+          }
+        }
 
         document.getElementById("authSection").classList.add("d-none");
         document.getElementById("appSection").classList.remove("d-none");
@@ -201,19 +230,8 @@ onAuthStateChanged(auth, async (user) => {
         const attDateEl = document.getElementById("attDate");
         if (attDateEl) attDateEl.valueAsDate = new Date();
 
-        populateClassDropdowns();
+        if(!isSuperAdmin) populateClassDropdowns();
         syncMobileMenu();
-
-        if (isSuperAdmin) {
-          showTab('superAdminTab');
-        } else if (currentUserRole === "principal") {
-          showTab('homeDashboardTab');
-          loadLeaderboard();
-          loadPrincipalsList(); 
-        } else if (currentUserRole === "teacher") {
-          showTab('homeDashboardTab');
-          loadLeaderboard();
-        }
       }
     } catch (e) {
       console.error("Auth Load Error:", e);
@@ -483,7 +501,7 @@ window.handleStaffSignUp = async (e) => {
 
 window.loadSuperAdminRequests = async () => {
   const tbody = document.getElementById("superAdminTableBody");
-  tbody.innerHTML = `<tr><td colspan="7" class="text-center">Loading registered madrasas...</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="8" class="text-center">Loading registered madrasas...</td></tr>`;
 
   const q = query(collection(db, "users"), where("role", "==", "admin"));
   const snap = await getDocs(q);
@@ -497,7 +515,7 @@ window.loadSuperAdminRequests = async () => {
   });
 
   let html = "";
-  localMadrasasCache.forEach(u => {
+  for (const u of localMadrasasCache) {
     const isPending = (u.status === "pending");
     const statusBadge = isPending 
       ? `<span class="badge bg-warning text-dark">Pending</span>` 
@@ -507,13 +525,29 @@ window.loadSuperAdminRequests = async () => {
       ? `<button class="btn btn-sm btn-success me-1" onclick="approveMadrasa('${u.id}', '${u.institutionName}')" title="Approve"><i class="fa-solid fa-check"></i> Approve</button>`
       : `<button class="btn btn-sm btn-primary me-1" onclick="switchMadrasaScope('${u.institutionId}', '${u.institutionName}')" title="Manage Scope"><i class="fa-solid fa-folder-open"></i> Manage</button>`;
 
+    let stuCount = 0;
+    let staffCount = 0;
+
+    try {
+        const stuQ = query(collection(db, "students"), where("institutionId", "==", u.institutionId));
+        const stuSnap = await getCountFromServer(stuQ);
+        stuCount = stuSnap.data().count;
+
+        const staffQ = query(collection(db, "users"), where("institutionId", "==", u.institutionId));
+        const staffSnap = await getCountFromServer(staffQ);
+        staffCount = Math.max(0, staffSnap.data().count - 1);
+    } catch (e) {
+        console.log("Count error", e);
+    }
+
     html += `
       <tr>
         <td><b>${u.institutionId || '-'}</b></td>
         <td><b>${u.institutionName || '-'}</b></td>
         <td>${u.place || '-'}</td>
         <td>${u.name || '-'}</td>
-        <td>${u.email}</td>
+        <td class="text-center"><span class="badge bg-info text-dark">${staffCount}</span></td>
+        <td class="text-center"><span class="badge bg-primary">${stuCount}</span></td>
         <td>${statusBadge}</td>
         <td class="text-center">
           ${approveOrManageBtn}
@@ -522,14 +556,23 @@ window.loadSuperAdminRequests = async () => {
         </td>
       </tr>
     `;
-  });
-  tbody.innerHTML = html || `<tr><td colspan="7" class="text-center text-muted">No madrasa accounts found.</td></tr>`;
+  }
+  tbody.innerHTML = html || `<tr><td colspan="8" class="text-center text-muted">No madrasa accounts found.</td></tr>`;
 };
 
 window.switchMadrasaScope = (instId, instName) => {
   currentInstitutionId = instId;
   document.getElementById("displayMadrassaName").innerText = instName + " (Super Admin View)";
   document.getElementById("superAdminBackBtn").classList.remove("d-none");
+  
+  document.getElementById("studentsMenuBtn").classList.remove("d-none");
+  document.getElementById("attendanceMenuBtn").classList.remove("d-none");
+  document.getElementById("marksMenuBtn").classList.remove("d-none");
+  document.getElementById("performanceMenuBtn").classList.remove("d-none");
+  document.getElementById("feesMenuBtn").classList.remove("d-none");
+  document.getElementById("feeSettingsBtn").classList.remove("d-none");
+  document.getElementById("instAdminStaffBtn").classList.remove("d-none");
+
   showTab('instAdminTab'); 
   loadPrincipalsList();
 };
@@ -537,6 +580,15 @@ window.switchMadrasaScope = (instId, instName) => {
 window.returnToSuperAdminConsole = () => {
   document.getElementById("displayMadrassaName").innerText = "Smart Madrasa - Master Control Center";
   document.getElementById("superAdminBackBtn").classList.add("d-none");
+
+  document.getElementById("studentsMenuBtn").classList.add("d-none");
+  document.getElementById("attendanceMenuBtn").classList.add("d-none");
+  document.getElementById("marksMenuBtn").classList.add("d-none");
+  document.getElementById("performanceMenuBtn").classList.add("d-none");
+  document.getElementById("feesMenuBtn").classList.add("d-none");
+  document.getElementById("feeSettingsBtn").classList.add("d-none");
+  document.getElementById("instAdminStaffBtn").classList.add("d-none");
+
   showTab('superAdminTab');
 };
 
@@ -621,20 +673,6 @@ window.rejectMadrasa = async (userId) => {
     alert("Madrasa account deleted.");
     loadSuperAdminRequests();
   }
-};
-
-window.logoutParent = () => {
-  sessionStorage.clear();
-  window.location.reload();
-};
-
-window.handleLogout = () => {
-  signOut(auth).then(() => {
-    sessionStorage.clear();
-    window.location.reload();
-  }).catch((error) => {
-    alert("Logout Error: " + error.message);
-  });
 };
 
 window.loadPrincipalsList = async () => {
@@ -775,7 +813,7 @@ window.instAssignClassesToStaff = async (e) => {
 };
 
 // ==========================================
-// STUDENT PROFILE MODAL
+// STUDENT PROFILE MODAL (JS VALIDATION)
 // ==========================================
 
 window.openStudentProfileModal = (docId) => {
