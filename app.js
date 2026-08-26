@@ -70,24 +70,19 @@ let instIdToNameMap = {};
 const DEFAULT_SUBJECTS = ["Quran", "Tajweed", "Fiqh", "Aqeedah", "Tareekh", "Lisan"];
 const ALL_MONTHS = ["APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC", "JAN", "FEB", "MAR"];
 
-// In-App Toast Notification
 window.showToast = (message, type = "success") => {
   const container = document.getElementById("appToastContainer");
   if (!container) {
-      alert(message); // Fallback if toast container is missing
+      alert(message);
       return;
   }
-
   const toast = document.createElement("div");
   toast.className = `modern-toast ${type}`;
-  
   let icon = "fa-circle-check";
   if (type === "error") icon = "fa-circle-xmark";
   if (type === "warning") icon = "fa-triangle-exclamation";
-
   toast.innerHTML = `<i class="fa-solid ${icon} fs-5"></i> <span>${message}</span>`;
   container.appendChild(toast);
-
   setTimeout(() => {
     toast.style.transition = "all 0.4s ease";
     toast.style.opacity = "0";
@@ -96,7 +91,6 @@ window.showToast = (message, type = "success") => {
   }, 4000);
 };
 
-// Password Toggle Functionality
 window.togglePasswordVisibility = (inputId, btn) => {
   const input = document.getElementById(inputId);
   if (!input) return;
@@ -179,10 +173,10 @@ window.populateClassDropdowns = function() {
 
       if (currentUserRole !== "principal" && currentUserRole !== "admin" && !isSuperAdmin && allowedClasses.length === 1) {
         select.value = allowedClasses[0];
-        if (id === "attClassSelect") loadAttendanceSheet();
-        if (id === "markClassSelect") loadMarksEntrySheet();
-        if (id === "perfClassSelect") loadStudentsForPerfSheet();
-        if (id === "feeClassSelect") loadStudentsForFees();
+        if (id === "attClassSelect") window.loadAttendanceSheet();
+        if (id === "markClassSelect") window.loadMarksEntrySheet();
+        if (id === "perfClassSelect") window.loadStudentsForPerfSheet();
+        if (id === "feeClassSelect") window.loadStudentsForFees();
       }
     }
   });
@@ -199,7 +193,7 @@ onAuthStateChanged(auth, async (user) => {
         
         if (!isSuperAdmin && userData.status === "pending") {
           let alertMsg = "Your registration is pending approval.";
-          if (userData.role === 'admin') alertMsg = "Your Madrasa registration is pending approval from the Super Admin. Please contact support.";
+          if (userData.role === 'admin') alertMsg = "Your Madrasa registration is pending approval from the Super Admin.";
           else if (userData.role === 'principal') alertMsg = "Your Principal registration is pending approval from your Institution Admin.";
           else alertMsg = "Your Staff registration is pending approval from your Principal.";
           
@@ -233,6 +227,7 @@ onAuthStateChanged(auth, async (user) => {
         const feesMenuBtn = document.getElementById("feesMenuBtn");
         const feeSettingsBtn = document.getElementById("feeSettingsBtn");
         const subjectSettingsBtn = document.getElementById("subjectSettingsBtn");
+        const tMenuBtn = document.getElementById("teachersMenuBtn");
 
         if (!isSuperAdmin) {
           const instDoc = await getDoc(doc(db, "settings", currentInstitutionId));
@@ -259,7 +254,7 @@ onAuthStateChanged(auth, async (user) => {
           if (adminActions) adminActions.classList.add("d-none");
           if (actionCol) actionCol.classList.add("d-none");
 
-          showTab('superAdminTab');
+          window.showTab('superAdminTab');
           window.loadSuperAdminRequests();
 
         } else {
@@ -296,7 +291,7 @@ onAuthStateChanged(auth, async (user) => {
             if (feeSettingsBtn) feeSettingsBtn.classList.remove("d-none");
             if (subjectSettingsBtn) subjectSettingsBtn.classList.remove("d-none");
 
-            showTab('instAdminTab'); 
+            window.showTab('instAdminTab'); 
             window.loadPrincipalsList(); 
             
             const reqManualEl = document.getElementById("reqManualReceipt");
@@ -313,12 +308,12 @@ onAuthStateChanged(auth, async (user) => {
             if (actionCol) actionCol.classList.remove("d-none");
             if (subjectSettingsBtn) subjectSettingsBtn.classList.remove("d-none");
             
-            showTab('homeDashboardTab');
-            loadLeaderboard();
+            window.showTab('homeDashboardTab');
+            window.loadLeaderboard();
             window.loadPrincipalsList();
           } else if (currentUserRole === "teacher") {
-            showTab('homeDashboardTab');
-            loadLeaderboard();
+            window.showTab('homeDashboardTab');
+            window.loadLeaderboard();
           }
         }
 
@@ -345,9 +340,289 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-// ==========================================
-// SUPER ADMIN MASTER CONTROL
-// ==========================================
+let parentStudentsData = [];
+window.handleUnifiedLogin = async (e) => {
+  e.preventDefault();
+  const identifier = document.getElementById("loginIdentifier").value.trim();
+
+  if (/^\d+$/.test(identifier)) {
+    const reg = Number(identifier);
+    const mobile = document.getElementById("loginMobile").value.trim().slice(-10);
+
+    if (!mobile) return showToast("Please enter the registered mobile number.", "warning");
+
+    const q = query(collection(db, "students"), where("regNo", "==", reg));
+    const snap = await getDocs(q);
+
+    if (snap.empty) return showToast("Student record not found.", "error");
+
+    let matchedStudent = null;
+    snap.forEach(d => {
+      const data = d.data();
+      const sPhone = (data.phone || '').replace(/[^0-9]/g, '').slice(-10);
+      if (sPhone === mobile) matchedStudent = {id: d.id, ...data};
+    });
+
+    if (!matchedStudent) return showToast("Phone number does not match.", "error");
+
+    const siblingsQ = query(collection(db, "students"), where("institutionId", "==", matchedStudent.institutionId));
+    const siblingsSnap = await getDocs(siblingsQ);
+    
+    parentStudentsData = [];
+    siblingsSnap.forEach(d => {
+        const data = d.data();
+        const sPhone = (data.phone || '').replace(/[^0-9]/g, '').slice(-10);
+        if (sPhone === mobile) {
+            parentStudentsData.push({id: d.id, ...data});
+        }
+    });
+
+    sessionStorage.setItem("parentLoggedIn", "true");
+    document.getElementById("authSection").classList.add("d-none");
+    document.getElementById("parentViewSection").classList.remove("d-none");
+
+    const studentSelect = document.getElementById("parentStudentSelect");
+    studentSelect.innerHTML = "";
+    parentStudentsData.forEach(student => {
+        const option = document.createElement("option");
+        option.value = student.regNo;
+        option.text = `${student.name} (Reg No: ${student.regNo})`;
+        if (student.regNo === reg) option.selected = true;
+        studentSelect.appendChild(option);
+    });
+
+    window.loadParentStudentData(matchedStudent);
+
+  } else {
+    const email = identifier.toLowerCase();
+    const password = document.getElementById("loginPassword").value;
+    if (!password) return showToast("Please enter your password.", "warning");
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      showToast("Signed in successfully!", "success");
+    } catch (err) { showToast("Sign-in failed: " + err.message, "error"); }
+  }
+};
+
+window.switchParentStudent = () => {
+    const selectedRegNo = Number(document.getElementById("parentStudentSelect").value);
+    const selectedStudent = parentStudentsData.find(s => s.regNo === selectedRegNo);
+    if (selectedStudent) window.loadParentStudentData(selectedStudent);
+};
+
+window.loadParentStudentData = async (student) => {
+    document.getElementById("pvStudentName").innerText = student.name;
+    document.getElementById("pvClass").innerText = "Class " + (student.currentClass || '').replace(/Class\s*/i, "");
+    document.getElementById("pvRegNo").innerText = student.regNo;
+    document.getElementById("pvFather").innerText = student.fatherName || student.guardianName || '-';
+
+    const feeQ = query(collection(db, "feeCollections"), where("institutionId", "==", student.institutionId), where("regNo", "==", student.regNo));
+    const feeSnap = await getDocs(feeQ);
+    
+    let feeHtml = "";
+    const paidMonths = new Set();
+    feeSnap.forEach(fd => {
+      const f = fd.data();
+      feeHtml += `<tr><td>#${f.receiptNo}</td><td>${f.date || '-'}</td><td>${f.feeType}</td><td class="fw-bold text-success">₹${f.amount}</td></tr>`;
+      ALL_MONTHS.forEach(m => {
+        if (f.feeType && f.feeType.includes(m)) paidMonths.add(m);
+      });
+    });
+    document.getElementById("pvFeeTableBody").innerHTML = feeHtml || `<tr><td colspan="4" class="text-center text-muted">No fee records found</td></tr>`;
+
+    let gridHtml = "";
+    ALL_MONTHS.forEach(m => {
+      if (paidMonths.has(m)) {
+        gridHtml += `<div class="month-badge month-paid">${m}<br><small>PAID</small></div>`;
+      } else {
+        gridHtml += `<div class="month-badge month-pending">${m}<br><small>DUE</small></div>`;
+      }
+    });
+    document.getElementById("pvFeeMonthGrid").innerHTML = gridHtml;
+
+    const perfQ = query(collection(db, "performancePoints"), where("institutionId", "==", student.institutionId), where("regNo", "==", student.regNo));
+    const perfSnap = await getDocs(perfQ);
+    let totalPts = 0;
+    let perfHtml = "";
+    perfSnap.forEach(pd => {
+      const p = pd.data();
+      totalPts += (Number(p.points) || 0);
+      perfHtml += `<tr><td>${p.date || '-'}</td><td>${p.task}</td><td class="fw-bold ${p.points >= 0 ? 'text-success' : 'text-danger'}">${p.points > 0 ? '+' : ''}${p.points} Pts</td></tr>`;
+    });
+    document.getElementById("pvTotalPoints").innerText = totalPts + " Pts";
+    document.getElementById("pvPointsTableBody").innerHTML = perfHtml || `<tr><td colspan="3" class="text-center text-muted">No points awarded yet</td></tr>`;
+};
+
+window.handleSignUp = async (e) => {
+  e.preventDefault();
+  const submitBtn = document.getElementById("btnSubmitSignup");
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Submitting...";
+  }
+
+  try {
+    const board = document.getElementById("regBoard")?.value || "Other";
+    const instCode = (document.getElementById("regInstCode")?.value || "").trim().toUpperCase();
+    const instName = (document.getElementById("regInstName")?.value || "").trim().toUpperCase();
+    const userName = (document.getElementById("regUserName")?.value || "").trim().toUpperCase();
+    const phone = (document.getElementById("regPhone")?.value || "").trim();
+    const whatsapp = (document.getElementById("regWhatsapp")?.value || "").trim() || phone;
+    const email = (document.getElementById("regEmail")?.value || "").trim().toLowerCase();
+    const pwd = document.getElementById("regPassword")?.value || "";
+
+    if (pwd.length < 6) {
+      showToast("Password must be at least 6 characters.", "warning");
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Submit for Approval";
+      }
+      return;
+    }
+
+    const instId = board + "_" + instCode;
+    const address = (document.getElementById("regAddress")?.value || "").trim().toUpperCase();
+    const place = (document.getElementById("regPlace")?.value || "").trim().toUpperCase();
+    const po = (document.getElementById("regPo")?.value || "").trim().toUpperCase();
+    const pincode = (document.getElementById("regPincode")?.value || "").trim();
+    const district = (document.getElementById("regDistrict")?.value || "").trim().toUpperCase();
+    const locationLink = (document.getElementById("regLocationLink")?.value || "").trim();
+
+    const isDev = (email === SUPER_ADMIN_EMAIL);
+    const cred = await createUserWithEmailAndPassword(auth, email, pwd);
+    
+    await setDoc(doc(db, "users", cred.user.uid), {
+      uid: cred.user.uid,
+      name: userName,
+      phone: phone,
+      whatsapp: whatsapp,
+      email: email,
+      institutionId: instId,
+      institutionCode: instCode,
+      institutionBoard: board,
+      institutionName: instName,
+      address: address,
+      place: place,
+      po: po,
+      pincode: pincode,
+      district: district,
+      locationLink: locationLink,
+      role: "admin",
+      status: isDev ? "active" : "pending",
+      assignedClasses: [],
+      createdAt: serverTimestamp()
+    });
+
+    await setDoc(doc(db, "settings", instId), {
+        feePermission: "all",
+        reqManualReceipt: false
+    });
+
+    const form = document.getElementById("signupForm");
+    if (form) form.reset();
+
+    if (isDev) {
+      showToast("Developer Account registered and activated!", "success");
+    } else {
+      showToast("Registration submitted! Please wait for Super Admin approval.", "success");
+      await signOut(auth);
+      window.switchAuthTab('login');
+    }
+  } catch (err) { 
+    showToast("Registration failed: " + err.message, "error"); 
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerText = "Submit for Approval";
+    }
+  }
+};
+
+window.handleStaffSignUp = async (e) => {
+  e.preventDefault();
+  const submitBtn = document.getElementById("btnStaffSubmitSignup");
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Submitting...";
+  }
+
+  try {
+    const role = document.getElementById("staffRole")?.value || "teacher";
+    const board = document.getElementById("staffBoard")?.value || "SKIMVB";
+    const instCode = (document.getElementById("staffInstCode")?.value || "").trim().toUpperCase();
+    const instId = board + "_" + instCode; 
+    
+    const userName = (document.getElementById("staffName")?.value || "").trim().toUpperCase();
+    const phone = document.getElementById("staffPhone")?.value || "").trim();
+    const whatsapp = document.getElementById("staffWhatsapp")?.value || "").trim() || phone;
+    const email = (document.getElementById("staffEmail")?.value || "").trim().toLowerCase();
+    const pwd = document.getElementById("staffPassword")?.value || "";
+
+    if (pwd.length < 6) {
+      showToast("Password must be at least 6 characters long.", "warning");
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Submit Request";
+      }
+      return;
+    }
+
+    const instQuery = query(collection(db, "users"), where("institutionId", "==", instId), where("role", "==", "admin"));
+    const instSnap = await getDocs(instQuery);
+
+    if (instSnap.empty) {
+      showToast("Madrasa Code not found. Please check Board & Code.", "warning");
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Submit Request";
+      }
+      return;
+    }
+    
+    let instName = "";
+    instSnap.forEach(d => instName = d.data().institutionName);
+
+    let desigTitle = "മുഅല്ലിം";
+    let systemRole = "teacher";
+    if (role === "principal") {
+      desigTitle = "സദർ മുഅല്ലിം";
+      systemRole = "principal";
+    }
+
+    const cred = await createUserWithEmailAndPassword(auth, email, pwd);
+    
+    await setDoc(doc(db, "users", cred.user.uid), {
+      uid: cred.user.uid,
+      name: userName,
+      phone: phone,
+      whatsapp: whatsapp,
+      email: email,
+      institutionId: instId,
+      institutionName: instName,
+      role: systemRole,
+      designation: desigTitle,
+      status: "pending", 
+      assignedClasses: [],
+      createdAt: serverTimestamp()
+    });
+
+    const form = document.getElementById("staffSignupForm");
+    if (form) form.reset();
+
+    showToast("Request submitted successfully! Please wait for approval.", "success");
+    await signOut(auth);
+    window.switchAuthTab('login');
+
+  } catch (err) { 
+    showToast("Registration failed: " + err.message, "error"); 
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerText = "Submit Request";
+    }
+  }
+};
 
 window.loadSuperAdminRequests = async () => {
   const tbody = document.getElementById("superAdminTableBody");
@@ -510,7 +785,7 @@ window.switchMadrasaScope = (instId, instName) => {
   document.getElementById("subjectSettingsBtn").classList.remove("d-none");
   document.getElementById("instAdminStaffBtn").classList.remove("d-none");
 
-  showTab('instAdminTab'); 
+  window.showTab('instAdminTab'); 
   window.loadPrincipalsList();
 };
 
@@ -527,199 +802,334 @@ window.returnToSuperAdminConsole = () => {
   document.getElementById("subjectSettingsBtn").classList.add("d-none");
   document.getElementById("instAdminStaffBtn").classList.add("d-none");
 
-  showTab('superAdminTab');
+  window.showTab('superAdminTab');
 };
 
-// ==========================================
-// REGISTRATION
-// ==========================================
+window.loadPrincipalsList = async () => {
+  const tbody = document.getElementById("principalsTableBody");
+  const pendingTbody = document.getElementById("instPendingStaffTableBody");
+  const pendingSection = document.getElementById("instPendingStaffSection");
 
-window.handleSignUp = async (e) => {
-  e.preventDefault();
-  const submitBtn = document.getElementById("btnSubmitSignup");
-  if (submitBtn) {
-    submitBtn.disabled = true;
-    submitBtn.innerText = "Submitting...";
-  }
+  if (!tbody) return;
 
-  try {
-    const board = document.getElementById("regBoard")?.value || "Other";
-    const instCode = (document.getElementById("regInstCode")?.value || "").trim().toUpperCase();
-    const instName = (document.getElementById("regInstName")?.value || "").trim().toUpperCase();
-    const userName = (document.getElementById("regUserName")?.value || "").trim().toUpperCase();
-    const phone = (document.getElementById("regPhone")?.value || "").trim();
-    const whatsapp = (document.getElementById("regWhatsapp")?.value || "").trim() || phone;
-    const email = (document.getElementById("regEmail")?.value || "").trim().toLowerCase();
-    
-    const pwd = document.getElementById("regPassword")?.value || "";
+  tbody.innerHTML = `<tr><td colspan="5" class="text-center">Loading...</td></tr>`;
+  if (pendingTbody) pendingTbody.innerHTML = `<tr><td colspan="5" class="text-center">Loading...</td></tr>`;
 
-    if (pwd.length < 6) {
-      showToast("Password must be at least 6 characters.", "warning");
-      if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.innerText = "Submit for Approval";
-      }
-      return;
+  const qActive = query(collection(db, "users"), where("institutionId", "==", currentInstitutionId), where("status", "==", "active"));
+  const snapActive = await getDocs(qActive);
+
+  localPrincipalsCache = [];
+  snapActive.forEach(d => {
+    if (d.data().role !== 'admin') {
+      localPrincipalsCache.push({ id: d.id, ...d.data() });
     }
+  });
 
-    const instId = board + "_" + instCode;
-    const address = (document.getElementById("regAddress")?.value || "").trim().toUpperCase();
-    const place = (document.getElementById("regPlace")?.value || "").trim().toUpperCase();
-    const po = (document.getElementById("regPo")?.value || "").trim().toUpperCase();
-    const pincode = (document.getElementById("regPincode")?.value || "").trim();
-    const district = (document.getElementById("regDistrict")?.value || "").trim().toUpperCase();
-    const locationLink = (document.getElementById("regLocationLink")?.value || "").trim();
+  let htmlActive = "";
+  localPrincipalsCache.forEach(p => {
+    const roleBadge = `<span class="badge bg-success">${p.designation || p.role}</span>`;
+    htmlActive += `
+      <tr>
+        <td><b>${p.name}</b></td>
+        <td>${roleBadge}</td>
+        <td>${p.email}</td>
+        <td>${p.phone}</td>
+        <td class="text-center">
+          <button class="btn btn-sm btn-primary me-1" onclick="openStaffProfileModal('${p.id}')" title="Edit Profile"><i class="fa-solid fa-pen"></i></button>
+          <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${p.id}', '${p.name}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
+        </td>
+      </tr>
+    `;
+  });
+  tbody.innerHTML = htmlActive || `<tr><td colspan="5" class="text-center text-muted">No staff assigned yet.</td></tr>`;
 
-    const isDev = (email === SUPER_ADMIN_EMAIL);
-    const cred = await createUserWithEmailAndPassword(auth, email, pwd);
+  const qPending = query(collection(db, "users"), where("institutionId", "==", currentInstitutionId), where("status", "==", "pending"));
+  const snapPending = await getDocs(qPending);
+
+  pendingStaffCache = [];
+  snapPending.forEach(d => {
+    if (d.data().role !== 'admin') {
+      pendingStaffCache.push({ id: d.id, ...d.data() });
+    }
+  });
+
+  if (pendingStaffCache.length > 0 && pendingSection && pendingTbody) {
+    pendingSection.classList.remove("d-none");
+    let htmlPending = "";
+    pendingStaffCache.forEach((t) => {
+      htmlPending += `
+        <tr>
+          <td><b>${t.name}</b></td>
+          <td><span class="badge bg-warning text-dark">${t.designation || t.role}</span></td>
+          <td>${t.email}</td>
+          <td>${t.phone}</td>
+          <td class="text-center">
+            <button class="btn btn-sm btn-success me-1" onclick="openInstAssignClassesForm('${t.id}')" title="Approve"><i class="fa-solid fa-check"></i></button>
+            <button class="btn btn-sm btn-danger" onclick="deleteUser('${t.id}', '${t.name}')" title="Reject"><i class="fa-solid fa-xmark"></i></button>
+          </td>
+        </tr>
+      `;
+    });
+    pendingTbody.innerHTML = htmlPending;
+  } else if (pendingSection) {
+    pendingSection.classList.add("d-none");
+  }
+};
+
+window.openStaffProfileModal = (docId) => {
+  document.getElementById("staffProfileForm").reset();
+  const authSec = document.getElementById("spAuthSection");
+
+  if (docId) {
+    const p = localPrincipalsCache.find(x => x.id === docId);
+    if (!p) return;
+
+    document.getElementById("staffModalTitle").innerText = `Edit Staff Profile: ${p.name}`;
+    document.getElementById("spDocId").value = docId;
+    if (authSec) authSec.classList.add("d-none");
+
+    document.getElementById("spName").value = p.name || '';
+    document.getElementById("spGender").value = p.gender || 'Male';
+    document.getElementById("spDob").value = p.dob || '';
+    document.getElementById("spBlood").value = p.bloodGroup || '';
+    document.getElementById("spGuardian").value = p.guardianName || '';
+    document.getElementById("spMarital").value = p.maritalStatus || 'Single';
+    document.getElementById("spAadhaar").value = p.aadhaar || '';
+
+    document.getElementById("spPhone").value = p.phone || '';
+    document.getElementById("spWhatsapp").value = p.whatsapp || '';
+    document.getElementById("spEmergency").value = p.emergencyPhone || '';
+    document.getElementById("spHouse").value = p.houseName || '';
+    document.getElementById("spPo").value = p.postOffice || '';
+    document.getElementById("spPin").value = p.pincode || '';
+    document.getElementById("spDistrict").value = p.district || '';
+    document.getElementById("spState").value = p.state || 'KERALA';
+
+    document.getElementById("spRelEdu").value = p.relEdu || '';
+    document.getElementById("spGenEdu").value = p.genEdu || '';
+    document.getElementById("spLanguages").value = p.languages || '';
+    document.getElementById("spSkills").value = p.skills || '';
+    document.getElementById("spAwards").value = p.awards || '';
+
+    document.getElementById("spRole").value = p.role || 'teacher';
     
-    await setDoc(doc(db, "users", cred.user.uid), {
-      uid: cred.user.uid,
-      name: userName,
-      phone: phone,
-      whatsapp: whatsapp,
-      email: email,
-      institutionId: instId,
-      institutionCode: instCode,
-      institutionBoard: board,
-      institutionName: instName,
-      address: address,
-      place: place,
-      po: po,
-      pincode: pincode,
-      district: district,
-      locationLink: locationLink,
-      role: "admin",
-      status: isDev ? "active" : "pending",
-      assignedClasses: [],
-      createdAt: serverTimestamp()
-    });
-
-    await setDoc(doc(db, "settings", instId), {
-        feePermission: "all",
-        reqManualReceipt: false
-    });
-
-    const form = document.getElementById("signupForm");
-    if (form) form.reset();
-
-    if (isDev) {
-      showToast("Developer Account registered and activated!", "success");
+    const desigSelect = document.getElementById("spDesignationSelect");
+    const desigCustom = document.getElementById("spDesignationCustom");
+    if (["സദർ മുഅല്ലിം", "വൈസ് സദർ", "സദർ ഇൻ-ചാർജ്", "മുഅല്ലിം"].includes(p.designation)) {
+      desigSelect.value = p.designation;
+      desigCustom.classList.add("d-none");
+    } else if (p.designation) {
+      desigSelect.value = "Other";
+      desigCustom.classList.remove("d-none");
+      desigCustom.value = p.designation;
     } else {
-      showToast("Registration submitted! Please wait for Super Admin approval.", "success");
-      await signOut(auth);
-      window.switchAuthTab('login');
+      desigSelect.value = "മുഅല്ലിം";
+      desigCustom.classList.add("d-none");
     }
-  } catch (err) { 
-    showToast("Registration failed: " + err.message, "error"); 
-  } finally {
-    if (submitBtn) {
-      submitBtn.disabled = false;
-      submitBtn.innerText = "Submit for Approval";
+
+    document.getElementById("spMsr").value = p.msrNo || '';
+    document.getElementById("spEmpType").value = p.employmentType || 'Full Time';
+    document.getElementById("spExp").value = p.experience || '';
+    document.getElementById("spDoj").value = p.doj || '';
+
+    const assigned = p.assignedClasses || [];
+    document.querySelectorAll(".sp-class-cb").forEach(cb => {
+      cb.checked = assigned.includes(cb.value);
+    });
+
+    document.getElementById("spAccName").value = p.accName || '';
+    document.getElementById("spAccNo").value = p.accNo || '';
+    document.getElementById("spIfsc").value = p.ifsc || '';
+    document.getElementById("spBank").value = p.bankName || '';
+    document.getElementById("spBranch").value = p.branch || '';
+
+    document.getElementById("spTransFrom").value = p.transFrom || '';
+    document.getElementById("spTransTo").value = p.transTo || '';
+    document.getElementById("spDol").value = p.dol || '';
+    document.getElementById("spReason").value = p.reasonLeaving || '';
+
+  } else {
+    document.getElementById("staffModalTitle").innerText = "Add New Staff Profile";
+    document.getElementById("spDocId").value = "";
+    if (authSec) authSec.classList.remove("d-none");
+    document.querySelectorAll(".sp-class-cb").forEach(cb => cb.checked = false);
+  }
+
+  const triggerEl = document.querySelector('#staffTabs button[data-bs-target="#tab-personal"]');
+  bootstrap.Tab.getOrCreateInstance(triggerEl).show();
+  new bootstrap.Modal(document.getElementById('staffProfileModal')).show();
+};
+
+window.saveStaffProfile = async (e) => {
+  if (e) e.preventDefault();
+
+  const nameInput = document.getElementById("spName").value.trim();
+  const phoneInput = document.getElementById("spPhone").value.trim();
+
+  if (!nameInput || !phoneInput) {
+    showToast("Name and Phone number are required!", "warning");
+    const triggerEl = document.querySelector('#staffTabs button[data-bs-target="#tab-personal"]');
+    bootstrap.Tab.getOrCreateInstance(triggerEl).show();
+    return;
+  }
+
+  const docId = document.getElementById("spDocId").value;
+  const role = document.getElementById("spRole").value;
+  
+  const desigSelect = document.getElementById("spDesignationSelect").value;
+  const designation = desigSelect === "Other" 
+    ? (document.getElementById("spDesignationCustom").value.trim().toUpperCase() || "മുഅല്ലിം")
+    : desigSelect;
+
+  const assignedClasses = [];
+  document.querySelectorAll(".sp-class-cb:checked").forEach(cb => assignedClasses.push(cb.value));
+
+  const staffData = {
+    institutionId: currentInstitutionId,
+    institutionName: document.getElementById("displayMadrassaName").innerText,
+    name: nameInput.toUpperCase(),
+    gender: document.getElementById("spGender").value,
+    dob: document.getElementById("spDob").value,
+    bloodGroup: document.getElementById("spBlood").value,
+    guardianName: document.getElementById("spGuardian").value.trim().toUpperCase(),
+    maritalStatus: document.getElementById("spMarital").value,
+    aadhaar: document.getElementById("spAadhaar").value.trim(),
+
+    phone: phoneInput,
+    whatsapp: document.getElementById("spWhatsapp").value.trim() || phoneInput,
+    emergencyPhone: document.getElementById("spEmergency").value.trim(),
+    houseName: document.getElementById("spHouse").value.trim().toUpperCase(),
+    postOffice: document.getElementById("spPo").value.trim().toUpperCase(),
+    pincode: document.getElementById("spPin").value.trim(),
+    district: document.getElementById("spDistrict").value.trim().toUpperCase(),
+    state: document.getElementById("spState").value.trim().toUpperCase(),
+
+    relEdu: document.getElementById("spRelEdu").value.trim().toUpperCase(),
+    genEdu: document.getElementById("spGenEdu").value.trim().toUpperCase(),
+    languages: document.getElementById("spLanguages").value.trim().toUpperCase(),
+    skills: document.getElementById("spSkills").value.trim().toUpperCase(),
+    awards: document.getElementById("spAwards").value.trim().toUpperCase(),
+
+    role: role,
+    designation: designation,
+    msrNo: document.getElementById("spMsr").value.trim().toUpperCase(),
+    employmentType: document.getElementById("spEmpType").value,
+    experience: Number(document.getElementById("spExp").value) || 0,
+    doj: document.getElementById("spDoj").value,
+    assignedClasses: role === 'principal' ? ["1","2","3","4","5","6","7","8","9","10","11","12"] : assignedClasses,
+
+    accName: document.getElementById("spAccName").value.trim().toUpperCase(),
+    accNo: document.getElementById("spAccNo").value.trim(),
+    ifsc: document.getElementById("spIfsc").value.trim().toUpperCase(),
+    bankName: document.getElementById("spBank").value.trim().toUpperCase(),
+    branch: document.getElementById("spBranch").value.trim().toUpperCase(),
+
+    transFrom: document.getElementById("spTransFrom").value.trim().toUpperCase(),
+    transTo: document.getElementById("spTransTo").value.trim().toUpperCase(),
+    dol: document.getElementById("spDol").value,
+    reasonLeaving: document.getElementById("spReason").value.trim().toUpperCase(),
+
+    status: "active"
+  };
+
+  try {
+    if (docId) {
+      staffData.updatedAt = serverTimestamp();
+      await updateDoc(doc(db, "users", docId), staffData);
+      showToast("Staff profile updated successfully.", "success");
+    } else {
+      const email = document.getElementById("spAuthEmail").value.trim().toLowerCase();
+      const pwd = document.getElementById("spAuthPassword").value;
+
+      if (!email || !pwd) {
+        return showToast("Please provide Email and Password for new staff account setup.", "warning");
+      }
+
+      const cred = await createUserWithEmailAndPassword(auth, email, pwd);
+      staffData.uid = cred.user.uid;
+      staffData.email = email;
+      staffData.createdAt = serverTimestamp();
+
+      await setDoc(doc(db, "users", cred.user.uid), staffData);
+      showToast("New staff registered and profile created successfully.", "success");
+    }
+
+    bootstrap.Modal.getInstance(document.getElementById('staffProfileModal')).hide();
+    window.loadPrincipalsList();
+  } catch (err) {
+    showToast("Error saving profile: " + err.message, "error");
+  }
+};
+
+window.deleteUser = async (docId, name) => {
+  if (confirm(`Are you sure you want to remove ${name}?`)) {
+    try {
+      await deleteDoc(doc(db, "users", docId));
+      showToast("User removed.", "success");
+      window.loadPrincipalsList();
+    } catch (err) { showToast("Error: " + err.message); }
+  }
+};
+
+window.openInstAssignClassesForm = (staffId) => {
+  const staff = pendingStaffCache.find(s => s.id === staffId);
+  if (staff) {
+    if (staff.role === 'principal') {
+      if (confirm(`Approve ${staff.name} as Principal (സദർ മുഅല്ലിം)?`)) {
+        updateDoc(doc(db, "users", staffId), { 
+          status: "active",
+          assignedClasses: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
+        }).then(() => {
+          showToast("Principal approved successfully!", "success");
+          window.loadPrincipalsList();
+        }).catch(err => showToast("Error: " + err.message));
+      }
+      return;
+    }
+
+    const formEl = document.getElementById("instAssignClassesForm");
+    const idEl = document.getElementById("instAssignStaffId");
+    const nameEl = document.getElementById("instAssignStaffNameDisplay");
+    const roleEl = document.getElementById("instAssignStaffRole");
+
+    if (idEl) idEl.value = staffId;
+    if (nameEl) nameEl.innerText = staff.name;
+    if (roleEl) roleEl.value = staff.role;
+
+    if (formEl) {
+      formEl.classList.remove("d-none");
+      document.querySelectorAll('.inst-approve-class-cb').forEach(cb => cb.checked = false);
     }
   }
 };
 
-window.handleStaffSignUp = async (e) => {
+window.instAssignClassesToStaff = async (e) => {
   e.preventDefault();
-  const submitBtn = document.getElementById("btnStaffSubmitSignup");
-  if (submitBtn) {
-    submitBtn.disabled = true;
-    submitBtn.innerText = "Submitting...";
+  const staffId = document.getElementById("instAssignStaffId")?.value;
+  const role = document.getElementById("instAssignStaffRole")?.value || 'teacher';
+  
+  let assignedClasses = [];
+
+  if (role === 'teacher') {
+    const checkboxes = document.querySelectorAll('.inst-approve-class-cb:checked');
+    assignedClasses = Array.from(checkboxes).map(cb => cb.value);
+    if (assignedClasses.length === 0) return showToast("Please select at least one class.", "warning");
+  } else if (role === 'principal') {
+    assignedClasses = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
   }
 
   try {
-    const role = document.getElementById("staffRole")?.value || "teacher";
-    const board = document.getElementById("staffBoard")?.value || "SKIMVB";
-    const instCode = (document.getElementById("staffInstCode")?.value || "").trim().toUpperCase();
-    const instId = board + "_" + instCode; 
-    
-    const userName = (document.getElementById("staffName")?.value || "").trim().toUpperCase();
-    const phone = document.getElementById("staffPhone")?.value || "").trim();
-    const whatsapp = document.getElementById("staffWhatsapp")?.value || "").trim() || phone;
-    const email = (document.getElementById("staffEmail")?.value || "").trim().toLowerCase();
-    
-    const pwd = document.getElementById("staffPassword")?.value || "";
-
-    if (pwd.length < 6) {
-      showToast("Password must be at least 6 characters long.", "warning");
-      if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.innerText = "Submit Request";
-      }
-      return;
-    }
-
-    const instQuery = query(collection(db, "users"), where("institutionId", "==", instId), where("role", "==", "admin"));
-    const instSnap = await getDocs(instQuery);
-
-    if (instSnap.empty) {
-      showToast("Madrasa Code not found. Please check Board & Code with your Admin.", "warning");
-      if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.innerText = "Submit Request";
-      }
-      return;
-    }
-    
-    let instName = "";
-    instSnap.forEach(d => instName = d.data().institutionName);
-
-    let desigTitle = "മുഅല്ലിം";
-    let systemRole = "teacher";
-    if (role === "principal") {
-      desigTitle = "സദർ മുഅല്ലിം";
-      systemRole = "principal";
-    } else if (role === "vice_principal") {
-      desigTitle = "വൈസ് സദർ";
-      systemRole = "teacher";
-    } else if (role === "in_charge") {
-      desigTitle = "സദർ ഇൻ-ചാർജ്";
-      systemRole = "teacher";
-    }
-
-    const cred = await createUserWithEmailAndPassword(auth, email, pwd);
-    
-    await setDoc(doc(db, "users", cred.user.uid), {
-      uid: cred.user.uid,
-      name: userName,
-      phone: phone,
-      whatsapp: whatsapp,
-      email: email,
-      institutionId: instId,
-      institutionName: instName,
-      role: systemRole,
-      designation: desigTitle,
-      status: "pending", 
-      assignedClasses: [],
-      createdAt: serverTimestamp()
+    await updateDoc(doc(db, "users", staffId), { 
+      status: "active",
+      assignedClasses: assignedClasses
     });
-
-    const form = document.getElementById("staffSignupForm");
-    if (form) form.reset();
-
-    showToast("Request submitted successfully! Please wait for approval.", "success");
-    await signOut(auth);
-    window.switchAuthTab('login');
-
-  } catch (err) { 
-    showToast("Registration failed: " + err.message, "error"); 
-  } finally {
-    if (submitBtn) {
-      submitBtn.disabled = false;
-      submitBtn.innerText = "Submit Request";
-    }
-  }
+    
+    showToast("Staff approved successfully!", "success");
+    const formEl = document.getElementById("instAssignClassesForm");
+    if (formEl) formEl.classList.add("d-none");
+    window.loadPrincipalsList(); 
+  } catch (err) { showToast("Error: " + err.message); }
 };
-
-// ==========================================
-// UNIFIED LOGIN
-// ==========================================
-// Handled above near parent login
-
-// ==========================================
-// SUBJECT SETTINGS & MARKS ENTRY
-// ==========================================
 
 window.loadClassSubjectSettings = async () => {
   const selClass = document.getElementById("subjectClassSelect").value;
@@ -871,10 +1281,6 @@ window.saveClassMarks = async () => {
   }
 };
 
-// ==========================================
-// FEES MODULE
-// ==========================================
-
 window.loadStudentsForFees = async () => {
   const selClass = document.getElementById("feeClassSelect").value;
   const tableArea = document.getElementById("feesTableArea");
@@ -1010,7 +1416,7 @@ window.openFeeModal = (studentDataStr) => {
     manualInput.placeholder = "Optional";
   }
 
-  calculateFeeAmount();
+  window.calculateFeeAmount();
   new bootstrap.Modal(document.getElementById('feePaymentModal')).show();
 };
 
@@ -1112,7 +1518,7 @@ window.saveFeePayment = async (e) => {
     document.getElementById("appSection").classList.add("d-none");
     document.getElementById("printableReceipt").classList.remove("d-none");
     
-    loadStudentsForFees();
+    window.loadStudentsForFees();
 
   } catch (err) { showToast("Error: " + err.message, "error"); }
 };
@@ -1217,10 +1623,6 @@ window.saveFeeSettings = async () => {
   } catch (err) { showToast("Error: " + err.message, "error"); }
 };
 
-// ==========================================
-// ATTENDANCE MODULE
-// ==========================================
-
 window.resetAttendanceButton = () => {
   const btn = document.getElementById("btnSaveAttendance");
   if (btn) {
@@ -1261,20 +1663,20 @@ window.loadAttendanceSheet = async () => {
   });
   tbody.innerHTML = html || `<tr><td colspan="3" class="text-center">No active students in this class.</td></tr>`;
   document.getElementById("selectAllAtt").checked = true;
-  updateAttendanceCount();
+  window.updateAttendanceCount();
 };
 
 window.toggleSelectAllAttendance = () => {
   const isChecked = document.getElementById("selectAllAtt").checked;
   document.querySelectorAll(".att-checkbox").forEach(cb => cb.checked = isChecked);
-  updateAttendanceCount();
+  window.updateAttendanceCount();
 };
 
 window.updateAttendanceCount = () => {
   const total = document.querySelectorAll(".att-checkbox").length;
   const present = document.querySelectorAll(".att-checkbox:checked").length;
   document.getElementById("attCountInfo").innerText = `Total: ${total} | Present: ${present} | Absent: ${total - present}`;
-  resetAttendanceButton();
+  window.resetAttendanceButton();
 };
 
 window.saveClassAttendance = async () => {
@@ -1320,10 +1722,6 @@ window.saveClassAttendance = async () => {
   }
 };
 
-// ==========================================
-// PERFORMANCE TASKS
-// ==========================================
-
 window.resetPerfButton = () => {
   const btn = document.getElementById("btnSavePerf");
   if (btn) {
@@ -1350,10 +1748,10 @@ window.loadStudentsForPerfSheet = async () => {
   snap.forEach(d => localPerfStudentsCache.push({ id: d.id, ...d.data() }));
   localPerfStudentsCache.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
 
-  renderPerfStudentsTable(localPerfStudentsCache);
+  window.renderPerfStudentsTable(localPerfStudentsCache);
 };
 
-function renderPerfStudentsTable(students) {
+window.renderPerfStudentsTable = (students) => {
   const tbody = document.getElementById("perfTableBody");
   let html = "";
   students.forEach(s => {
@@ -1370,7 +1768,7 @@ function renderPerfStudentsTable(students) {
   tbody.innerHTML = html || `<tr><td colspan="3" class="text-center">No active students in this class.</td></tr>`;
   const selectAll = document.getElementById("selectAllPerf");
   if (selectAll) selectAll.checked = true;
-}
+};
 
 window.toggleSelectAllPerf = () => {
   const isChecked = document.getElementById("selectAllPerf").checked;
@@ -1383,7 +1781,7 @@ window.filterPerfStudents = () => {
     (s.name && s.name.toLowerCase().includes(term)) || 
     (s.regNo && s.regNo.toString().includes(term))
   );
-  renderPerfStudentsTable(filtered);
+  window.renderPerfStudentsTable(filtered);
 };
 
 window.saveBulkPerformancePoints = async () => {
@@ -1448,7 +1846,7 @@ window.saveBulkPerformancePoints = async () => {
     const searchInput = document.getElementById("perfStudentSearch");
     if (searchInput) searchInput.value = "";
     
-    loadLeaderboard();
+    window.loadLeaderboard();
   } catch (err) { 
     if (btn) {
       btn.disabled = false;
@@ -1474,7 +1872,7 @@ window.addNewCustomTask = (e) => {
   showToast("New task added.", "success");
 };
 
-async function loadLeaderboard() {
+window.loadLeaderboard = async () => {
   const q = query(collection(db, "performancePoints"), where("institutionId", "==", currentInstitutionId));
   const snap = await getDocs(q);
 
@@ -1502,11 +1900,7 @@ async function loadLeaderboard() {
     document.getElementById("starMonthName").innerText = sorted[0].name;
     document.getElementById("starMonthClass").innerText = `Class ${sorted[0].class} (${sorted[0].points} Pts)`;
   }
-}
-
-// ==========================================
-// STUDENT PROFILE / STATUS UPDATE
-// ==========================================
+};
 
 window.openStudentProfileModal = (docId) => {
   document.getElementById("studentProfileForm").reset();
@@ -1643,8 +2037,8 @@ window.saveStudentProfile = async (e) => {
     }
     
     bootstrap.Modal.getInstance(document.getElementById('studentProfileModal')).hide();
-    loadStudentsByClass(true);
-  } catch (err) { showToast("Error: " + err.message); }
+    window.loadStudentsByClass(true);
+  } catch (err) { showToast("Error: " + err.message, "error"); }
 };
 
 window.deleteStudent = async (docId, name) => {
@@ -1652,8 +2046,8 @@ window.deleteStudent = async (docId, name) => {
     try {
       await deleteDoc(doc(db, "students", docId));
       showToast("Student removed.", "success");
-      loadStudentsByClass(true);
-    } catch (err) { showToast("Error: " + err.message); }
+      window.loadStudentsByClass(true);
+    } catch (err) { showToast("Error: " + err.message, "error"); }
   }
 };
 
@@ -1680,10 +2074,10 @@ window.loadStudentsByClass = async (forceRefresh = false) => {
 
   localStudentsCache.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
   currentPage = 1;
-  renderPaginatedTable();
+  window.renderPaginatedTable();
 };
 
-function renderPaginatedTable() {
+window.renderPaginatedTable = () => {
   const tbody = document.getElementById("studentsTableBody");
   const total = localStudentsCache.length;
 
@@ -1708,11 +2102,17 @@ function renderPaginatedTable() {
       </td>` : ``;
 
     let statusBadge = s.status === 'active' ? '' : `<span class="badge bg-secondary ms-1">${s.status}</span>`;
+    let instBadge = '';
+    
+    if (isSuperAdmin) {
+       const instName = instIdToNameMap[s.institutionId] || s.institutionId;
+       instBadge = `<br><span class="badge bg-secondary" style="font-size: 0.65rem;">${instName}</span>`;
+    }
 
     html += `
       <tr>
         <td><b class="text-success">${s.regNo || '-'}</b></td>
-        <td><b>${s.name || '-'}</b> ${statusBadge}</td>
+        <td><b>${s.name || '-'}</b> ${statusBadge} ${instBadge}</td>
         <td><span class="badge bg-success">Class ${cleanClass}</span></td>
         <td>${s.fatherName || s.guardianName || '-'}</td>
         <td>${s.place || '-'}</td>
@@ -1723,10 +2123,10 @@ function renderPaginatedTable() {
   });
   tbody.innerHTML = html;
   document.getElementById("paginationInfo").innerText = `Showing ${startIndex + 1}-${endIndex} of ${total} students`;
-  renderPaginationControls(Math.ceil(total / pageSize));
-}
+  window.renderPaginationControls(Math.ceil(total / pageSize));
+};
 
-function renderPaginationControls(totalPages) {
+window.renderPaginationControls = (totalPages) => {
   const container = document.getElementById("paginationControls");
   let html = "";
   if (totalPages <= 1) { container.innerHTML = ""; return; }
@@ -1734,11 +2134,11 @@ function renderPaginationControls(totalPages) {
     html += `<li class="page-item ${i === currentPage ? 'active' : ''}"><a class="page-link" href="#" onclick="changePage(${i})">${i}</a></li>`;
   }
   container.innerHTML = html;
-}
+};
 
 window.changePage = (page) => {
   currentPage = page;
-  renderPaginatedTable();
+  window.renderPaginatedTable();
 };
 
 window.filterStudentsLocal = () => {
@@ -1748,8 +2148,10 @@ window.filterStudentsLocal = () => {
     (s.regNo && s.regNo.toString().includes(term)) ||
     (s.place && s.place.toLowerCase().includes(term))
   );
+  
   const tbody = document.getElementById("studentsTableBody");
   let html = "";
+  
   filtered.slice(0, 50).forEach(s => {
     const cleanClass = (s.currentClass || '-').replace(/Class\s*/i, "").trim();
     const actionCol = (currentUserRole === "principal" || currentUserRole === "admin" || isSuperAdmin) ? `
@@ -1758,10 +2160,16 @@ window.filterStudentsLocal = () => {
         <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${s.id}', '${s.name}')"><i class="fa-solid fa-trash"></i></button>
       </td>` : ``;
 
+    let instBadge = '';
+    if (isSuperAdmin) {
+       const instName = instIdToNameMap[s.institutionId] || s.institutionId;
+       instBadge = `<br><span class="badge bg-secondary" style="font-size: 0.65rem;">${instName}</span>`;
+    }
+
     html += `
       <tr>
         <td><b class="text-success">${s.regNo || '-'}</b></td>
-        <td><b>${s.name || '-'}</b></td>
+        <td><b>${s.name || '-'}</b> ${instBadge}</td>
         <td><span class="badge bg-success">Class ${cleanClass}</span></td>
         <td>${s.fatherName || s.guardianName || '-'}</td>
         <td>${s.place || '-'}</td>
@@ -1773,11 +2181,8 @@ window.filterStudentsLocal = () => {
   tbody.innerHTML = html || `<tr><td colspan="7" class="text-center text-muted">No matching results found.</td></tr>`;
 };
 
-// ==========================================
-// DELETE ALL STUDENTS (BULK DELETE)
-// ==========================================
 window.deleteAllStudents = async () => {
-  window.deleteAllStudentsFromDB(); // Call actual function to bypass UI binding issue in some contexts
+  window.deleteAllStudentsFromDB(); 
 };
 
 window.deleteAllStudentsFromDB = async () => {
@@ -1801,7 +2206,7 @@ window.deleteAllStudentsFromDB = async () => {
       await batch.commit();
       showToast(`${count} Students deleted successfully.`, "success");
       
-      loadStudentsByClass(true);
+      window.loadStudentsByClass(true);
       
     } catch (err) { 
       showToast("Error deleting students: " + err.message, "error"); 
@@ -1819,8 +2224,106 @@ window.promoteStudents = async () => {
     snap.forEach(d => batch.update(doc(db, "students", d.id), { currentClass: to }));
     await batch.commit();
     showToast(`Students promoted to Class ${to}.`, "success");
-    loadStudentsByClass(true);
+    window.loadStudentsByClass(true);
   }
+};
+
+window.downloadCSVFormat = () => {
+    const headers = "REG NO.,ID NO.,AADHAAR NUMBER,STUDENT NAME,GENDER,D.O.B,BLOOD GROUP,CURRENT CLASS,JOINED CLASS,JOINED DATE,PRESENCE,MONTHLY FEE,FATHER NAME,MOTHER NAME,GUARDIAN NAME,RELATION,GUARDIAN OCCUPATION,MOBILE NUMBER,EMERGENCY NUMBER,HOUSE NAME,PLACE,PO,PINCODE,DISTRICT,STATE,TRANSFERRED TO,REASON FOR LEAVING,DATE OF LEAVING,TC ISSUED,TC DETAILS,IDENTIFICATION MARKS,SPECIAL INFO\n";
+    const sampleData = "101,A123,,MUHAMMED,Male,2015-05-12,O+,1,1,2021-06-01,Regular,200,ABDULLA,FATHIMA,ABDULLA,Father,Business,9876543210,9876543211,HOUSE NAME,CALICUT,CALICUT PO,673001,KOZHIKODE,KERALA,,,,,,,,None,\n";
+    const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(headers + sampleData);
+    
+    const link = document.createElement("a");
+    link.setAttribute("href", csvContent);
+    link.setAttribute("download", "student_bulk_import_format.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+};
+
+window.handleBulkUpload = () => {
+  const fileInput = document.getElementById("csvFileInput");
+  const statusDiv = document.getElementById("bulkStatus");
+  if (!fileInput.files.length) return showToast("Please select a CSV file.", "warning");
+
+  statusDiv.classList.remove("d-none");
+  statusDiv.className = "alert alert-info";
+  statusDiv.innerText = "Analyzing file...";
+
+  Papa.parse(fileInput.files[0], {
+    header: true,
+    skipEmptyLines: true,
+    complete: async (results) => {
+      const rows = results.data;
+      try {
+        const batch = writeBatch(db);
+        rows.forEach((row) => {
+          const newStudentRef = doc(collection(db, "students"));
+          const regNum = parseInt(row["REG NO."] || 0, 10);
+          
+          batch.set(newStudentRef, {
+            institutionId: currentInstitutionId,
+            regNo: isNaN(regNum) ? 0 : regNum,
+            idNo: (row["ID NO."] || "").toUpperCase(),
+            aadhaar: row["AADHAAR NUMBER"] || row["AADHAAR"] || "",
+            name: (row["STUDENT NAME"] || row["NAME"] || "").toUpperCase(),
+            gender: row["GENDER"] || "Male",
+            dob: row["D.O.B"] || "",
+            bloodGroup: row["BLOOD GROUP"] || "",
+            
+            currentClass: (row["CURRENT CLASS"] || "1").replace(/Class\s*/i, "").trim(),
+            joinedClass: (row["JOINED CLASS"] || "").toUpperCase(),
+            joinedDate: row["JOINED DATE"] || "",
+            presence: (row["PRESENCE"] || "").toUpperCase(),
+            monthlyFeeAmount: Number(row["MONTHLY FEE"]) || 0,
+
+            fatherName: (row["FATHER NAME"] || "").toUpperCase(),
+            motherName: (row["MOTHER NAME"] || "").toUpperCase(),
+            guardianName: (row["GUARDIAN NAME"] || "").toUpperCase(),
+            relation: (row["RELATION"] || "").toUpperCase(),
+            guardianOccupation: (row["GUARDIAN OCCUPATION"] || "").toUpperCase(),
+            phone: row["MOBILE NUMBER"] || row["MOBILE NO"] || row["PHONE"] || "",
+            emergencyPhone: row["EMERGENCY NUMBER"] || row["EMERGENCY NO"] || "",
+
+            houseName: (row["HOUSE NAME"] || row["ADDRESS"] || "").toUpperCase(),
+            place: (row["PLACE"] || "").toUpperCase(),
+            postOffice: (row["PO"] || "").toUpperCase(),
+            pincode: row["PINCODE"] || "",
+            district: (row["DISTRICT"] || "").toUpperCase(),
+            state: (row["STATE"] || "KERALA").toUpperCase(),
+
+            transferredTo: (row["TRANSFERRED TO"] || "").toUpperCase(),
+            reasonLeaving: (row["REASON FOR LEAVING"] || "").toUpperCase(),
+            dateOfLeaving: row["DATE OF LEAVING"] || "",
+            tcIssued: row["TC ISSUED"] || row["TC ISSUED(Yes/No)"] || "No",
+            tcDetails: (row["TC DETAILS"] || "").toUpperCase(),
+
+            identificationMarks: (row["IDENTIFICATION MARKS"] || "").toUpperCase(),
+            specialInfo: (row["SPECIAL INFO"] || "").toUpperCase(),
+            
+            status: "active",
+            createdAt: serverTimestamp()
+          });
+        });
+
+        await batch.commit();
+        statusDiv.className = "alert alert-success";
+        statusDiv.innerText = `Successfully imported ${rows.length} students!`;
+        
+        setTimeout(() => {
+            bootstrap.Modal.getInstance(document.getElementById('bulkImportModal')).hide();
+            window.loadStudentsByClass(true);
+            fileInput.value = "";
+            statusDiv.classList.add("d-none");
+        }, 1500);
+
+      } catch (err) {
+        statusDiv.className = "alert alert-danger";
+        statusDiv.innerText = "Error: " + err.message;
+        showToast("Error importing data", "error");
+      }
+    }
+  });
 };
 
 window.showSignupForm = (type) => {
@@ -1863,9 +2366,9 @@ window.showTab = (tabId) => {
     if (offcanvasInstance) offcanvasInstance.hide();
   }
 
-  if (tabId === 'studentsListTab') loadStudentsByClass();
+  if (tabId === 'studentsListTab') window.loadStudentsByClass();
   if (tabId === 'instAdminTab') window.loadPrincipalsList();
-  if (tabId === 'homeDashboardTab') loadLeaderboard();
+  if (tabId === 'homeDashboardTab') window.loadLeaderboard();
   if (tabId === 'superAdminTab') window.loadSuperAdminRequests();
   if (tabId === 'subjectSettingsTab') window.loadClassSubjectSettings();
 };
