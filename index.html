@@ -119,6 +119,35 @@
     .month-paid { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
     .month-pending { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
 
+    /* Modern Floating Toast Notification */
+    #appToastContainer {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 10000;
+    }
+    .modern-toast {
+      background: #0f172a;
+      color: #fff;
+      border-radius: 12px;
+      padding: 14px 20px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      min-width: 280px;
+      animation: toastSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .modern-toast.success { background: #065f46; border-left: 5px solid #10b981; }
+    .modern-toast.error { background: #991b1b; border-left: 5px solid #ef4444; }
+    .modern-toast.warning { background: #92400e; border-left: 5px solid #f59e0b; }
+    @keyframes toastSlideUp {
+      from { transform: translateY(30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
     @media print {
       body * { visibility: hidden; }
       #printableReceipt, #printableReceipt * { visibility: visible; }
@@ -128,12 +157,8 @@
 </head>
 <body>
 
-  <!-- Language Switcher Bar -->
-  <div class="d-flex justify-content-end p-2 px-3 bg-white border-bottom">
-    <button class="btn btn-sm btn-outline-success d-flex align-items-center gap-1" onclick="toggleLanguage()">
-      <i class="fa-solid fa-language"></i> <span id="langSwitchLabel">മലയാളം</span>
-    </button>
-  </div>
+  <!-- Toast Container -->
+  <div id="appToastContainer"></div>
 
   <!-- Unified Auth Screen -->
   <div id="authSection" class="auth-wrapper">
@@ -194,9 +219,11 @@
           </div>
       </div>
 
+      <!-- Madrasa Sign Up Form -->
       <form id="signupForm" class="d-none" onsubmit="handleSignUp(event)">
         <button type="button" class="btn btn-sm btn-link text-decoration-none mb-3 p-0" onclick="switchAuthTab('signup')"><i class="fa-solid fa-arrow-left"></i> Back</button>
         <div class="alert alert-warning py-2 small">New registrations require Developer / Super Admin approval before activation.</div>
+        
         <div class="mb-2">
             <label class="form-label small fw-semibold">Board of Education</label>
             <select id="regBoard" class="form-select" required>
@@ -270,6 +297,7 @@
         <button type="submit" id="btnSubmitSignup" class="btn btn-primary-custom w-100">Submit for Approval</button>
       </form>
 
+      <!-- Staff Signup Form -->
       <form id="staffSignupForm" class="d-none" onsubmit="handleStaffSignUp(event)">
         <button type="button" class="btn btn-sm btn-link text-decoration-none mb-3 p-0" onclick="switchAuthTab('signup')"><i class="fa-solid fa-arrow-left"></i> Back</button>
         <div class="alert alert-info py-2 small">Registration requires approval from the Institution Admin/Principal.</div>
@@ -374,7 +402,7 @@
     </div>
   </div>
 
-  <!-- Main Management App Screen -->
+  <!-- Main App Screen -->
   <div id="appSection" class="d-none">
     <nav class="navbar navbar-dark bg-madrassa shadow-sm sticky-top">
       <div class="container-fluid px-3">
@@ -423,8 +451,6 @@
 
         <!-- Content Area -->
         <div class="col-lg-10">
-
-          <!-- 0. Super Admin Master Console -->
           <div id="superAdminTab" class="content-tab d-none">
             <div class="card p-4">
               <div class="d-flex justify-content-between align-items-center mb-3">
@@ -589,7 +615,7 @@
             </div>
           </div>
 
-          <!-- Subject Settings Tab (For Principal / Admin) -->
+          <!-- Subject Settings Tab -->
           <div id="subjectSettingsTab" class="content-tab d-none">
             <div class="card p-4">
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-book"></i> Class Subjects Configuration</h5>
@@ -649,7 +675,7 @@
             </div>
           </div>
 
-          <!-- Fees Tab with Grid and Tables -->
+          <!-- Fees Tab -->
           <div id="feesTab" class="content-tab d-none">
              <div class="card p-4">
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-receipt"></i> Fee Collection & Receipt</h5>
