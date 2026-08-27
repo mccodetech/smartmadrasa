@@ -124,42 +124,46 @@ window.openStaffProfileModal = (staffId = null) => {
 // സ്റ്റാഫിനെ അപ്രൂവ് ചെയ്യുമ്പോൾ ക്ലാസ് അസൈൻ ചെയ്യുന്ന ഫോം കാണിക്കാൻ
 window.prepareApproveStaff = (userId, name, role) => {
   const form = document.getElementById("instAssignClassesForm");
-  const idInput = document.getElementById("instAssignStaffid");
+  const idInput = document.getElementById("instAssignStaffId") || document.getElementById("instAssignStaffid");
   const nameDisplay = document.getElementById("instAssignStaffNameDisplay");
   
   if (idInput) idInput.value = userId;
   if (nameDisplay) nameDisplay.innerText = `${name} (${role})`;
   if (form) form.classList.remove("d-none");
 
-  const container = document.getElementById("instClassAssignDiv") || document.getElementById("instAssignClassContainer");
-  if (container) {
-    let html = `<label class="form-label fw-bold">Assign Classes:</label><div class="d-flex flex-wrap gap-2">`;
-    const classes = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
-    classes.forEach(c => {
-      html += `
-        <div class="form-check form-check-inline">
-          <input class="form-check-input staff-class-cb" type="checkbox" value="${c}" id="staffClass_${c}">
-          <label class="form-check-label" for="staffClass_${c}">Class ${c}</label>
-        </div>
-      `;
-    });
-    html += `</div>`;
-    container.innerHTML = html;
-  }
+  // യൂസറുടെ നിലവിലുള്ള ക്ലാസുകൾ ഫെച്ച് ചെയ്ത് ചെക്ക്ബോക്സ് ടിക്ക് ചെയ്യാൻ
+  getDoc(doc(db, "users", userId)).then(docSnap => {
+    if (docSnap.exists()) {
+      const userData = docSnap.data();
+      const assigned = userData.assignedClasses || [];
+      
+      document.querySelectorAll(".inst-approve-class-cb, .staff-class-cb").forEach(cb => {
+        cb.checked = assigned.includes(cb.value);
+      });
+    }
+  }).catch(err => {
+    console.error("Error fetching staff classes:", err);
+  });
 };
 
 // ക്ലാസുകൾ സഹിതം സ്റ്റാഫിന്റെ അപ്രൂവൽ സേവ് ചെയ്യാൻ
-window.saveAssignedClassesAndApprove = async (e) => {
-  e.preventDefault();
-  const userId = document.getElementById("instAssignStaffid")?.value;
-  if (!userId) return window.showToast("No staff selected.", "error");
+window.instAssignClassesToStaff = async (e) => {
+  if (e) e.preventDefault();
+  
+  const userId = document.getElementById("instAssignStaffId")?.value || document.getElementById("instAssignStaffid")?.value;
+  if (!userId) {
+    window.showToast("No staff selected for approval.", "error");
+    return;
+  }
 
-  const selectedClasses = Array.from(document.querySelectorAll(".staff-class-cb:checked")).map(cb => cb.value);
+  const selectedClasses = Array.from(document.querySelectorAll(".inst-approve-class-cb:checked, .staff-class-cb:checked"))
+    .map(cb => cb.value);
 
   try {
     await updateDoc(doc(db, "users", userId), {
       status: "active",
-      assignedClasses: selectedClasses
+      assignedClasses: selectedClasses,
+      updatedAt: serverTimestamp()
     });
 
     window.showToast("Staff approved and classes assigned successfully!", "success");
@@ -182,7 +186,6 @@ window.loadPrincipalsList = async () => {
   }
 
   try {
-    // ഇൻഡക്സ് പ്രശ്നങ്ങൾ വരാതിരിക്കാൻ institutionId മാത്രം വെച്ച് ക്വറി ചെയ്യുന്നു
     const q = query(collection(db, "users"), where("institutionId", "==", currentInstitutionId));
     const snap = await getDocs(q);
 
@@ -234,11 +237,11 @@ window.loadPrincipalsList = async () => {
       }
     }
 
-    const tableBody = document.getElementById("staffTableBody") || document.querySelector("table tbody");
+    const tableBody = document.getElementById("staffTableBody") || document.getElementById("principalsTableBody") || document.querySelector("table tbody");
     if (tableBody) {
       tableBody.innerHTML = html || `<tr><td colspan="5" class="text-center text-muted">No staff or principals found for this institution.</td></tr>`;
     }
-  }	catch (e) {
+  } catch (e) {
     console.error("Error loading staff list:", e);
     window.showToast("Error loading staff list: " + e.message, "error");
   }
