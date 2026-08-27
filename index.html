@@ -345,211 +345,142 @@
     </div>
   </div>
 
-  <!-- Parent View Dashboard -->
-  <div id="parentViewSection" class="d-none">
-    <nav class="navbar navbar-expand-lg bg-madrassa navbar-dark shadow-sm">
-      <div class="container px-4">
-        <a class="navbar-brand fw-bold" href="#"><i class="fa-solid fa-kaaba me-2"></i><span id="parentInstNameDisplay">Smart Madrasa</span></a>
-        <button class="btn btn-outline-light btn-sm" onclick="logoutParent()"><i class="fa-solid fa-right-from-bracket"></i> Exit</button>
-      </div>
-    </nav>
-    <div class="container py-4">
-        <div class="row mb-3"><div class="col-12"><select id="parentStudentSelect" class="form-select" onchange="switchParentStudent()"></select></div></div>
-      <div class="row g-4">
-        <div class="col-md-4">
-          <div class="card p-4 text-center">
-            <i class="fa-solid fa-user-graduate fa-4x text-success mb-3"></i>
-            <h4 class="fw-bold mb-1" id="pvStudentName">-</h4>
-            <span class="badge bg-success mb-2" id="pvClass">-</span>
-            <p class="text-muted mb-0">Reg No: <b id="pvRegNo">-</b></p>
-            <p class="text-muted small">Father: <span id="pvFather">-</span></p>
-            <div class="border-top pt-3 mt-2">
-              <h6>Total Points</h6>
-              <h3 class="fw-bold text-warning mb-0" id="pvTotalPoints">0 Pts</h3>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-8">
-          <div class="card p-4 mb-4">
-            <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-calendar-days me-2"></i>Academic Fee Status</h5>
-            <div id="pvFeeMonthGrid" class="month-grid mb-3"></div>
-            <div class="table-responsive">
-              <table class="table table-bordered align-middle">
-                <thead class="table-light"><tr><th>Receipt No</th><th>Date</th><th>Month/Item</th><th>Amount</th></tr></thead>
-                <tbody id="pvFeeTableBody"><tr><td colspan="4" class="text-center text-muted">No fee records found</td></tr></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+  <div class="container-fluid px-3 px-md-4 py-4">
+     <div class="row">
+       <!-- Desktop Sidebar -->
+       <div class="col-lg-2 d-none d-lg-block mb-4">
+         <div class="card p-3">
+           <div class="nav flex-column nav-pills gap-1" id="desktopTabMenu">
+             <button class="nav-link active text-start" id="homeMenuBtn" onclick="showTab('homeDashboardTab')"><i class="fa-solid fa-house me-2"></i> Home</button>
+             <button class="nav-link text-start d-none" id="superAdminMasterBtn" onclick="showTab('superAdminTab')"><i class="fa-solid fa-shield-halved me-2"></i> All Madrasas</button>
+             <button class="nav-link text-start d-none" id="instAdminStaffBtn" onclick="showTab('instAdminTab'); loadPrincipalsList();"><i class="fa-solid fa-user-tie me-2"></i> Manage Staff</button>
+             <button class="nav-link text-start d-none" id="studentsMenuBtn" onclick="showTab('studentsListTab')"><i class="fa-solid fa-users me-2"></i> Students</button>
+             <button class="nav-link text-start d-none" id="attendanceMenuBtn" onclick="showTab('attendanceTab')"><i class="fa-solid fa-calendar-check me-2"></i> Attendance</button>
+             <button class="nav-link text-start d-none" id="marksMenuBtn" onclick="showTab('marksTab')"><i class="fa-solid fa-award me-2"></i> Marks Entry</button>
+             <button class="nav-link text-start d-none" id="performanceMenuBtn" onclick="showTab('performanceTab')"><i class="fa-solid fa-star me-2"></i> Performance</button>
+             <button class="nav-link text-start d-none" id="feesMenuBtn" onclick="showTab('feesTab')"><i class="fa-solid fa-receipt me-2"></i> Fees & Receipts</button>
+             <button class="nav-link text-start d-none" id="subjectSettingsBtn" onclick="showTab('subjectSettingsTab')"><i class="fa-solid fa-book me-2"></i> Subject Settings</button>
+             <button class="nav-link text-start d-none" id="feeSettingsBtn" onclick="showTab('feeSettingsTab')"><i class="fa-solid fa-gear me-2"></i> Fee Settings</button>
+             <button class="nav-link text-start d-none" id="promotionMenuBtn" onclick="showTab('promotionTab')"><i class="fa-solid fa-graduation-cap me-2"></i> Class Promotion</button>
+             
+             <!-- Settings ബട്ടൺ -->
+             <button class="nav-link text-start d-none" id="settingsMenuBtn" onclick="showTab('settingsTab'); loadInstitutionSettings();"><i class="fa-solid fa-gears me-2"></i> Settings</button>
+           </div>
+         </div>
+       </div>
 
-  <!-- Main App Screen -->
-  <div id="appSection" class="d-none">
-    <nav class="navbar navbar-dark bg-madrassa shadow-sm sticky-top py-2">
-      <div class="container-fluid top-header-bar px-2 px-md-3">
-        <div class="d-flex align-items-center gap-2">
-          <button class="btn btn-outline-light btn-sm d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas"><i class="fa-solid fa-bars"></i></button>
-          <a class="navbar-brand fw-bold m-0 d-flex align-items-center gap-2 top-brand-text" href="#" onclick="showTab('homeDashboardTab')"><i class="fa-solid fa-kaaba"></i> <span id="displayMadrassaName">Smart Madrasa</span></a>
-        </div>
-        <div class="d-flex align-items-center gap-2 text-white">
-          <button class="btn btn-sm btn-outline-warning d-none" id="superAdminBackBtn" onclick="returnToSuperAdminConsole()"><i class="fa-solid fa-arrow-left me-1"></i> Console</button>
-          <span class="badge bg-light text-dark d-none d-md-inline-block" id="displayUserRole">Admin</span>
-          <button class="btn btn-outline-light btn-sm" onclick="handleLogout()"><i class="fa-solid fa-right-from-bracket me-md-1"></i> <span class="d-none d-md-inline-block">Logout</span></button>
-        </div>
-      </div>
-    </nav>
+       <!-- Content Area (ഇതുപോലെ ഒരൊറ്റ row-ന്റെ ഉള്ളിലാണ് എല്ലാ ടാബുകളും വരേണ്ടത്) -->
+       <div class="col-lg-10">
+         <div id="superAdminTab" class="content-tab d-none">
+           <div class="card p-4">
+             <div class="d-flex justify-content-between align-items-center mb-3">
+               <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-shield-halved me-2"></i>Madrasa Master Console</h5>
+               <button class="btn btn-sm btn-outline-success" onclick="loadSuperAdminRequests()"><i class="fa-solid fa-rotate"></i> Reload</button>
+             </div>
+             <div class="table-responsive">
+               <table class="table table-hover table-bordered align-middle">
+                 <thead class="table-light"><tr><th>Inst. ID</th><th>Madrasa Name</th><th>Place</th><th>Admin Name</th><th class="text-center">Staff</th><th class="text-center">Students</th><th>Status</th><th class="text-center">Actions</th></tr></thead>
+                 <tbody id="superAdminTableBody"></tbody>
+               </table>
+             </div>
+           </div>
+         </div>
 
-    <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarOffcanvas">
-      <div class="offcanvas-header bg-madrassa text-white">
-        <h5 class="offcanvas-title fw-bold"><i class="fa-solid fa-kaaba me-2"></i> Menu</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
-      </div>
-      <div class="offcanvas-body p-3">
-        <div class="nav flex-column nav-pills gap-1" id="mobileTabMenu"></div>
-      </div>
-    </div>
+         <div id="instAdminTab" class="content-tab d-none">
+           <div class="card p-4">
+             <div class="d-flex justify-content-between align-items-center mb-3">
+                 <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-user-tie me-2"></i> Manage Principals & Staff</h5>
+                 <button class="btn btn-sm btn-outline-success" onclick="openStaffProfileModal(null)"><i class="fa-solid fa-plus me-1"></i> Add Staff / Principal</button>
+             </div>
+             <div id="instPendingStaffSection" class="mb-4 d-none">
+                 <h6 class="fw-bold text-warning mb-2"><i class="fa-solid fa-clock me-1"></i> Pending Approvals</h6>
+                 <div class="table-responsive">
+                     <table class="table table-bordered align-middle table-warning">
+                         <thead><tr><th>Name</th><th>Role</th><th>Email</th><th>Phone</th><th class="text-center" style="width:120px;">Action</th></tr></thead>
+                         <tbody id="instPendingStaffTableBody"></tbody>
+                     </table>
+                 </div>
+             </div>
+             <form id="instAssignClassesForm" onsubmit="instAssignClassesToStaff(event)" class="mb-4 d-none border p-3 rounded bg-light">
+               <input type="hidden" id="instAssignStaffId"><input type="hidden" id="instAssignStaffRole">
+               <h6 class="fw-bold text-primary mb-2">Approve <span id="instAssignStaffNameDisplay"></span></h6>
+               <div class="row g-3 align-items-end">
+                 <div class="col-md-6" id="instClassAssignDiv">
+                   <label class="form-label fw-bold">Assign Classes</label>
+                   <div class="d-flex flex-wrap gap-2">
+                     <div class="form-check"><input type="checkbox" class="form-check-input inst-approve-class-cb" value="1" id="iac1"><label class="form-check-label" for="iac1">Class 1</label></div>
+                     <div class="form-check"><input type="checkbox" class="form-check-input inst-approve-class-cb" value="2" id="iac2"><label class="form-check-label" for="iac2">Class 2</label></div>
+                     <div class="form-check"><input type="checkbox" class="form-check-input inst-approve-class-cb" value="3" id="iac3"><label class="form-check-label" for="iac3">Class 3</label></div>
+                     <div class="form-check"><input type="checkbox" class="form-check-input inst-approve-class-cb" value="4" id="iac4"><label class="form-check-label" for="iac4">Class 4</label></div>
+                     <div class="form-check"><input type="checkbox" class="form-check-input inst-approve-class-cb" value="5" id="iac5"><label class="form-check-label" for="iac5">Class 5</label></div>
+                     <div class="form-check"><input type="checkbox" class="form-check-input inst-approve-class-cb" value="6" id="iac6"><label class="form-check-label" for="iac6">Class 6</label></div>
+                     <div class="form-check"><input type="checkbox" class="form-check-input inst-approve-class-cb" value="7" id="iac7"><label class="form-check-label" for="iac7">Class 7</label></div>
+                     <div class="form-check"><input type="checkbox" class="form-check-input inst-approve-class-cb" value="8" id="iac8"><label class="form-check-label" for="iac8">Class 8</label></div>
+                     <div class="form-check"><input type="checkbox" class="form-check-input inst-approve-class-cb" value="9" id="iac9"><label class="form-check-label" for="iac9">Class 9</label></div>
+                     <div class="form-check"><input type="checkbox" class="form-check-input inst-approve-class-cb" value="10" id="iac10"><label class="form-check-label" for="iac10">Class 10</label></div>
+                     <div class="form-check"><input type="checkbox" class="form-check-input inst-approve-class-cb" value="11" id="iac11"><label class="form-check-label" for="iac11">Class 11</label></div>
+                     <div class="form-check"><input type="checkbox" class="form-check-input inst-approve-class-cb" value="12" id="iac12"><label class="form-check-label" for="iac12">Class 12</label></div>
+                   </div>
+                 </div>
+                 <div class="col-md-6 text-end">
+                     <button type="button" class="btn btn-secondary me-2" onclick="document.getElementById('instAssignClassesForm').classList.add('d-none');">Cancel</button>
+                     <button type="submit" class="btn btn-success"><i class="fa-solid fa-check me-1"></i> Confirm</button>
+                 </div>
+               </div>
+             </form>
+             <h6 class="fw-bold mt-4 mb-2">Assigned Staff & Principals</h6>
+             <div class="table-responsive">
+               <table class="table table-bordered align-middle">
+                 <thead class="table-light"><tr><th>Name</th><th>Role</th><th>Email</th><th>Phone</th><th class="text-center">Action</th></tr></thead>
+                 <tbody id="staffTableBody"></tbody>
+               </table>
+             </div>
+           </div>
+         </div>
 
-   <div class="container-fluid px-3 px-md-4 py-4">
-  <div class="row">
-    <!-- Desktop Sidebar -->
-    <div class="col-lg-2 d-none d-lg-block mb-4">
-      <div class="card p-3">
-        <div class="nav flex-column nav-pills gap-1" id="desktopTabMenu">
-          <button class="nav-link active text-start" id="homeMenuBtn" onclick="showTab('homeDashboardTab')"><i class="fa-solid fa-house me-2"></i> Home</button>
-          <button class="nav-link text-start d-none" id="superAdminMasterBtn" onclick="showTab('superAdminTab')"><i class="fa-solid fa-shield-halved me-2"></i> All Madrasas</button>
-          <button class="nav-link text-start d-none" id="instAdminStaffBtn" onclick="showTab('instAdminTab'); loadPrincipalsList();"><i class="fa-solid fa-user-tie me-2"></i> Manage Staff</button>
-          <button class="nav-link text-start d-none" id="studentsMenuBtn" onclick="showTab('studentsListTab')"><i class="fa-solid fa-users me-2"></i> Students</button>
-          <button class="nav-link text-start d-none" id="attendanceMenuBtn" onclick="showTab('attendanceTab')"><i class="fa-solid fa-calendar-check me-2"></i> Attendance</button>
-          <button class="nav-link text-start d-none" id="marksMenuBtn" onclick="showTab('marksTab')"><i class="fa-solid fa-award me-2"></i> Marks Entry</button>
-          <button class="nav-link text-start d-none" id="performanceMenuBtn" onclick="showTab('performanceTab')"><i class="fa-solid fa-star me-2"></i> Performance</button>
-          <button class="nav-link text-start d-none" id="feesMenuBtn" onclick="showTab('feesTab')"><i class="fa-solid fa-receipt me-2"></i> Fees & Receipts</button>
-          <button class="nav-link text-start d-none" id="subjectSettingsBtn" onclick="showTab('subjectSettingsTab')"><i class="fa-solid fa-book me-2"></i> Subject Settings</button>
-          <button class="nav-link text-start d-none" id="feeSettingsBtn" onclick="showTab('feeSettingsTab')"><i class="fa-solid fa-gear me-2"></i> Fee Settings</button>
-          <button class="nav-link text-start d-none" id="promotionMenuBtn" onclick="showTab('promotionTab')"><i class="fa-solid fa-graduation-cap me-2"></i> Class Promotion</button>
-          
-          <!-- Settings ബട്ടൺ -->
-          <button class="nav-link text-start d-none" id="settingsMenuBtn" onclick="showTab('settingsTab'); loadInstitutionSettings();"><i class="fa-solid fa-gears me-2"></i> Settings</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-        <!-- Content Area -->
-        <div class="col-lg-10">
-          <div id="superAdminTab" class="content-tab d-none">
-            <div class="card p-4">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-shield-halved me-2"></i>Madrasa Master Console</h5>
-                <button class="btn btn-sm btn-outline-success" onclick="loadSuperAdminRequests()"><i class="fa-solid fa-rotate"></i> Reload</button>
-              </div>
-              <div class="table-responsive">
-                <table class="table table-hover table-bordered align-middle">
-                  <thead class="table-light"><tr><th>Inst. ID</th><th>Madrasa Name</th><th>Place</th><th>Admin Name</th><th class="text-center">Staff</th><th class="text-center">Students</th><th>Status</th><th class="text-center">Actions</th></tr></thead>
-                  <tbody id="superAdminTableBody"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
+         <div id="homeDashboardTab" class="content-tab">
+           <div class="row g-3 mb-4">
+               <div class="col-md-4"><div class="card p-4 text-center dashboard-card border-start border-4 border-success" onclick="showTab('attendanceTab')"><i class="fa-solid fa-calendar-check fa-3x text-success mb-2"></i><h5 class="fw-bold">Attendance</h5><p class="text-muted small m-0">Record daily attendance</p></div></div>
+               <div class="col-md-4"><div class="card p-4 text-center dashboard-card border-start border-4 border-warning" onclick="showTab('performanceTab')"><i class="fa-solid fa-star fa-3x text-warning mb-2"></i><h5 class="fw-bold">Performance Board</h5><p class="text-muted small m-0">Tasks & Star Points</p></div></div>
+               <div class="col-md-4"><div class="card p-4 text-center dashboard-card border-start border-4 border-primary" onclick="showTab('marksTab')"><i class="fa-solid fa-award fa-3x text-primary mb-2"></i><h5 class="fw-bold">Marks Entry</h5><p class="text-muted small m-0">Exam scores & evaluations</p></div></div>
+           </div>
+           <div class="card p-4">
+             <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-trophy me-2"></i>Top Performers Leaderboard</h5>
+             <div class="row g-3 text-center" id="homeLeaderboardArea">
+               <div class="col-md-4"><div class="card p-3 bg-light"><span class="star-badge mb-2 d-inline-block">Today's Star</span><h5 class="fw-bold mt-2" id="starTodayName">-</h5><small class="text-muted" id="starTodayClass">-</small></div></div>
+               <div class="col-md-4"><div class="card p-3 bg-light"><span class="star-badge mb-2 d-inline-block">Weekly Star</span><h5 class="fw-bold mt-2" id="starWeekName">-</h5><small class="text-muted" id="starWeekClass">-</small></div></div>
+               <div class="col-md-4"><div class="card p-3 bg-light"><span class="star-badge mb-2 d-inline-block">Monthly Star</span><h5 class="fw-bold mt-2" id="starMonthName">-</h5><small class="text-muted" id="starMonthClass">-</small></div></div>
+             </div>
+           </div>
+         </div>
 
-          <div id="instAdminTab" class="content-tab d-none">
-            <div class="card p-4">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                  <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-user-tie"></i> Manage Principals & Staff</h5>
-                  <button class="btn btn-sm btn-outline-success" onclick="openStaffProfileModal(null)"><i class="fa-solid fa-plus me-1"></i> Add Staff / Principal</button>
-              </div>
-              <div id="instPendingStaffSection" class="mb-4 d-none">
-                  <h6 class="fw-bold text-warning mb-2"><i class="fa-solid fa-clock me-1"></i> Pending Approvals</h6>
-                  <div class="table-responsive">
-                      <table class="table table-bordered align-middle table-warning">
-                          <thead><tr><th>Name</th><th>Role</th><th>Email</th><th>Phone</th><th class="text-center" style="width:120px;">Action</th></tr></thead>
-                          <tbody id="instPendingStaffTableBody"></tbody>
-                      </table>
-                  </div>
-              </div>
-              <form id="instAssignClassesForm" onsubmit="instAssignClassesToStaff(event)" class="mb-4 d-none border p-3 rounded bg-light">
-                <input type="hidden" id="instAssignStaffId"><input type="hidden" id="instAssignStaffRole">
-                <h6 class="fw-bold text-primary mb-2">Approve <span id="instAssignStaffNameDisplay"></span></h6>
-                <div class="row g-3 align-items-end">
-                  <div class="col-md-6" id="instClassAssignDiv">
-                    <label class="form-label fw-bold">Assign Classes</label>
-                    <div class="d-flex flex-wrap gap-2">
-                      <div class="form-check"><input type="checkbox" class="form-check-input inst-approve-class-cb" value="1" id="iac1"><label class="form-check-label" for="iac1">Class 1</label></div>
-                      <div class="form-check"><input type="checkbox" class="form-check-input inst-approve-class-cb" value="2" id="iac2"><label class="form-check-label" for="iac2">Class 2</label></div>
-                      <div class="form-check"><input type="checkbox" class="form-check-input inst-approve-class-cb" value="3" id="iac3"><label class="form-check-label" for="iac3">Class 3</label></div>
-                      <div class="form-check"><input type="checkbox" class="form-check-input inst-approve-class-cb" value="4" id="iac4"><label class="form-check-label" for="iac4">Class 4</label></div>
-                      <div class="form-check"><input type="checkbox" class="form-check-input inst-approve-class-cb" value="5" id="iac5"><label class="form-check-label" for="iac5">Class 5</label></div>
-                      <div class="form-check"><input type="checkbox" class="form-check-input inst-approve-class-cb" value="6" id="iac6"><label class="form-check-label" for="iac6">Class 6</label></div>
-                      <div class="form-check"><input type="checkbox" class="form-check-input inst-approve-class-cb" value="7" id="iac7"><label class="form-check-label" for="iac7">Class 7</label></div>
-                      <div class="form-check"><input type="checkbox" class="form-check-input inst-approve-class-cb" value="8" id="iac8"><label class="form-check-label" for="iac8">Class 8</label></div>
-                      <div class="form-check"><input type="checkbox" class="form-check-input inst-approve-class-cb" value="9" id="iac9"><label class="form-check-label" for="iac9">Class 9</label></div>
-                      <div class="form-check"><input type="checkbox" class="form-check-input inst-approve-class-cb" value="10" id="iac10"><label class="form-check-label" for="iac10">Class 10</label></div>
-                      <div class="form-check"><input type="checkbox" class="form-check-input inst-approve-class-cb" value="11" id="iac11"><label class="form-check-label" for="iac11">Class 11</label></div>
-                      <div class="form-check"><input type="checkbox" class="form-check-input inst-approve-class-cb" value="12" id="iac12"><label class="form-check-label" for="iac12">Class 12</label></div>
-                    </div>
-                  </div>
-                  <div class="col-md-6 text-end">
-                      <button type="button" class="btn btn-secondary me-2" onclick="document.getElementById('instAssignClassesForm').classList.add('d-none');">Cancel</button>
-                      <button type="submit" class="btn btn-success"><i class="fa-solid fa-check me-1"></i> Confirm</button>
-                  </div>
-                </div>
-              </form>
-              <h6 class="fw-bold mt-4 mb-2">Assigned Staff & Principals</h6>
-              <div class="table-responsive">
-                <table class="table table-bordered align-middle">
-                  <thead class="table-light"><tr><th>Name</th><th>Role</th><th>Email</th><th>Phone</th><th class="text-center">Action</th></tr></thead>
-                  <tbody id="principalsTableBody"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
+         <div id="studentsListTab" class="content-tab d-none">
+           <div class="card p-4">
+             <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+               <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-users"></i> Student Directory</h5>
+               <div class="d-flex gap-2" id="adminStudentActions">
+                 <button class="btn btn-sm btn-success" onclick="openStudentProfileModal(null)"><i class="fa-solid fa-user-plus me-1"></i> New Admission</button>
+                 <button class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#bulkImportModal"><i class="fa-solid fa-file-csv me-1"></i> Bulk Import</button>
+                 <button class="btn btn-sm btn-outline-danger" onclick="deleteAllStudents()"><i class="fa-solid fa-trash-can me-1"></i> Delete All</button>
+               </div>
+             </div>
+             <div class="row g-2 align-items-center mb-3">
+               <div class="col-md-4"><select id="filterClassSelect" class="form-select form-select-sm" onchange="loadStudentsByClass()"></select></div>
+               <div class="col-md-6"><input type="text" id="searchBox" class="form-control form-control-sm" placeholder="Search by name or Reg No..." oninput="filterStudentsLocal()"></div>
+               <div class="col-md-2 text-end"><button class="btn btn-sm btn-outline-success w-100" onclick="loadStudentsByClass(true)"><i class="fa-solid fa-rotate"></i> Reload</button></div>
+             </div>
+             <div class="table-responsive">
+               <table class="table table-hover table-bordered align-middle">
+                 <thead><tr><th>#</th><th>Reg No</th><th>Name</th><th>Class</th><th>Parent / Guardian</th><th>Place</th><th>Phone</th><th class="text-center">Actions</th></tr></thead>
+                 <tbody id="studentsTableBody"></tbody>
+               </table>
+             </div>
+           </div>
+         </div>
 
-          <div id="homeDashboardTab" class="content-tab">
-            <div class="row g-3 mb-4">
-                <div class="col-md-4"><div class="card p-4 text-center dashboard-card border-start border-4 border-success" onclick="showTab('attendanceTab')"><i class="fa-solid fa-calendar-check fa-3x text-success mb-2"></i><h5 class="fw-bold">Attendance</h5><p class="text-muted small m-0">Record daily attendance</p></div></div>
-                <div class="col-md-4"><div class="card p-4 text-center dashboard-card border-start border-4 border-warning" onclick="showTab('performanceTab')"><i class="fa-solid fa-star fa-3x text-warning mb-2"></i><h5 class="fw-bold">Performance Board</h5><p class="text-muted small m-0">Tasks & Star Points</p></div></div>
-                <div class="col-md-4"><div class="card p-4 text-center dashboard-card border-start border-4 border-primary" onclick="showTab('marksTab')"><i class="fa-solid fa-award fa-3x text-primary mb-2"></i><h5 class="fw-bold">Marks Entry</h5><p class="text-muted small m-0">Exam scores & evaluations</p></div></div>
-            </div>
-            <div class="card p-4">
-              <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-trophy me-2"></i>Top Performers Leaderboard</h5>
-              <div class="row g-3 text-center" id="homeLeaderboardArea">
-                <div class="col-md-4"><div class="card p-3 bg-light"><span class="star-badge mb-2 d-inline-block">Today's Star</span><h5 class="fw-bold mt-2" id="starTodayName">-</h5><small class="text-muted" id="starTodayClass">-</small></div></div>
-                <div class="col-md-4"><div class="card p-3 bg-light"><span class="star-badge mb-2 d-inline-block">Weekly Star</span><h5 class="fw-bold mt-2" id="starWeekName">-</h5><small class="text-muted" id="starWeekClass">-</small></div></div>
-                <div class="col-md-4"><div class="card p-3 bg-light"><span class="star-badge mb-2 d-inline-block">Monthly Star</span><h5 class="fw-bold mt-2" id="starMonthName">-</h5><small class="text-muted" id="starMonthClass">-</small></div></div>
-              </div>
-            </div>
-          </div>
-
-          <div id="studentsListTab" class="content-tab d-none">
-            <div class="card p-4">
-              <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-                <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-users"></i> Student Directory</h5>
-                <div class="d-flex gap-2" id="adminStudentActions">
-                  <button class="btn btn-sm btn-success" onclick="openStudentProfileModal(null)"><i class="fa-solid fa-user-plus me-1"></i> New Admission</button>
-                  <button class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#bulkImportModal"><i class="fa-solid fa-file-csv me-1"></i> Bulk Import</button>
-                  <button class="btn btn-sm btn-outline-danger" onclick="deleteAllStudents()"><i class="fa-solid fa-trash-can me-1"></i> Delete All</button>
-                </div>
-              </div>
-              <div class="row g-2 align-items-center mb-3">
-                <div class="col-md-4"><select id="filterClassSelect" class="form-select form-select-sm" onchange="loadStudentsByClass()"></select></div>
-                <div class="col-md-6"><input type="text" id="searchBox" class="form-control form-control-sm" placeholder="Search by name or Reg No..." oninput="filterStudentsLocal()"></div>
-                <div class="col-md-2 text-end"><button class="btn btn-sm btn-outline-success w-100" onclick="loadStudentsByClass(true)"><i class="fa-solid fa-rotate"></i> Reload</button></div>
-              </div>
-              <div class="table-responsive">
-                <table class="table table-hover table-bordered align-middle">
-                  <thead>
-  <tr>
-    <th>#</th>
-    <th>Reg No</th>
-    <th>Name</th>
-    <th>Class</th>
-    <th>Parent / Guardian</th>
-    <th>Place</th>
-    <th>Phone</th>
-    <th class="text-center">Actions</th>
-  </tr>
-</thead>
+       </div> <!-- col-lg-10 Closing -->
+     </div> <!-- row Closing -->
+   </div> <!-- container-fluid Closing -->
                   <tbody id="studentsTableBody"><tr><td colspan="7" class="text-center text-muted">Loading data...</td></tr></tbody>
                 </table>
               </div>
