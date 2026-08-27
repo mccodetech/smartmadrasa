@@ -66,6 +66,7 @@ window.populateClassDropdowns = function() {
 };
 
 // സെറ്റിങ്സ് ലോഡ് ചെയ്യാൻ
+// സെറ്റിങ്സ് ലോഡ് ചെയ്യാൻ
 window.loadInstitutionSettings = async () => {
   const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
   if (!currentInstitutionId) return;
@@ -74,11 +75,16 @@ window.loadInstitutionSettings = async () => {
     const docRef = doc(db, "settings", currentInstitutionId);
     const snap = await getDoc(docRef);
     const inputEl = document.getElementById("settingSpecialFundsInput");
-    if (snap.exists() && inputEl) {
+    const workingDaysEl = document.getElementById("settingTotalWorkingDays");
+
+    if (snap.exists()) {
       const data = snap.data();
-      if (data.specialFeeCategories) {
+      if (data.specialFeeCategories && inputEl) {
         inputEl.value = data.specialFeeCategories.join(", ");
         window.customSpecialFunds = data.specialFeeCategories;
+      }
+      if (data.totalWorkingDays !== undefined && workingDaysEl) {
+        workingDaysEl.value = data.totalWorkingDays;
       }
     }
   } catch (e) {
@@ -91,11 +97,13 @@ window.saveInstitutionSettings = async () => {
   const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
   const rawInput = document.getElementById("settingSpecialFundsInput")?.value || "";
   const fundsArray = rawInput.split(',').map(s => s.trim().toUpperCase()).filter(s => s.length > 0);
+  const totalWorkingDays = Number(document.getElementById("settingTotalWorkingDays")?.value) || 0;
 
   try {
     await setDoc(doc(db, "settings", currentInstitutionId), {
       institutionId: currentInstitutionId,
       specialFeeCategories: fundsArray,
+      totalWorkingDays: totalWorkingDays,
       updatedAt: serverTimestamp()
     }, { merge: true });
 
