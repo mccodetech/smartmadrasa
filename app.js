@@ -175,6 +175,7 @@ window.saveAssignedClassesAndApprove = async (e) => {
 };
 
 // പ്രിൻസിപ്പൽ & സ്റ്റാഫ് ലിസ്റ്റ് ലോഡ് ചെയ്യാൻ
+// പ്രിൻസിപ്പൽ & സ്റ്റാഫ് ലിസ്റ്റ് ലോഡ് ചെയ്യാൻ (Edit ബട്ടൺ സഹിതം)
 window.loadPrincipalsList = async () => {
   const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
   if (!currentInstitutionId) return;
@@ -202,7 +203,7 @@ window.loadPrincipalsList = async () => {
           <td class="text-center">
             ${isPending 
               ? `<button class="btn btn-sm btn-success px-3" onclick="prepareApproveStaff('${d.id}', '${user.name}', '${user.role}')"><i class="fa-solid fa-check me-1"></i> Approve</button>` 
-              : `<span class="badge bg-success">Active</span>`
+              : `<button class="btn btn-sm btn-outline-primary me-1" onclick="prepareApproveStaff('${d.id}', '${user.name}', '${user.role}')" title="Edit Classes/Role"><i class="fa-solid fa-pen"></i> Edit</button> <span class="badge bg-success">Active</span>`
             }
             <button class="btn btn-sm btn-outline-danger ms-1" onclick="deleteStaffAccount('${d.id}', '${user.name}')"><i class="fa-solid fa-trash"></i></button>
           </td>
