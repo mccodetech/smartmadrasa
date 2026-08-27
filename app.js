@@ -9,7 +9,7 @@ import "./academics.js";
 import "./main-dashboard.js";
 
 import { 
-  doc, getDoc, collection, getDocs, query, where, serverTimestamp, setDoc, updateDoc 
+  doc, getDoc, collection, getDocs, query, where, serverTimestamp, setDoc, updateDoc, deleteDoc 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
