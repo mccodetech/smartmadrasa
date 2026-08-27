@@ -342,3 +342,6 @@ window.changeStudentPage = (page) => {
     window.loadStudentsByClass();
   }
 };
+window.renderPaginatedContros = (totalRecords, currentPage, rowsPerPage) => {
+  window.renderPaginatedTable(totalRecords, currentPage, rowsPerPage);
+};
