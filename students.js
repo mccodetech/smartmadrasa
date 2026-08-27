@@ -224,3 +224,49 @@ window.downloadCSVFormat = () => {
   link.click();
   document.body.removeChild(link);
 };
+// ==========================================
+// STUDENT PROFILE VIEW MODULE (students.js)
+// ==========================================
+
+// കുട്ടിയുടെ മുഴുവൻ വിവരങ്ങളും വ്യൂ ചെയ്യാൻ മോഡൽ തുറക്കുന്ന ഫംഗ്ഷൻ
+window.viewStudentProfile = (docId) => {
+  const s = localStudentsCache.find(x => x.id === docId);
+  if (!s) return;
+
+  // മോഡലിലെ വിവിധ ഫീൽഡുകളിലേക്ക് ഡാറ്റ നൽകുന്നു
+  document.getElementById("viewStuName").innerText = s.name || '-';
+  document.getElementById("viewStuRegNo").innerText = s.regNo || '-';
+  document.getElementById("viewStuIdNo").innerText = s.idNo || '-';
+  document.getElementById("viewStuClass").innerText = "Class " + (s.currentClass || '-');
+  document.getElementById("viewStuGender").innerText = s.gender || '-';
+  document.getElementById("viewStuDob").innerText = s.dob || '-';
+  document.getElementById("viewStuBlood").innerText = s.bloodGroup || '-';
+  
+  // രക്ഷിതാക്കളുടെ വിവരങ്ങൾ
+  document.getElementById("viewStuFather").innerText = s.fatherName || '-';
+  document.getElementById("viewStuMother").innerText = s.motherName || '-';
+  document.getElementById("viewStuGuardian").innerText = s.guardianName || '-';
+  document.getElementById("viewStuRelation").innerText = s.relation || '-';
+  document.getElementById("viewStuPhone").innerText = s.phone || '-';
+  document.getElementById("viewStuEmergency").innerText = s.emergencyPhone || '-';
+
+  // വിലാസം
+  document.getElementById("viewStuHouse").innerText = s.houseName || '-';
+  document.getElementById("viewStuPlace").innerText = s.place || '-';
+  document.getElementById("viewStuPo").innerText = s.postOffice || '-';
+  document.getElementById("viewStuPin").innerText = s.pincode || '-';
+  document.getElementById("viewStuDistrict").innerText = s.district || '-';
+
+  // മറ്റ് വിവരങ്ങൾ & ടി.സി ഡാറ്റ
+  document.getElementById("viewStuDoj").innerText = s.joinedDate || '-';
+  document.getElementById("viewStuFee").innerText = `₹${s.monthlyFeeAmount || 0}`;
+  document.getElementById("viewStuTc").innerText = s.tcIssued || 'No';
+  document.getElementById("viewStuReason").innerText = s.reasonLeaving || '-';
+  document.getElementById("viewStuSpecial").innerText = s.specialInfo || '-';
+
+  // വ്യൂ മോഡൽ ഓപ്പൺ ചെയ്യുന്നു
+  const modalEl = document.getElementById('studentDetailsViewModal');
+  if (modalEl) {
+    new bootstrap.Modal(modalEl).show();
+  }
+};
