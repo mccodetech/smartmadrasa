@@ -1,5 +1,5 @@
 // ==========================================
-// FEES MANAGEMENT MODULE (fees.js) - Complete
+// FEES MANAGEMENT MODULE (fees.js) - Complete Fix
 // ==========================================
 import { db, auth } from "./firebase-config.js";
 import { 
@@ -150,22 +150,46 @@ window.loadStudentsForFees = async () => {
       });
       monthBadges += `</div>`;
 
-      // സുരക്ഷിതമായി ഡാറ്റ പാസ് ചെയ്യാൻ എൻകോഡ് ചെയ്യുന്നു
-      const sDataStr = encodeURIComponent(JSON.stringify({
-        id: s.id, regNo: s.regNo, name: s.name, class: s.currentClass, phone: s.phone || '', fee: defaultFee
-      }));
-
+      // ഡാറ്റ സുരക്ഷിതമായി ആട്രിബ്യൂട്ടിൽ വെക്കുന്നു
       html += `
         <tr>
           <td><b>${s.regNo || '-'}</b></td>
           <td><b>${s.name}</b></td>
           <td class="text-primary fw-bold">₹${defaultFee}</td>
           <td>${monthBadges}</td>
-          <td class="text-center"><button class="btn btn-sm btn-success w-100" onclick="openFeeModal('${sDataStr}')"><i class="fa-solid fa-indian-rupee-sign me-1"></i> Pay Fee</button></td>
+          <td class="text-center">
+            <button class="btn btn-sm btn-success w-100 pay-fee-btn" 
+              data-id="${s.id}" 
+              data-reg="${s.regNo || ''}" 
+              data-name="${s.name || ''}" 
+              data-class="${s.currentClass || cleanClass}" 
+              data-phone="${s.phone || ''}" 
+              data-fee="${defaultFee}">
+              <i class="fa-solid fa-indian-rupee-sign me-1"></i> Pay Fee
+            </button>
+          </td>
         </tr>
       `;
     });
-    if (tbody) tbody.innerHTML = html;
+    
+    if (tbody) {
+      tbody.innerHTML = html;
+      
+      // ഇന്റർനാഷണൽ ഇവന്റ് ലിスナー വഴി ബട്ടൺ വർക്ക് ചെയ്യിക്കുന്നു (യൂണിവേഴ്സൽ ഫിക്സ്)
+      document.querySelectorAll(".pay-fee-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const studentObj = {
+            id: btn.getAttribute("data-id"),
+            regNo: btn.getAttribute("data-reg"),
+            name: btn.getAttribute("data-name"),
+            class: btn.getAttribute("data-class"),
+            phone: btn.getAttribute("data-phone"),
+            fee: btn.getAttribute("data-fee")
+          };
+          window.openFeeModalObj(studentObj);
+        });
+      });
+    }
 
   } catch (err) {
     console.error("Error loading fee data:", err);
@@ -191,10 +215,9 @@ window.calculateFeeAmount = () => {
   if (payAmtEl) payAmtEl.value = total;
 };
 
-// ഫീസ് മോഡൽ സുരക്ഷിതമായി ഓപ്പൺ ചെയ്യാൻ
-window.openFeeModal = (studentDataStr) => {
+// ഒബ്ജക്റ്റ് നേരിട്ട് സ്വീകരിച്ച് മോഡൽ ഓപ്പൺ ചെയ്യുന്ന പുതിയ ഫംഗ്ഷൻ
+window.openFeeModalObj = (s) => {
   try {
-    const s = JSON.parse(decodeURIComponent(studentDataStr));
     const feeForm = document.getElementById("feePaymentForm");
     if (feeForm && typeof feeForm.reset === 'function') {
       feeForm.reset();
@@ -240,10 +263,10 @@ window.openFeeModal = (studentDataStr) => {
         document.body.classList.add("modal-open");
       }
     } else {
-      window.showToast("Fee payment modal not found.", "error");
+      window.showToast("Fee payment modal not found in HTML.", "error");
     }
   } catch (err) {
-    console.error("Error in openFeeModal:", err);
+    console.error("Error in openFeeModalObj:", err);
     window.showToast("Error opening modal: " + err.message, "error");
   }
 };
