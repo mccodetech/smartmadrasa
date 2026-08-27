@@ -1,5 +1,5 @@
 // ==========================================
-// MAIN ENTRY POINT (app.js)
+// MAIN ENTRY POINT (app.js) - Updated with Principal Staff & Settings Access
 // ==========================================
 import { db, auth, SUPER_ADMIN_EMAIL } from "./firebase-config.js";
 import "./auth.js";
@@ -9,7 +9,7 @@ import "./academics.js";
 import "./main-dashboard.js";
 
 import { 
-  doc, getDoc, collection, getDocs, query, where, serverTimestamp 
+  doc, getDoc, collection, getDocs, query, where, serverTimestamp, setDoc, updateDoc 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
@@ -36,7 +36,7 @@ window.showToast = (message, type = "success") => {
   setTimeout(() => { toast.style.transition = "all 0.4s ease"; toast.style.opacity = "0"; setTimeout(() => toast.remove(), 400); }, 4000);
 };
 
-// മൊബൈൽ മെനു സിങ്ക് ചെയ്യാനുള്ള ഫങ്ഷൻ ഇവിടെ ആഡ് ചെയ്തിരിക്കുന്നു
+// മൊബൈൽ മെനു സിങ്ക് ചെയ്യാനുള്ള ഫങ്ഷൻ
 window.syncMobileMenu = () => {
   const desktopMenu = document.getElementById("desktopTabMenu");
   const mobileMenu = document.getElementById("mobileTabMenu");
@@ -65,6 +65,60 @@ window.populateClassDropdowns = function() {
   });
 };
 
+// സെറ്റിങ്സ് ലോഡ് ചെയ്യാൻ
+window.loadInstitutionSettings = async () => {
+  const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
+  if (!currentInstitutionId) return;
+
+  try {
+    const docRef = doc(db, "settings", currentInstitutionId);
+    const snap = await getDoc(docRef);
+    const inputEl = document.getElementById("settingSpecialFundsInput");
+    if (snap.exists() && inputEl) {
+      const data = snap.data();
+      if (data.specialFeeCategories) {
+        inputEl.value = data.specialFeeCategories.join(", ");
+        window.customSpecialFunds = data.specialFeeCategories;
+      }
+    }
+  } catch (e) {
+    console.error("Error loading settings:", e);
+  }
+};
+
+// സെറ്റിങ്സ് സേവ് ചെയ്യാൻ
+window.saveInstitutionSettings = async () => {
+  const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
+  const rawInput = document.getElementById("settingSpecialFundsInput")?.value || "";
+  const fundsArray = rawInput.split(',').map(s => s.trim().toUpperCase()).filter(s => s.length > 0);
+
+  try {
+    await setDoc(doc(db, "settings", currentInstitutionId), {
+      institutionId: currentInstitutionId,
+      specialFeeCategories: fundsArray,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+
+    window.customSpecialFunds = fundsArray;
+    window.showToast("Settings updated successfully!", "success");
+  } catch (e) {
+    window.showToast("Error saving settings: " + e.message, "error");
+  }
+};
+
+// സ്റ്റാഫിന്റെ സ്റ്റാറ്റസ് ആക്ടീവ് ആക്കാൻ
+window.approveStaffAccount = async (userId) => {
+  try {
+    await updateDoc(doc(db, "users", userId), {
+      status: "active"
+    });
+    window.showToast("Staff account activated successfully!", "success");
+    if (typeof window.loadPrincipalsList === 'function') window.loadPrincipalsList();
+  } catch (e) {
+    window.showToast("Error activating staff: " + e.message, "error");
+  }
+};
+
 // സെഷൻ പരിശോധന (Auth State Listener & Role Based Menu Visibility)
 onAuthStateChanged(auth, async (user) => {
   if (user) {
@@ -89,11 +143,9 @@ onAuthStateChanged(auth, async (user) => {
         if (instNameEl) instNameEl.innerText = window.isSuperAdmin ? "Smart Madrasa - Master Control Center" : (userData.institutionName || "Smart Madrasa");
 
         const userRoleEl = document.getElementById("displayUserRole");
-        const pMenuBtn = document.getElementById("promotionMenuBtn");
-        const adminActions = document.getElementById("adminStudentActions");
-        const actionCol = document.getElementById("actionHeaderCol");
         const superMasterBtn = document.getElementById("superAdminMasterBtn");
         const instAdminStaffBtn = document.getElementById("instAdminStaffBtn");
+        const settingsMenuBtn = document.getElementById("settingsMenuBtn");
         const homeMenuBtn = document.getElementById("homeMenuBtn");
         const studentsMenuBtn = document.getElementById("studentsMenuBtn");
         const attendanceMenuBtn = document.getElementById("attendanceMenuBtn");
@@ -124,16 +176,22 @@ onAuthStateChanged(auth, async (user) => {
           if (studentsMenuBtn) studentsMenuBtn.classList.remove("d-none");
           if (feesMenuBtn) feesMenuBtn.classList.remove("d-none");
 
-          if (window.currentUserRole === "admin") {
+          // അഡ്മിൻ അല്ലെങ്കിൽ പ്രിൻസിപ്പൽ ആണെങ്കിൽ സ്റ്റാഫ് മാനേജ്‌മെന്റും സെറ്റിങ്സും കാണിക്കാൻ
+          if (window.currentUserRole === "admin" || window.currentUserRole === "principal") {
             if (instAdminStaffBtn) instAdminStaffBtn.classList.remove("d-none");
+            if (settingsMenuBtn) settingsMenuBtn.classList.remove("d-none");
+          } else {
+            if (instAdminStaffBtn) instAdminStaffBtn.classList.add("d-none");
+            if (settingsMenuBtn) settingsMenuBtn.classList.add("d-none");
+          }
+
+          if (window.currentUserRole === "admin") {
             if (homeMenuBtn) homeMenuBtn.classList.remove("d-none");
             if (attendanceMenuBtn) attendanceMenuBtn.classList.remove("d-none");
             if (marksMenuBtn) marksMenuBtn.classList.remove("d-none");
             if (performanceMenuBtn) performanceMenuBtn.classList.remove("d-none");
             if (feeSettingsBtn) feeSettingsBtn.classList.remove("d-none");
             if (subjectSettingsBtn) subjectSettingsBtn.classList.remove("d-none");
-            if (adminActions) adminActions.classList.remove("d-none");
-            if (actionCol) actionCol.classList.remove("d-none");
 
             window.showTab('instAdminTab'); 
             if (typeof window.loadPrincipalsList === 'function') window.loadPrincipalsList();
@@ -153,7 +211,10 @@ onAuthStateChanged(auth, async (user) => {
         const attDateEl = document.getElementById("attDate");
         if (attDateEl) attDateEl.valueAsDate = new Date();
 
-        if (!window.isSuperAdmin) window.populateClassDropdowns();
+        if (!window.isSuperAdmin) {
+          window.populateClassDropdowns();
+          window.loadInstitutionSettings();
+        }
         window.syncMobileMenu();
       }
     } catch (e) {
