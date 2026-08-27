@@ -293,6 +293,7 @@ async function loadParentStudentData(student) {
   if (fatherEl) fatherEl.innerText = student.fatherName || student.guardianName || '-';
 
   try {
+    // 1. Fee Status & Grid
     const feeQ = query(collection(db, "feeCollections"), where("institutionId", "==", student.institutionId), where("regNo", "==", student.regNo));
     const feeSnap = await getDocs(feeQ);
     
@@ -324,15 +325,39 @@ async function loadParentStudentData(student) {
     const monthGrid = document.getElementById("pvFeeMonthGrid");
     if (monthGrid) monthGrid.innerHTML = gridHtml;
 
-    // പെർഫോമൻസ് പോയിന്റുകൾ ലോഡ് ചെയ്യാൻ
+    // 2. Examination Marks
+    const marksQ = query(collection(db, "examMarks"), where("institutionId", "==", student.institutionId), where("regNo", "==", student.regNo));
+    const marksSnap = await getDocs(marksQ);
+    let marksHtml = "";
+    marksSnap.forEach(md => {
+      const m = md.data();
+      if (m.marks && typeof m.marks === 'object') {
+        Object.entries(m.marks).forEach(([subj, score]) => {
+          marksHtml += `<tr><td>${m.examName || 'Exam'}</td><td>${subj}</td><td class="fw-bold">${score}</td></tr>`;
+        });
+      }
+    });
+    const marksTableBody = document.getElementById("pvMarksTableBody");
+    if (marksTableBody) {
+      marksTableBody.innerHTML = marksHtml || `<tr><td colspan="3" class="text-center text-muted">No exam marks found</td></tr>`;
+    }
+
+    // 3. Performance & Star Points History
     const perfQ = query(collection(db, "performancePoints"), where("institutionId", "==", student.institutionId), where("regNo", "==", student.regNo));
     const perfSnap = await getDocs(perfQ);
     let totalPts = 0;
+    let perfHtml = "";
     perfSnap.forEach(pd => {
       const p = pd.data();
       totalPts += (Number(p.points) || 0);
+      perfHtml += `<tr><td>${p.date || '-'}</td><td>${p.task || '-'}</td><td class="fw-bold ${p.points >= 0 ? 'text-success' : 'text-danger'}">${p.points > 0 ? '+' : ''}${p.points} Pts</td></tr>`;
     });
+    
     if (totalPtsEl) totalPtsEl.innerText = totalPts + " Pts";
+    const pointsTableBody = document.getElementById("pvPointsTableBody");
+    if (pointsTableBody) {
+      pointsTableBody.innerHTML = perfHtml || `<tr><td colspan="3" class="text-center text-muted">No performance points recorded</td></tr>`;
+    }
 
   } catch (e) {
     console.error("Error loading parent data:", e);
