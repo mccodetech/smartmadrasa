@@ -620,28 +620,63 @@
           </div>
 
           <!-- Attendance Module -->
-          <div id="attendanceTab" class="content-tab d-none">
-             <div class="card p-4">
-              <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-calendar-check"></i> Daily Attendance</h5>
-              <div class="row g-3 mb-4">
-                <div class="col-md-4"><label class="form-label">Date</label><input type="date" id="attDate" class="form-control" onchange="resetAttendanceButton()"></div>
-                <div class="col-md-4"><label class="form-label">Select Class</label><select id="attClassSelect" class="form-select" onchange="loadAttendanceSheet()"></select></div>
-              </div>
-              <div id="attendanceSheetArea" class="d-none">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                  <span class="fw-bold text-muted" id="attCountInfo">Total: 0 | Present: 0</span>
-                  <div class="form-check"><input class="form-check-input form-check-input-lg" type="checkbox" id="selectAllAtt" checked onchange="toggleSelectAllAttendance()"><label class="form-check-label fw-bold ms-1" for="selectAllAtt">Select All</label></div>
-                </div>
-                <div class="table-responsive">
-                  <table class="table table-bordered align-middle">
-                    <thead class="table-light"><tr><th style="width: 80px;">Reg No</th><th>Student Name</th><th style="width: 140px;" class="text-center">Status (Present)</th></tr></thead>
-                    <tbody id="attendanceTableBody"></tbody>
-                  </table>
-                </div>
-                <button id="btnSaveAttendance" class="btn btn-primary-custom px-4 mt-2" onclick="saveClassAttendance()"><i class="fa-solid fa-check-double me-1"></i> Save Attendance</button>
-              </div>
-            </div>
-          </div>
+<div id="attendanceTab" class="content-tab d-none">
+  <div class="card p-4 mb-4">
+    <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-calendar-check"></i> Daily Attendance</h5>
+    <!-- ... (നിലവിലുള്ള അറ്റൻഡൻസ് കോഡ് അവിടെത്തന്നെ നിൽക്കട്ടെ) ... -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-4"><label class="form-label">Date</label><input type="date" id="attDate" class="form-control" onchange="resetAttendanceButton()"></div>
+      <div class="col-md-4"><label class="form-label">Select Class</label><select id="attClassSelect" class="form-select" onchange="loadAttendanceSheet()"></select></div>
+    </div>
+    <div id="attendanceSheetArea" class="d-none">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="fw-bold text-muted" id="attCountInfo">Total: 0 | Present: 0</span>
+        <div class="form-check"><input class="form-check-input form-check-input-lg" type="checkbox" id="selectAllAtt" checked onchange="toggleSelectAllAttendance()"><label class="form-check-label fw-bold ms-1" for="selectAllAtt">Select All</label></div>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-bordered align-middle">
+          <thead class="table-light"><tr><th style="width: 80px;">Reg No</th><th>Student Name</th><th style="width: 140px;" class="text-center">Status (Present)</th></tr></thead>
+          <tbody id="attendanceTableBody"></tbody>
+        </table>
+      </div>
+      <button id="btnSaveAttendance" class="btn btn-primary-custom px-4 mt-2" onclick="saveClassAttendance()"><i class="fa-solid fa-check-double me-1"></i> Save Attendance</button>
+    </div>
+  </div>
+
+  <!-- പുതിയ സെക്ഷൻ: മുമ്പുള്ള അറ്റൻഡൻസ് മാനുവലായി ചേർക്കാൻ -->
+  <div class="card p-4 border-warning">
+    <h5 class="fw-bold text-warning mb-3"><i class="fa-solid fa-clock-rotate-left"></i> Add Previous Attendance</h5>
+    <p class="small text-muted mb-3">അധ്യായന വർഷത്തിന്റെ ഇടയിൽ ഈ സിസ്റ്റം ഉപയോഗിക്കാൻ തുടങ്ങുമ്പോൾ, ഇതുവരെയുള്ള ഹാജർ നില ഇവിടെ ചേർക്കാവുന്നതാണ്.</p>
+    <div class="row g-3 mb-3">
+      <div class="col-md-4">
+        <label class="form-label fw-bold">Select Class</label>
+        <select id="manualAttClassSelect" class="form-select" onchange="loadManualAttendanceSheet()"></select>
+      </div>
+      <div class="col-md-8 d-flex align-items-end">
+        <div class="alert alert-info py-2 mb-0 w-100">
+          Total Working Days: <b id="displayTotalWorkingDays">0</b> 
+          <small class="d-block text-muted">(Settings ടാബിൽ അഡ്മിൻ നൽകിയ വിവരമനുസരിച്ച്)</small>
+        </div>
+      </div>
+    </div>
+    
+    <div id="manualAttendanceSheetArea" class="d-none">
+      <div class="table-responsive">
+        <table class="table table-bordered align-middle">
+          <thead class="table-light">
+            <tr>
+              <th style="width: 80px;">Reg No</th>
+              <th>Student Name</th>
+              <th style="width: 200px;" class="text-center">Total Days Present</th>
+            </tr>
+          </thead>
+          <tbody id="manualAttendanceTableBody"></tbody>
+        </table>
+      </div>
+      <button id="btnSaveManualAttendance" class="btn btn-warning px-4 mt-2" onclick="saveManualAttendance()"><i class="fa-solid fa-save me-1"></i> Save Previous Attendance</button>
+    </div>
+  </div>
+</div>
 
           <!-- Marks Entry Tab -->
           <div id="marksTab" class="content-tab d-none">
