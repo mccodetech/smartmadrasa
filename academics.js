@@ -301,3 +301,73 @@ window.saveClassAttendance = async () => {
     window.showToast("Error: " + err.message, "error"); 
   }
 };
+
+// പെർഫോമൻസ് ഷീറ്റിൽ ക്ലാസ് സെലക്ട് ചെയ്യുമ്പോൾ കുട്ടികളുടെ ലിസ്റ്റ് ലോഡ് ചെയ്യാൻ
+window.loadStudentsForPerfSheet = async () => {
+  const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
+  const classSelect = document.getElementById("perfClassSelect");
+  const selectedClass = classSelect ? classSelect.value : "";
+  const sheetArea = document.getElementById("perfSheetArea");
+  const tbody = document.getElementById("perfTableBody");
+
+  if (!selectedClass) {
+    if (sheetArea) sheetArea.classList.add("d-none");
+    return;
+  }
+
+  if (tbody) {
+    tbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-3"><i class="fa-solid fa-spinner fa-spin me-2"></i>Loading students...</td></tr>`;
+  }
+  if (sheetArea) sheetArea.classList.remove("d-none");
+
+  try {
+    const q = query(
+      collection(db, "students"), 
+      where("institutionId", "==", currentInstitutionId), 
+      where("currentClass", "==", selectedClass.replace(/Class\s*/i, "").trim())
+    );
+    const snap = await getDocs(q);
+    
+    let students = [];
+    snap.forEach(d => {
+      students.push({ id: d.id, ...d.data() });
+    });
+
+    students.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
+
+    let html = "";
+    if (students.length === 0) {
+      html = `<tr><td colspan="3" class="text-center text-muted py-3">No students found in Class ${selectedClass}.</td></tr>`;
+    } else {
+      students.forEach((stu) => {
+        html += `
+          <tr>
+            <td><b>${stu.regNo || '-'}</b></td>
+            <td><b>${stu.name || '-'}</b></td>
+            <td class="text-center">
+              <div class="form-check d-inline-block">
+                <input class="form-check-input perf-student-cb" type="checkbox" value="${stu.id}" id="perfStu_${stu.id}" checked>
+                <label class="form-check-label" for="perfStu_${stu.id}">Award</label>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    if (tbody) tbody.innerHTML = html;
+
+  } catch (err) {
+    console.error("Error loading performance sheet:", err);
+    window.showToast("Error loading students: " + err.message, "error");
+  }
+};
+
+// സെലക്ട് ഓൾ (Select All) ചെക്ക്ബോക്സ് വർക്ക് ചെയ്യാൻ
+window.toggleSelectAllPerf = () => {
+  const selectAllCb = document.getElementById("selectAllPerf");
+  const checkboxes = document.querySelectorAll(".perf-student-cb");
+  checkboxes.forEach(cb => {
+    cb.checked = selectAllCb ? selectAllCb.checked : true;
+  });
+};
