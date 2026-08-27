@@ -1187,6 +1187,66 @@
       </div>
     </div>
   </div>
+  <!-- Student Details View Modal -->
+<div class="modal fade" id="studentDetailsViewModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title"><i class="fa-solid fa-user-graduate me-2"></i> Student Full Profile</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4 bg-light">
+        <div class="card border-0 shadow-sm p-4 mb-3">
+          <h4 class="text-success fw-bold mb-3" id="viewStuName">-</h4>
+          <div class="row g-3">
+            <div class="col-md-4"><strong>Reg No:</strong> <span id="viewStuRegNo">-</span></div>
+            <div class="col-md-4"><strong>ID No:</strong> <span id="viewStuIdNo">-</span></div>
+            <div class="col-md-4"><strong>Class:</strong> <span id="viewStuClass" class="badge bg-success">-</span></div>
+            <div class="col-md-4"><strong>Gender:</strong> <span id="viewStuGender">-</span></div>
+            <div class="col-md-4"><strong>Date of Birth:</strong> <span id="viewStuDob">-</span></div>
+            <div class="col-md-4"><strong>Blood Group:</strong> <span id="viewStuBlood">-</span></div>
+          </div>
+        </div>
+
+        <div class="card border-0 shadow-sm p-4 mb-3">
+          <h5 class="text-primary fw-bold mb-3"><i class="fa-solid fa-users me-2"></i> Parent & Contact Info</h5>
+          <div class="row g-3">
+            <div class="col-md-6"><strong>Father's Name:</strong> <span id="viewStuFather">-</span></div>
+            <div class="col-md-6"><strong>Mother's Name:</strong> <span id="viewStuMother">-</span></div>
+            <div class="col-md-6"><strong>Guardian:</strong> <span id="viewStuGuardian">-</span> (<span id="viewStuRelation">-</span>)</div>
+            <div class="col-md-6"><strong>Phone:</strong> <span id="viewStuPhone">-</span></div>
+            <div class="col-md-6"><strong>Emergency Phone:</strong> <span id="viewStuEmergency">-</span></div>
+          </div>
+        </div>
+
+        <div class="card border-0 shadow-sm p-4 mb-3">
+          <h5 class="text-warning text-dark fw-bold mb-3"><i class="fa-solid fa-location-dot me-2"></i> Address</h5>
+          <div class="row g-3">
+            <div class="col-md-6"><strong>House Name:</strong> <span id="viewStuHouse">-</span></div>
+            <div class="col-md-6"><strong>Place:</strong> <span id="viewStuPlace">-</span></div>
+            <div class="col-md-4"><strong>Post Office:</strong> <span id="viewStuPo">-</span></div>
+            <div class="col-md-4"><strong>Pincode:</strong> <span id="viewStuPin">-</span></div>
+            <div class="col-md-4"><strong>District:</strong> <span id="viewStuDistrict">-</span></div>
+          </div>
+        </div>
+
+        <div class="card border-0 shadow-sm p-4">
+          <h5 class="text-secondary fw-bold mb-3"><i class="fa-solid fa-circle-info me-2"></i> Other Details</h5>
+          <div class="row g-3">
+            <div class="col-md-4"><strong>Joined Date:</strong> <span id="viewStuDoj">-</span></div>
+            <div class="col-md-4"><strong>Monthly Fee:</strong> <span id="viewStuFee">-</span></div>
+            <div class="col-md-4"><strong>TC Issued:</strong> <span id="viewStuTc">-</span></div>
+            <div class="col-md-6"><strong>Reason Leaving:</strong> <span id="viewStuReason">-</span></div>
+            <div class="col-md-6"><strong>Special Info:</strong> <span id="viewStuSpecial">-</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script type="module" src="app.js"></script>
