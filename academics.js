@@ -406,3 +406,115 @@ window.toggleSelectAllPerf = () => {
     cb.checked = selectAllCb ? selectAllCb.checked : true;
   });
 };
+// ==========================================
+// 3.1. MANUAL PREVIOUS ATTENDANCE MODULE
+// ==========================================
+
+// മാനുവൽ അറ്റൻഡൻസ് ഷീറ്റ് ലോഡ് ചെയ്യാൻ
+window.loadManualAttendanceSheet = async () => {
+  const selClass = document.getElementById("manualAttClassSelect")?.value;
+  const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
+  if (!selClass) { document.getElementById("manualAttendanceSheetArea")?.classList.add("d-none"); return; }
+
+  const cleanClass = selClass.replace(/Class\s*/i, "").trim();
+  const area = document.getElementById("manualAttendanceSheetArea");
+  const tbody = document.getElementById("manualAttendanceTableBody");
+  
+  if (tbody) tbody.innerHTML = `<tr><td colspan="3" class="text-center">Loading students...</td></tr>`;
+  if (area) area.classList.remove("d-none");
+
+  try {
+    // ഇൻസ്റ്റിറ്റ്യൂഷൻ സെറ്റിങ്സിൽ നിന്ന് Total Working Days എടുക്കാൻ
+    const settingsDoc = await getDoc(doc(db, "settings", currentInstitutionId));
+    let totalWorkingDays = 0;
+    if (settingsDoc.exists()) {
+      totalWorkingDays = Number(settingsDoc.data().totalWorkingDays) || 0;
+    }
+    document.getElementById("displayTotalWorkingDays").innerText = totalWorkingDays;
+
+    // കുട്ടികളെയും അവരുടെ നിലവിലെ മാനുവൽ അറ്റൻഡൻസും ഫെച്ച് ചെയ്യാൻ
+    const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", cleanClass), where("status", "==", "active"));
+    const snap = await getDocs(q);
+
+    // മാനുവൽ അറ്റൻഡൻസ് റെക്കോർഡുകൾ എടുക്കാൻ
+    const manualAttQ = query(collection(db, "manualAttendance"), where("institutionId", "==", currentInstitutionId), where("classNum", "==", cleanClass));
+    const manualSnap = await getDocs(manualAttQ);
+    let existingManualAtt = {};
+    manualSnap.forEach(d => {
+      const data = d.data();
+      if (data.regNo) existingManualAtt[data.regNo] = data.presentDays || 0;
+    });
+
+    let students = [];
+    snap.forEach(d => students.push({ id: d.id, ...d.data() }));
+    students.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
+
+    let html = "";
+    students.forEach(s => {
+      const presentDays = existingManualAtt[s.regNo] || 0;
+      html += `
+        <tr data-sid="${s.id}" data-reg="${s.regNo}">
+          <td style="white-space: nowrap;"><b>${s.regNo || '-'}</b></td>
+          <td><b>${s.name}</b></td>
+          <td class="text-center">
+            <input type="number" class="form-control text-center mx-auto manual-att-input" value="${presentDays}" min="0" max="${totalWorkingDays}" style="max-width: 100px;">
+          </td>
+        </tr>
+      `;
+    });
+    if (tbody) tbody.innerHTML = html || `<tr><td colspan="3" class="text-center">No active students in this class.</td></tr>`;
+
+  } catch (error) {
+    console.error("Error loading manual attendance:", error);
+    window.showToast("Failed to load students.", "error");
+  }
+};
+
+// മാനുവൽ അറ്റൻഡൻസ് സേവ് ചെയ്യാൻ
+window.saveManualAttendance = async () => {
+  const selClass = document.getElementById("manualAttClassSelect")?.value;
+  const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
+  if (!selClass) return;
+
+  const btn = document.getElementById("btnSaveManualAttendance");
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-1"></i> Saving...`;
+  }
+
+  const cleanClass = selClass.replace(/Class\s*/i, "").trim();
+  const rows = document.querySelectorAll("#manualAttendanceTableBody tr[data-sid]");
+  const batch = writeBatch(db);
+
+  rows.forEach(r => {
+    const sid = r.getAttribute("data-sid");
+    const reg = r.getAttribute("data-reg");
+    const presentDays = Number(r.querySelector(".manual-att-input")?.value) || 0;
+
+    const docId = `${currentInstitutionId}_${cleanClass}_${reg}`;
+    const manualRef = doc(db, "manualAttendance", docId);
+    batch.set(manualRef, {
+      institutionId: currentInstitutionId,
+      classNum: cleanClass,
+      studentId: sid,
+      regNo: Number(reg),
+      presentDays: presentDays,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+  });
+
+  try {
+    await batch.commit();
+    if (btn) {
+      btn.className = "btn btn-success px-4 mt-2"; 
+      btn.innerHTML = `<i class="fa-solid fa-check me-1"></i> Saved Successfully`;
+    }
+    window.showToast("Previous attendance saved successfully!", "success");
+  } catch (err) { 
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `<i class="fa-solid fa-save me-1"></i> Save Previous Attendance`;
+    }
+    window.showToast("Error: " + err.message, "error"); 
+  }
+};
