@@ -230,36 +230,31 @@ onAuthStateChanged(auth, async (user) => {
 
 // ==========================================
 // MANAGE PRINCIPALS & STAFF MODULE
-// ==========================================
 window.loadPrincipalsList = async () => {
   const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
-  const tbody = document.querySelector("#staffTableBody") || document.querySelector("table tbody"); // ടേബിളിന്റെ ബോഡി കണ്ടെത്താൻ
-  
   if (!currentInstitutionId) return;
 
   try {
-    // സ്ഥാപനത്തിലെ മുഴുവൻ യൂസർമാരെയും (സ്റ്റാഫ് & പ്രിൻസിപ്പൽ) ഫെച്ച് ചെയ്യുന്നു
     const q = query(collection(db, "users"), where("institutionId", "==", currentInstitutionId));
     const snap = await getDocs(q);
 
     let html = "";
-    let count = 0;
+    let pendingHtml = "";
+    let hasPending = false;
 
     snap.forEach(d => {
       const user = d.data();
-      // സൂപ്പർ അഡ്മിനെ ഈ ലിസ്റ്റിൽ ഒഴിവാക്കാം
       if (user.role === "admin" && user.email === "mccodetech@gmail.com") return; 
 
-      count++;
       const isPending = user.status === "pending";
-      
-      html += `
+
+      const rowHtml = `
         <tr>
           <td><b>${user.name || '-'}</b></td>
           <td><span class="badge bg-secondary">${user.role || 'staff'}</span></td>
           <td>${user.email || '-'}</td>
           <td>${user.phone || '-'}</td>
-          <td>
+          <td class="text-center">
             ${isPending 
               ? `<button class="btn btn-sm btn-success px-3" onclick="approveStaffAccount('${d.id}')"><i class="fa-solid fa-check me-1"></i> Approve</button>` 
               : `<span class="badge bg-success">Active</span>`
@@ -268,12 +263,33 @@ window.loadPrincipalsList = async () => {
           </td>
         </tr>
       `;
+
+      if (isPending) {
+        hasPending = true;
+        pendingHtml += rowHtml;
+      } else {
+        html += rowHtml;
+      }
     });
 
-    // ടേബിളിൽ ഡാറ്റ ഇൻസേർട്ട് ചെയ്യുന്നു
-    const tableBody = document.getElementById("staffTableBody");
+    // പെൻഡിങ് സെക്ഷൻ കാണിക്കാനും മറയ്ക്കാനുമുള്ള കോഡ്
+    const pendingSection = document.getElementById("instPendingStaffSection");
+    const pendingTableBody = document.getElementById("instPendingStaffTableBody");
+    
+    if (pendingSection && pendingTableBody) {
+      if (hasPending) {
+        pendingSection.classList.remove("d-none");
+        pendingTableBody.innerHTML = pendingHtml;
+      } else {
+        pendingSection.classList.add("d-none");
+        pendingTableBody.innerHTML = "";
+      }
+    }
+
+    // മെയിൻ സ്റ്റാഫ് ലിങ്ക് ടേബിൾ
+    const tableBody = document.getElementById("staffTableBody") || document.querySelector("table tbody");
     if (tableBody) {
-      tableBody.innerHTML = html || `<tr><td colspan="5" class="text-center text-muted">No staff or principals found.</td></tr>`;
+      tableBody.innerHTML = html || `<tr><td colspan="5" class="text-center text-muted">No active staff found.</td></tr>`;
     }
   } catch (e) {
     console.error("Error loading staff list:", e);
