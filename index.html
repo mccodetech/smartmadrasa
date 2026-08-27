@@ -177,49 +177,75 @@
 
   <div id="appToastContainer"></div>
 
-  <!-- Parent View Dashboard -->
-  <div id="parentViewSection" class="d-none">
-    <nav class="navbar navbar-expand-lg bg-madrassa navbar-dark shadow-sm">
-      <div class="container px-4">
-        <a class="navbar-brand fw-bold" href="#"><i class="fa-solid fa-kaaba me-2"></i><span id="parentInstNameDisplay">Smart Madrasa</span></a>
-        <button class="btn btn-outline-light btn-sm" onclick="logoutParent()"><i class="fa-solid fa-right-from-bracket"></i> Exit</button>
+<!-- Parent View Dashboard -->
+<div id="parentViewSection" class="d-none">
+  <nav class="navbar navbar-expand-lg bg-madrassa navbar-dark shadow-sm">
+    <div class="container px-4">
+      <a class="navbar-brand fw-bold" href="#"><i class="fa-solid fa-kaaba me-2"></i><span id="parentInstNameDisplay">Smart Madrasa</span></a>
+      <button class="btn btn-outline-light btn-sm" onclick="logoutParent()"><i class="fa-solid fa-right-from-bracket"></i> Exit</button>
+    </div>
+  </nav>
+  <div class="container py-4">
+    <div class="row mb-3">
+      <div class="col-12">
+        <select id="parentStudentSelect" class="form-select" onchange="switchParentStudent()"></select>
       </div>
-    </nav>
-    <div class="container py-4">
-      <div class="row mb-3">
-        <div class="col-12">
-          <select id="parentStudentSelect" class="form-select" onchange="switchParentStudent()"></select>
-        </div>
-      </div>
-      <div class="row g-4">
-        <div class="col-md-4">
-          <div class="card p-4 text-center border-0 shadow-sm">
-            <i class="fa-solid fa-user-graduate fa-4x text-success mb-3"></i>
-            <h4 class="fw-bold mb-1" id="pvStudentName">-</h4>
-            <span class="badge bg-success mb-2" id="pvClass">-</span>
-            <p class="text-muted mb-0">Reg No: <b id="pvRegNo">-</b></p>
-            <p class="text-muted small">Father: <span id="pvFather">-</span></p>
-            <div class="border-top pt-3 mt-2">
-              <h6>Total Points</h6>
-              <h3 class="fw-bold text-warning mb-0" id="pvTotalPoints">0 Pts</h3>
-            </div>
+    </div>
+    <div class="row g-4">
+      <!-- Left Profile Card -->
+      <div class="col-md-4">
+        <div class="card p-4 text-center border-0 shadow-sm mb-4">
+          <i class="fa-solid fa-user-graduate fa-4x text-success mb-3"></i>
+          <h4 class="fw-bold mb-1" id="pvStudentName">-</h4>
+          <span class="badge bg-success mb-2" id="pvClass">-</span>
+          <p class="text-muted mb-0">Reg No: <b id="pvRegNo">-</b></p>
+          <p class="text-muted small">Father: <span id="pvFather">-</span></p>
+          <div class="border-top pt-3 mt-2">
+            <h6>Total Performance Points</h6>
+            <h3 class="fw-bold text-warning mb-0" id="pvTotalPoints">0 Pts</h3>
           </div>
         </div>
-        <div class="col-md-8">
-          <div class="card p-4 mb-4 border-0 shadow-sm">
-            <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-calendar-days me-2"></i>Academic Fee Status</h5>
-            <div id="pvFeeMonthGrid" class="month-grid mb-3"></div>
-            <div class="table-responsive">
-              <table class="table table-bordered align-middle">
-                <thead class="table-light"><tr><th>Receipt No</th><th>Date</th><th>Month/Item</th><th>Amount</th></tr></thead>
-                <tbody id="pvFeeTableBody"><tr><td colspan="4" class="text-center text-muted">No fee records found</td></tr></tbody>
-              </table>
-            </div>
+      </div>
+
+      <!-- Right Details Sections (Fees, Marks, Performance, Attendance) -->
+      <div class="col-md-8">
+        <!-- 1. Academic Fee Status -->
+        <div class="card p-4 mb-4 border-0 shadow-sm">
+          <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-calendar-days me-2"></i>Academic Fee Status</h5>
+          <div id="pvFeeMonthGrid" class="month-grid mb-3"></div>
+          <div class="table-responsive">
+            <table class="table table-bordered align-middle">
+              <thead class="table-light"><tr><th>Receipt No</th><th>Date</th><th>Month/Item</th><th>Amount</th></tr></thead>
+              <tbody id="pvFeeTableBody"><tr><td colspan="4" class="text-center text-muted">No fee records found</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 2. Examination Marks -->
+        <div class="card p-4 mb-4 border-0 shadow-sm">
+          <h5 class="fw-bold text-primary mb-3"><i class="fa-solid fa-award me-2"></i>Examination Marks</h5>
+          <div class="table-responsive">
+            <table class="table table-bordered align-middle">
+              <thead class="table-light"><tr><th>Exam</th><th>Subject</th><th>Mark Obtained</th></tr></thead>
+              <tbody id="pvMarksTableBody"><tr><td colspan="3" class="text-center text-muted">No exam marks found</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 3. Performance & Star Points History -->
+        <div class="card p-4 mb-4 border-0 shadow-sm">
+          <h5 class="fw-bold text-warning text-dark mb-3"><i class="fa-solid fa-star me-2"></i>Performance & Tasks History</h5>
+          <div class="table-responsive">
+            <table class="table table-bordered align-middle">
+              <thead class="table-light"><tr><th>Date</th><th>Task / Activity</th><th>Points</th></tr></thead>
+              <tbody id="pvPointsTableBody"><tr><td colspan="3" class="text-center text-muted">No performance points recorded</td></tr></tbody>
+            </table>
           </div>
         </div>
       </div>
     </div>
   </div>
+</div>
 
   <!-- Auth Screen -->
   <div id="authSection" class="auth-wrapper">
