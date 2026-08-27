@@ -57,6 +57,44 @@ window.logoutParent = () => {
   window.location.reload();
 };
 
+window.switchAuthTab = (tabName) => {
+  const loginForm = document.getElementById("loginForm");
+  const signupOptions = document.getElementById("signupOptions");
+  const signupForm = document.getElementById("signupForm");
+  const staffSignupForm = document.getElementById("staffSignupForm");
+  const btnLogin = document.getElementById("tabBtnLogin");
+  const btnSignup = document.getElementById("tabBtnSignup");
+
+  if (tabName === 'login') {
+    if (loginForm) loginForm.classList.remove("d-none");
+    if (signupOptions) signupOptions.classList.add("d-none");
+    if (signupForm) signupForm.classList.add("d-none");
+    if (staffSignupForm) staffSignupForm.classList.add("d-none");
+    if (btnLogin) btnLogin.classList.add("active");
+    if (btnSignup) btnSignup.classList.remove("active");
+  } else if (tabName === 'signup') {
+    if (loginForm) loginForm.classList.add("d-none");
+    if (signupOptions) signupOptions.classList.remove("d-none");
+    if (signupForm) signupForm.classList.add("d-none");
+    if (staffSignupForm) staffSignupForm.classList.add("d-none");
+    if (btnLogin) btnLogin.classList.remove("active");
+    if (btnSignup) btnSignup.classList.add("active");
+  }
+};
+
+window.showSignupForm = (type) => {
+  const signupOptions = document.getElementById("signupOptions");
+  const signupForm = document.getElementById("signupForm");
+  const staffSignupForm = document.getElementById("staffSignupForm");
+
+  if (signupOptions) signupOptions.classList.add("d-none");
+  if (type === 'madrasa') {
+    if (signupForm) signupForm.classList.remove("d-none");
+  } else if (type === 'staff') {
+    if (staffSignupForm) staffSignupForm.classList.remove("d-none");
+  }
+};
+
 // ==========================================
 // SECTION 3: STAFF & ADMIN REGISTRATION
 // ==========================================
@@ -295,4 +333,4 @@ async function loadParentStudentData(student) {
   } catch (e) {
     console.error("Error loading parent data:", e);
   }
-}
+};
