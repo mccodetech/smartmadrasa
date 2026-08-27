@@ -227,3 +227,81 @@ onAuthStateChanged(auth, async (user) => {
     }
   }
 });
+
+// ==========================================
+// MANAGE PRINCIPALS & STAFF MODULE
+// ==========================================
+window.loadPrincipalsList = async () => {
+  const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
+  const tbody = document.querySelector("#staffTableBody") || document.querySelector("table tbody"); // ടേബിളിന്റെ ബോഡി കണ്ടെത്താൻ
+  
+  if (!currentInstitutionId) return;
+
+  try {
+    // സ്ഥാപനത്തിലെ മുഴുവൻ യൂസർമാരെയും (സ്റ്റാഫ് & പ്രിൻസിപ്പൽ) ഫെച്ച് ചെയ്യുന്നു
+    const q = query(collection(db, "users"), where("institutionId", "==", currentInstitutionId));
+    const snap = await getDocs(q);
+
+    let html = "";
+    let count = 0;
+
+    snap.forEach(d => {
+      const user = d.data();
+      // സൂപ്പർ അഡ്മിനെ ഈ ലിസ്റ്റിൽ ഒഴിവാക്കാം
+      if (user.role === "admin" && user.email === "mccodetech@gmail.com") return; 
+
+      count++;
+      const isPending = user.status === "pending";
+      
+      html += `
+        <tr>
+          <td><b>${user.name || '-'}</b></td>
+          <td><span class="badge bg-secondary">${user.role || 'staff'}</span></td>
+          <td>${user.email || '-'}</td>
+          <td>${user.phone || '-'}</td>
+          <td>
+            ${isPending 
+              ? `<button class="btn btn-sm btn-success px-3" onclick="approveStaffAccount('${d.id}')"><i class="fa-solid fa-check me-1"></i> Approve</button>` 
+              : `<span class="badge bg-success">Active</span>`
+            }
+            <button class="btn btn-sm btn-outline-danger ms-1" onclick="deleteStaffAccount('${d.id}', '${user.name}')"><i class="fa-solid fa-trash"></i></button>
+          </td>
+        </tr>
+      `;
+    });
+
+    // ടേബിളിൽ ഡാറ്റ ഇൻസേർട്ട് ചെയ്യുന്നു
+    const tableBody = document.getElementById("staffTableBody");
+    if (tableBody) {
+      tableBody.innerHTML = html || `<tr><td colspan="5" class="text-center text-muted">No staff or principals found.</td></tr>`;
+    }
+  } catch (e) {
+    console.error("Error loading staff list:", e);
+    window.showToast("Error loading staff list: " + e.message, "error");
+  }
+};
+
+// സ്റ്റാഫ് അക്കൗണ്ട് അപ്പ്രൂവ് ചെയ്യാൻ
+window.approveStaffAccount = async (userId) => {
+  try {
+    await updateDoc(doc(db, "users", userId), {
+      status: "active"
+    });
+    window.showToast("Staff account approved successfully!", "success");
+    window.loadPrincipalsList(); // ലിസ്റ്റ് റിഫ്രഷ് ചെയ്യാൻ
+  } catch (e) {
+    window.showToast("Error approving staff: " + e.message, "error");
+  }
+};
+
+// സ്റ്റാഫ് അക്കൗണ്ട് ഡിലീറ്റ് ചെയ്യാൻ (ആവശ്യമെങ്കിൽ)
+window.deleteStaffAccount = async (userId, name) => {
+  if (!confirm(`Are you sure you want to remove ${name}?`)) return;
+  try {
+    await deleteDoc(doc(db, "users", userId));
+    window.showToast("Staff removed successfully!", "success");
+    window.loadPrincipalsList();
+  } catch (e) {
+    window.showToast("Error deleting staff: " + e.message, "error");
+  }
+};
