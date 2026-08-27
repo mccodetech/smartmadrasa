@@ -157,8 +157,10 @@ function renderPaginatedTable() {
   const pageData = localStudentsCache.slice(startIndex, endIndex);
 
   let html = "";
+  
+  // നിങ്ങൾ ചോദിച്ച കോഡ് ഇവിടെയാണ് ചേർക്കേണ്ടത്:
   pageData.forEach((s, index) => {
-    const slNo = startIndex + index + 1; // സീരിയൽ നമ്പർ കണക്കാക്കാൻ
+    const slNo = startIndex + index + 1;
     const cleanClass = (s.currentClass || '-').replace(/Class\s*/i, "").trim();
     html += `
       <tr>
@@ -169,15 +171,18 @@ function renderPaginatedTable() {
         <td>${s.fatherName || '-'}</td>
         <td>${s.place || '-'}</td>
         <td>${s.phone || '-'}</td>
-        <td class="text-center">
-          <button class="btn btn-sm btn-outline-primary me-1" onclick="openStudentProfileModal('${s.id}')"><i class="fa-solid fa-pen"></i></button>
-          <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${s.id}', '${s.name}')"><i class="fa-solid fa-trash"></i></button>
+        <td class="text-center" style="white-space: nowrap;">
+          <button class="btn btn-sm btn-outline-info me-1" onclick="viewStudentProfile('${s.id}')" title="View Full Details"><i class="fa-solid fa-eye"></i></button>
+          <button class="btn btn-sm btn-outline-primary me-1" onclick="openStudentProfileModal('${s.id}')" title="Edit"><i class="fa-solid fa-pen"></i></button>
+          <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${s.id}', '${s.name}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
         </td>
       </tr>
     `;
   });
+
   tbody.innerHTML = html;
   document.getElementById("paginationInfo").innerText = `Showing ${startIndex + 1}-${endIndex} of ${total} students`;
+  renderPaginationControls(Math.ceil(total / pageSize));
 }
 
 // ലോക്കൽ ഫിൽട്ടർ ചെയ്യുമ്പോഴും സീരിയൽ നമ്പർ വരുന്ന രീതിയിൽ
@@ -190,6 +195,7 @@ window.filterStudentsLocal = () => {
   );
   const tbody = document.getElementById("studentsTableBody");
   let html = "";
+  
   filtered.slice(0, 50).forEach((s, index) => {
     const cleanClass = (s.currentClass || '-').replace(/Class\s*/i, "").trim();
     html += `
@@ -201,16 +207,17 @@ window.filterStudentsLocal = () => {
         <td>${s.fatherName || '-'}</td>
         <td>${s.place || '-'}</td>
         <td>${s.phone || '-'}</td>
-        <td class="text-center">
-          <button class="btn btn-sm btn-outline-primary me-1" onclick="openStudentProfileModal('${s.id}')"><i class="fa-solid fa-pen"></i></button>
-          <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${s.id}', '${s.name}')"><i class="fa-solid fa-trash"></i></button>
+        <td class="text-center" style="white-space: nowrap;">
+          <button class="btn btn-sm btn-outline-info me-1" onclick="viewStudentProfile('${s.id}')" title="View Full Details"><i class="fa-solid fa-eye"></i></button>
+          <button class="btn btn-sm btn-outline-primary me-1" onclick="openStudentProfileModal('${s.id}')" title="Edit"><i class="fa-solid fa-pen"></i></button>
+          <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${s.id}', '${s.name}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
         </td>
       </tr>
     `;
   });
+  
   tbody.innerHTML = html || `<tr><td colspan="8" class="text-center text-muted">No matching results found.</td></tr>`;
 };
-
 // CSV ഫോർമാറ്റ് ഡൗൺലോഡ് ചെയ്യാൻ
 window.downloadCSVFormat = () => {
   const headers = "REG NO.,STUDENT NAME,CURRENT CLASS,FATHER NAME,MOBILE NUMBER\n";
