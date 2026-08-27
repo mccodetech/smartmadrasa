@@ -7,6 +7,8 @@ import "./students.js";
 import "./fees.js";
 import "./academics.js";
 import "./main-dashboard.js";
+import "./committee.js";
+import "./ledger.js";
 
 import { 
   doc, getDoc, collection, getDocs, query, where, serverTimestamp, setDoc, updateDoc, deleteDoc 
