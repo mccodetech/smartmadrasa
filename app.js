@@ -92,28 +92,43 @@ window.loadInstitutionSettings = async () => {
   }
 };
 
-// സെറ്റിങ്സ് സേവ് ചെയ്യാൻ
-window.saveInstitutionSettings = async () => {
+// സ്പെഷ്യൽ ഫണ്ട് മാത്രം സേവ് ചെയ്യാൻ
+window.saveSpecialFundsSetting = async () => {
   const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
   const rawInput = document.getElementById("settingSpecialFundsInput")?.value || "";
   const fundsArray = rawInput.split(',').map(s => s.trim().toUpperCase()).filter(s => s.length > 0);
-  const totalWorkingDays = Number(document.getElementById("settingTotalWorkingDays")?.value) || 0;
 
   try {
     await setDoc(doc(db, "settings", currentInstitutionId), {
       institutionId: currentInstitutionId,
       specialFeeCategories: fundsArray,
-      totalWorkingDays: totalWorkingDays,
       updatedAt: serverTimestamp()
     }, { merge: true });
 
     window.customSpecialFunds = fundsArray;
-    window.showToast("Settings updated successfully!", "success");
+    window.showToast("Special funds updated successfully!", "success");
   } catch (e) {
-    window.showToast("Error saving settings: " + e.message, "error");
+    window.showToast("Error saving special funds: " + e.message, "error");
   }
 };
 
+// ടോട്ടൽ വർക്കിംഗ് ഡെയ്സ് മാത്രം സേവ് ചെയ്യാൻ
+window.saveWorkingDaysSetting = async () => {
+  const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
+  const totalWorkingDays = Number(document.getElementById("settingTotalWorkingDays")?.value) || 0;
+
+  try {
+    await setDoc(doc(db, "settings", currentInstitutionId), {
+      institutionId: currentInstitutionId,
+      totalWorkingDays: totalWorkingDays,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+
+    window.showToast("Total working days updated successfully!", "success");
+  } catch (e) {
+    window.showToast("Error saving working days: " + e.message, "error");
+  }
+};
 // ==========================================
 // STAFF MANAGEMENT & CLASS ASSIGNMENT MODULE
 // ==========================================
