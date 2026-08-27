@@ -232,7 +232,37 @@ async function loadParentStudentData(student) {
     if (marksTableBody) {
       marksTableBody.innerHTML = marksHtml || `<tr><td colspan="3" class="text-center text-muted">No exam marks found</td></tr>`;
     }
+    // 4. Attendance Summary Calculation (അറ്റൻഡൻസ് കണക്കുകൾ ലോഡ് ചെയ്യാൻ)
+    const attQ = query(collection(db, "attendance"), where("institutionId", "==", student.institutionId), where("class", "==", String(student.currentClass || '').replace(/Class\s*/i, "").trim()));
+    const attSnap = await getDocs(attQ);
+    
+    let totalDays = 0;
+    let presentDays = 0;
+    let absentDays = 0;
 
+    attSnap.forEach(ad => {
+      const attData = ad.data();
+      if (attData.records && attData.records[student.id]) {
+        totalDays++;
+        if (attData.records[student.id] === "P") {
+          presentDays++;
+        } else {
+          absentDays++;
+        }
+      }
+    });
+
+    const attPercentage = totalDays > 0 ? Math.round((presentDays / totalDays) * 100) : 0;
+
+    const elTotal = document.getElementById("pvAttTotal");
+    const elPresent = document.getElementById("pvAttPresent");
+    const elAbsent = document.getElementById("pvAttAbsent");
+    const elPercentage = document.getElementById("pvAttPercentage");
+
+    if (elTotal) elTotal.innerText = totalDays;
+    if (elPresent) elPresent.innerText = presentDays;
+    if (elAbsent) elAbsent.innerText = absentDays;
+    if (elPercentage) elPercentage.innerText = attPercentage + "%";
     // 3. Performance & Star Points History (പെർഫോമൻസ് പോയിന്റുകൾ ലോഡ് ചെയ്യാൻ)
     const perfQ = query(collection(db, "performancePoints"), where("institutionId", "==", student.institutionId), where("regNo", "==", student.regNo));
     const perfSnap = await getDocs(perfQ);
