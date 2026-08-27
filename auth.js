@@ -7,7 +7,7 @@ import {
   signOut 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { 
-  doc, setDoc, collection, getDocs, query, where, serverTimestamp 
+  doc, setDoc, collection, getDoc, getDocs, query, where, serverTimestamp 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // ==========================================
@@ -62,7 +62,6 @@ window.logoutParent = () => {
 // ==========================================
 window.handleSignUp = async (e) => {
   e.preventDefault();
-  // (രജിസ്ട്രേഷൻ കോഡ്)
 };
 
 // ==========================================
@@ -161,7 +160,7 @@ window.switchParentStudent = () => {
   if (selectedStudent) loadParentStudentData(selectedStudent);
 };
 
-// പാരന്റ് പോർട്ടലിൽ കുട്ടിയുടെ ഫീസ്, മാർക്ക്, പെർഫോമൻസ് എന്നിവ ലോഡ് ചെയ്യുന്ന ഫംഗ്ഷൻ
+// പാരന്റ് പോർട്ടലിൽ കുട്ടിയുടെ ഫീസ്, മാർക്ക്, അറ്റൻഡൻസ്, പെർഫോമൻസ് എന്നിവ ലോഡ് ചെയ്യുന്ന ഫംഗ്ഷൻ
 async function loadParentStudentData(student) {
   const nameEl = document.getElementById("pvStudentName");
   const classEl = document.getElementById("pvClass");
@@ -207,7 +206,7 @@ async function loadParentStudentData(student) {
     const monthGrid = document.getElementById("pvFeeMonthGrid");
     if (monthGrid) monthGrid.innerHTML = gridHtml;
 
-    // 2. Examination Marks (മാർക്കുകളും ടോട്ടലും കൃത്യമായി കാണിക്കാൻ)
+    // 2. Examination Marks
     const marksQ = query(collection(db, "examMarks"), where("institutionId", "==", student.institutionId), where("regNo", "==", student.regNo));
     const marksSnap = await getDocs(marksQ);
     let marksHtml = "";
@@ -223,7 +222,6 @@ async function loadParentStudentData(student) {
           examTotal += numScore;
           marksHtml += `<tr><td>${examTitle}</td><td>${subj}</td><td class="fw-bold">${numScore}</td></tr>`;
         });
-        // ആ എക്സാമിന്റെ ടോട്ടൽ മാർക്ക് അവസാന വരിയായി ചേർക്കുന്നു
         marksHtml += `<tr class="table-secondary fw-bold"><td>${examTitle}</td><td>Total Score</td><td class="text-success">${examTotal} Marks</td></tr>`;
       }
     });
@@ -232,38 +230,52 @@ async function loadParentStudentData(student) {
     if (marksTableBody) {
       marksTableBody.innerHTML = marksHtml || `<tr><td colspan="3" class="text-center text-muted">No exam marks found</td></tr>`;
     }
-    // 4. Attendance Summary Calculation (അറ്റൻഡൻസ് കണക്കുകൾ ലോഡ് ചെയ്യാൻ)
+
+    // 3. Attendance Summary Calculation (മാനുവൽ ഡാറ്റയും ഡെയിലി അറ്റൻഡൻസും ചേർത്ത്)
+    const settingsDoc = await getDoc(doc(db, "settings", student.institutionId));
+    let manualTotalDays = 0;
+    if (settingsDoc.exists()) {
+      manualTotalDays = Number(settingsDoc.data().totalWorkingDays) || 0;
+    }
+
+    const manualAttDoc = await getDoc(doc(db, "manualAttendance", `${student.institutionId}_${String(student.currentClass).replace(/Class\s*/i, "").trim()}_${student.regNo}`));
+    let manualPresentDays = 0;
+    if (manualAttDoc.exists()) {
+      manualPresentDays = Number(manualAttDoc.data().presentDays) || 0;
+    }
+
     const attQ = query(collection(db, "attendance"), where("institutionId", "==", student.institutionId), where("class", "==", String(student.currentClass || '').replace(/Class\s*/i, "").trim()));
     const attSnap = await getDocs(attQ);
     
-    let totalDays = 0;
-    let presentDays = 0;
-    let absentDays = 0;
+    let dailyRecordedDays = 0;
+    let dailyPresentDays = 0;
 
     attSnap.forEach(ad => {
       const attData = ad.data();
       if (attData.records && attData.records[student.id]) {
-        totalDays++;
+        dailyRecordedDays++;
         if (attData.records[student.id] === "P") {
-          presentDays++;
-        } else {
-          absentDays++;
+          dailyPresentDays++;
         }
       }
     });
 
-    const attPercentage = totalDays > 0 ? Math.round((presentDays / totalDays) * 100) : 0;
+    const finalTotalDays = manualTotalDays + dailyRecordedDays;
+    const finalPresentDays = manualPresentDays + dailyPresentDays;
+    const absentDays = Math.max(0, finalTotalDays - finalPresentDays);
+    const attPercentage = finalTotalDays > 0 ? Math.round((finalPresentDays / finalTotalDays) * 100) : 0;
 
     const elTotal = document.getElementById("pvAttTotal");
     const elPresent = document.getElementById("pvAttPresent");
     const elAbsent = document.getElementById("pvAttAbsent");
     const elPercentage = document.getElementById("pvAttPercentage");
 
-    if (elTotal) elTotal.innerText = totalDays;
-    if (elPresent) elPresent.innerText = presentDays;
+    if (elTotal) elTotal.innerText = finalTotalDays;
+    if (elPresent) elPresent.innerText = finalPresentDays;
     if (elAbsent) elAbsent.innerText = absentDays;
     if (elPercentage) elPercentage.innerText = attPercentage + "%";
-    // 3. Performance & Star Points History (പെർഫോമൻസ് പോയിന്റുകൾ ലോഡ് ചെയ്യാൻ)
+
+    // 4. Performance & Star Points History
     const perfQ = query(collection(db, "performancePoints"), where("institutionId", "==", student.institutionId), where("regNo", "==", student.regNo));
     const perfSnap = await getDocs(perfQ);
     let totalPts = 0;
