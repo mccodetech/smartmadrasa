@@ -67,12 +67,22 @@ window.saveCommitteeMember = async (e) => {
   const name = document.getElementById("commName").value.trim().toUpperCase();
   const designation = document.getElementById("commDesignation").value.trim().toUpperCase();
   const phone = document.getElementById("commPhone").value.trim();
-  const photo = document.getElementById("commPhoto").value.trim();
+  const photoFile = document.getElementById("commPhotoFile")?.files[0];
+
+  let photoBase64 = "";
+
+  // ഫോട്ടോ സെലക്ട് ചെയ്തിട്ടുണ്ടെങ്കിൽ അതിനെ Base64 ആക്കി മാറ്റുന്നു
+  if (photoFile) {
+    photoBase64 = await toBase64(photoFile);
+  }
 
   try {
     await addDoc(collection(db, "committee"), {
       institutionId: currentInstitutionId,
-      name, designation, phone, photo,
+      name, 
+      designation, 
+      phone, 
+      photo: photoBase64, // സേവ് ചെയ്യുന്ന ഫോട്ടോ
       timestamp: serverTimestamp()
     });
 
@@ -86,6 +96,14 @@ window.saveCommitteeMember = async (e) => {
     window.showToast("Error: " + err.message, "error");
   }
 };
+
+// ഫയലിനെ Base64 ഫോർമാറ്റിലേക്ക് മാറ്റാൻ സഹായിക്കുന്ന ചെറിയ ഫംഗ്ഷൻ
+const toBase64 = file => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+});
 
 window.deleteCommitteeMember = async (id) => {
   if (!confirm("Are you sure you want to delete this member?")) return;
