@@ -8,6 +8,53 @@ import {
 
 const DEFAULT_SUBJECTS = ["Quran", "Tajweed", "Fiqh", "Aqeedah", "Tareekh", "Lisan"];
 
+// കസ്റ്റം ടാസ്ക് മോഡൽ സുരക്ഷിതമായി ഓപ്പൺ ചെയ്യാൻ
+window.openCustomTaskModal = () => {
+  try {
+    const modalEl = document.getElementById("customTaskModal");
+    if (modalEl) {
+      if (window.bootstrap && window.bootstrap.Modal) {
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
+      } else {
+        modalEl.classList.add("show");
+        modalEl.style.display = "block";
+        document.body.classList.add("modal-open");
+      }
+    } else {
+      window.showToast("Custom task modal not found in HTML.", "error");
+    }
+  } catch (err) {
+    console.error("Error opening custom task modal:", err);
+    window.showToast("Error: " + err.message, "error");
+  }
+};
+
+window.saveCustomTask = (e) => {
+  e.preventDefault();
+  const taskName = document.getElementById("customTaskName")?.value.trim().toUpperCase();
+  const taskPts = document.getElementById("customTaskPoints")?.value.trim();
+
+  if (!taskName || !taskPts) return;
+
+  const taskSelect = document.getElementById("perfTaskSelect");
+  if (taskSelect) {
+    const newOpt = document.createElement("option");
+    newOpt.value = `${taskName} (+${taskPts})|${taskPts}`;
+    newOpt.text = `${taskName} (+${taskPts} Pts)`;
+    newOpt.selected = true;
+    taskSelect.appendChild(newOpt);
+  }
+
+  const modalEl = document.getElementById("customTaskModal");
+  if (modalEl && window.bootstrap) {
+    const modalInstance = bootstrap.Modal.getInstance(modalEl);
+    if (modalInstance) modalInstance.hide();
+  }
+  
+  window.showToast("Custom task added successfully!", "success");
+};
+
 // ==========================================
 // 1. SUBJECT SETTINGS MODULE
 // ==========================================
@@ -282,7 +329,6 @@ window.saveClassAttendance = async () => {
   const cleanClass = selClass.replace(/Class\s*/i, "").trim();
   
   try {
-    // 1. ഈ തീയതിയിലും ക്ലാസിലും ഇതിനകം അറ്റൻഡൻസ് എടുത്തിട്ടുണ്ടോ എന്ന് പരിശോധിക്കുന്നു
     const existingAttQuery = query(
       collection(db, "attendance"), 
       where("institutionId", "==", currentInstitutionId), 
@@ -311,7 +357,6 @@ window.saveClassAttendance = async () => {
       const isPresent = r.querySelector(".att-checkbox")?.checked;
       records[sid] = isPresent ? "P" : "A";
 
-      // പ്രസന്റ് ആയ കുട്ടികൾക്ക് മാത്രം അന്ന് ഒരു തവണ മാത്രം 5 പോയിന്റ് നൽകുന്നു
       if (isPresent) {
         const reg = r.querySelector("b")?.innerText || "";
         const name = r.querySelectorAll("td")[1]?.innerText || "";
@@ -323,7 +368,7 @@ window.saveClassAttendance = async () => {
           regNo: Number(reg) || 0,
           studentName: name,
           class: cleanClass,
-          task: `Daily Attendance (${date})`, // തീയതി സഹിതം സേവ് ചെയ്യുന്നു
+          task: `Daily Attendance (${date})`,
           points: 5,
           date: new Date(date).toLocaleDateString(),
           timestamp: serverTimestamp()
@@ -431,7 +476,6 @@ window.toggleSelectAllPerf = () => {
 // 3.1. MANUAL PREVIOUS ATTENDANCE MODULE
 // ==========================================
 
-// ക്ലാസുകൾ ഡ്രോപ്പ്ഡൗണിലേക്ക് പോപ്പുലേറ്റ് ചെയ്യാൻ
 window.populateManualAttendanceClasses = () => {
   const classesList = ["Class 1", "Class 2", "Class 3", "Class 4", "Class 5", "Class 6", "Class 7", "Class 8", "Class 9", "Class 10", "Class 11", "Class 12"];
   const manualSelect = document.getElementById("manualAttClassSelect");
@@ -444,7 +488,6 @@ window.populateManualAttendanceClasses = () => {
   }
 };
 
-// മാനുവൽ അറ്റൻഡൻസ് ഷീറ്റ് ലോഡ് ചെയ്യാൻ
 window.loadManualAttendanceSheet = async () => {
   const selClass = document.getElementById("manualAttClassSelect")?.value;
   const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
@@ -502,7 +545,6 @@ window.loadManualAttendanceSheet = async () => {
   }
 };
 
-// മാനുവൽ അറ്റൻഡൻസ് സേവ് ചെയ്യാൻ
 window.saveManualAttendance = async () => {
   const selClass = document.getElementById("manualAttClassSelect")?.value;
   const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
