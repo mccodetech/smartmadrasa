@@ -276,56 +276,77 @@ window.saveClassAttendance = async () => {
   const btn = document.getElementById("btnSaveAttendance");
   if (btn) {
     btn.disabled = true;
-    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-1"></i> Saving Attendance & Points...`;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-1"></i> Checking & Saving...`;
   }
 
   const cleanClass = selClass.replace(/Class\s*/i, "").trim();
-  const rows = document.querySelectorAll("#attendanceTableBody tr[data-sid]");
-  const records = {};
   
-  const batch = writeBatch(db);
-  const attendanceRef = doc(collection(db, "attendance"));
-
-  rows.forEach(r => {
-    const sid = r.getAttribute("data-sid");
-    const isPresent = r.querySelector(".att-checkbox")?.checked;
-    records[sid] = isPresent ? "P" : "A";
-
-    if (isPresent) {
-      const reg = r.querySelector("b")?.innerText || "";
-      const name = r.querySelectorAll("td")[1]?.innerText || "";
-
-      const perfRef = doc(collection(db, "performancePoints"));
-      batch.set(perfRef, {
-        institutionId: currentInstitutionId,
-        studentId: sid,
-        regNo: Number(reg) || 0,
-        studentName: name,
-        class: cleanClass,
-        task: "Daily Attendance (+5 Pts)",
-        points: 5,
-        date: new Date(date).toLocaleDateString(),
-        timestamp: serverTimestamp()
-      });
-    }
-  });
-
-  batch.set(attendanceRef, {
-    institutionId: currentInstitutionId,
-    date: date,
-    class: cleanClass,
-    records: records,
-    recordedBy: auth.currentUser ? auth.currentUser.uid : "unknown",
-    timestamp: serverTimestamp()
-  });
-
   try {
+    // 1. ഈ തീയതിയിലും ക്ലാസിലും ഇതിനകം അറ്റൻഡൻസ് എടുത്തിട്ടുണ്ടോ എന്ന് പരിശോധിക്കുന്നു
+    const existingAttQuery = query(
+      collection(db, "attendance"), 
+      where("institutionId", "==", currentInstitutionId), 
+      where("class", "==", cleanClass), 
+      where("date", "==", date)
+    );
+    const existingSnap = await getDocs(existingAttQuery);
+
+    if (!existingSnap.empty) {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fa-solid fa-check-double me-1"></i> Save Attendance`;
+      }
+      window.showToast("Attendance for this date is already recorded! Duplicate points not allowed.", "warning");
+      return;
+    }
+
+    const rows = document.querySelectorAll("#attendanceTableBody tr[data-sid]");
+    const records = {};
+    
+    const batch = writeBatch(db);
+    const attendanceRef = doc(collection(db, "attendance"));
+
+    rows.forEach(r => {
+      const sid = r.getAttribute("data-sid");
+      const isPresent = r.querySelector(".att-checkbox")?.checked;
+      records[sid] = isPresent ? "P" : "A";
+
+      // പ്രസന്റ് ആയ കുട്ടികൾക്ക് മാത്രം അന്ന് ഒരു തവണ മാത്രം 5 പോയിന്റ് നൽകുന്നു
+      if (isPresent) {
+        const reg = r.querySelector("b")?.innerText || "";
+        const name = r.querySelectorAll("td")[1]?.innerText || "";
+
+        const perfRef = doc(collection(db, "performancePoints"));
+        batch.set(perfRef, {
+          institutionId: currentInstitutionId,
+          studentId: sid,
+          regNo: Number(reg) || 0,
+          studentName: name,
+          class: cleanClass,
+          task: `Daily Attendance (${date})`, // തീയതി സഹിതം സേവ് ചെയ്യുന്നു
+          points: 5,
+          date: new Date(date).toLocaleDateString(),
+          timestamp: serverTimestamp()
+        });
+      }
+    });
+
+    batch.set(attendanceRef, {
+      institutionId: currentInstitutionId,
+      date: date,
+      class: cleanClass,
+      records: records,
+      recordedBy: auth.currentUser ? auth.currentUser.uid : "unknown",
+      timestamp: serverTimestamp()
+    });
+
     await batch.commit();
     if (btn) {
       btn.className = "btn btn-secondary px-4 mt-2"; 
       btn.innerHTML = `<i class="fa-solid fa-check me-1"></i> Saved Successfully`;
     }
     window.showToast("Attendance & Auto-Points recorded successfully!", "success");
+
   } catch (err) { 
     if (btn) {
       btn.disabled = false;
