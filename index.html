@@ -844,21 +844,31 @@
           </div>
 
           <!-- Settings Tab -->
-          <div id="settingsTab" class="content-tab d-none">
-            <div class="card p-4">
-              <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-gears"></i> Institution Settings</h5>
-              <div class="alert alert-info small">Manage custom settings and special funds for your institution.</div>
-              <div class="mb-3">
-                <label class="form-label fw-bold">Special Fund Categories (Comma Separated)</label>
-                <input type="text" id="settingSpecialFundsInput" class="form-control" placeholder="e.g. BUILDING FUND, ANNUAL DAY">
-              </div>
-              <div class="mb-3">
-              <label class="form-label fw-bold">Total Working Days (ഇതുവരെയുള്ള ആകെ പ്രവൃത്തി ദിവസങ്ങൾ)</label>
-              <input type="number" id="settingTotalWorkingDays" class="form-control" placeholder="e.g. 50">
-              </div>
-              <button class="btn btn-primary" onclick="saveInstitutionSettings()"><i class="fa-solid fa-save me-1"></i> Save Settings</button>
-            </div>
-          </div>
+          <!-- Settings Tab -->
+<div id="settingsTab" class="content-tab d-none">
+  <div class="card p-4">
+    <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-gears"></i> Institution Settings</h5>
+    <div class="alert alert-info small">Manage custom settings and special funds for your institution.</div>
+    
+    <!-- 1. Special Funds Setting -->
+    <div class="mb-4 p-3 border rounded bg-light">
+      <label class="form-label fw-bold">Special Fund Categories (Comma Separated)</label>
+      <div class="input-group">
+        <input type="text" id="settingSpecialFundsInput" class="form-control" placeholder="e.g. BUILDING FUND, ANNUAL DAY">
+        <button class="btn btn-success btn-sm px-3" onclick="saveSpecialFundsSetting()"><i class="fa-solid fa-save me-1"></i> Save</button>
+      </div>
+    </div>
+
+    <!-- 2. Total Working Days Setting -->
+    <div class="mb-3 p-3 border rounded bg-light">
+      <label class="form-label fw-bold">Total Working Days (ഇതുവരെയുള്ള ആകെ പ്രവൃത്തി ദിവസങ്ങൾ)</label>
+      <div class="input-group">
+        <input type="number" id="settingTotalWorkingDays" class="form-control" placeholder="e.g. 65">
+        <button class="btn btn-primary btn-sm px-3" onclick="saveWorkingDaysSetting()"><i class="fa-solid fa-save me-1"></i> Save</button>
+      </div>
+    </div>
+  </div>
+</div>
 
         </div> <!-- End of col-lg-9 col-xl-10 -->
       </div> <!-- End of row -->
