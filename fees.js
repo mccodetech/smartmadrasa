@@ -150,6 +150,7 @@ window.loadStudentsForFees = async () => {
       });
       monthBadges += `</div>`;
 
+      // സുരക്ഷിതമായി ഡാറ്റ പാസ് ചെയ്യാൻ എൻകോഡ് ചെയ്യുന്നു
       const sDataStr = encodeURIComponent(JSON.stringify({
         id: s.id, regNo: s.regNo, name: s.name, class: s.currentClass, phone: s.phone || '', fee: defaultFee
       }));
@@ -192,45 +193,58 @@ window.calculateFeeAmount = () => {
 
 // ഫീസ് മോഡൽ സുരക്ഷിതമായി ഓപ്പൺ ചെയ്യാൻ
 window.openFeeModal = (studentDataStr) => {
-  const s = JSON.parse(decodeURIComponent(studentDataStr));
-  const feeForm = document.getElementById("feePaymentForm");
-  if (feeForm && typeof feeForm.reset === 'function') {
-    feeForm.reset();
-  }
+  try {
+    const s = JSON.parse(decodeURIComponent(studentDataStr));
+    const feeForm = document.getElementById("feePaymentForm");
+    if (feeForm && typeof feeForm.reset === 'function') {
+      feeForm.reset();
+    }
 
-  const sId = document.getElementById("payStudentId");
-  const sReg = document.getElementById("payStudentReg");
-  const sName = document.getElementById("payStudentName");
-  const sClass = document.getElementById("payStudentClass");
-  const sPhone = document.getElementById("payStudentPhone");
-  const baseFee = document.getElementById("payBaseFee");
-  const nameDisplay = document.getElementById("payStudentNameDisplay");
-  const feeCategory = document.getElementById("payFeeCategory");
+    const sId = document.getElementById("payStudentId");
+    const sReg = document.getElementById("payStudentReg");
+    const sName = document.getElementById("payStudentName");
+    const sClass = document.getElementById("payStudentClass");
+    const sPhone = document.getElementById("payStudentPhone");
+    const baseFee = document.getElementById("payBaseFee");
+    const nameDisplay = document.getElementById("payStudentNameDisplay");
+    const feeCategory = document.getElementById("payFeeCategory");
 
-  if (sId) sId.value = s.id;
-  if (sReg) sReg.value = s.regNo;
-  if (sName) sName.value = s.name;
-  if (sClass) sClass.value = s.class;
-  if (sPhone) sPhone.value = s.phone;
-  if (baseFee) baseFee.value = s.fee;
-  if (nameDisplay) nameDisplay.innerText = `${s.name} (Reg: ${s.regNo})`;
-  if (feeCategory) feeCategory.value = "Monthly Fee";
-  
-  window.toggleFeeCategoryOptions();
+    if (sId) sId.value = s.id;
+    if (sReg) sReg.value = s.regNo;
+    if (sName) sName.value = s.name;
+    if (sClass) sClass.value = s.class;
+    if (sPhone) sPhone.value = s.phone;
+    if (baseFee) baseFee.value = s.fee;
+    if (nameDisplay) nameDisplay.innerText = `${s.name} (Reg: ${s.regNo})`;
+    if (feeCategory) feeCategory.value = "Monthly Fee";
+    
+    window.toggleFeeCategoryOptions();
 
-  const manualInput = document.getElementById("payManualReceiptInput");
-  const sysReqManualReceipt = window.sysReqManualReceipt || false;
-  if (manualInput) {
-    manualInput.required = sysReqManualReceipt;
-    manualInput.placeholder = sysReqManualReceipt ? "Required" : "Optional";
-  }
+    const manualInput = document.getElementById("payManualReceiptInput");
+    const sysReqManualReceipt = window.sysReqManualReceipt || false;
+    if (manualInput) {
+      manualInput.required = sysReqManualReceipt;
+      manualInput.placeholder = sysReqManualReceipt ? "Required" : "Optional";
+    }
 
-  window.calculateFeeAmount();
+    window.calculateFeeAmount();
 
-  const modalEl = document.getElementById("feePaymentModal");
-  if (modalEl && window.bootstrap) {
-    const modal = new bootstrap.Modal(modalEl);
-    modal.show();
+    const modalEl = document.getElementById("feePaymentModal");
+    if (modalEl) {
+      if (window.bootstrap && window.bootstrap.Modal) {
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
+      } else {
+        modalEl.classList.add("show");
+        modalEl.style.display = "block";
+        document.body.classList.add("modal-open");
+      }
+    } else {
+      window.showToast("Fee payment modal not found.", "error");
+    }
+  } catch (err) {
+    console.error("Error in openFeeModal:", err);
+    window.showToast("Error opening modal: " + err.message, "error");
   }
 };
 
