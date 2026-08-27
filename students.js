@@ -146,7 +146,7 @@ function renderPaginatedTable() {
   const total = localStudentsCache.length;
 
   if (!total) {
-    tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">No student records found.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted">No student records found.</td></tr>`;
     document.getElementById("paginationInfo").innerText = `Showing 0-0 of 0`;
     document.getElementById("paginationControls").innerHTML = "";
     return;
@@ -157,10 +157,12 @@ function renderPaginatedTable() {
   const pageData = localStudentsCache.slice(startIndex, endIndex);
 
   let html = "";
-  pageData.forEach(s => {
+  pageData.forEach((s, index) => {
+    const slNo = startIndex + index + 1; // സീരിയൽ നമ്പർ കണക്കാക്കാൻ
     const cleanClass = (s.currentClass || '-').replace(/Class\s*/i, "").trim();
     html += `
       <tr>
+        <td><b>${slNo}</b></td>
         <td><b class="text-success">${s.regNo || '-'}</b></td>
         <td><b>${s.name || '-'}</b></td>
         <td><span class="badge bg-success">Class ${cleanClass}</span></td>
@@ -177,6 +179,37 @@ function renderPaginatedTable() {
   tbody.innerHTML = html;
   document.getElementById("paginationInfo").innerText = `Showing ${startIndex + 1}-${endIndex} of ${total} students`;
 }
+
+// ലോക്കൽ ഫിൽട്ടർ ചെയ്യുമ്പോഴും സീരിയൽ നമ്പർ വരുന്ന രീതിയിൽ
+window.filterStudentsLocal = () => {
+  const term = document.getElementById("searchBox").value.toLowerCase();
+  const filtered = localStudentsCache.filter(s => 
+    (s.name && s.name.toLowerCase().includes(term)) || 
+    (s.regNo && s.regNo.toString().includes(term)) ||
+    (s.place && s.place.toLowerCase().includes(term))
+  );
+  const tbody = document.getElementById("studentsTableBody");
+  let html = "";
+  filtered.slice(0, 50).forEach((s, index) => {
+    const cleanClass = (s.currentClass || '-').replace(/Class\s*/i, "").trim();
+    html += `
+      <tr>
+        <td><b>${index + 1}</b></td>
+        <td><b class="text-success">${s.regNo || '-'}</b></td>
+        <td><b>${s.name || '-'}</b></td>
+        <td><span class="badge bg-success">Class ${cleanClass}</span></td>
+        <td>${s.fatherName || '-'}</td>
+        <td>${s.place || '-'}</td>
+        <td>${s.phone || '-'}</td>
+        <td class="text-center">
+          <button class="btn btn-sm btn-outline-primary me-1" onclick="openStudentProfileModal('${s.id}')"><i class="fa-solid fa-pen"></i></button>
+          <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${s.id}', '${s.name}')"><i class="fa-solid fa-trash"></i></button>
+        </td>
+      </tr>
+    `;
+  });
+  tbody.innerHTML = html || `<tr><td colspan="8" class="text-center text-muted">No matching results found.</td></tr>`;
+};
 
 // CSV ഫോർമാറ്റ് ഡൗൺലോഡ് ചെയ്യാൻ
 window.downloadCSVFormat = () => {
