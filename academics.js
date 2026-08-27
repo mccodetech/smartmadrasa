@@ -90,7 +90,6 @@ window.loadMarksEntrySheet = async () => {
     console.log("Using default subjects");
   }
 
-  // നിലവിലുള്ള മാർക്കുകൾ ഫെച്ച് ചെയ്യുന്നു
   const examName = document.getElementById("markExamSelect")?.value || "Quarterly Exam";
   const marksQuery = query(collection(db, "examMarks"), where("institutionId", "==", currentInstitutionId), where("examName", "==", examName), where("classNum", "==", cleanClass));
   const marksSnap = await getDocs(marksQuery);
@@ -406,9 +405,23 @@ window.toggleSelectAllPerf = () => {
     cb.checked = selectAllCb ? selectAllCb.checked : true;
   });
 };
+
 // ==========================================
 // 3.1. MANUAL PREVIOUS ATTENDANCE MODULE
 // ==========================================
+
+// ക്ലാസുകൾ ഡ്രോപ്പ്ഡൗണിലേക്ക് പോപ്പുലേറ്റ് ചെയ്യാൻ
+window.populateManualAttendanceClasses = () => {
+  const classesList = ["Class 1", "Class 2", "Class 3", "Class 4", "Class 5", "Class 6", "Class 7", "Class 8", "Class 9", "Class 10", "Class 11", "Class 12"];
+  const manualSelect = document.getElementById("manualAttClassSelect");
+  if (manualSelect && manualSelect.options.length <= 1) {
+    let optionsHtml = `<option value="">-- Select Class --</option>`;
+    classesList.forEach(cls => {
+      optionsHtml += `<option value="${cls}">${cls}</option>`;
+    });
+    manualSelect.innerHTML = optionsHtml;
+  }
+};
 
 // മാനുവൽ അറ്റൻഡൻസ് ഷീറ്റ് ലോഡ് ചെയ്യാൻ
 window.loadManualAttendanceSheet = async () => {
@@ -424,19 +437,17 @@ window.loadManualAttendanceSheet = async () => {
   if (area) area.classList.remove("d-none");
 
   try {
-    // ഇൻസ്റ്റിറ്റ്യൂഷൻ സെറ്റിങ്സിൽ നിന്ന് Total Working Days എടുക്കാൻ
     const settingsDoc = await getDoc(doc(db, "settings", currentInstitutionId));
     let totalWorkingDays = 0;
     if (settingsDoc.exists()) {
       totalWorkingDays = Number(settingsDoc.data().totalWorkingDays) || 0;
     }
-    document.getElementById("displayTotalWorkingDays").innerText = totalWorkingDays;
+    const displayEl = document.getElementById("displayTotalWorkingDays");
+    if (displayEl) displayEl.innerText = totalWorkingDays;
 
-    // കുട്ടികളെയും അവരുടെ നിലവിലെ മാനുവൽ അറ്റൻഡൻസും ഫെച്ച് ചെയ്യാൻ
     const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", cleanClass), where("status", "==", "active"));
     const snap = await getDocs(q);
 
-    // മാനുവൽ അറ്റൻഡൻസ് റെക്കോർഡുകൾ എടുക്കാൻ
     const manualAttQ = query(collection(db, "manualAttendance"), where("institutionId", "==", currentInstitutionId), where("classNum", "==", cleanClass));
     const manualSnap = await getDocs(manualAttQ);
     let existingManualAtt = {};
