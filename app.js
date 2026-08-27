@@ -1,5 +1,5 @@
 // ==========================================
-// MAIN ENTRY POINT (app.js) - Updated with Principal Staff & Settings Access
+// MAIN ENTRY POINT (app.js) - Complete Code
 // ==========================================
 import { db, auth, SUPER_ADMIN_EMAIL } from "./firebase-config.js";
 import "./auth.js";
@@ -106,20 +106,155 @@ window.saveInstitutionSettings = async () => {
   }
 };
 
-// സ്റ്റാഫിന്റെ സ്റ്റാറ്റസ് ആക്ടീവ് ആക്കാൻ
-window.approveStaffAccount = async (userId) => {
-  try {
-    await updateDoc(doc(db, "users", userId), {
-      status: "active"
+// ==========================================
+// STAFF MANAGEMENT & CLASS ASSIGNMENT MODULE
+// ==========================================
+
+// സ്റ്റാഫ് / പ്രിൻസിപ്പൽ ആഡ് ചെയ്യാനുള്ള മോഡൽ തുറക്കാൻ
+window.openStaffProfileModal = (staffId = null) => {
+  const modalEl = document.getElementById("staffProfileModal");
+  if (!modalEl) {
+    window.showToast("Staff profile modal not found in HTML.", "error");
+    return;
+  }
+  const modal = new bootstrap.Modal(modalEl);
+  modal.show();
+};
+
+// സ്റ്റാഫിനെ അപ്രൂവ് ചെയ്യുമ്പോൾ ക്ലാസ് അസൈൻ ചെയ്യുന്ന ഫോം കാണിക്കാൻ
+window.prepareApproveStaff = (userId, name, role) => {
+  const form = document.getElementById("instAssignClassesForm");
+  const idInput = document.getElementById("instAssignStaffid");
+  const nameDisplay = document.getElementById("instAssignStaffNameDisplay");
+  
+  if (idInput) idInput.value = userId;
+  if (nameDisplay) nameDisplay.innerText = `${name} (${role})`;
+  if (form) form.classList.remove("d-none");
+
+  const container = document.getElementById("instClassAssignDiv") || document.getElementById("instAssignClassContainer");
+  if (container) {
+    let html = `<label class="form-label fw-bold">Assign Classes:</label><div class="d-flex flex-wrap gap-2">`;
+    const classes = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
+    classes.forEach(c => {
+      html += `
+        <div class="form-check form-check-inline">
+          <input class="form-check-input staff-class-cb" type="checkbox" value="${c}" id="staffClass_${c}">
+          <label class="form-check-label" for="staffClass_${c}">Class ${c}</label>
+        </div>
+      `;
     });
-    window.showToast("Staff account activated successfully!", "success");
-    if (typeof window.loadPrincipalsList === 'function') window.loadPrincipalsList();
-  } catch (e) {
-    window.showToast("Error activating staff: " + e.message, "error");
+    html += `</div>`;
+    container.innerHTML = html;
   }
 };
 
-// സെഷൻ പരിശോധന (Auth State Listener & Role Based Menu Visibility)
+// ക്ലാസുകൾ സഹിതം സ്റ്റാഫിന്റെ അപ്രൂവൽ സേവ് ചെയ്യാൻ
+window.saveAssignedClassesAndApprove = async (e) => {
+  e.preventDefault();
+  const userId = document.getElementById("instAssignStaffid")?.value;
+  if (!userId) return window.showToast("No staff selected.", "error");
+
+  const selectedClasses = Array.from(document.querySelectorAll(".staff-class-cb:checked")).map(cb => cb.value);
+
+  try {
+    await updateDoc(doc(db, "users", userId), {
+      status: "active",
+      assignedClasses: selectedClasses
+    });
+
+    window.showToast("Staff approved and classes assigned successfully!", "success");
+    const form = document.getElementById("instAssignClassesForm");
+    if (form) form.classList.add("d-none");
+    
+    if (typeof window.loadPrincipalsList === 'function') {
+      window.loadPrincipalsList();
+    }
+  } catch (err) {
+    window.showToast("Error approving staff: " + err.message, "error");
+  }
+};
+
+// പ്രിൻസിപ്പൽ & സ്റ്റാഫ് ലിസ്റ്റ് ലോഡ് ചെയ്യാൻ
+window.loadPrincipalsList = async () => {
+  const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
+  if (!currentInstitutionId) return;
+
+  try {
+    const q = query(collection(db, "users"), where("institutionId", "==", currentInstitutionId));
+    const snap = await getDocs(q);
+
+    let html = "";
+    let pendingHtml = "";
+    let hasPending = false;
+
+    snap.forEach(d => {
+      const user = d.data();
+      if (user.role === "admin" && user.email === SUPER_ADMIN_EMAIL) return; 
+
+      const isPending = user.status === "pending";
+
+      const rowHtml = `
+        <tr>
+          <td><b>${user.name || '-'}</b></td>
+          <td><span class="badge bg-secondary">${user.role || 'staff'}</span></td>
+          <td>${user.email || '-'}</td>
+          <td>${user.phone || '-'}</td>
+          <td class="text-center">
+            ${isPending 
+              ? `<button class="btn btn-sm btn-success px-3" onclick="prepareApproveStaff('${d.id}', '${user.name}', '${user.role}')"><i class="fa-solid fa-check me-1"></i> Approve</button>` 
+              : `<span class="badge bg-success">Active</span>`
+            }
+            <button class="btn btn-sm btn-outline-danger ms-1" onclick="deleteStaffAccount('${d.id}', '${user.name}')"><i class="fa-solid fa-trash"></i></button>
+          </td>
+        </tr>
+      `;
+
+      if (isPending) {
+        hasPending = true;
+        pendingHtml += rowHtml;
+      } else {
+        html += rowHtml;
+      }
+    });
+
+    const pendingSection = document.getElementById("instPendingStaffSection");
+    const pendingTableBody = document.getElementById("instPendingStaffTableBody");
+    
+    if (pendingSection && pendingTableBody) {
+      if (hasPending) {
+        pendingSection.classList.remove("d-none");
+        pendingTableBody.innerHTML = pendingHtml;
+      } else {
+        pendingSection.classList.add("d-none");
+        pendingTableBody.innerHTML = "";
+      }
+    }
+
+    const tableBody = document.getElementById("staffTableBody") || document.querySelector("table tbody");
+    if (tableBody) {
+      tableBody.innerHTML = html || `<tr><td colspan="5" class="text-center text-muted">No active staff found.</td></tr>`;
+    }
+  } catch (e) {
+    console.error("Error loading staff list:", e);
+    window.showToast("Error loading staff list: " + e.message, "error");
+  }
+};
+
+// സ്റ്റാഫ് അക്കൗണ്ട് ഡിലീറ്റ് ചെയ്യാൻ
+window.deleteStaffAccount = async (userId, name) => {
+  if (!confirm(`Are you sure you want to remove ${name}?`)) return;
+  try {
+    await deleteDoc(doc(db, "users", userId));
+    window.showToast("Staff removed successfully!", "success");
+    window.loadPrincipalsList();
+  } catch (e) {
+    window.showToast("Error deleting staff: " + e.message, "error");
+  }
+};
+
+// ==========================================
+// SESSION & AUTH STATE LISTENER
+// ==========================================
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     try {
@@ -176,7 +311,6 @@ onAuthStateChanged(auth, async (user) => {
           if (studentsMenuBtn) studentsMenuBtn.classList.remove("d-none");
           if (feesMenuBtn) feesMenuBtn.classList.remove("d-none");
 
-          // അഡ്മിൻ അല്ലെങ്കിൽ പ്രിൻസിപ്പൽ ആണെങ്കിൽ സ്റ്റാഫ് മാനേജ്‌മെന്റും സെറ്റിങ്സും കാണിക്കാൻ
           if (window.currentUserRole === "admin" || window.currentUserRole === "principal") {
             if (instAdminStaffBtn) instAdminStaffBtn.classList.remove("d-none");
             if (settingsMenuBtn) settingsMenuBtn.classList.remove("d-none");
@@ -227,97 +361,3 @@ onAuthStateChanged(auth, async (user) => {
     }
   }
 });
-
-// ==========================================
-// MANAGE PRINCIPALS & STAFF MODULE
-window.loadPrincipalsList = async () => {
-  const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
-  if (!currentInstitutionId) return;
-
-  try {
-    const q = query(collection(db, "users"), where("institutionId", "==", currentInstitutionId));
-    const snap = await getDocs(q);
-
-    let html = "";
-    let pendingHtml = "";
-    let hasPending = false;
-
-    snap.forEach(d => {
-      const user = d.data();
-      if (user.role === "admin" && user.email === "mccodetech@gmail.com") return; 
-
-      const isPending = user.status === "pending";
-
-      const rowHtml = `
-        <tr>
-          <td><b>${user.name || '-'}</b></td>
-          <td><span class="badge bg-secondary">${user.role || 'staff'}</span></td>
-          <td>${user.email || '-'}</td>
-          <td>${user.phone || '-'}</td>
-          <td class="text-center">
-            ${isPending 
-              ? `<button class="btn btn-sm btn-success px-3" onclick="approveStaffAccount('${d.id}')"><i class="fa-solid fa-check me-1"></i> Approve</button>` 
-              : `<span class="badge bg-success">Active</span>`
-            }
-            <button class="btn btn-sm btn-outline-danger ms-1" onclick="deleteStaffAccount('${d.id}', '${user.name}')"><i class="fa-solid fa-trash"></i></button>
-          </td>
-        </tr>
-      `;
-
-      if (isPending) {
-        hasPending = true;
-        pendingHtml += rowHtml;
-      } else {
-        html += rowHtml;
-      }
-    });
-
-    // പെൻഡിങ് സെക്ഷൻ കാണിക്കാനും മറയ്ക്കാനുമുള്ള കോഡ്
-    const pendingSection = document.getElementById("instPendingStaffSection");
-    const pendingTableBody = document.getElementById("instPendingStaffTableBody");
-    
-    if (pendingSection && pendingTableBody) {
-      if (hasPending) {
-        pendingSection.classList.remove("d-none");
-        pendingTableBody.innerHTML = pendingHtml;
-      } else {
-        pendingSection.classList.add("d-none");
-        pendingTableBody.innerHTML = "";
-      }
-    }
-
-    // മെയിൻ സ്റ്റാഫ് ലിങ്ക് ടേബിൾ
-    const tableBody = document.getElementById("staffTableBody") || document.querySelector("table tbody");
-    if (tableBody) {
-      tableBody.innerHTML = html || `<tr><td colspan="5" class="text-center text-muted">No active staff found.</td></tr>`;
-    }
-  } catch (e) {
-    console.error("Error loading staff list:", e);
-    window.showToast("Error loading staff list: " + e.message, "error");
-  }
-};
-
-// സ്റ്റാഫ് അക്കൗണ്ട് അപ്പ്രൂവ് ചെയ്യാൻ
-window.approveStaffAccount = async (userId) => {
-  try {
-    await updateDoc(doc(db, "users", userId), {
-      status: "active"
-    });
-    window.showToast("Staff account approved successfully!", "success");
-    window.loadPrincipalsList(); // ലിസ്റ്റ് റിഫ്രഷ് ചെയ്യാൻ
-  } catch (e) {
-    window.showToast("Error approving staff: " + e.message, "error");
-  }
-};
-
-// സ്റ്റാഫ് അക്കൗണ്ട് ഡിലീറ്റ് ചെയ്യാൻ (ആവശ്യമെങ്കിൽ)
-window.deleteStaffAccount = async (userId, name) => {
-  if (!confirm(`Are you sure you want to remove ${name}?`)) return;
-  try {
-    await deleteDoc(doc(db, "users", userId));
-    window.showToast("Staff removed successfully!", "success");
-    window.loadPrincipalsList();
-  } catch (e) {
-    window.showToast("Error deleting staff: " + e.message, "error");
-  }
-};
