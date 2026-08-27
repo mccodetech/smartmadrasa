@@ -207,18 +207,27 @@ async function loadParentStudentData(student) {
     const monthGrid = document.getElementById("pvFeeMonthGrid");
     if (monthGrid) monthGrid.innerHTML = gridHtml;
 
-    // 2. Examination Marks (എക്സാം മാർക്കുകൾ ലോഡ് ചെയ്യാൻ)
+    // 2. Examination Marks (മാർക്കുകളും ടോട്ടലും കൃത്യമായി കാണിക്കാൻ)
     const marksQ = query(collection(db, "examMarks"), where("institutionId", "==", student.institutionId), where("regNo", "==", student.regNo));
     const marksSnap = await getDocs(marksQ);
     let marksHtml = "";
+    
     marksSnap.forEach(md => {
       const m = md.data();
+      const examTitle = m.examName || 'Exam';
+      let examTotal = 0;
+
       if (m.marks && typeof m.marks === 'object') {
         Object.entries(m.marks).forEach(([subj, score]) => {
-          marksHtml += `<tr><td>${m.examName || 'Exam'}</td><td>${subj}</td><td class="fw-bold">${score}</td></tr>`;
+          const numScore = Number(score) || 0;
+          examTotal += numScore;
+          marksHtml += `<tr><td>${examTitle}</td><td>${subj}</td><td class="fw-bold">${numScore}</td></tr>`;
         });
+        // ആ എക്സാമിന്റെ ടോട്ടൽ മാർക്ക് അവസാന വരിയായി ചേർക്കുന്നു
+        marksHtml += `<tr class="table-secondary fw-bold"><td>${examTitle}</td><td>Total Score</td><td class="text-success">${examTotal} Marks</td></tr>`;
       }
     });
+
     const marksTableBody = document.getElementById("pvMarksTableBody");
     if (marksTableBody) {
       marksTableBody.innerHTML = marksHtml || `<tr><td colspan="3" class="text-center text-muted">No exam marks found</td></tr>`;
