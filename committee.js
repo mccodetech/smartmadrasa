@@ -3,7 +3,7 @@
 // ==========================================
 import { db, auth } from "./firebase-config.js";
 import { 
-  collection, doc, setDoc, getDocs, query, where, addDoc, deleteDoc, serverTimestamp 
+  collection, doc, getDocs, query, where, addDoc, deleteDoc, serverTimestamp 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // കമ്മിറ്റി അംഗങ്ങളുടെ പട്ടിക ലോഡ് ചെയ്യാൻ
@@ -13,7 +13,6 @@ window.loadCommitteeMembers = async () => {
   const tbody = document.getElementById("committeeTableBody");
   const addBtn = document.getElementById("btnAddCommitteeMember");
 
-  // അഡ്മിന് മാത്രം ആഡ് ചെയ്യാനും ഡിലീറ്റ് ചെയ്യാനും അനുവാദം നൽകുക
   if (currentUserRole === "admin") {
     if (addBtn) addBtn.classList.remove("d-none");
     document.querySelectorAll(".action-col").forEach(el => el.classList.remove("d-none"));
@@ -36,8 +35,8 @@ window.loadCommitteeMembers = async () => {
       html += `
         <tr>
           <td class="text-center">${photoHtml}</td>
-          <td class="fw-bold">${c.name}</td>
-          <td><span class="badge bg-success">${c.designation}</span></td>
+          <td class="fw-bold">${c.name || '-'}</td>
+          <td><span class="badge bg-success">${c.designation || '-'}</span></td>
           <td>${c.phone || '-'}</td>
           <td class="text-center action-col ${currentUserRole === 'admin' ? '' : 'd-none'}">
             <button class="btn btn-sm text-danger p-0" onclick="deleteCommitteeMember('${d.id}')"><i class="fa-solid fa-trash"></i></button>
@@ -64,16 +63,24 @@ window.openCommitteeModal = () => {
 window.saveCommitteeMember = async (e) => {
   e.preventDefault();
   const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
-  const name = document.getElementById("commName").value.trim().toUpperCase();
-  const designation = document.getElementById("commDesignation").value.trim().toUpperCase();
-  const phone = document.getElementById("commPhone").value.trim();
-  const photoFile = document.getElementById("commPhotoFile")?.files[0];
+  
+  const nameEl = document.getElementById("commName");
+  const desigEl = document.getElementById("commDesignation");
+  const phoneEl = document.getElementById("commPhone");
+  const photoFileEl = document.getElementById("commPhotoFile");
+
+  const name = nameEl ? nameEl.value.trim().toUpperCase() : "";
+  const designation = desigEl ? desigEl.value.trim().toUpperCase() : "";
+  const phone = phoneEl ? phoneEl.value.trim() : "";
+  const photoFile = photoFileEl ? photoFileEl.files[0] : null;
 
   let photoBase64 = "";
-
-  // ഫോട്ടോ സെലക്ട് ചെയ്തിട്ടുണ്ടെങ്കിൽ അതിനെ Base64 ആക്കി മാറ്റുന്നു
   if (photoFile) {
-    photoBase64 = await toBase64(photoFile);
+    try {
+      photoBase64 = await toBase64(photoFile);
+    } catch (err) {
+      console.error("Error converting photo:", err);
+    }
   }
 
   try {
@@ -82,13 +89,14 @@ window.saveCommitteeMember = async (e) => {
       name, 
       designation, 
       phone, 
-      photo: photoBase64, // സേവ് ചെയ്യുന്ന ഫോട്ടോ
+      photo: photoBase64,
       timestamp: serverTimestamp()
     });
 
     const modalEl = document.getElementById("committeeModal");
     if (modalEl && window.bootstrap) {
-      bootstrap.Modal.getInstance(modalEl).hide();
+      const modalInstance = bootstrap.Modal.getInstance(modalEl);
+      if (modalInstance) modalInstance.hide();
     }
     window.showToast("Committee member added successfully!", "success");
     window.loadCommitteeMembers();
@@ -97,7 +105,6 @@ window.saveCommitteeMember = async (e) => {
   }
 };
 
-// ഫയലിനെ Base64 ഫോർമാറ്റിലേക്ക് മാറ്റാൻ സഹായിക്കുന്ന ചെറിയ ഫംഗ്ഷൻ
 const toBase64 = file => new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
