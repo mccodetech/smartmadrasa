@@ -52,6 +52,7 @@ function renderSpecialFundCategoriesList() {
   listEl.innerHTML = html;
 }
 
+// ഫീസ് കാറ്റഗറി മാറുമ്പോൾ സ്പെഷ്യൽ ഫണ്ട് ഡ്രോപ്ഡൗൺ കാണിക്കാൻ
 window.toggleFeeCategoryOptions = () => {
   const category = document.getElementById("payFeeCategory")?.value;
   const monthDiv = document.getElementById("monthSelectionDiv");
@@ -61,16 +62,17 @@ window.toggleFeeCategoryOptions = () => {
   if (category === "Monthly Fee") {
     if (monthDiv) monthDiv.classList.remove("d-none");
     if (specialDiv) specialDiv.classList.add("d-none");
-  } else if (category === "Special Fee") {
+  } else if (category === "Special Fee / Fund") {
     if (monthDiv) monthDiv.classList.add("d-none");
     if (specialDiv) specialDiv.classList.remove("d-none");
     
     let html = "";
+    // അഡ്മിൻ സെറ്റിങ്സിൽ നൽകിയ കസ്റ്റം ഫണ്ടുകൾ ഇവിടെ ഡ്രോപ്ഡൗണിൽ വരും
     const funds = window.customSpecialFunds || [];
     if (funds.length > 0) {
       funds.forEach(f => html += `<option value="${f}">${f}</option>`);
     } else {
-      html = `<option value="GENERAL FUND">GENERAL FUND</option>`;
+      html = `<option value="GENERAL FUND">GENERAL FUND</option><option value="BUILDING FUND">BUILDING FUND</option>`;
     }
     if (specialSelect) specialSelect.innerHTML = html;
   } else {
@@ -78,6 +80,112 @@ window.toggleFeeCategoryOptions = () => {
     if (specialDiv) specialDiv.classList.add("d-none");
   }
   window.calculateFeeAmount();
+};
+
+// ഫീസ് പേയ്മെന്റ് സേവ് ചെയ്യുമ്പോൾ സ്പെഷ്യൽ ഫണ്ടിന്റെ പേര് കൂടി സേവ് ചെയ്യാൻ
+window.saveFeePayment = async (e) => {
+  e.preventDefault();
+  const sId = document.getElementById("payStudentId").value;
+  const reg = document.getElementById("payStudentReg").value;
+  const name = document.getElementById("payStudentName").value;
+  const sClass = document.getElementById("payStudentClass").value;
+  const phone = document.getElementById("payStudentPhone").value;
+  
+  const amount = document.getElementById("payAmount").value;
+  const academicYear = document.getElementById("payAcademicYear").value;
+  const category = document.getElementById("payFeeCategory").value;
+  const manual = document.getElementById("payManualReceiptInput").value.trim().toUpperCase();
+  const today = new Date().toLocaleDateString();
+  const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
+  const currentUserName = window.currentUserName || "Staff";
+
+  let finalFeeTypeStr = category;
+  let specificFundName = "";
+
+  if (category === "Monthly Fee") {
+    const checkedMonths = Array.from(document.querySelectorAll(".month-cb:checked")).map(cb => cb.value);
+    if (checkedMonths.length === 0) return window.showToast("Select at least one month.", "warning");
+    finalFeeTypeStr = `Monthly Fee (${academicYear}): ${checkedMonths.join(', ')}`;
+  } else if (category === "Special Fee / Fund") {
+    specificFundName = document.getElementById("paySpecialFeeSelect").value;
+    finalFeeTypeStr = `Fund - ${specificFundName} (${academicYear})`;
+  } else {
+    finalFeeTypeStr = `${category} (${academicYear})`;
+  }
+
+  try {
+    const counterRef = doc(db, "counters", currentInstitutionId + "_receipts");
+    let nextReceiptNo = 1;
+
+    await runTransaction(db, async (transaction) => {
+      const counterDoc = await transaction.get(counterRef);
+      if (counterDoc.exists()) {
+        nextReceiptNo = (counterDoc.data().lastNo || 0) + 1;
+        transaction.update(counterRef, { lastNo: nextReceiptNo });
+      } else {
+        transaction.set(counterRef, { lastNo: 1 });
+      }
+    });
+
+    // പ്രധാന ഫീസ് കളക്ഷൻ ടേബിളിൽ സേവ് ചെയ്യുന്നു
+    await addDoc(collection(db, "feeCollections"), {
+      institutionId: currentInstitutionId, 
+      receiptNo: nextReceiptNo, 
+      studentId: sId, 
+      regNo: Number(reg),
+      studentName: name, 
+      class: sClass, 
+      amount: Number(amount), 
+      feeType: finalFeeTypeStr,
+      fundCategory: specificFundName || category, // ഏത് ഫണ്ടാണെന്ന് അറിയാൻ
+      manualReceiptNo: manual, 
+      date: today, 
+      collectedBy: auth.currentUser.uid, 
+      collectedByName: currentUserName,
+      timestamp: serverTimestamp()
+    });
+
+    // സ്പെഷ്യൽ ഫണ്ട് റിപ്പോർട്ടുകൾക്കായി സെപ്പറേറ്റ് കളക്ഷനിലേക്ക് സേവ് ചെയ്യുന്നു
+    if (category === "Special Fee / Fund") {
+      await addDoc(collection(db, "specialFunds"), {
+        institutionId: currentInstitutionId,
+        studentId: sId,
+        regNo: Number(reg),
+        donorName: name,
+        class: sClass,
+        fundCategory: specificFundName,
+        amount: Number(amount),
+        date: today,
+        timestamp: serverTimestamp()
+      });
+    }
+
+    // രസീത് പ്രിന്റ് ചെയ്യാനുള്ള ഡാറ്റ സെറ്റ് ചെയ്യൽ
+    document.getElementById("recMadrassaName").innerText = document.getElementById("displayMadrassaName").innerText;
+    document.getElementById("recNo").innerText = "#" + nextReceiptNo;
+    document.getElementById("recDate").innerText = today;
+    document.getElementById("recStudentName").innerText = name;
+    document.getElementById("recAdmNo").innerText = reg;
+    document.getElementById("recClass").innerText = "Class " + sClass;
+    document.getElementById("recFeeType").innerText = finalFeeTypeStr;
+    document.getElementById("recAmount").innerText = "₹" + amount;
+    document.getElementById("recCollector").innerText = currentUserName;
+
+    if (manual) {
+      document.getElementById("recManualNo").innerText = manual;
+      document.getElementById("recManualBox").classList.remove("d-none");
+    } else {
+      document.getElementById("recManualBox").classList.add("d-none");
+    }
+
+    bootstrap.Modal.getInstance(document.getElementById('feePaymentModal')).hide();
+    document.getElementById("appSection").classList.add("d-none");
+    document.getElementById("printableReceipt").classList.remove("d-none");
+    window.loadStudentsForFees();
+
+  } catch (err) { 
+    window.showToast("Error: " + err.message, "error"); 
+  }
 };
 
 window.saveFeeSettings = async () => {
