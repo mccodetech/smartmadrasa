@@ -277,3 +277,68 @@ window.viewStudentProfile = (docId) => {
     new bootstrap.Modal(modalEl).show();
   }
 };
+
+// ==========================================
+// PAGINATION & TABLE RENDERING MODULE
+// ==========================================
+
+window.currentPage = 1;
+window.rowsPerPage = 50;
+
+window.renderPaginatedTable = (totalRecords, currentPage, rowsPerPage, onPageChangeCallback) => {
+  const totalPages = Math.ceil(totalRecords / rowsPerPage) || 1;
+  
+  let paginationContainer = document.getElementById("studentPaginationContainer");
+  if (!paginationContainer) {
+    const tableResponsive = document.querySelector(".table-responsive");
+    if (tableResponsive && tableResponsive.parentNode) {
+      paginationContainer = document.createElement("div");
+      paginationContainer.id = "studentPaginationContainer";
+      paginationContainer.className = "d-flex justify-content-between align-items-center mt-3 px-2";
+      tableResponsive.parentNode.appendChild(paginationContainer);
+    } else {
+      return;
+    }
+  }
+
+  if (totalPages <= 1) {
+    paginationContainer.innerHTML = `<small class="text-muted">Showing all ${totalRecords} students</small>`;
+    return;
+  }
+
+  let paginationHtml = `
+    <small class="text-muted">Page ${currentPage} of ${totalPages} (Total: ${totalRecords} students)</small>
+    <ul class="pagination pagination-sm m-0">
+      <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+        <button class="page-link" onclick="window.changeStudentPage(${currentPage - 1})">Previous</button>
+      </li>
+  `;
+
+  for (let i = 1; i <= totalPages; i++) {
+    if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+      paginationHtml += `
+        <li class="page-item ${i === currentPage ? 'active' : ''}">
+          <button class="page-link" onclick="window.changeStudentPage(${i})">${i}</button>
+        </li>
+      `;
+    } else if (i === currentPage - 3 || i === currentPage + 3) {
+      paginationHtml += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+    }
+  }
+
+  paginationHtml += `
+      <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+        <button class="page-link" onclick="window.changeStudentPage(${currentPage + 1})">Next</button>
+      </li>
+    </ul>
+  `;
+
+  paginationContainer.innerHTML = paginationHtml;
+};
+
+window.changeStudentPage = (page) => {
+  window.currentPage = page;
+  if (typeof window.loadStudentsByClass === 'function') {
+    window.loadStudentsByClass();
+  }
+};
