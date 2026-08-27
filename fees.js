@@ -1,7 +1,7 @@
 // ==========================================
-// FEES MANAGEMENT MODULE (fees.js)
+// FEES MANAGEMENT MODULE (fees.js) - Complete
 // ==========================================
-import { db } from "./firebase-config.js";
+import { db, auth } from "./firebase-config.js";
 import { 
   collection, doc, setDoc, getDocs, query, where, addDoc, runTransaction, serverTimestamp 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -67,7 +67,6 @@ window.toggleFeeCategoryOptions = () => {
     if (specialDiv) specialDiv.classList.remove("d-none");
     
     let html = "";
-    // അഡ്മിൻ സെറ്റിങ്സിൽ നൽകിയ കസ്റ്റം ഫണ്ടുകൾ ഇവിടെ ഡ്രോപ്ഡൗണിൽ വരും
     const funds = window.customSpecialFunds || [];
     if (funds.length > 0) {
       funds.forEach(f => html += `<option value="${f}">${f}</option>`);
@@ -82,7 +81,159 @@ window.toggleFeeCategoryOptions = () => {
   window.calculateFeeAmount();
 };
 
-// ഫീസ് പേയ്മെന്റ് സേവ് ചെയ്യുമ്പോൾ സ്പെഷ്യൽ ഫണ്ടിന്റെ പേര് കൂടി സേവ് ചെയ്യാൻ
+// ക്ലാസ് സെലക്ട് ചെയ്യുമ്പോൾ കുട്ടികളുടെ ഫീസ് വിവരങ്ങൾ ലോഡ് ചെയ്യാൻ
+window.loadStudentsForFees = async () => {
+  const selClass = document.getElementById("feeClassSelect")?.value;
+  const tableArea = document.getElementById("feesTableArea");
+  const tbody = document.getElementById("feesTableBody");
+  const alertArea = document.getElementById("feeCollectionAlert");
+  const collectionArea = document.getElementById("feeCollectionArea");
+  const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
+  const currentUserRole = window.currentUserRole || sessionStorage.getItem("currentUserRole");
+  const sysFeePermission = window.sysFeePermission || "all";
+
+  let canCollect = (currentUserRole === "admin") || 
+                   (currentUserRole === "principal" && (sysFeePermission === "principal" || sysFeePermission === "all")) || 
+                   (currentUserRole === "teacher" && sysFeePermission === "all");
+
+  if (!canCollect) {
+    if (alertArea) alertArea.classList.remove("d-none");
+    if (collectionArea) collectionArea.classList.add("d-none");
+    return;
+  } else {
+    if (alertArea) alertArea.classList.add("d-none");
+    if (collectionArea) collectionArea.classList.remove("d-none");
+  }
+
+  if (!selClass) { if (tableArea) tableArea.classList.add("d-none"); return; }
+  if (tableArea) tableArea.classList.remove("d-none");
+  if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="text-center">Loading student fee status...</td></tr>`;
+
+  const cleanClass = selClass.replace(/Class\s*/i, "").trim();
+
+  try {
+    const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", cleanClass), where("status", "==", "active"));
+    const snap = await getDocs(q);
+
+    let students = [];
+    snap.forEach(d => students.push({ id: d.id, ...d.data() }));
+    students.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
+
+    if (students.length === 0) {
+      if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">No active students in this class.</td></tr>`;
+      return;
+    }
+
+    const feeQ = query(collection(db, "feeCollections"), where("institutionId", "==", currentInstitutionId), where("class", "==", cleanClass));
+    const feeSnap = await getDocs(feeQ);
+    
+    let studentPaidMonths = {};
+    feeSnap.forEach(d => {
+      const f = d.data();
+      if (f.regNo) {
+        if (!studentPaidMonths[f.regNo]) studentPaidMonths[f.regNo] = new Set();
+        ALL_MONTHS.forEach(m => {
+          if (f.feeType && f.feeType.includes(m)) studentPaidMonths[f.regNo].add(m);
+        });
+      }
+    });
+
+    let html = "";
+    students.forEach(s => {
+      const defaultFee = s.monthlyFeeAmount || s.monthlyFee || 200;
+      const paidSet = studentPaidMonths[s.regNo] || new Set();
+
+      let monthBadges = `<div class="d-flex flex-wrap gap-1">`;
+      ALL_MONTHS.forEach(m => {
+        if (paidSet.has(m)) monthBadges += `<span class="badge bg-success" style="font-size:0.7rem;">${m}</span>`;
+        else monthBadges += `<span class="badge bg-light text-danger border border-danger" style="font-size:0.7rem;">${m}</span>`;
+      });
+      monthBadges += `</div>`;
+
+      const sDataStr = encodeURIComponent(JSON.stringify({
+        id: s.id, regNo: s.regNo, name: s.name, class: s.currentClass, phone: s.phone || '', fee: defaultFee
+      }));
+
+      html += `
+        <tr>
+          <td><b>${s.regNo || '-'}</b></td>
+          <td><b>${s.name}</b></td>
+          <td class="text-primary fw-bold">₹${defaultFee}</td>
+          <td>${monthBadges}</td>
+          <td class="text-center"><button class="btn btn-sm btn-success w-100" onclick="openFeeModal('${sDataStr}')"><i class="fa-solid fa-indian-rupee-sign me-1"></i> Pay Fee</button></td>
+        </tr>
+      `;
+    });
+    if (tbody) tbody.innerHTML = html;
+
+  } catch (err) {
+    console.error("Error loading fee data:", err);
+    window.showToast("Error loading fee details: " + err.message, "error");
+  }
+};
+
+window.calculateFeeAmount = () => {
+  const category = document.getElementById("payFeeCategory")?.value;
+  const baseFee = Number(document.getElementById("payBaseFee")?.value) || 0;
+  const monthDiv = document.getElementById("monthSelectionDiv");
+  let total = 0;
+
+  if (category === "Monthly Fee") {
+    if (monthDiv) monthDiv.classList.remove("d-none");
+    const checkedCount = document.querySelectorAll(".month-cb:checked").length;
+    total = baseFee * checkedCount;
+  } else {
+    if (monthDiv) monthDiv.classList.add("d-none");
+    total = baseFee;
+  }
+  const payAmtEl = document.getElementById("payAmount");
+  if (payAmtEl) payAmtEl.value = total;
+};
+
+// ഫീസ് മോഡൽ സുരക്ഷിതമായി ഓപ്പൺ ചെയ്യാൻ
+window.openFeeModal = (studentDataStr) => {
+  const s = JSON.parse(decodeURIComponent(studentDataStr));
+  const feeForm = document.getElementById("feePaymentForm");
+  if (feeForm && typeof feeForm.reset === 'function') {
+    feeForm.reset();
+  }
+
+  const sId = document.getElementById("payStudentId");
+  const sReg = document.getElementById("payStudentReg");
+  const sName = document.getElementById("payStudentName");
+  const sClass = document.getElementById("payStudentClass");
+  const sPhone = document.getElementById("payStudentPhone");
+  const baseFee = document.getElementById("payBaseFee");
+  const nameDisplay = document.getElementById("payStudentNameDisplay");
+  const feeCategory = document.getElementById("payFeeCategory");
+
+  if (sId) sId.value = s.id;
+  if (sReg) sReg.value = s.regNo;
+  if (sName) sName.value = s.name;
+  if (sClass) sClass.value = s.class;
+  if (sPhone) sPhone.value = s.phone;
+  if (baseFee) baseFee.value = s.fee;
+  if (nameDisplay) nameDisplay.innerText = `${s.name} (Reg: ${s.regNo})`;
+  if (feeCategory) feeCategory.value = "Monthly Fee";
+  
+  window.toggleFeeCategoryOptions();
+
+  const manualInput = document.getElementById("payManualReceiptInput");
+  const sysReqManualReceipt = window.sysReqManualReceipt || false;
+  if (manualInput) {
+    manualInput.required = sysReqManualReceipt;
+    manualInput.placeholder = sysReqManualReceipt ? "Required" : "Optional";
+  }
+
+  window.calculateFeeAmount();
+
+  const modalEl = document.getElementById("feePaymentModal");
+  if (modalEl && window.bootstrap) {
+    const modal = new bootstrap.Modal(modalEl);
+    modal.show();
+  }
+};
+
 window.saveFeePayment = async (e) => {
   e.preventDefault();
   const sId = document.getElementById("payStudentId").value;
@@ -127,7 +278,6 @@ window.saveFeePayment = async (e) => {
       }
     });
 
-    // പ്രധാന ഫീസ് കളക്ഷൻ ടേബിളിൽ സേവ് ചെയ്യുന്നു
     await addDoc(collection(db, "feeCollections"), {
       institutionId: currentInstitutionId, 
       receiptNo: nextReceiptNo, 
@@ -137,15 +287,14 @@ window.saveFeePayment = async (e) => {
       class: sClass, 
       amount: Number(amount), 
       feeType: finalFeeTypeStr,
-      fundCategory: specificFundName || category, // ഏത് ഫണ്ടാണെന്ന് അറിയാൻ
+      fundCategory: specificFundName || category,
       manualReceiptNo: manual, 
       date: today, 
-      collectedBy: auth.currentUser.uid, 
+      collectedBy: auth.currentUser ? auth.currentUser.uid : "unknown", 
       collectedByName: currentUserName,
       timestamp: serverTimestamp()
     });
 
-    // സ്പെഷ്യൽ ഫണ്ട് റിപ്പോർട്ടുകൾക്കായി സെപ്പറേറ്റ് കളക്ഷനിലേക്ക് സേവ് ചെയ്യുന്നു
     if (category === "Special Fee / Fund") {
       await addDoc(collection(db, "specialFunds"), {
         institutionId: currentInstitutionId,
@@ -160,267 +309,55 @@ window.saveFeePayment = async (e) => {
       });
     }
 
-    // രസീത് പ്രിന്റ് ചെയ്യാനുള്ള ഡാറ്റ സെറ്റ് ചെയ്യൽ
-    document.getElementById("recMadrassaName").innerText = document.getElementById("displayMadrassaName").innerText;
-    document.getElementById("recNo").innerText = "#" + nextReceiptNo;
-    document.getElementById("recDate").innerText = today;
-    document.getElementById("recStudentName").innerText = name;
-    document.getElementById("recAdmNo").innerText = reg;
-    document.getElementById("recClass").innerText = "Class " + sClass;
-    document.getElementById("recFeeType").innerText = finalFeeTypeStr;
-    document.getElementById("recAmount").innerText = "₹" + amount;
-    document.getElementById("recCollector").innerText = currentUserName;
+    const recMad = document.getElementById("recMadrassaName");
+    const recNo = document.getElementById("recNo");
+    const recDate = document.getElementById("recDate");
+    const recStuName = document.getElementById("recStudentName");
+    const recAdmNo = document.getElementById("recAdmNo");
+    const recClass = document.getElementById("recClass");
+    const recFeeType = document.getElementById("recFeeType");
+    const recAmount = document.getElementById("recAmount");
+    const recCollector = document.getElementById("recCollector");
+    const displayMad = document.getElementById("displayMadrassaName");
 
+    if (recMad && displayMad) recMad.innerText = displayMad.innerText;
+    if (recNo) recNo.innerText = "#" + nextReceiptNo;
+    if (recDate) recDate.innerText = today;
+    if (recStuName) recStuName.innerText = name;
+    if (recAdmNo) recAdmNo.innerText = reg;
+    if (recClass) recClass.innerText = "Class " + sClass;
+    if (recFeeType) recFeeType.innerText = finalFeeTypeStr;
+    if (recAmount) recAmount.innerText = "₹" + amount;
+    if (recCollector) recCollector.innerText = currentUserName;
+
+    const manualBox = document.getElementById("recManualBox");
+    const recManualNo = document.getElementById("recManualNo");
     if (manual) {
-      document.getElementById("recManualNo").innerText = manual;
-      document.getElementById("recManualBox").classList.remove("d-none");
+      if (recManualNo) recManualNo.innerText = manual;
+      if (manualBox) manualBox.classList.remove("d-none");
     } else {
-      document.getElementById("recManualBox").classList.add("d-none");
+      if (manualBox) manualBox.classList.add("d-none");
     }
 
-    bootstrap.Modal.getInstance(document.getElementById('feePaymentModal')).hide();
-    document.getElementById("appSection").classList.add("d-none");
-    document.getElementById("printableReceipt").classList.remove("d-none");
-    window.loadStudentsForFees();
+    lastReceiptWhatsAppPayload = { phone, madrassa: displayMad ? displayMad.innerText : "Smart Madrasa", receiptNo: nextReceiptNo, name, reg, class: sClass, amount, type: finalFeeTypeStr, manual, date: today };
 
-  } catch (err) { 
-    window.showToast("Error: " + err.message, "error"); 
-  }
-};
+    const waBtn = document.getElementById("whatsappShareBtn");
+    if (waBtn) {
+      if (phone) waBtn.classList.remove("d-none");
+      else waBtn.classList.add("d-none");
+    }
 
-window.saveFeeSettings = async () => {
-  const perm = document.querySelector('input[name="feePermission"]:checked')?.value || "all";
-  const reqManual = document.getElementById("reqManualReceipt")?.checked || false;
-  const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
+    const modalElem = document.getElementById('feePaymentModal');
+    if (modalElem && window.bootstrap) {
+      const modalInstance = bootstrap.Modal.getInstance(modalElem);
+      if (modalInstance) modalInstance.hide();
+    }
 
-  try {
-    await setDoc(doc(db, "settings", currentInstitutionId), {
-      feePermission: perm,
-      reqManualReceipt: reqManual,
-      specialFundCategories: window.customSpecialFunds || [],
-      updatedAt: serverTimestamp()
-    }, { merge: true });
+    const appSec = document.getElementById("appSection");
+    const printRec = document.getElementById("printableReceipt");
+    if (appSec) appSec.classList.add("d-none");
+    if (printRec) printRec.classList.remove("d-none");
     
-    window.sysFeePermission = perm;
-    window.sysReqManualReceipt = reqManual;
-    window.showToast("Fee settings saved successfully!", "success");
-  } catch (err) { 
-    window.showToast("Error: " + err.message, "error"); 
-  }
-};
-
-window.loadStudentsForFees = async () => {
-  const selClass = document.getElementById("feeClassSelect")?.value;
-  const tableArea = document.getElementById("feesTableArea");
-  const tbody = document.getElementById("feesTableBody");
-  const alertArea = document.getElementById("feeCollectionAlert");
-  const collectionArea = document.getElementById("feeCollectionArea");
-  const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
-  const currentUserRole = window.currentUserRole || sessionStorage.getItem("currentUserRole");
-  const sysFeePermission = window.sysFeePermission || "all";
-
-  let canCollect = (currentUserRole === "admin") || 
-                   (currentUserRole === "principal" && (sysFeePermission === "principal" || sysFeePermission === "all")) || 
-                   (currentUserRole === "teacher" && sysFeePermission === "all");
-
-  if (!canCollect) {
-    if (alertArea) alertArea.classList.remove("d-none");
-    if (collectionArea) collectionArea.classList.add("d-none");
-    return;
-  } else {
-    if (alertArea) alertArea.classList.add("d-none");
-    if (collectionArea) collectionArea.classList.remove("d-none");
-  }
-
-  if (!selClass) { if (tableArea) tableArea.classList.add("d-none"); return; }
-  if (tableArea) tableArea.classList.remove("d-none");
-  if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="text-center">Loading student fee status...</td></tr>`;
-
-  const cleanClass = selClass.replace(/Class\s*/i, "").trim();
-  const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", cleanClass), where("status", "==", "active"));
-  const snap = await getDocs(q);
-
-  let students = [];
-  snap.forEach(d => students.push({ id: d.id, ...d.data() }));
-  students.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
-
-  if (students.length === 0) {
-    if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">No active students in this class.</td></tr>`;
-    return;
-  }
-
-  const feeQ = query(collection(db, "feeCollections"), where("institutionId", "==", currentInstitutionId), where("class", "==", cleanClass));
-  const feeSnap = await getDocs(feeQ);
-  
-  const studentPaidMonths = {};
-  feeSnap.forEach(d => {
-    const f = d.data();
-    if (!studentPaidMonths[f.regNo]) studentPaidMonths[f.regNo] = new Set();
-    ALL_MONTHS.forEach(m => {
-      if (f.feeType && f.feeType.includes(m)) studentPaidMonths[f.regNo].add(m);
-    });
-  });
-
-  let html = "";
-  students.forEach(s => {
-    const defaultFee = s.monthlyFeeAmount || 0;
-    const paidSet = studentPaidMonths[s.regNo] || new Set();
-
-    let monthBadges = `<div class="d-flex flex-wrap gap-1">`;
-    ALL_MONTHS.forEach(m => {
-      if (paidSet.has(m)) monthBadges += `<span class="badge bg-success" style="font-size:0.7rem;">${m}</span>`;
-      else monthBadges += `<span class="badge bg-light text-danger border border-danger" style="font-size:0.7rem;">${m}</span>`;
-    });
-    monthBadges += `</div>`;
-
-    const sDataStr = encodeURIComponent(JSON.stringify({
-      id: s.id, regNo: s.regNo, name: s.name, class: s.currentClass, phone: s.phone || '', fee: defaultFee
-    }));
-
-    html += `
-      <tr>
-        <td><b>${s.regNo || '-'}</b></td>
-        <td><b>${s.name}</b></td>
-        <td class="text-primary fw-bold">₹${defaultFee}</td>
-        <td>${monthBadges}</td>
-        <td class="text-center"><button class="btn btn-sm btn-success w-100" onclick="openFeeModal('${sDataStr}')">Pay Fee</button></td>
-      </tr>
-    `;
-  });
-  if (tbody) tbody.innerHTML = html;
-};
-
-window.calculateFeeAmount = () => {
-  const category = document.getElementById("payFeeCategory")?.value;
-  const baseFee = Number(document.getElementById("payBaseFee")?.value) || 0;
-  const monthDiv = document.getElementById("monthSelectionDiv");
-  let total = 0;
-
-  if (category === "Monthly Fee") {
-    if (monthDiv) monthDiv.classList.remove("d-none");
-    const checkedCount = document.querySelectorAll(".month-cb:checked").length;
-    total = baseFee * checkedCount;
-  } else {
-    if (monthDiv) monthDiv.classList.add("d-none");
-    total = baseFee;
-  }
-  const payAmtEl = document.getElementById("payAmount");
-  if (payAmtEl) payAmtEl.value = total;
-};
-
-window.openFeeModal = (studentDataStr) => {
-  const s = JSON.parse(decodeURIComponent(studentDataStr));
-  document.getElementById("feePaymentForm").reset();
-
-  document.getElementById("payStudentId").value = s.id;
-  document.getElementById("payStudentReg").value = s.regNo;
-  document.getElementById("payStudentName").value = s.name;
-  document.getElementById("payStudentClass").value = s.class;
-  document.getElementById("payStudentPhone").value = s.phone;
-  document.getElementById("payBaseFee").value = s.fee;
-
-  document.getElementById("payStudentNameDisplay").innerText = `${s.name} (Reg: ${s.regNo})`;
-  document.getElementById("payFeeCategory").value = "Monthly Fee";
-  window.toggleFeeCategoryOptions();
-
-  const manualInput = document.getElementById("payManualReceiptInput");
-  const sysReqManualReceipt = window.sysReqManualReceipt || false;
-  if (manualInput) {
-    manualInput.required = sysReqManualReceipt;
-    manualInput.placeholder = sysReqManualReceipt ? "Required" : "Optional";
-  }
-
-  window.calculateFeeAmount();
-  new bootstrap.Modal(document.getElementById('feePaymentModal')).show();
-};
-
-window.saveFeePayment = async (e) => {
-  e.preventDefault();
-  const sId = document.getElementById("payStudentId").value;
-  const reg = document.getElementById("payStudentReg").value;
-  const name = document.getElementById("payStudentName").value;
-  const sClass = document.getElementById("payStudentClass").value;
-  const phone = document.getElementById("payStudentPhone").value;
-  
-  const amount = document.getElementById("payAmount").value;
-  const academicYear = document.getElementById("payAcademicYear").value;
-  const category = document.getElementById("payFeeCategory").value;
-  const manual = document.getElementById("payManualReceiptInput").value.trim().toUpperCase();
-  const today = new Date().toLocaleDateString();
-  const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
-  const currentUserName = window.currentUserName || "Staff";
-
-  let finalFeeTypeStr = category;
-  if (category === "Monthly Fee") {
-    const checkedMonths = Array.from(document.querySelectorAll(".month-cb:checked")).map(cb => cb.value);
-    if (checkedMonths.length === 0) return window.showToast("Select at least one month.", "warning");
-    finalFeeTypeStr = `Monthly Fee (${academicYear}): ${checkedMonths.join(', ')}`;
-  } else if (category === "Special Fee") {
-    const specName = document.getElementById("paySpecialFeeSelect").value;
-    finalFeeTypeStr = `Special Fee - ${specName} (${academicYear})`;
-  } else {
-    finalFeeTypeStr = `${category} (${academicYear})`;
-  }
-
-  try {
-    const counterRef = doc(db, "counters", currentInstitutionId + "_receipts");
-    let nextReceiptNo = 1;
-
-    await runTransaction(db, async (transaction) => {
-      const counterDoc = await transaction.get(counterRef);
-      if (counterDoc.exists()) {
-        nextReceiptNo = (counterDoc.data().lastNo || 0) + 1;
-        transaction.update(counterRef, { lastNo: nextReceiptNo });
-      } else {
-        transaction.set(counterRef, { lastNo: 1 });
-      }
-    });
-
-    await addDoc(collection(db, "feeCollections"), {
-      institutionId: currentInstitutionId, receiptNo: nextReceiptNo, studentId: sId, regNo: Number(reg),
-      studentName: name, class: sClass, amount: Number(amount), feeType: finalFeeTypeStr,
-      manualReceiptNo: manual, date: today, collectedBy: auth.currentUser.uid, collectedByName: currentUserName,
-      timestamp: serverTimestamp()
-    });
-
-    // If it's a special fund, store it separately for public display board if needed
-    if (category === "Special Fee") {
-      const specName = document.getElementById("paySpecialFeeSelect").value;
-      await addDoc(collection(db, "specialFunds"), {
-        institutionId: currentInstitutionId,
-        donorName: name,
-        fundCategory: specName,
-        amount: Number(amount),
-        date: today,
-        timestamp: serverTimestamp()
-      });
-    }
-
-    document.getElementById("recMadrassaName").innerText = document.getElementById("displayMadrassaName").innerText;
-    document.getElementById("recNo").innerText = "#" + nextReceiptNo;
-    document.getElementById("recDate").innerText = today;
-    document.getElementById("recStudentName").innerText = name;
-    document.getElementById("recAdmNo").innerText = reg;
-    document.getElementById("recClass").innerText = "Class " + sClass;
-    document.getElementById("recFeeType").innerText = finalFeeTypeStr;
-    document.getElementById("recAmount").innerText = "₹" + amount;
-    document.getElementById("recCollector").innerText = currentUserName;
-
-    if (manual) {
-      document.getElementById("recManualNo").innerText = manual;
-      document.getElementById("recManualBox").classList.remove("d-none");
-    } else {
-      document.getElementById("recManualBox").classList.add("d-none");
-    }
-
-    lastReceiptWhatsAppPayload = { phone, madrassa: document.getElementById("displayMadrassaName").innerText, receiptNo: nextReceiptNo, name, reg, class: sClass, amount, type: finalFeeTypeStr, manual, date: today };
-
-    if (phone) document.getElementById("whatsappShareBtn").classList.remove("d-none");
-    else document.getElementById("whatsappShareBtn").classList.add("d-none");
-
-    bootstrap.Modal.getInstance(document.getElementById('feePaymentModal')).hide();
-    document.getElementById("appSection").classList.add("d-none");
-    document.getElementById("printableReceipt").classList.remove("d-none");
     window.loadStudentsForFees();
   } catch (err) { 
     window.showToast("Error: " + err.message, "error"); 
@@ -434,4 +371,26 @@ window.shareToWhatsApp = () => {
   const cleanPhone = (p.phone || '').replace(/[^0-9]/g, '');
   const waUrl = cleanPhone.length >= 10 ? `https://wa.me/91${cleanPhone.slice(-10)}?text=${msg}` : `https://wa.me/?text=${msg}`;
   window.open(waUrl, "_blank");
+};
+
+window.saveFeeSettings = async () => {
+  const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
+  const feePerm = document.querySelector('input[name="feePermission"]:checked')?.value || "all";
+  const reqManual = document.getElementById("reqManualReceipt")?.checked || false;
+
+  try {
+    await setDoc(doc(db, "settings", currentInstitutionId), {
+      institutionId: currentInstitutionId,
+      feePermission: feePerm,
+      reqManualReceipt: reqManual,
+      specialFundCategories: window.customSpecialFunds || [],
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+
+    window.sysFeePermission = feePerm;
+    window.sysReqManualReceipt = reqManual;
+    window.showToast("Fee settings saved successfully!", "success");
+  } catch (e) {
+    window.showToast("Error saving fee settings: " + e.message, "error");
+  }
 };
