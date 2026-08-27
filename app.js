@@ -174,13 +174,15 @@ window.saveAssignedClassesAndApprove = async (e) => {
   }
 };
 
-// പ്രിൻസിപ്പൽ & സ്റ്റാഫ് ലിസ്റ്റ് ലോഡ് ചെയ്യാൻ
-// പ്രിൻസിപ്പൽ & സ്റ്റാഫ് ലിസ്റ്റ് ലോഡ് ചെയ്യാൻ (Edit ബട്ടൺ സഹിതം)
 window.loadPrincipalsList = async () => {
   const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
-  if (!currentInstitutionId) return;
+  if (!currentInstitutionId) {
+    console.warn("Institution ID not found.");
+    return;
+  }
 
   try {
+    // ഇൻഡക്സ് പ്രശ്നങ്ങൾ വരാതിരിക്കാൻ institutionId മാത്രം വെച്ച് ക്വറി ചെയ്യുന്നു
     const q = query(collection(db, "users"), where("institutionId", "==", currentInstitutionId));
     const snap = await getDocs(q);
 
@@ -190,14 +192,15 @@ window.loadPrincipalsList = async () => {
 
     snap.forEach(d => {
       const user = d.data();
-      if (user.role === "admin" && user.email === SUPER_ADMIN_EMAIL) return; 
+      if (user.email === SUPER_ADMIN_EMAIL) return; 
 
       const isPending = user.status === "pending";
+      const userRoleDisplay = user.role ? user.role.toUpperCase() : 'STAFF';
 
       const rowHtml = `
         <tr>
           <td><b>${user.name || '-'}</b></td>
-          <td><span class="badge bg-secondary">${user.role || 'staff'}</span></td>
+          <td><span class="badge bg-secondary">${userRoleDisplay}</span></td>
           <td>${user.email || '-'}</td>
           <td>${user.phone || '-'}</td>
           <td class="text-center">
@@ -233,9 +236,9 @@ window.loadPrincipalsList = async () => {
 
     const tableBody = document.getElementById("staffTableBody") || document.querySelector("table tbody");
     if (tableBody) {
-      tableBody.innerHTML = html || `<tr><td colspan="5" class="text-center text-muted">No active staff found.</td></tr>`;
+      tableBody.innerHTML = html || `<tr><td colspan="5" class="text-center text-muted">No staff or principals found for this institution.</td></tr>`;
     }
-  } catch (e) {
+  }	catch (e) {
     console.error("Error loading staff list:", e);
     window.showToast("Error loading staff list: " + e.message, "error");
   }
