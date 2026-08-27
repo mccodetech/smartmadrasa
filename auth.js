@@ -229,6 +229,14 @@ window.handleUnifiedLogin = async (e) => {
       document.getElementById("authSection")?.classList.add("d-none");
       document.getElementById("parentViewSection")?.classList.remove("d-none");
 
+      // സ്ഥാപനത്തിന്റെ പേര് ഡിസ്പ്ലേ ചെയ്യാൻ
+      if (matchedStudent.institutionId) {
+        const instDoc = await getDocs(query(collection(db, "settings"), where("institutionId", "==", matchedStudent.institutionId)));
+        // സുരക്ഷിതമായി ഇൻസ്റ്റിറ്റ്യൂഷൻ നെയിം സെറ്റ് ചെയ്യുന്നു
+        const instDisplay = document.getElementById("parentInstNameDisplay");
+        if (instDisplay) instDisplay.innerText = matchedStudent.institutionName || "Smart Madrasa";
+      }
+
       const studentSelect = document.getElementById("parentStudentSelect");
       if (studentSelect) {
         studentSelect.innerHTML = "";
@@ -277,6 +285,7 @@ async function loadParentStudentData(student) {
   const classEl = document.getElementById("pvClass");
   const regNoEl = document.getElementById("pvRegNo");
   const fatherEl = document.getElementById("pvFather");
+  const totalPtsEl = document.getElementById("pvTotalPoints");
 
   if (nameEl) nameEl.innerText = student.name || '-';
   if (classEl) classEl.innerText = "Class " + (student.currentClass || '').replace(/Class\s*/i, "");
@@ -293,7 +302,7 @@ async function loadParentStudentData(student) {
     
     feeSnap.forEach(fd => {
       const f = fd.data();
-      feeHtml += `<tr><td>#${f.receiptNo}</td><td>${f.date || '-'}</td><td>${f.feeType}</td><td class="fw-bold text-success">₹${f.amount}</td></tr>`;
+      feeHtml += `<tr><td>#${f.receiptNo || '-'}</td><td>${f.date || '-'}</td><td>${f.feeType || '-'}</td><td class="fw-bold text-success">₹${f.amount || 0}</td></tr>`;
       ALL_MONTHS.forEach(m => {
         if (f.feeType && f.feeType.includes(m)) paidMonths.add(m);
       });
@@ -319,19 +328,12 @@ async function loadParentStudentData(student) {
     const perfQ = query(collection(db, "performancePoints"), where("institutionId", "==", student.institutionId), where("regNo", "==", student.regNo));
     const perfSnap = await getDocs(perfQ);
     let totalPts = 0;
-    let perfHtml = "";
     perfSnap.forEach(pd => {
       const p = pd.data();
       totalPts += (Number(p.points) || 0);
-      perfHtml += `<tr><td>${p.date || '-'}</td><td>${p.task}</td><td class="fw-bold ${p.points >= 0 ? 'text-success' : 'text-danger'}">${p.points > 0 ? '+' : ''}${p.points} Pts</td></tr>`;
     });
-    const totalPtsEl = document.getElementById("pvTotalPoints");
     if (totalPtsEl) totalPtsEl.innerText = totalPts + " Pts";
-    
-    const pointsTableBody = document.getElementById("pvPointsTableBody");
-    if (pointsTableBody) {
-      pointsTableBody.innerHTML = perfHtml || `<tr><td colspan="3" class="text-center text-muted">No points awarded yet</td></tr>`;
-    }
+
   } catch (e) {
     console.error("Error loading parent data:", e);
   }
