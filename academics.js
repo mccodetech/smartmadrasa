@@ -1,5 +1,5 @@
 // ==========================================
-// ACADEMICS MODULE (academics.js) - Attendance & Marks
+// ACADEMICS MODULE (academics.js) - Complete
 // ==========================================
 import { db, auth } from "./firebase-config.js";
 import { 
@@ -9,7 +9,7 @@ import {
 const DEFAULT_SUBJECTS = ["Quran", "Tajweed", "Fiqh", "Aqeedah", "Tareekh", "Lisan"];
 
 // ==========================================
-// SUBJECT SETTINGS
+// 1. SUBJECT SETTINGS MODULE
 // ==========================================
 window.loadClassSubjectSettings = async () => {
   const selClass = document.getElementById("subjectClassSelect")?.value;
@@ -55,7 +55,7 @@ window.saveClassSubjects = async () => {
 };
 
 // ==========================================
-// MARKS ENTRY
+// 2. MARKS ENTRY MODULE (With Total Column)
 // ==========================================
 window.resetMarksButton = () => {
   const btn = document.getElementById("btnSaveMarks");
@@ -90,9 +90,19 @@ window.loadMarksEntrySheet = async () => {
     console.log("Using default subjects");
   }
 
+  // നിലവിലുള്ള മാർക്കുകൾ ഫെച്ച് ചെയ്യുന്നു
+  const examName = document.getElementById("markExamSelect")?.value || "Quarterly Exam";
+  const marksQuery = query(collection(db, "examMarks"), where("institutionId", "==", currentInstitutionId), where("examName", "==", examName), where("classNum", "==", cleanClass));
+  const marksSnap = await getDocs(marksQuery);
+  let existingMarks = {}; 
+  marksSnap.forEach(d => {
+    const data = d.data();
+    if (data.regNo) existingMarks[data.regNo] = data.marks || {};
+  });
+
   let headHtml = `<tr><th>Reg No</th><th>Name</th>`;
   currentSubjects.forEach(sub => { headHtml += `<th>${sub}</th>`; });
-  headHtml += `</tr>`;
+  headHtml += `<th class="table-secondary" style="width: 100px;">Total</th></tr>`;
   if (thead) thead.innerHTML = headHtml;
 
   const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", cleanClass), where("status", "==", "active"));
@@ -104,16 +114,35 @@ window.loadMarksEntrySheet = async () => {
 
   let bodyHtml = "";
   students.forEach(s => {
+    const studentMarks = existingMarks[s.regNo] || {};
+    let rowTotal = 0;
+
     bodyHtml += `<tr data-sid="${s.id}" data-reg="${s.regNo}" data-name="${s.name}">
       <td><b>${s.regNo || '-'}</b></td>
-      <td>${s.name}</td>`;
-    currentSubjects.forEach((sub) => {
-      bodyHtml += `<td><input type="number" class="form-control form-control-sm text-center sub-mark-input" data-subject="${sub}" style="max-width:80px; margin:auto;" oninput="resetMarksButton()"></td>`;
+      <td><b>${s.name}</b></td>`;
+
+    currentSubjects.forEach(sub => {
+      const score = studentMarks[sub] !== undefined ? studentMarks[sub] : "";
+      rowTotal += Number(score) || 0;
+      bodyHtml += `<td><input type="number" class="form-control form-control-sm text-center sub-mark-input mark-input" data-subject="${sub}" value="${score}" style="max-width:80px; margin:auto;" oninput="calculateRowTotal(this); resetMarksButton()"></td>`;
     });
-    bodyHtml += `</tr>`;
+
+    bodyHtml += `<td class="table-secondary fw-bold text-center row-total">${rowTotal}</td></tr>`;
   });
 
-  if (tbody) tbody.innerHTML = bodyHtml || `<tr><td colspan="${currentSubjects.length + 2}" class="text-center text-muted">No active students in this class.</td></tr>`;
+  if (tbody) tbody.innerHTML = bodyHtml || `<tr><td colspan="${currentSubjects.length + 3}" class="text-center text-muted">No active students in this class.</td></tr>`;
+};
+
+window.calculateRowTotal = (inputEl) => {
+  const row = inputEl.closest("tr");
+  if (!row) return;
+  const inputs = row.querySelectorAll(".mark-input");
+  let total = 0;
+  inputs.forEach(inp => {
+    total += Number(inp.value) || 0;
+  });
+  const totalCell = row.querySelector(".row-total");
+  if (totalCell) totalCell.innerText = total;
 };
 
 window.saveClassMarks = async () => {
@@ -138,22 +167,27 @@ window.saveClassMarks = async () => {
     const name = r.getAttribute("data-name");
 
     const scores = {};
+    let totalScore = 0;
     r.querySelectorAll(".sub-mark-input").forEach(input => {
       const subName = input.getAttribute("data-subject");
-      scores[subName] = Number(input.value) || 0;
+      const val = Number(input.value) || 0;
+      scores[subName] = val;
+      totalScore += val;
     });
 
-    const markRef = doc(collection(db, "marks"));
+    const docId = `${currentInstitutionId}_${exam}_${cleanClass}_${reg}`;
+    const markRef = doc(db, "examMarks", docId);
     batch.set(markRef, {
       institutionId: currentInstitutionId,
       examName: exam,
-      class: cleanClass,
+      classNum: cleanClass,
       studentId: sid,
       regNo: Number(reg),
       studentName: name,
-      scores: scores,
+      marks: scores,
+      totalScore: totalScore,
       timestamp: serverTimestamp()
-    });
+    }, { merge: true });
   });
 
   try {
@@ -173,7 +207,7 @@ window.saveClassMarks = async () => {
 };
 
 // ==========================================
-// ATTENDANCE MODULE (With Auto Points)
+// 3. ATTENDANCE MODULE
 // ==========================================
 window.resetAttendanceButton = () => {
   const btn = document.getElementById("btnSaveAttendance");
@@ -302,7 +336,9 @@ window.saveClassAttendance = async () => {
   }
 };
 
-// പെർഫോമൻസ് ഷീറ്റിൽ ക്ലാസ് സെലക്ട് ചെയ്യുമ്പോൾ കുട്ടികളുടെ ലിസ്റ്റ് ലോഡ് ചെയ്യാൻ
+// ==========================================
+// 4. PERFORMANCE MODULE
+// ==========================================
 window.loadStudentsForPerfSheet = async () => {
   const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
   const classSelect = document.getElementById("perfClassSelect");
@@ -363,7 +399,6 @@ window.loadStudentsForPerfSheet = async () => {
   }
 };
 
-// സെലക്ട് ഓൾ (Select All) ചെക്ക്ബോക്സ് വർക്ക് ചെയ്യാൻ
 window.toggleSelectAllPerf = () => {
   const selectAllCb = document.getElementById("selectAllPerf");
   const checkboxes = document.querySelectorAll(".perf-student-cb");
