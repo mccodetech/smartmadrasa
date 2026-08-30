@@ -393,3 +393,43 @@ onAuthStateChanged(auth, async (user) => {
     }
   }
 });
+window.loadSuperAdminRequests = async () => {
+  const tableBody = document.getElementById("superAdminTableBody");
+  if (!tableBody) return;
+
+  tableBody.innerHTML = `<tr><td colspan="8" class="text-center text-muted">Loading institutions...</td></tr>`;
+
+  try {
+    // ഫയർബേസ് കളക്ഷൻ പേര് 'institutions' ആണെന്ന് ഉറപ്പുവരുത്തുക
+    const querySnapshot = await getDocs(collection(db, "institutions"));
+    let html = "";
+
+    if (querySnapshot.empty) {
+      tableBody.innerHTML = `<tr><td colspan="8" class="text-center text-muted">No Madrasas found.</td></tr>`;
+      return;
+    }
+
+    querySnapshot.forEach((docSnap) => {
+      const data = docSnap.data();
+      html += `
+        <tr>
+          <td><b>${data.institutionId || docSnap.id}</b></td>
+          <td>${data.institutionName || '-'}</td>
+          <td>${data.place || '-'}</td>
+          <td>${data.adminName || '-'}</td>
+          <td class="text-center">${data.staffCount || 0}</td>
+          <td class="text-center">${data.studentCount || 0}</td>
+          <td><span class="badge bg-success">${data.status || 'Active'}</span></td>
+          <td class="text-center">
+            <button class="btn btn-sm btn-outline-primary" onclick="viewInstitution('${docSnap.id}')">View</button>
+          </td>
+        </tr>
+      `;
+    });
+
+    tableBody.innerHTML = html;
+  } catch (e) {
+    console.error("Error loading super admin data:", e);
+    tableBody.innerHTML = `<tr><td colspan="8" class="text-center text-danger">Error loading data: ${e.message}</td></tr>`;
+  }
+};
