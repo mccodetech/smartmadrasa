@@ -400,7 +400,6 @@ window.loadSuperAdminRequests = async () => {
   tableBody.innerHTML = `<tr><td colspan="8" class="text-center text-muted">Loading institutions...</td></tr>`;
 
   try {
-    // 'institutions'-ന് പകരം 'settings' കളക്ഷൻ വിളിക്കുന്നു
     const querySnapshot = await getDocs(collection(db, "settings"));
     let html = "";
 
@@ -411,11 +410,12 @@ window.loadSuperAdminRequests = async () => {
 
     querySnapshot.forEach((docSnap) => {
       const data = docSnap.data();
-      // സ്ഥാപനത്തിന്റെ ഐഡിയും പേരും ഡാറ്റാബേസിലെ ഫീൽഡുകൾ അനുസരിച്ച് എടുക്കുന്നു
+      
+      // ഡാറ്റാബേസിലെ ഫീൽഡ് പേരുകൾ ഇവിടെ കൃത്യമായി നൽകാം
       const instId = data.institutionId || docSnap.id;
       const instName = data.institutionName || data.name || 'Smart Madrasa';
-      const place = data.place || '-';
-      const adminName = data.adminName || '-';
+      const place = data.place || data.regPlace || '-';       // Place ഫീൽഡ് പരിശോധിക്കുന്നു
+      const adminName = data.adminName || data.userName || '-'; // Admin Name ഫീൽഡ് പരിശോധിക്കുന്നു
 
       html += `
         <tr>
