@@ -400,8 +400,8 @@ window.loadSuperAdminRequests = async () => {
   tableBody.innerHTML = `<tr><td colspan="8" class="text-center text-muted">Loading institutions...</td></tr>`;
 
   try {
-    // ഫയർബേസ് കളക്ഷൻ പേര് 'institutions' ആണെന്ന് ഉറപ്പുവരുത്തുക
-    const querySnapshot = await getDocs(collection(db, "institutions"));
+    // 'institutions'-ന് പകരം 'settings' കളക്ഷൻ വിളിക്കുന്നു
+    const querySnapshot = await getDocs(collection(db, "settings"));
     let html = "";
 
     if (querySnapshot.empty) {
@@ -411,15 +411,21 @@ window.loadSuperAdminRequests = async () => {
 
     querySnapshot.forEach((docSnap) => {
       const data = docSnap.data();
+      // സ്ഥാപനത്തിന്റെ ഐഡിയും പേരും ഡാറ്റാബേസിലെ ഫീൽഡുകൾ അനുസരിച്ച് എടുക്കുന്നു
+      const instId = data.institutionId || docSnap.id;
+      const instName = data.institutionName || data.name || 'Smart Madrasa';
+      const place = data.place || '-';
+      const adminName = data.adminName || '-';
+
       html += `
         <tr>
-          <td><b>${data.institutionId || docSnap.id}</b></td>
-          <td>${data.institutionName || '-'}</td>
-          <td>${data.place || '-'}</td>
-          <td>${data.adminName || '-'}</td>
-          <td class="text-center">${data.staffCount || 0}</td>
-          <td class="text-center">${data.studentCount || 0}</td>
-          <td><span class="badge bg-success">${data.status || 'Active'}</span></td>
+          <td><b>${instId}</b></td>
+          <td>${instName}</td>
+          <td>${place}</td>
+          <td>${adminName}</td>
+          <td class="text-center">-</td>
+          <td class="text-center">-</td>
+          <td><span class="badge bg-success">Active</span></td>
           <td class="text-center">
             <button class="btn btn-sm btn-outline-primary" onclick="viewInstitution('${docSnap.id}')">View</button>
           </td>
