@@ -68,7 +68,6 @@ window.populateClassDropdowns = function() {
 };
 
 // സെറ്റിങ്സ് ലോഡ് ചെയ്യാൻ
-// സെറ്റിങ്സ് ലോഡ് ചെയ്യാൻ
 window.loadInstitutionSettings = async () => {
   const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
   if (!currentInstitutionId) return;
@@ -131,11 +130,11 @@ window.saveWorkingDaysSetting = async () => {
     window.showToast("Error saving working days: " + e.message, "error");
   }
 };
+
 // ==========================================
 // STAFF MANAGEMENT & CLASS ASSIGNMENT MODULE
 // ==========================================
 
-// സ്റ്റാഫ് / പ്രിൻസിപ്പൽ ആഡ് ചെയ്യാനുള്ള മോഡൽ തുറക്കാൻ
 window.openStaffProfileModal = (staffId = null) => {
   const modalEl = document.getElementById("staffProfileModal");
   if (!modalEl) {
@@ -146,7 +145,6 @@ window.openStaffProfileModal = (staffId = null) => {
   modal.show();
 };
 
-// സ്റ്റാഫിനെ അപ്രൂവ് ചെയ്യുമ്പോൾ ക്ലാസ് അസൈൻ ചെയ്യുന്ന ഫോം കാണിക്കാൻ
 window.prepareApproveStaff = (userId, name, role) => {
   const form = document.getElementById("instAssignClassesForm");
   const idInput = document.getElementById("instAssignStaffId") || document.getElementById("instAssignStaffid");
@@ -156,7 +154,6 @@ window.prepareApproveStaff = (userId, name, role) => {
   if (nameDisplay) nameDisplay.innerText = `${name} (${role})`;
   if (form) form.classList.remove("d-none");
 
-  // യൂസറുടെ നിലവിലുള്ള ക്ലാസുകൾ ഫെച്ച് ചെയ്ത് ചെക്ക്ബോക്സ് ടിക്ക് ചെയ്യാൻ
   getDoc(doc(db, "users", userId)).then(docSnap => {
     if (docSnap.exists()) {
       const userData = docSnap.data();
@@ -171,7 +168,6 @@ window.prepareApproveStaff = (userId, name, role) => {
   });
 };
 
-// ക്ലാസുകൾ സഹിതം സ്റ്റാഫിന്റെ അപ്രൂവൽ സേവ് ചെയ്യാൻ
 window.instAssignClassesToStaff = async (e) => {
   if (e) e.preventDefault();
   
@@ -272,7 +268,6 @@ window.loadPrincipalsList = async () => {
   }
 };
 
-// സ്റ്റാഫ് അക്കൗണ്ട് ഡിലീറ്റ് ചെയ്യാൻ
 window.deleteStaffAccount = async (userId, name) => {
   if (!confirm(`Are you sure you want to remove ${name}?`)) return;
   try {
@@ -281,6 +276,55 @@ window.deleteStaffAccount = async (userId, name) => {
     window.loadPrincipalsList();
   } catch (e) {
     window.showToast("Error deleting staff: " + e.message, "error");
+  }
+};
+
+// ==========================================
+// SUPER ADMIN MASTER CONSOLE MODULE
+// ==========================================
+window.loadSuperAdminRequests = async () => {
+  const tableBody = document.getElementById("superAdminTableBody");
+  if (!tableBody) return;
+
+  tableBody.innerHTML = `<tr><td colspan="8" class="text-center text-muted">Loading institutions...</td></tr>`;
+
+  try {
+    const querySnapshot = await getDocs(collection(db, "settings"));
+    let html = "";
+
+    if (querySnapshot.empty) {
+      tableBody.innerHTML = `<tr><td colspan="8" class="text-center text-muted">No Madrasas found.</td></tr>`;
+      return;
+    }
+
+    querySnapshot.forEach((docSnap) => {
+      const data = docSnap.data();
+      
+      const instId = data.institutionId || docSnap.id;
+      const instName = data.institutionName || data.name || 'Smart Madrasa';
+      const place = data.place || data.regPlace || '-';       
+      const adminName = data.adminName || data.userName || '-'; 
+
+      html += `
+        <tr>
+          <td><b>${instId}</b></td>
+          <td>${instName}</td>
+          <td>${place}</td>
+          <td>${adminName}</td>
+          <td class="text-center">-</td>
+          <td class="text-center">-</td>
+          <td><span class="badge bg-success">Active</span></td>
+          <td class="text-center">
+            <button class="btn btn-sm btn-outline-primary" onclick="viewInstitution('${docSnap.id}')">View</button>
+          </td>
+        </tr>
+      `;
+    });
+
+    tableBody.innerHTML = html;
+  } catch (e) {
+    console.error("Error loading super admin data:", e);
+    tableBody.innerHTML = `<tr><td colspan="8" class="text-center text-danger">Error loading data: ${e.message}</td></tr>`;
   }
 };
 
@@ -393,49 +437,3 @@ onAuthStateChanged(auth, async (user) => {
     }
   }
 });
-window.loadSuperAdminRequests = async () => {
-  const tableBody = document.getElementById("superAdminTableBody");
-  if (!tableBody) return;
-
-  tableBody.innerHTML = `<tr><td colspan="8" class="text-center text-muted">Loading institutions...</td></tr>`;
-
-  try {
-    const querySnapshot = await getDocs(collection(db, "settings"));
-    let html = "";
-
-    if (querySnapshot.empty) {
-      tableBody.innerHTML = `<tr><td colspan="8" class="text-center text-muted">No Madrasas found.</td></tr>`;
-      return;
-    }
-
-    querySnapshot.forEach((docSnap) => {
-      const data = docSnap.data();
-      
-      // ഡാറ്റാബേസിലെ ഫീൽഡ് പേരുകൾ ഇവിടെ കൃത്യമായി നൽകാം
-      const instId = data.institutionId || docSnap.id;
-      const instName = data.institutionName || data.name || 'Smart Madrasa';
-      const place = data.place || data.regPlace || '-';       // Place ഫീൽഡ് പരിശോധിക്കുന്നു
-      const adminName = data.adminName || data.userName || '-'; // Admin Name ഫീൽഡ് പരിശോധിക്കുന്നു
-
-      html += `
-        <tr>
-          <td><b>${instId}</b></td>
-          <td>${instName}</td>
-          <td>${place}</td>
-          <td>${adminName}</td>
-          <td class="text-center">-</td>
-          <td class="text-center">-</td>
-          <td><span class="badge bg-success">Active</span></td>
-          <td class="text-center">
-            <button class="btn btn-sm btn-outline-primary" onclick="viewInstitution('${docSnap.id}')">View</button>
-          </td>
-        </tr>
-      `;
-    });
-
-    tableBody.innerHTML = html;
-  } catch (e) {
-    console.error("Error loading super admin data:", e);
-    tableBody.innerHTML = `<tr><td colspan="8" class="text-center text-danger">Error loading data: ${e.message}</td></tr>`;
-  }
-};
