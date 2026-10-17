@@ -91,7 +91,7 @@ body {
   color: #334155 !important;
 }
 
-/* സ്ഥാപനത്തിന്റെ ഫോട്ടോകൾ ഹെഡറിൽ ഭംഗിയായി കാണാൻ (Updated for Dynamic Loading) */
+/* സ്ഥാപനത്തിന്റെ ഫോട്ടോകൾ ഹെഡറിൽ ഭംഗിയായി കാണാൻ */
 .inst-header-photo {
   width: 32px !important;
   height: 32px !important;
@@ -107,4 +107,12 @@ body {
     width: 38px !important;
     height: 38px !important;
   }
+}
+
+/* ഹോം പേജിലെ ഗാലറി ഫോട്ടോകൾ ഭംഗിയായി കാണാൻ */
+#homeGalleryContainer .card img {
+  height: 160px !important;
+  object-fit: cover !important;
+  border-radius: 8px !important;
+  width: 100% !important;
 }
