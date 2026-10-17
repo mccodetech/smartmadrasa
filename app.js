@@ -89,8 +89,8 @@ window.loadInstitutionSettings = async () => {
       }
       
       // ഗാലറി ഫോട്ടോകൾ ലോഡ് ചെയ്യുക
-      if (data.photos) {
-        window.loadHomeInstitutionPhotos(data.photos);
+      if (data.galleryPhotos || data.photos) {
+        window.loadHomeInstitutionPhotos(data.galleryPhotos || data.photos);
       }
     }
   } catch (e) {
