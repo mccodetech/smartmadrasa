@@ -67,7 +67,7 @@ window.populateClassDropdowns = function() {
   });
 };
 
-// സെറ്റിങ്സ് ലോഡ് ചെയ്യാൻ
+// സെറ്റിങ്സും ഗാലറി ഫോട്ടോകളും ലോഡ് ചെയ്യാൻ
 window.loadInstitutionSettings = async () => {
   const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
   if (!currentInstitutionId) return;
@@ -80,16 +80,27 @@ window.loadInstitutionSettings = async () => {
 
     if (snap.exists()) {
       const data = snap.data();
+      
+      // സ്പെഷ്യൽ ഫണ്ടുകൾ ലോഡ് ചെയ്യാൻ
       if (data.specialFeeCategories && inputEl) {
         inputEl.value = data.specialFeeCategories.join(", ");
         window.customSpecialFunds = data.specialFeeCategories;
       }
+      
+      // പ്രവൃത്തി ദിവസങ്ങൾ ലോഡ് ചെയ്യാൻ
       if (data.totalWorkingDays !== undefined && workingDaysEl) {
         workingDaysEl.value = data.totalWorkingDays;
       }
       
-      // ഗാലറി ഫോട്ടോകൾ ലോഡ് ചെയ്യുക
-      if (data.galleryPhotos || data.photos) {
+      // ഗാലറി ഫോട്ടോകൾ ലോഡ് ചെയ്ത് ഹോം പേജിൽ കാണിക്കാൻ
+      let loadedPhotos = [];
+      if (data.photo1) loadedPhotos.push(data.photo1);
+      if (data.photo2) loadedPhotos.push(data.photo2);
+      if (data.photo3) loadedPhotos.push(data.photo3);
+      
+      if (loadedPhotos.length > 0) {
+        window.loadHomeInstitutionPhotos(loadedPhotos);
+      } else if (data.galleryPhotos || data.photos) {
         window.loadHomeInstitutionPhotos(data.galleryPhotos || data.photos);
       }
     }
@@ -452,7 +463,7 @@ onAuthStateChanged(auth, async (user) => {
 // INSTITUTION GALLERY PHOTOS MODULE
 // ==========================================
 
-// സ്ഥാപനത്തിന്റെ ഫോട്ടോകൾ ഫയർസ്റ്റോറിൽ സേവ് ചെയ്യാൻ (Updated)
+// സ്ഥാപനത്തിന്റെ ഫോട്ടോകൾ ഫയർസ്റ്റോറിൽ സേവ് ചെയ്യാൻ (Fixed)
 window.saveInstitutionPhotosSetting = async function() {
     const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
     if (!currentInstitutionId) {
@@ -477,27 +488,33 @@ window.saveInstitutionPhotosSetting = async function() {
             });
         };
 
-        let photosArray = [];
+        let photo1Data = null;
+        let photo2Data = null;
+        let photo3Data = null;
+
         if (file1) {
             let base641 = await convertToBase64(file1);
-            photosArray.push({ url: base641, caption: caption1 });
+            photo1Data = { url: base641, caption: caption1 };
         }
         if (file2) {
             let base642 = await convertToBase64(file2);
-            photosArray.push({ url: base642, caption: caption2 });
+            photo2Data = { url: base642, caption: caption2 };
         }
         if (file3) {
             let base643 = await convertToBase64(file3);
-            photosArray.push({ url: base643, caption: caption3 });
+            photo3Data = { url: base643, caption: caption3 };
         }
 
-        // ഫയർസ്റ്റോറിലേക്ക് ഒബ്‌ജക്റ്റ് ആയി സേവ് ചെയ്യുന്നു (Error ഒഴിവാക്കാൻ)
+        // ഫയർസ്റ്റോറിലേക്ക് അറേ ഒഴിവാക്കി നേരിട്ട് ഒബ്‌ജക്റ്റുകളായി സേവ് ചെയ്യുന്നു
         await setDoc(doc(db, "settings", currentInstitutionId), {
-            galleryPhotos: photosArray,
+            photo1: photo1Data,
+            photo2: photo2Data,
+            photo3: photo3Data,
             updatedAt: serverTimestamp()
         }, { merge: true });
 
-        window.loadHomeInstitutionPhotos(photosArray);
+        let savedPhotos = [photo1Data, photo2Data, photo3Data].filter(p => p !== null);
+        window.loadHomeInstitutionPhotos(savedPhotos);
         window.showToast("Institution photos saved successfully!", "success");
     } catch (error) {
         console.error('Error saving photos:', error);
@@ -505,31 +522,30 @@ window.saveInstitutionPhotosSetting = async function() {
     }
 };
 
-// ഹോം പേജിൽ സ്ഥാപനത്തിന്റെ ഫോട്ടോകൾ ഗാലറിയായി ലോഡ് ചെയ്ത് കാണിക്കാൻ (Updated)
-window.loadHomeInstitutionPhotos = function(photos = null) {
+// ഹോം പേജിൽ സ്ഥാപനത്തിന്റെ ഫോട്ടോകൾ ഗാലറിയായി ലോഡ് ചെയ്ത് കാണിക്കാൻ (Fixed)
+window.loadHomeInstitutionPhotos = function(photosList = null) {
     const container = document.getElementById('homeGalleryContainer');
     const cardContainer = document.getElementById('homeGalleryCard');
     if (!container || !cardContainer) return;
     
     container.innerHTML = '';
     
-    let photosList = photos;
-    if (!photosList) {
-        let currentInst = JSON.parse(localStorage.getItem('currentInstitution') || '{}');
-        photosList = currentInst.photos || currentInst.galleryPhotos || [];
+    let validPhotos = [];
+    if (photosList) {
+        validPhotos = photosList.filter(p => p && p.url);
     }
 
-    if (photosList && photosList.length > 0) {
+    if (validPhotos.length > 0) {
         cardContainer.style.display = 'block';
         
         let colClass = "col-md-4";
-        if (photosList.length === 1) {
+        if (validPhotos.length === 1) {
             colClass = "col-12";
-        } else if (photosList.length === 2) {
+        } else if (validPhotos.length === 2) {
             colClass = "col-md-6";
         }
 
-        photosList.forEach(photo => {
+        validPhotos.forEach(photo => {
             let col = document.createElement('div');
             col.className = `${colClass} text-center mb-3`;
             col.innerHTML = `
