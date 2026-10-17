@@ -67,7 +67,7 @@ window.populateClassDropdowns = function() {
   });
 };
 
-// Load Institution Settings & Gallery Photos from Firestore
+// സെറ്റിങ്സും ഗാലറി ഫോട്ടോകളും ലോഡ് ചെയ്യാൻ (Input fields-ൽ caption ഉം status ഉം കാണിക്കാൻ വേണ്ടിയുള്ള Update)
 window.loadInstitutionSettings = async () => {
   const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
   if (!currentInstitutionId) return;
@@ -81,15 +81,29 @@ window.loadInstitutionSettings = async () => {
     if (snap.exists()) {
       const data = snap.data();
       
+      // സ്പെഷ്യൽ ഫണ്ടുകൾ ലോഡ് ചെയ്യാൻ
       if (data.specialFeeCategories && inputEl) {
         inputEl.value = data.specialFeeCategories.join(", ");
         window.customSpecialFunds = data.specialFeeCategories;
       }
+      
+      // പ്രവൃത്തി ദിവസങ്ങൾ ലോഡ് ചെയ്യാൻ
       if (data.totalWorkingDays !== undefined && workingDaysEl) {
         workingDaysEl.value = data.totalWorkingDays;
       }
       
-      // Load Gallery Photos
+      // സെറ്റിങ്സ് പേജിലെ ക്യാപ്ഷൻ ഇൻപുട്ടുകളിൽ സേവ് ചെയ്ത ക്യാപ്ഷനുകൾ കാണിക്കാൻ
+      if (data.photo1 && document.getElementById('instCaption1')) {
+        document.getElementById('instCaption1').value = data.photo1.caption || '';
+      }
+      if (data.photo2 && document.getElementById('instCaption2')) {
+        document.getElementById('instCaption2').value = data.photo2.caption || '';
+      }
+      if (data.photo3 && document.getElementById('instCaption3')) {
+        document.getElementById('instCaption3').value = data.photo3.caption || '';
+      }
+      
+      // ഗാലറി ഫോട്ടോകൾ ലോഡ് ചെയ്ത് ഹോം പേജിൽ കാണിക്കാൻ
       let loadedPhotos = [];
       if (data.photo1) loadedPhotos.push(data.photo1);
       if (data.photo2) loadedPhotos.push(data.photo2);
