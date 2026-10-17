@@ -437,3 +437,76 @@ onAuthStateChanged(auth, async (user) => {
     }
   }
 });
+
+// സ്ഥാപനത്തിന്റെ ഫോട്ടോകൾ സേവ് ചെയ്യാൻ
+window.saveInstitutionPhotosSetting = async function() {
+    try {
+        const file1 = document.getElementById('instPhoto1File').files[0];
+        const caption1 = document.getElementById('instCaption1').value;
+        const file2 = document.getElementById('instPhoto2File').files[0];
+        const caption2 = document.getElementById('instCaption2').value;
+        const file3 = document.getElementById('instPhoto3File').files[0];
+        const caption3 = document.getElementById('instCaption3').value;
+
+        // ഫയലുകളെ Base64 ആക്കി മാറ്റാനുള്ള ഫങ്ഷൻ
+        const convertToBase64 = (file) => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        };
+
+        let photosArray = [];
+        if (file1) {
+            let base641 = await convertToBase64(file1);
+            photosArray.push({ url: base641, caption: caption1 });
+        }
+        if (file2) {
+            let base642 = await convertToBase64(file2);
+            photosArray.push({ url: base642, caption: caption2 });
+        }
+        if (file3) {
+            let base643 = await convertToBase64(file3);
+            photosArray.push({ url: base643, caption: caption3 });
+        }
+
+        // നിലവിലെ ലോക്കൽ സ്റ്റോറേജിലോ ഫയർസ്റ്റോറിലോ സ്ഥാപനത്തിന്റെ ഡാറ്റയിൽ സേവ് ചെയ്യുന്നു
+        let currentInst = JSON.parse(localStorage.getItem('currentInstitution') || '{}');
+        currentInst.photos = photosArray;
+        localStorage.setItem('currentInstitution', JSON.stringify(currentInst));
+
+        // ഹെഡറിലെ ഫോട്ടോകൾ അപ്ഡേറ്റ് ചെയ്യുന്നു
+        loadHeaderInstitutionPhotos();
+
+        alert('Institution photos saved successfully!');
+    } catch (error) {
+        console.error('Error saving photos:', error);
+        alert('Failed to save photos.');
+    }
+};
+
+// ഹെഡറിൽ ഫോട്ടോകൾ ലോഡ് ചെയ്ത് കാണിക്കാൻ
+window.loadHeaderInstitutionPhotos = function() {
+    const container = document.getElementById('headerInstPhotos');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    let currentInst = JSON.parse(localStorage.getItem('currentInstitution') || '{}');
+    
+    if (currentInst.photos && currentInst.photos.length > 0) {
+        currentInst.photos.forEach(photo => {
+            let img = document.createElement('img');
+            img.src = photo.url;
+            img.alt = photo.caption || 'Institution Photo';
+            img.className = 'inst-header-photo';
+            container.appendChild(img);
+        });
+    }
+};
+
+// പേജ് ലോഡ് ആകുമ്പോൾ ഹെഡർ ഫോട്ടോകൾ ലോഡ് ചെയ്യാൻ
+document.addEventListener('DOMContentLoaded', () => {
+    loadHeaderInstitutionPhotos();
+});
