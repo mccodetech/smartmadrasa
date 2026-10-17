@@ -17,6 +17,168 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   
   <link rel="stylesheet" href="style.css">
+  <style>
+    :root {
+      --primary: #0f5132;
+      --primary-dark: #0a3622;
+      --primary-light: #e8f5e9;
+      --accent: #198754;
+      --bg-body: #f8fafc;
+      --card-bg: #ffffff;
+      --text-dark: #0f172a;
+      --text-muted: #64748b;
+    }
+    body {
+      background-color: var(--bg-body);
+      font-family: 'Plus Jakarta Sans', 'Manjari', sans-serif;
+      color: var(--text-dark);
+      -webkit-font-smoothing: antialiased;
+    }
+    .bg-madrassa { background-color: var(--primary) !important; }
+    .btn-madrassa { background-color: var(--accent); color: #fff; border: none; font-weight: 500; }
+    .btn-madrassa:hover { background-color: var(--primary); color: #fff; }
+    
+    .auth-wrapper {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at top left, #dcfce7 0%, #f1f5f9 60%);
+      padding: 20px;
+    }
+    .auth-card {
+      background: var(--card-bg);
+      border-radius: 20px;
+      border: 1px solid rgba(226, 232, 240, 0.8);
+      box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.08);
+      width: 100%;
+      max-width: 460px;
+      padding: 32px 28px;
+    }
+    .brand-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 18px;
+      background: var(--primary-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+      font-size: 28px;
+      margin: 0 auto 16px auto;
+    }
+    .segmented-control {
+      background: #f1f5f9;
+      border-radius: 12px;
+      padding: 4px;
+      display: flex;
+      gap: 4px;
+      margin-bottom: 24px;
+    }
+    .segmented-control button {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 8px 16px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      border-radius: 9px;
+      transition: all 0.2s ease;
+    }
+    .segmented-control button.active {
+      background: #ffffff;
+      color: var(--primary);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+    .btn-primary-custom {
+      background: var(--primary);
+      color: #fff;
+      font-weight: 600;
+      border-radius: 10px;
+      padding: 11px;
+      border: none;
+      transition: all 0.2s;
+    }
+    .btn-primary-custom:hover {
+      background: var(--primary-dark);
+      color: #fff;
+    }
+    .card { border-radius: 14px; border: 1px solid #e2e8f0; box-shadow: 0 4px 16px rgba(0,0,0,0.03); }
+    .nav-pills .nav-link { color: #475569; font-weight: 600; border-radius: 10px; padding: 10px 14px; }
+    .nav-pills .nav-link.active { background-color: var(--primary); color: #fff; }
+    .dashboard-card { cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease; border-radius: 14px; }
+    .dashboard-card:hover { transform: translateY(-4px); box-shadow: 0 10px 24px rgba(0,0,0,0.08); }
+    .star-badge { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; font-weight: 700; border-radius: 20px; padding: 4px 12px; }
+    
+    .month-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 8px;
+    }
+    .month-badge {
+      padding: 8px 4px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+    .month-paid { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+    .month-pending { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+
+    #appToastContainer {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 10000;
+    }
+    .modern-toast {
+      background: #0f172a;
+      color: #fff;
+      border-radius: 12px;
+      padding: 14px 20px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      min-width: 280px;
+      animation: toastSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .modern-toast.success { background: #065f46; border-left: 5px solid #10b981; }
+    .modern-toast.error { background: #991b1b; border-left: 5px solid #ef4444; }
+    .modern-toast.warning { background: #92400e; border-left: 5px solid #f59e0b; }
+    @keyframes toastSlideUp {
+      from { transform: translateY(30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .password-toggle-btn { cursor: pointer; }
+
+    .top-header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: nowrap;
+    }
+    .top-brand-text {
+      max-width: 180px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 1rem;
+    }
+    @media (min-width: 768px) {
+      .top-brand-text { max-width: 450px; font-size: 1.15rem; }
+    }
+
+    @media print {
+      body * { visibility: hidden; }
+      #printableReceipt, #printableReceipt * { visibility: visible; }
+      #printableReceipt { position: absolute; left: 0; top: 0; width: 100%; display: block !important; border: 1px solid #333 !important; }
+    }
+  </style>
 </head>
 <body>
 
@@ -818,6 +980,7 @@
                     <div class="col-md-4"><label class="form-label small">Blood Group</label><select id="spBlood" class="form-select"><option value="">Select</option><option value="A+">A+</option><option value="A-">A-</option><option value="B+">B+</option><option value="B-">B-</option><option value="O+">O+</option><option value="O-">O-</option><option value="AB+">AB+</option><option value="AB-">AB-</option></select></div>
                     <div class="col-md-4"><label class="form-label small">Father's / Spouse's Name</label><input type="text" id="spGuardian" class="form-control text-uppercase"></div>
                     <div class="col-md-4"><label class="form-label small">Marital Status</label><select id="spMarital" class="form-select"><option value="Single">Single</option><option value="Married">Married</option></select></div>
+                    <div class="col-md-4"><label class="form-label small">Aadhaar Number</label><input type="text" id="spAadhaar" class="form-control"></div>
                   </div>
                 </div>
                 <div class="tab-pane fade" id="tab-contact">
