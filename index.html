@@ -463,23 +463,34 @@
   <!-- ========================================== -->
   <!-- SECTION 4: MAIN DASHBOARD & TABS SCREEN   -->
   <!-- ========================================== -->
-  <div id="appSection" class="d-none">
-    <nav class="navbar navbar-dark bg-madrassa shadow-sm sticky-top py-2">
-      <div class="container-fluid top-header-bar px-2 px-md-3">
-        <div class="d-flex align-items-center gap-2">
-          <button class="btn btn-outline-light btn-sm d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas"><i class="fa-solid fa-bars"></i></button>
-          <a class="navbar-brand fw-bold m-0 d-flex align-items-center gap-2 top-brand-text" href="#" onclick="showTab('homeDashboardTab')">
-            <img src="images.png" alt="Logo" class="app-navbar-logo">
-            <span id="displayMadrassaName">Smart Madrasa</span>
-          </a>
-        </div>
-        <div class="d-flex align-items-center gap-2 text-white">
-          <button class="btn btn-sm btn-outline-warning d-none" id="superAdminBackBtn" onclick="returnToSuperAdminConsole()"><i class="fa-solid fa-arrow-left me-1"></i> Console</button>
-          <span class="badge bg-light text-dark d-none d-md-inline-block" id="displayUserRole">Admin</span>
-          <button class="btn btn-outline-light btn-sm" onclick="handleLogout()"><i class="fa-solid fa-right-from-bracket me-md-1"></i> <span class="d-none d-md-inline-block">Logout</span></button>
-        </div>
+ <div id="appSection" class="d-none">
+  <!-- ഇവിടെയാണ് പുതിയ നാവിഗേഷൻ ബാർ കോഡ് നൽകേണ്ടത് -->
+  <nav class="navbar navbar-dark bg-madrassa shadow-sm sticky-top py-2">
+    <div class="container-fluid top-header-bar px-2 px-md-3">
+      <div class="d-flex align-items-center gap-2">
+        <!-- മൊബൈലിൽ മാത്രം കാണുന്ന ഹാംബർഗർ മെനു ബട്ടൺ -->
+        <button class="btn btn-outline-light btn-sm d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        
+        <a class="navbar-brand fw-bold m-0 d-flex align-items-center gap-2 top-brand-text" href="#" onclick="showTab('homeDashboardTab')">
+          <!-- സ്ഥാപനത്തിന്റെ 3 ഫോട്ടോകൾ വരെ ചെറിയ സൈസിൽ ഒന്നിനരികെ ഒന്നായി കാണിക്കാൻ -->
+          <div class="d-flex align-items-center gap-1">
+            <img src="images.png" alt="Institution Photo 1" class="inst-header-photo">
+            <img src="images2.png" alt="Institution Photo 2" class="inst-header-photo">
+            <img src="images3.png" alt="Institution Photo 3" class="inst-header-photo">
+          </div>
+          <span id="displayMadrassaName">Hayathul Islam Madrasa</span>
+        </a>
       </div>
-    </nav>
+
+      <div class="d-flex align-items-center gap-2 text-white">
+        <button class="btn btn-sm btn-outline-warning d-none" id="superAdminBackBtn" onclick="returnToSuperAdminConsole()"><i class="fa-solid fa-arrow-left me-1"></i> Console</button>
+        <span class="badge bg-light text-dark d-none d-md-inline-block" id="displayUserRole">Admin</span>
+        <button class="btn btn-outline-light btn-sm" onclick="handleLogout()"><i class="fa-solid fa-right-from-bracket me-md-1"></i> <span class="d-none d-md-inline-block">Logout</span></button>
+      </div>
+    </div>
+  </nav>
 
     <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarOffcanvas">
       <div class="offcanvas-header bg-madrassa text-white">
