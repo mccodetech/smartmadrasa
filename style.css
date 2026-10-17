@@ -91,19 +91,20 @@ body {
   color: #334155 !important;
 }
 
-/* സ്ഥാപനത്തിന്റെ ഫോട്ടോകൾ ഹെഡറിൽ ഭംഗിയായി കാണാൻ */
+/* സ്ഥാപനത്തിന്റെ ഫോട്ടോകൾ ഹെഡറിൽ ഭംഗിയായി കാണാൻ (Updated for Dynamic Loading) */
 .inst-header-photo {
-  width: 30px;
-  height: 30px;
-  object-fit: cover;
-  border-radius: 50%; /* വേണമെങ്കിൽ റൗണ്ട് ആയി കാണിക്കാം, അല്ലെങ്കിൽ ബോർഡർ റേഡിയസ് മാറ്റാം */
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  width: 32px !important;
+  height: 32px !important;
+  object-fit: cover !important;
+  border-radius: 50% !important;
+  border: 1px solid rgba(255, 255, 255, 0.7);
   background: #fff;
+  display: inline-block;
 }
 
 @media (min-width: 768px) {
   .inst-header-photo {
-    width: 36px;
-    height: 36px;
+    width: 38px !important;
+    height: 38px !important;
   }
 }
