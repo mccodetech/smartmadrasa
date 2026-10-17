@@ -513,7 +513,6 @@ window.loadHomeInstitutionPhotos = function(photos = null) {
     
     container.innerHTML = '';
     
-    // ഫോട്ടോകൾ ആർഗ്യുമെന്റ് ആയി കിട്ടിയില്ലെങ്കിൽ ലോക്കൽ സ്റ്റോറേജിൽ നിന്നോ സെറ്റിങ്സിൽ നിന്നോ എടുക്കുന്നു
     let photosList = photos;
     if (!photosList) {
         let currentInst = JSON.parse(localStorage.getItem('currentInstitution') || '{}');
@@ -522,12 +521,21 @@ window.loadHomeInstitutionPhotos = function(photos = null) {
 
     if (photosList && photosList.length > 0) {
         cardContainer.style.display = 'block';
+        
+        // ഫോട്ടോകളുടെ എണ്ണത്തിനനുസരിച്ച് Bootstrap Grid Class നിർണ്ണയിക്കുന്നു
+        let colClass = "col-md-4"; // 3 ഫോട്ടോകൾക്ക്
+        if (photosList.length === 1) {
+            colClass = "col-12"; // 1 ഫോട്ടോ മാത്രം ഉണ്ടെങ്കിൽ ഫുൾ വിഡ്ത്ത്
+        } else if (photosList.length === 2) {
+            colClass = "col-md-6"; // 2 ഫോട്ടോകൾ ഉണ്ടെങ്കിൽ പകുതി വീതം
+        }
+
         photosList.forEach(photo => {
             let col = document.createElement('div');
-            col.className = 'col-md-4 text-center mb-3';
+            col.className = `${colClass} text-center mb-3`;
             col.innerHTML = `
                 <div class="card p-2 border shadow-sm h-100">
-                    <img src="${photo.url}" alt="${photo.caption || 'Institution Photo'}" class="img-fluid rounded mb-2" style="height: 180px; object-fit: cover; width: 100%;">
+                    <img src="${photo.url}" alt="${photo.caption || 'Institution Photo'}" class="img-fluid rounded mb-2 gallery-img">
                     <h6 class="fw-bold text-dark small m-0">${photo.caption || ''}</h6>
                 </div>
             `;
