@@ -109,18 +109,12 @@ body {
   }
 }
 
-/* ഹോം പേജിലെ ഗാലറി ഫോട്ടോകൾ ഭംഗിയായി കാണാൻ */
-#homeGalleryContainer .card img {
-  height: 160px !important;
-  object-fit: cover !important;
-  border-radius: 8px !important;
-  width: 100% !important;
-}
-
-/* ഹോം ഗാലറി ചിത്രങ്ങളുടെ സ്റ്റൈൽ */
+/* ഹോം ഗാലറി ചിത്രങ്ങൾ ക്രോപ്പ് ആകാതെ മുഴുവനായി കാണാൻ */
 .gallery-img {
   height: 220px !important;
-  object-fit: cover !important;
+  object-fit: contain !important;
   width: 100% !important;
-  border-radius: 10px !important;
+  background-color: #f8fafc;
+  border-radius: 8px !important;
+  padding: 4px;
 }
