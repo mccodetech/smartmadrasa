@@ -24,7 +24,7 @@ window.sysFeePermission = "all";
 window.sysReqManualReceipt = false;
 window.customSpecialFunds = [];
 
-// ടോസ്റ്റ് നോട്ടിഫിക്കേഷൻ
+// Toast Notification
 window.showToast = (message, type = "success") => {
   const container = document.getElementById("appToastContainer");
   if (!container) return;
@@ -38,7 +38,7 @@ window.showToast = (message, type = "success") => {
   setTimeout(() => { toast.style.transition = "all 0.4s ease"; toast.style.opacity = "0"; setTimeout(() => toast.remove(), 400); }, 4000);
 };
 
-// മൊബൈൽ മെനു സിങ്ക് ചെയ്യാനുള്ള ഫങ്ഷൻ
+// Sync Mobile Menu
 window.syncMobileMenu = () => {
   const desktopMenu = document.getElementById("desktopTabMenu");
   const mobileMenu = document.getElementById("mobileTabMenu");
@@ -67,7 +67,7 @@ window.populateClassDropdowns = function() {
   });
 };
 
-// സെറ്റിങ്സും ഗാലറി ഫോട്ടോകളും ലോഡ് ചെയ്യാൻ
+// Load Institution Settings & Gallery Photos from Firestore
 window.loadInstitutionSettings = async () => {
   const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
   if (!currentInstitutionId) return;
@@ -81,18 +81,15 @@ window.loadInstitutionSettings = async () => {
     if (snap.exists()) {
       const data = snap.data();
       
-      // സ്പെഷ്യൽ ഫണ്ടുകൾ ലോഡ് ചെയ്യാൻ
       if (data.specialFeeCategories && inputEl) {
         inputEl.value = data.specialFeeCategories.join(", ");
         window.customSpecialFunds = data.specialFeeCategories;
       }
-      
-      // പ്രവൃത്തി ദിവസങ്ങൾ ലോഡ് ചെയ്യാൻ
       if (data.totalWorkingDays !== undefined && workingDaysEl) {
         workingDaysEl.value = data.totalWorkingDays;
       }
       
-      // ഗാലറി ഫോട്ടോകൾ ലോഡ് ചെയ്ത് ഹോം പേജിൽ കാണിക്കാൻ
+      // Load Gallery Photos
       let loadedPhotos = [];
       if (data.photo1) loadedPhotos.push(data.photo1);
       if (data.photo2) loadedPhotos.push(data.photo2);
@@ -109,7 +106,6 @@ window.loadInstitutionSettings = async () => {
   }
 };
 
-// സ്പെഷ്യൽ ഫണ്ട് മാത്രം സേവ് ചെയ്യാൻ
 window.saveSpecialFundsSetting = async () => {
   const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
   const rawInput = document.getElementById("settingSpecialFundsInput")?.value || "";
@@ -129,7 +125,6 @@ window.saveSpecialFundsSetting = async () => {
   }
 };
 
-// ടോട്ടൽ വർക്കിംഗ് ഡെയ്സ് മാത്രം സേവ് ചെയ്യാൻ
 window.saveWorkingDaysSetting = async () => {
   const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
   const totalWorkingDays = Number(document.getElementById("settingTotalWorkingDays")?.value) || 0;
@@ -366,6 +361,11 @@ onAuthStateChanged(auth, async (user) => {
         window.currentUserAssignedClasses = userData.assignedClasses || [];
         window.currentUserName = userData.name || "Staff";
 
+        // Session storage-ൽ institutionId ഉറപ്പുവരുത്തുക
+        if (window.currentInstitutionId) {
+          sessionStorage.setItem("currentInstitutionId", window.currentInstitutionId);
+        }
+
         const instNameEl = document.getElementById("displayMadrassaName");
         if (instNameEl) instNameEl.innerText = window.isSuperAdmin ? "Smart Madrasa - Master Control Center" : (userData.institutionName || "Smart Madrasa");
 
@@ -389,9 +389,17 @@ onAuthStateChanged(auth, async (user) => {
             window.sysReqManualReceipt = instDoc.data().reqManualReceipt || false;
             window.customSpecialFunds = instDoc.data().specialFeeCategories || [];
             
-            // സ്ഥാപനത്തിന്റെ ഗാലറി ഫോട്ടോകൾ ലോഡ് ചെയ്യാൻ
-            if (instDoc.data().photos) {
-              window.loadHomeInstitutionPhotos(instDoc.data().photos);
+            // Load Gallery Photos immediately on Auth State Change
+            let loadedPhotos = [];
+            let data = instDoc.data();
+            if (data.photo1) loadedPhotos.push(data.photo1);
+            if (data.photo2) loadedPhotos.push(data.photo2);
+            if (data.photo3) loadedPhotos.push(data.photo3);
+            
+            if (loadedPhotos.length > 0) {
+              window.loadHomeInstitutionPhotos(loadedPhotos);
+            } else if (data.galleryPhotos || data.photos) {
+              window.loadHomeInstitutionPhotos(data.galleryPhotos || data.photos);
             }
           }
         }
@@ -460,10 +468,9 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 // ==========================================
-// INSTITUTION GALLERY PHOTOS MODULE
+// INSTITUTION GALLERY PHOTOS MODULE (FIXED)
 // ==========================================
 
-// സ്ഥാപനത്തിന്റെ ഫോട്ടോകൾ ഫയർസ്റ്റോറിൽ സേവ് ചെയ്യാൻ (Fixed)
 window.saveInstitutionPhotosSetting = async function() {
     const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
     if (!currentInstitutionId) {
@@ -505,7 +512,6 @@ window.saveInstitutionPhotosSetting = async function() {
             photo3Data = { url: base643, caption: caption3 };
         }
 
-        // ഫയർസ്റ്റോറിലേക്ക് അറേ ഒഴിവാക്കി നേരിട്ട് ഒബ്‌ജക്റ്റുകളായി സേവ് ചെയ്യുന്നു
         await setDoc(doc(db, "settings", currentInstitutionId), {
             photo1: photo1Data,
             photo2: photo2Data,
@@ -522,7 +528,6 @@ window.saveInstitutionPhotosSetting = async function() {
     }
 };
 
-// ഹോം പേജിൽ സ്ഥാപനത്തിന്റെ ഫോട്ടോകൾ ഗാലറിയായി ലോഡ് ചെയ്ത് കാണിക്കാൻ (Fixed)
 window.loadHomeInstitutionPhotos = function(photosList = null) {
     const container = document.getElementById('homeGalleryContainer');
     const cardContainer = document.getElementById('homeGalleryCard');
@@ -561,7 +566,6 @@ window.loadHomeInstitutionPhotos = function(photosList = null) {
     }
 };
 
-// പേജ് ലോഡ് ആകുമ്പോൾ ഗാലറി ലോഡ് ചെയ്യാൻ
 document.addEventListener('DOMContentLoaded', () => {
-    window.loadHomeInstitutionPhotos();
+    window.loadInstitutionSettings();
 });
