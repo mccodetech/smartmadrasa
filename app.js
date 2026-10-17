@@ -452,7 +452,7 @@ onAuthStateChanged(auth, async (user) => {
 // INSTITUTION GALLERY PHOTOS MODULE
 // ==========================================
 
-// സ്ഥാപനത്തിന്റെ ഫോട്ടോകൾ ഫയർസ്റ്റോറിൽ സേവ് ചെയ്യാൻ
+// സ്ഥാപനത്തിന്റെ ഫോട്ടോകൾ ഫയർസ്റ്റോറിൽ സേവ് ചെയ്യാൻ (Updated)
 window.saveInstitutionPhotosSetting = async function() {
     const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
     if (!currentInstitutionId) {
@@ -462,11 +462,11 @@ window.saveInstitutionPhotosSetting = async function() {
 
     try {
         const file1 = document.getElementById('instPhoto1File').files[0];
-        const caption1 = document.getElementById('instCaption1').value;
+        const caption1 = document.getElementById('instCaption1').value || '';
         const file2 = document.getElementById('instPhoto2File').files[0];
-        const caption2 = document.getElementById('instCaption2').value;
+        const caption2 = document.getElementById('instCaption2').value || '';
         const file3 = document.getElementById('instPhoto3File').files[0];
-        const caption3 = document.getElementById('instCaption3').value;
+        const caption3 = document.getElementById('instCaption3').value || '';
 
         const convertToBase64 = (file) => {
             return new Promise((resolve, reject) => {
@@ -491,9 +491,9 @@ window.saveInstitutionPhotosSetting = async function() {
             photosArray.push({ url: base643, caption: caption3 });
         }
 
-        // ഫയർസ്റ്റോറിലെ settings ഡൊക്യുമെന്റിൽ ഫോട്ടോകൾ സേവ് ചെയ്യുന്നു
+        // ഫയർസ്റ്റോറിലേക്ക് ഒബ്‌ജക്റ്റ് ആയി സേവ് ചെയ്യുന്നു (Error ഒഴിവാക്കാൻ)
         await setDoc(doc(db, "settings", currentInstitutionId), {
-            photos: photosArray,
+            galleryPhotos: photosArray,
             updatedAt: serverTimestamp()
         }, { merge: true });
 
@@ -505,7 +505,7 @@ window.saveInstitutionPhotosSetting = async function() {
     }
 };
 
-// ഹോം പേജിൽ സ്ഥാപനത്തിന്റെ ഫോട്ടോകൾ ഗാലറിയായി ലോഡ് ചെയ്ത് കാണിക്കാൻ
+// ഹോം പേജിൽ സ്ഥാപനത്തിന്റെ ഫോട്ടോകൾ ഗാലറിയായി ലോഡ് ചെയ്ത് കാണിക്കാൻ (Updated)
 window.loadHomeInstitutionPhotos = function(photos = null) {
     const container = document.getElementById('homeGalleryContainer');
     const cardContainer = document.getElementById('homeGalleryCard');
@@ -516,18 +516,17 @@ window.loadHomeInstitutionPhotos = function(photos = null) {
     let photosList = photos;
     if (!photosList) {
         let currentInst = JSON.parse(localStorage.getItem('currentInstitution') || '{}');
-        photosList = currentInst.photos || [];
+        photosList = currentInst.photos || currentInst.galleryPhotos || [];
     }
 
     if (photosList && photosList.length > 0) {
         cardContainer.style.display = 'block';
         
-        // ഫോട്ടോകളുടെ എണ്ണത്തിനനുസരിച്ച് Bootstrap Grid Class നിർണ്ണയിക്കുന്നു
-        let colClass = "col-md-4"; // 3 ഫോട്ടോകൾക്ക്
+        let colClass = "col-md-4";
         if (photosList.length === 1) {
-            colClass = "col-12"; // 1 ഫോട്ടോ മാത്രം ഉണ്ടെങ്കിൽ ഫുൾ വിഡ്ത്ത്
+            colClass = "col-12";
         } else if (photosList.length === 2) {
-            colClass = "col-md-6"; // 2 ഫോട്ടോകൾ ഉണ്ടെങ്കിൽ പകുതി വീതം
+            colClass = "col-md-6";
         }
 
         photosList.forEach(photo => {
