@@ -475,7 +475,7 @@ window.saveInstitutionPhotosSetting = async function() {
         currentInst.photos = photosArray;
         localStorage.setItem('currentInstitution', JSON.stringify(currentInst));
 
-        loadHeaderInstitutionPhotos();
+        loadHomeInstitutionPhotos(); // ഹോം ഗാലറി അപ്ഡേറ്റ് ചെയ്യാൻ
         alert('Institution photos saved successfully!');
     } catch (error) {
         console.error('Error saving photos:', error);
@@ -483,25 +483,37 @@ window.saveInstitutionPhotosSetting = async function() {
     }
 };
 
-// ഹെഡറിൽ ഫോട്ടോകൾ ലോഡ് ചെയ്ത് കാണിക്കാൻ
-window.loadHeaderInstitutionPhotos = function() {
-    const container = document.getElementById('headerInstPhotos');
-    if (!container) return;
+// ഹോം പേജിൽ സ്ഥാപനത്തിന്റെ ഫോട്ടോകൾ ഗാലറിയായി ലോഡ് ചെയ്ത് കാണിക്കാൻ
+window.loadHomeInstitutionPhotos = function() {
+    const container = document.getElementById('homeGalleryContainer');
+    const cardContainer = document.getElementById('homeGalleryCard');
+    if (!container || !cardContainer) return;
     
     container.innerHTML = '';
     let currentInst = JSON.parse(localStorage.getItem('currentInstitution') || '{}');
     
     if (currentInst.photos && currentInst.photos.length > 0) {
+        cardContainer.style.display = 'block';
         currentInst.photos.forEach(photo => {
-            let img = document.createElement('img');
-            img.src = photo.url;
-            img.alt = photo.caption || 'Institution Photo';
-            img.className = 'inst-header-photo';
-            container.appendChild(img);
+            let col = document.createElement('div');
+            col.className = 'col-md-4 text-center';
+            col.innerHTML = `
+                <div class="card p-2 border shadow-sm h-100">
+                    <img src="${photo.url}" alt="${photo.caption || 'Institution Photo'}" class="img-fluid rounded mb-2" style="height: 180px; object-fit: cover; width: 100%;">
+                    <h6 class="fw-bold text-dark small m-0">${photo.caption || ''}</h6>
+                </div>
+            `;
+            container.appendChild(col);
         });
+    } else {
+        cardContainer.style.display = 'none';
     }
 };
 
+// പേജ് ലോഡ് ആകുമ്പോൾ ഹോം ഗാലറി ലോഡ് ചെയ്യാൻ
+document.addEventListener('DOMContentLoaded', () => {
+    loadHomeInstitutionPhotos();
+});
 document.addEventListener('DOMContentLoaded', () => {
     loadHeaderInstitutionPhotos();
 });
