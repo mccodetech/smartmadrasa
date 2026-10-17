@@ -470,7 +470,7 @@ onAuthStateChanged(auth, async (user) => {
 // ==========================================
 // INSTITUTION GALLERY PHOTOS MODULE (FIXED)
 // ==========================================
-
+// സ്ഥാപനത്തിന്റെ ഫോട്ടോകൾ കംപ്രസ് ചെയ്ത് ഫയർസ്റ്റോറിൽ സേവ് ചെയ്യാൻ (Fixed size error)
 window.saveInstitutionPhotosSetting = async function() {
     const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
     if (!currentInstitutionId) {
@@ -486,12 +486,37 @@ window.saveInstitutionPhotosSetting = async function() {
         const file3 = document.getElementById('instPhoto3File').files[0];
         const caption3 = document.getElementById('instCaption3').value || '';
 
-        const convertToBase64 = (file) => {
+        // ചിത്രങ്ങളുടെ സൈസ് കുറക്കാൻ കംപ്രസ് ചെയ്യുന്ന ഫങ്ഷൻ (Resize & Compress)
+        const compressImage = (file) => {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = error => reject(error);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        // മാക്സിമം വീതി 800px ആയി കുറക്കുന്നു
+                        const maxWidth = 800;
+                        if (width > maxWidth) {
+                            height = Math.round((height * maxWidth) / width);
+                            width = maxWidth;
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // JPEG ആയി കംപ്രസ് ചെയ്യുന്നു (Quality 0.7)
+                        resolve(canvas.toDataURL('image/jpeg', 0.7));
+                    };
+                    img.onerror = (error) => reject(error);
+                };
+                reader.onerror = (error) => reject(error);
             });
         };
 
@@ -500,16 +525,16 @@ window.saveInstitutionPhotosSetting = async function() {
         let photo3Data = null;
 
         if (file1) {
-            let base641 = await convertToBase64(file1);
-            photo1Data = { url: base641, caption: caption1 };
+            let compressedUrl1 = await compressImage(file1);
+            photo1Data = { url: compressedUrl1, caption: caption1 };
         }
         if (file2) {
-            let base642 = await convertToBase64(file2);
-            photo2Data = { url: base642, caption: caption2 };
+            let compressedUrl2 = await compressImage(file2);
+            photo2Data = { url: compressedUrl2, caption: caption2 };
         }
         if (file3) {
-            let base643 = await convertToBase64(file3);
-            photo3Data = { url: base643, caption: caption3 };
+            let compressedUrl3 = await compressImage(file3);
+            photo3Data = { url: compressedUrl3, caption: caption3 };
         }
 
         await setDoc(doc(db, "settings", currentInstitutionId), {
