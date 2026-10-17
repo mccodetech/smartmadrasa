@@ -448,7 +448,6 @@ window.saveInstitutionPhotosSetting = async function() {
         const file3 = document.getElementById('instPhoto3File').files[0];
         const caption3 = document.getElementById('instCaption3').value;
 
-        // ഫയലുകളെ Base64 ആക്കി മാറ്റാനുള്ള ഫങ്ഷൻ
         const convertToBase64 = (file) => {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -472,14 +471,11 @@ window.saveInstitutionPhotosSetting = async function() {
             photosArray.push({ url: base643, caption: caption3 });
         }
 
-        // നിലവിലെ ലോക്കൽ സ്റ്റോറേജിലോ ഫയർസ്റ്റോറിലോ സ്ഥാപനത്തിന്റെ ഡാറ്റയിൽ സേവ് ചെയ്യുന്നു
         let currentInst = JSON.parse(localStorage.getItem('currentInstitution') || '{}');
         currentInst.photos = photosArray;
         localStorage.setItem('currentInstitution', JSON.stringify(currentInst));
 
-        // ഹെഡറിലെ ഫോട്ടോകൾ അപ്ഡേറ്റ് ചെയ്യുന്നു
         loadHeaderInstitutionPhotos();
-
         alert('Institution photos saved successfully!');
     } catch (error) {
         console.error('Error saving photos:', error);
@@ -506,7 +502,6 @@ window.loadHeaderInstitutionPhotos = function() {
     }
 };
 
-// പേജ് ലോഡ് ആകുമ്പോൾ ഹെഡർ ഫോട്ടോകൾ ലോഡ് ചെയ്യാൻ
 document.addEventListener('DOMContentLoaded', () => {
     loadHeaderInstitutionPhotos();
 });
