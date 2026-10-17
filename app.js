@@ -96,9 +96,12 @@ window.loadInstitutionSettings = async () => {
       if (data.photo3) loadedPhotos.push(data.photo3);
       
       if (loadedPhotos.length > 0) {
+        localStorage.setItem('cachedGalleryPhotos_' + currentInstitutionId, JSON.stringify(loadedPhotos));
         window.loadHomeInstitutionPhotos(loadedPhotos);
       } else if (data.galleryPhotos || data.photos) {
-        window.loadHomeInstitutionPhotos(data.galleryPhotos || data.photos);
+        let photos = data.galleryPhotos || data.photos;
+        localStorage.setItem('cachedGalleryPhotos_' + currentInstitutionId, JSON.stringify(photos));
+        window.loadHomeInstitutionPhotos(photos);
       }
     }
   } catch (e) {
@@ -361,7 +364,6 @@ onAuthStateChanged(auth, async (user) => {
         window.currentUserAssignedClasses = userData.assignedClasses || [];
         window.currentUserName = userData.name || "Staff";
 
-        // Session storage-ൽ institutionId ഉറപ്പുവരുത്തുക
         if (window.currentInstitutionId) {
           sessionStorage.setItem("currentInstitutionId", window.currentInstitutionId);
         }
@@ -389,7 +391,6 @@ onAuthStateChanged(auth, async (user) => {
             window.sysReqManualReceipt = instDoc.data().reqManualReceipt || false;
             window.customSpecialFunds = instDoc.data().specialFeeCategories || [];
             
-            // Load Gallery Photos immediately on Auth State Change
             let loadedPhotos = [];
             let data = instDoc.data();
             if (data.photo1) loadedPhotos.push(data.photo1);
@@ -397,9 +398,12 @@ onAuthStateChanged(auth, async (user) => {
             if (data.photo3) loadedPhotos.push(data.photo3);
             
             if (loadedPhotos.length > 0) {
+              localStorage.setItem('cachedGalleryPhotos_' + window.currentInstitutionId, JSON.stringify(loadedPhotos));
               window.loadHomeInstitutionPhotos(loadedPhotos);
             } else if (data.galleryPhotos || data.photos) {
-              window.loadHomeInstitutionPhotos(data.galleryPhotos || data.photos);
+              let photos = data.galleryPhotos || data.photos;
+              localStorage.setItem('cachedGalleryPhotos_' + window.currentInstitutionId, JSON.stringify(photos));
+              window.loadHomeInstitutionPhotos(photos);
             }
           }
         }
@@ -468,9 +472,9 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 // ==========================================
-// INSTITUTION GALLERY PHOTOS MODULE (FIXED)
+// INSTITUTION GALLERY PHOTOS MODULE (FINAL)
 // ==========================================
-// സ്ഥാപനത്തിന്റെ ഫോട്ടോകൾ കംപ്രസ് ചെയ്ത് ഫയർസ്റ്റോറിൽ സേവ് ചെയ്യാൻ (Fixed size error)
+
 window.saveInstitutionPhotosSetting = async function() {
     const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
     if (!currentInstitutionId) {
@@ -486,7 +490,6 @@ window.saveInstitutionPhotosSetting = async function() {
         const file3 = document.getElementById('instPhoto3File').files[0];
         const caption3 = document.getElementById('instCaption3').value || '';
 
-        // ചിത്രങ്ങളുടെ സൈസ് കുറക്കാൻ കംപ്രസ് ചെയ്യുന്ന ഫങ്ഷൻ (Resize & Compress)
         const compressImage = (file) => {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -498,20 +501,15 @@ window.saveInstitutionPhotosSetting = async function() {
                         const canvas = document.createElement('canvas');
                         let width = img.width;
                         let height = img.height;
-                        
-                        // മാക്സിമം വീതി 800px ആയി കുറക്കുന്നു
                         const maxWidth = 800;
                         if (width > maxWidth) {
                             height = Math.round((height * maxWidth) / width);
                             width = maxWidth;
                         }
-
                         canvas.width = width;
                         canvas.height = height;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
-                        
-                        // JPEG ആയി കംപ്രസ് ചെയ്യുന്നു (Quality 0.7)
                         resolve(canvas.toDataURL('image/jpeg', 0.7));
                     };
                     img.onerror = (error) => reject(error);
@@ -545,6 +543,10 @@ window.saveInstitutionPhotosSetting = async function() {
         }, { merge: true });
 
         let savedPhotos = [photo1Data, photo2Data, photo3Data].filter(p => p !== null);
+        
+        // Save to local cache for instant loading
+        localStorage.setItem('cachedGalleryPhotos_' + currentInstitutionId, JSON.stringify(savedPhotos));
+
         window.loadHomeInstitutionPhotos(savedPhotos);
         window.showToast("Institution photos saved successfully!", "success");
     } catch (error) {
@@ -563,6 +565,16 @@ window.loadHomeInstitutionPhotos = function(photosList = null) {
     let validPhotos = [];
     if (photosList) {
         validPhotos = photosList.filter(p => p && p.url);
+    } else {
+        const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
+        let cached = localStorage.getItem('cachedGalleryPhotos_' + currentInstitutionId);
+        if (cached) {
+            try {
+                validPhotos = JSON.parse(cached).filter(p => p && p.url);
+            } catch(e) {
+                validPhotos = [];
+            }
+        }
     }
 
     if (validPhotos.length > 0) {
@@ -592,5 +604,5 @@ window.loadHomeInstitutionPhotos = function(photosList = null) {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    window.loadInstitutionSettings();
+    window.loadHomeInstitutionPhotos();
 });
