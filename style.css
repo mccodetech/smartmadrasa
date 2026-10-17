@@ -116,3 +116,11 @@ body {
   border-radius: 8px !important;
   width: 100% !important;
 }
+
+/* ഹോം ഗാലറി ചിത്രങ്ങളുടെ സ്റ്റൈൽ */
+.gallery-img {
+  height: 220px !important;
+  object-fit: cover !important;
+  width: 100% !important;
+  border-radius: 10px !important;
+}
