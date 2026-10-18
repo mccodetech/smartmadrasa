@@ -67,7 +67,7 @@ window.populateClassDropdowns = function() {
   });
 };
 
-// Load Institution Settings & Gallery Photos from Firestore
+// Load Institution Settings & Photo from Firestore
 window.loadInstitutionSettings = async () => {
   let currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
   if (!currentInstitutionId) {
@@ -99,28 +99,20 @@ window.loadInstitutionSettings = async () => {
         workingDaysEl.value = data.totalWorkingDays;
       }
       
+      // Caption field
       if (data.photo1 && document.getElementById('instCaption1')) {
         document.getElementById('instCaption1').value = data.photo1.caption || '';
       }
-      if (data.photo2 && document.getElementById('instCaption2')) {
-        document.getElementById('instCaption2').value = data.photo2.caption || '';
-      }
-      if (data.photo3 && document.getElementById('instCaption3')) {
-        document.getElementById('instCaption3').value = data.photo3.caption || '';
-      }
       
-      let loadedPhotos = [];
-      if (data.photo1) loadedPhotos.push(data.photo1);
-      if (data.photo2) loadedPhotos.push(data.photo2);
-      if (data.photo3) loadedPhotos.push(data.photo3);
-      
-      if (loadedPhotos.length > 0) {
-        localStorage.setItem('cachedGalleryPhotos_' + currentInstitutionId, JSON.stringify(loadedPhotos));
-        window.loadHomeInstitutionPhotos(loadedPhotos);
-      } else if (data.galleryPhotos || data.photos) {
-        let photos = data.galleryPhotos || data.photos;
-        localStorage.setItem('cachedGalleryPhotos_' + currentInstitutionId, JSON.stringify(photos));
-        window.loadHomeInstitutionPhotos(photos);
+      // Load and show preview if photo exists
+      if (data.photo1 && data.photo1.url) {
+        const previewArea = document.getElementById('instPhotoPreviewArea');
+        const previewImg = document.getElementById('instPhotoPreviewImg');
+        if (previewImg) previewImg.src = data.photo1.url;
+        if (previewArea) previewArea.classList.remove('d-none');
+        
+        localStorage.setItem('cachedGalleryPhotos_' + currentInstitutionId, JSON.stringify([data.photo1]));
+        window.loadHomeInstitutionPhotos([data.photo1]);
       } else {
         window.loadHomeInstitutionPhotos([]);
       }
@@ -412,19 +404,10 @@ onAuthStateChanged(auth, async (user) => {
             window.sysReqManualReceipt = instDoc.data().reqManualReceipt || false;
             window.customSpecialFunds = instDoc.data().specialFeeCategories || [];
             
-            let loadedPhotos = [];
             let data = instDoc.data();
-            if (data.photo1) loadedPhotos.push(data.photo1);
-            if (data.photo2) loadedPhotos.push(data.photo2);
-            if (data.photo3) loadedPhotos.push(data.photo3);
-            
-            if (loadedPhotos.length > 0) {
-              localStorage.setItem('cachedGalleryPhotos_' + window.currentInstitutionId, JSON.stringify(loadedPhotos));
-              window.loadHomeInstitutionPhotos(loadedPhotos);
-            } else if (data.galleryPhotos || data.photos) {
-              let photos = data.galleryPhotos || data.photos;
-              localStorage.setItem('cachedGalleryPhotos_' + window.currentInstitutionId, JSON.stringify(photos));
-              window.loadHomeInstitutionPhotos(photos);
+            if (data.photo1) {
+              localStorage.setItem('cachedGalleryPhotos_' + window.currentInstitutionId, JSON.stringify([data.photo1]));
+              window.loadHomeInstitutionPhotos([data.photo1]);
             }
           }
         }
@@ -493,7 +476,7 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 // ==========================================
-// INSTITUTION GALLERY PHOTOS MODULE (FINAL)
+// INSTITUTION GALLERY PHOTO MODULE (SINGLE PHOTO)
 // ==========================================
 
 window.saveInstitutionPhotosSetting = async function() {
@@ -504,12 +487,8 @@ window.saveInstitutionPhotosSetting = async function() {
     }
 
     try {
-        const file1 = document.getElementById('instPhoto1File').files[0];
-        const caption1 = document.getElementById('instCaption1').value || '';
-        const file2 = document.getElementById('instPhoto2File').files[0];
-        const caption2 = document.getElementById('instCaption2').value || '';
-        const file3 = document.getElementById('instPhoto3File').files[0];
-        const caption3 = document.getElementById('instCaption3').value || '';
+        const file1 = document.getElementById('instPhoto1File')?.files[0];
+        const caption1 = document.getElementById('instCaption1')?.value || '';
 
         const compressImage = (file) => {
             return new Promise((resolve, reject) => {
@@ -517,104 +496,4 @@ window.saveInstitutionPhotosSetting = async function() {
                 reader.readAsDataURL(file);
                 reader.onload = (event) => {
                     const img = new Image();
-                    img.src = event.target.result;
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        let width = img.width;
-                        let height = img.height;
-                        const maxWidth = 800;
-                        if (width > maxWidth) {
-                            height = Math.round((height * maxWidth) / width);
-                            width = maxWidth;
-                        }
-                        canvas.width = width;
-                        canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-                        resolve(canvas.toDataURL('image/jpeg', 0.7));
-                    };
-                    img.onerror = (error) => reject(error);
-                };
-                reader.onerror = (error) => reject(error);
-            });
-        };
-
-        let photo1Data = null;
-        let photo2Data = null;
-        let photo3Data = null;
-
-        if (file1) {
-            let compressedUrl1 = await compressImage(file1);
-            photo1Data = { url: compressedUrl1, caption: caption1 };
-        }
-        if (file2) {
-            let compressedUrl2 = await compressImage(file2);
-            photo2Data = { url: compressedUrl2, caption: caption2 };
-        }
-        if (file3) {
-            let compressedUrl3 = await compressImage(file3);
-            photo3Data = { url: compressedUrl3, caption: caption3 };
-        }
-
-        await setDoc(doc(db, "settings", currentInstitutionId), {
-            photo1: photo1Data,
-            photo2: photo2Data,
-            photo3: photo3Data,
-            updatedAt: serverTimestamp()
-        }, { merge: true });
-
-        let savedPhotos = [photo1Data, photo2Data, photo3Data].filter(p => p !== null);
-        
-        localStorage.setItem('cachedGalleryPhotos_' + currentInstitutionId, JSON.stringify(savedPhotos));
-
-        window.loadHomeInstitutionPhotos(savedPhotos);
-        window.showToast("Institution photos saved successfully!", "success");
-    } catch (error) {
-        console.error('Error saving photos:', error);
-        window.showToast("Failed to save photos: " + error.message, "error");
-    }
-};
-
-window.loadHomeInstitutionPhotos = function(photosList = null) {
-    const container = document.getElementById('homeGalleryContainer');
-    const cardContainer = document.getElementById('homeGalleryCard');
-    if (!container || !cardContainer) return;
-    
-    container.innerHTML = '';
-    
-    let validPhotos = [];
-    if (photosList) {
-        validPhotos = photosList.filter(p => p && p.url);
-    } else {
-        const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
-        let cached = localStorage.getItem('cachedGalleryPhotos_' + currentInstitutionId);
-        if (cached) {
-            try {
-                validPhotos = JSON.parse(cached).filter(p => p && p.url);
-            } catch(e) {
-                validPhotos = [];
-            }
-        }
-    }
-
-    if (validPhotos.length > 0) {
-        cardContainer.style.display = 'block';
-        
-        // ഹോം പേജിൽ ഒരൊറ്റ ഫോട്ടോ മനോഹരമായി സെന്ററിൽ കാണിക്കാൻ
-        let photo = validPhotos[0]; 
-        container.innerHTML = `
-            <div class="col-12 text-center">
-                <div class="card p-2 border-0 shadow-sm bg-transparent">
-                    <img src="${photo.url}" alt="${photo.caption || 'Institution Photo'}" class="img-fluid rounded shadow-sm w-100 gallery-img" style="max-height: 320px; object-fit: contain; background: #000;">
-                    ${photo.caption ? `<h6 class="fw-bold text-dark mt-2">${photo.caption}</h6>` : ''}
-                </div>
-            </div>
-        `;
-    } else {
-        cardContainer.style.display = 'none';
-    }
-};
-
-document.addEventListener('DOMContentLoaded', () => {
-    window.loadInstitutionSettings();
-});
+                    img.src = event.target
