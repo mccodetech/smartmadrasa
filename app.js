@@ -487,17 +487,20 @@ window.saveInstitutionPhotosSetting = async function() {
     }
 
     try {
-        const fileInput = document.getElementById('instPhoto1File');
-        const captionInput = document.getElementById('instCaption1');
+        // സുരക്ഷിതമായി HTML എലമെന്റുകൾ എടുക്കുന്നു
+        const photo1Input = document.getElementById('instPhoto1File');
+        const caption1Input = document.getElementById('instCaption1');
 
-        if (!fileInput) {
-            window.showToast("Photo input element missing.", "error");
+        if (!photo1Input) {
+            window.showToast("Photo upload field not found in HTML.", "error");
             return;
         }
 
-        const file1 = fileInput.files ? fileInput.files[0] : null;
-        const caption1 = captionInput ? captionInput.value : '';
+        // files ഉണ്ടോ എന്ന് ഉറപ്പുവരുത്തുന്നു
+        const file1 = photo1Input.files && photo1Input.files.length > 0 ? photo1Input.files[0] : null;
+        const caption1 = caption1Input ? caption1Input.value.trim() : '';
 
+        // ഇമേജ് കംപ്രസ്സ് ചെയ്യാനുള്ള ഫങ്ഷൻ
         const compressImage = (file) => {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -529,34 +532,47 @@ window.saveInstitutionPhotosSetting = async function() {
         let photo1Data = null;
 
         if (file1) {
+            // പുതിയ ഫോട്ടോ അപ്‌ലോഡ് ചെയ്താൽ
             let compressedUrl1 = await compressImage(file1);
             photo1Data = { url: compressedUrl1, caption: caption1 };
         } else {
-            const docRef = doc(db, "settings", currentInstitutionId);
-            const snap = await getDoc(docRef);
-            if (snap.exists() && snap.data().photo1) {
-                photo1Data = { url: snap.data().photo1.url, caption: caption1 };
+            // ഫോട്ടോ തിരഞ്ഞെടുത്തിട്ടില്ലെങ്കിൽ നിലവിൽ ഡാറ്റാബേസിലുള്ള ഫോട്ടോ ബാക്കപ്പ് ചെയ്യുന്നു
+            try {
+                const docRef = doc(db, "settings", currentInstitutionId);
+                const snap = await getDoc(docRef);
+                if (snap.exists() && snap.data().photo1) {
+                    photo1Data = { url: snap.data().photo1.url, caption: caption1 };
+                }
+            } catch (err) {
+                console.warn("Could not fetch previous photo:", err);
             }
         }
 
         if (!photo1Data) {
-            window.showToast("Please select a photo to save.", "warning");
+            window.showToast("Please choose a photo to upload.", "warning");
             return;
         }
 
+        // Firestore ഡാറ്റാബേസിൽ സേവ് ചെയ്യുന്നു
         await setDoc(doc(db, "settings", currentInstitutionId), {
             photo1: photo1Data,
             updatedAt: serverTimestamp()
         }, { merge: true });
 
+        // ലോക്കൽ കാഷെ അപ്ഡേറ്റ് ചെയ്യുന്നു
         localStorage.setItem('cachedGalleryPhotos_' + currentInstitutionId, JSON.stringify([photo1Data]));
 
+        // പ്രിവ്യൂ അപ്ഡേറ്റ് ചെയ്യുന്നു
         const previewArea = document.getElementById('instPhotoPreviewArea');
         const previewImg = document.getElementById('instPhotoPreviewImg');
         if (previewImg) previewImg.src = photo1Data.url;
         if (previewArea) previewArea.classList.remove('d-none');
 
-        window.loadHomeInstitutionPhotos([photo1Data]);
+        // ഹോം പേജിൽ അപ്ഡേറ്റ് ചെയ്യുന്നു
+        if (typeof window.loadHomeInstitutionPhotos === 'function') {
+            window.loadHomeInstitutionPhotos([photo1Data]);
+        }
+
         window.showToast("Institution photo saved successfully!", "success");
     } catch (error) {
         console.error('Error saving photo:', error);
