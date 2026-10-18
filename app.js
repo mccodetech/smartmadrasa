@@ -67,7 +67,7 @@ window.populateClassDropdowns = function() {
   });
 };
 
-// Load Institution Settings & Photo from Firestore
+// 1. റിഫ്രഷ് ചെയ്യുമ്പോൾ ഡാറ്റാബേസിൽ നിന്ന് ഫോട്ടോയും ക്യാപ്ഷനും എടുക്കാൻ
 window.loadInstitutionSettings = async () => {
   let currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
   if (!currentInstitutionId) {
@@ -99,12 +99,12 @@ window.loadInstitutionSettings = async () => {
         workingDaysEl.value = data.totalWorkingDays;
       }
       
-      // Caption field
+      // Caption field ലോഡ് ചെയ്യുന്നു
       if (data.photo1 && document.getElementById('instCaption1')) {
         document.getElementById('instCaption1').value = data.photo1.caption || '';
       }
       
-      // Load photo preview
+      // Photo Preview & Home photo ലോഡ് ചെയ്യുന്നു
       if (data.photo1 && data.photo1.url) {
         const previewArea = document.getElementById('instPhotoPreviewArea');
         const previewImg = document.getElementById('instPhotoPreviewImg');
@@ -112,15 +112,107 @@ window.loadInstitutionSettings = async () => {
         if (previewArea) previewArea.classList.remove('d-none');
         
         localStorage.setItem('cachedGalleryPhotos_' + currentInstitutionId, JSON.stringify([data.photo1]));
-        window.loadHomeInstitutionPhotos([data.photo1]);
-      } else {
-        window.loadHomeInstitutionPhotos([]);
+        if (typeof window.loadHomeInstitutionPhotos === 'function') {
+          window.loadHomeInstitutionPhotos([data.photo1]);
+        }
       }
     }
   } catch (e) {
     console.error("Error loading settings:", e);
   }
 };
+
+// 2. ഫോട്ടോ സുരക്ഷിതമായി സേവ് ചെയ്യുന്ന പുതിയ ഫങ്ഷൻ
+window.saveSinglePhotoSetting = async function() {
+    const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
+    if (!currentInstitutionId) {
+        window.showToast("Institution ID not found.", "error");
+        return;
+    }
+
+    try {
+        const fileInput = document.getElementById('instPhoto1File');
+        const captionInput = document.getElementById('instCaption1');
+
+        const file1 = (fileInput && fileInput.files && fileInput.files.length > 0) ? fileInput.files[0] : null;
+        const caption1 = captionInput ? captionInput.value.trim() : '';
+
+        const compressImage = (file) => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        const maxWidth = 800;
+                        if (width > maxWidth) {
+                            height = Math.round((height * maxWidth) / width);
+                            width = maxWidth;
+                        }
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        resolve(canvas.toDataURL('image/jpeg', 0.7));
+                    };
+                    img.onerror = (error) => reject(error);
+                };
+                reader.onerror = (error) => reject(error);
+            });
+        };
+
+        let photo1Data = null;
+
+        if (file1) {
+            let compressedUrl = await compressImage(file1);
+            photo1Data = { url: compressedUrl, caption: caption1 };
+        } else {
+            // പുതിയ ഫോട്ടോ തിരഞ്ഞെടുത്തിട്ടില്ലെങ്കിൽ നിലവിലുള്ള ഫോട്ടോയും പുതിയ ക്യാപ്‌ഷനും അപ്‌ഡേറ്റ് ചെയ്യുന്നു
+            const docRef = doc(db, "settings", currentInstitutionId);
+            const snap = await getDoc(docRef);
+            if (snap.exists() && snap.data().photo1) {
+                photo1Data = { url: snap.data().photo1.url, caption: caption1 };
+            }
+        }
+
+        if (!photo1Data) {
+            window.showToast("Please choose a photo to upload.", "warning");
+            return;
+        }
+
+        // Firestore ഡാറ്റാബേസിൽ സേവ് ചെയ്യുന്നു
+        await setDoc(doc(db, "settings", currentInstitutionId), {
+            photo1: photo1Data,
+            updatedAt: serverTimestamp()
+        }, { merge: true });
+
+        // Cache
+        localStorage.setItem('cachedGalleryPhotos_' + currentInstitutionId, JSON.stringify([photo1Data]));
+
+        // Settings പേജിലെ പ്രിവ്യൂ കാട്ടുന്നു
+        const previewArea = document.getElementById('instPhotoPreviewArea');
+        const previewImg = document.getElementById('instPhotoPreviewImg');
+        if (previewImg) previewImg.src = photo1Data.url;
+        if (previewArea) previewArea.classList.remove('d-none');
+
+        // Home Page-ലേക്ക് ഫോട്ടോ നല്കുന്നു
+        if (typeof window.loadHomeInstitutionPhotos === 'function') {
+            window.loadHomeInstitutionPhotos([photo1Data]);
+        }
+
+        window.showToast("Institution photo saved successfully!", "success");
+    } catch (error) {
+        console.error('Error saving photo:', error);
+        window.showToast("Failed to save photo: " + error.message, "error");
+    }
+};
+
+// പഴയ പേരിൽ ആരെങ്കിലും വിളിച്ചാൽ സുരക്ഷിതമായി പുതിയ ഫങ്ഷൻ റൺ ആകാൻ:
+window.saveInstitutionPhotosSetting = window.saveSinglePhotoSetting;
 
 window.saveSpecialFundsSetting = async () => {
   const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
