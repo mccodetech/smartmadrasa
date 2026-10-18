@@ -478,7 +478,6 @@ onAuthStateChanged(auth, async (user) => {
 // ==========================================
 // INSTITUTION GALLERY PHOTO MODULE (SINGLE PHOTO)
 // ==========================================
-
 window.saveInstitutionPhotosSetting = async function() {
     const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
     if (!currentInstitutionId) {
@@ -487,8 +486,16 @@ window.saveInstitutionPhotosSetting = async function() {
     }
 
     try {
-        const file1 = document.getElementById('instPhoto1File')?.files[0];
-        const caption1 = document.getElementById('instCaption1')?.value || '';
+        const fileInput = document.getElementById('instPhoto1File');
+        const captionInput = document.getElementById('instCaption1');
+
+        if (!fileInput) {
+            window.showToast("Photo input field not found in HTML.", "error");
+            return;
+        }
+
+        const file1 = fileInput.files[0];
+        const caption1 = captionInput ? captionInput.value : '';
 
         const compressImage = (file) => {
             return new Promise((resolve, reject) => {
@@ -496,4 +503,67 @@ window.saveInstitutionPhotosSetting = async function() {
                 reader.readAsDataURL(file);
                 reader.onload = (event) => {
                     const img = new Image();
-                    img.src = event.target
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        const maxWidth = 800;
+                        if (width > maxWidth) {
+                            height = Math.round((height * maxWidth) / width);
+                            width = maxWidth;
+                        }
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        resolve(canvas.toDataURL('image/jpeg', 0.7));
+                    };
+                    img.onerror = (error) => reject(error);
+                };
+                reader.onerror = (error) => reject(error);
+            });
+        };
+
+        let photo1Data = null;
+
+        if (file1) {
+            let compressedUrl1 = await compressImage(file1);
+            photo1Data = { url: compressedUrl1, caption: caption1 };
+        } else {
+            // പുതിയ ഫോട്ടോ തിരഞ്ഞെടുത്തിട്ടില്ലെങ്കിൽ നിലവിലെ പഴയ ഫോട്ടോ വിവരങ്ങൾ നിലനിർത്തുന്നു
+            const docRef = doc(db, "settings", currentInstitutionId);
+            const snap = await getDoc(docRef);
+            if (snap.exists() && snap.data().photo1) {
+                photo1Data = { url: snap.data().photo1.url, caption: caption1 };
+            }
+        }
+
+        if (!photo1Data) {
+            window.showToast("Please choose a photo to upload.", "warning");
+            return;
+        }
+
+        // Firestore ഡാറ്റാബേസിൽ ഒരു ഫോട്ടോയായി സേവ് ചെയ്യുന്നു
+        await setDoc(doc(db, "settings", currentInstitutionId), {
+            photo1: photo1Data,
+            updatedAt: serverTimestamp()
+        }, { merge: true });
+
+        // ലോക്കൽ കാഷെ അപ്ഡേറ്റ് ചെയ്യുന്നു
+        localStorage.setItem('cachedGalleryPhotos_' + currentInstitutionId, JSON.stringify([photo1Data]));
+
+        // Settings പേജിലെ പ്രിവ്യൂ അപ്ഡേറ്റ് ചെയ്യുന്നു
+        const previewArea = document.getElementById('instPhotoPreviewArea');
+        const previewImg = document.getElementById('instPhotoPreviewImg');
+        if (previewImg) previewImg.src = photo1Data.url;
+        if (previewArea) previewArea.classList.remove('d-none');
+
+        // ഹോം പേജിലേക്ക് അപ്ഡേറ്റ് ചെയ്യുന്നു
+        window.loadHomeInstitutionPhotos([photo1Data]);
+        window.showToast("Institution photo saved successfully!", "success");
+    } catch (error) {
+        console.error('Error saving photo:', error);
+        window.showToast("Failed to save photo: " + error.message, "error");
+    }
+};
