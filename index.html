@@ -1013,7 +1013,7 @@
     </div>
   </div>
 
-  <!-- അപ്‌ലോഡ് ചെയ്ത ചിത്രത്തിന്റെ പ്രിവ്യൂ -->
+  <!-- അപ്‌ലോഡ് ചെയ്ത ചിത്രത്തിന്റെ പ്രിവ്യൂ (പേജ് റിഫ്രഷ് ചെയ്താലും ഇവിടെ കാണും) -->
   <div id="instPhotoPreviewArea" class="mb-3 d-none">
     <small class="text-muted d-block mb-1">Current Saved Photo:</small>
     <img id="instPhotoPreviewImg" src="" alt="Institution Photo" style="max-height: 120px; border-radius: 8px; border: 1px solid #ccc; padding: 2px;">
@@ -1022,28 +1022,23 @@
   <button type="button" class="btn btn-success btn-sm px-4" onclick="saveSinglePhotoSetting()"><i class="fa-solid fa-save me-1"></i> Save Photo</button>
 </div>
 
-              <div class="mb-4 p-3 border rounded bg-light">
-                <label class="form-label fw-bold">Special Fund Categories (Comma Separated)</label>
-                <div class="input-group">
-                  <input type="text" id="settingSpecialFundsInput" class="form-control" placeholder="e.g. BUILDING FUND, ANNUAL DAY">
-                  <button class="btn btn-success btn-sm px-3" onclick="saveSpecialFundsSetting()"><i class="fa-solid fa-save me-1"></i> Save</button>
-                </div>
-              </div>
-
-              <div class="mb-3 p-3 border rounded bg-light">
-                <label class="form-label fw-bold">Total Working Days (ഇതുവരെയുള്ള ആകെ പ്രവൃത്തി ദിവസങ്ങൾ)</label>
-                <div class="input-group">
-                  <input type="number" id="settingTotalWorkingDays" class="form-control" placeholder="e.g. 65">
-                  <button class="btn btn-primary btn-sm px-3" onclick="saveWorkingDaysSetting()"><i class="fa-solid fa-save me-1"></i> Save</button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </div>
+<!-- Special Fund Categories Section -->
+<div class="mb-4 p-3 border rounded bg-light">
+  <label class="form-label fw-bold">Special Fund Categories (Comma Separated)</label>
+  <div class="input-group">
+    <input type="text" id="settingSpecialFundsInput" class="form-control" placeholder="e.g. BUILDING FUND, ANNUAL DAY">
+    <button class="btn btn-success btn-sm px-3" onclick="saveSpecialFundsSetting()"><i class="fa-solid fa-save me-1"></i> Save</button>
   </div>
+</div>
+
+<!-- Total Working Days Section -->
+<div class="mb-3 p-3 border rounded bg-light">
+  <label class="form-label fw-bold">Total Working Days (ഇതുവരെയുള്ള ആകെ പ്രവൃത്തി ദിവസങ്ങൾ)</label>
+  <div class="input-group">
+    <input type="number" id="settingTotalWorkingDays" class="form-control" placeholder="e.g. 65">
+    <button class="btn btn-primary btn-sm px-3" onclick="saveWorkingDaysSetting()"><i class="fa-solid fa-save me-1"></i> Save</button>
+  </div>
+</div>
 
   <!-- MODALS -->
   <!-- Staff Profile Modal -->
