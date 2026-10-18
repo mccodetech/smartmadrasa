@@ -84,26 +84,25 @@ async function loadPublicFundBoard() {
   }
 }
 
-// ടാബ് നാവിഗേഷൻ റൂട്ടിംഗ്
-window.showTab = (tabId) => {
-  document.querySelectorAll(".content-tab").forEach(t => t.classList.add("d-none"));
-  const targetTab = document.getElementById(tabId);
-  if (targetTab) targetTab.classList.remove("d-none");
-
-  document.querySelectorAll("#desktopTabMenu .nav-link, #mobileTabMenu .nav-link").forEach(b => b.classList.remove("active"));
-  
-  const activeBtns = document.querySelectorAll(`button[onclick="showTab('${tabId}')"]`);
-  activeBtns.forEach(btn => btn.classList.add("active"));
-
-  const offcanvasEl = document.getElementById('sidebarOffcanvas');
-  if (offcanvasEl) {
-    const offcanvasInstance = bootstrap.Offcanvas.getInstance(offcanvasEl);
-    if (offcanvasInstance) offcanvasInstance.hide();
+window.showTab = function(tabId) {
+  // Prevent Non-SuperAdmins from accessing the Master Console
+  if (tabId === 'superAdminTab' && !window.isSuperAdmin) {
+    window.showToast("Access Denied: Super Admin area only.", "error");
+    tabId = 'homeDashboardTab';
   }
 
-  if (tabId === 'studentsListTab' && typeof window.loadStudentsByClass === 'function') window.loadStudentsByClass();
-  if (tabId === 'instAdminTab' && typeof window.loadPrincipalsList === 'function') window.loadPrincipalsList();
-  if (tabId === 'homeDashboardTab') loadLeaderboard();
-  if (tabId === 'superAdminTab' && typeof window.loadSuperAdminRequests === 'function') window.loadSuperAdminRequests();
-  if (tabId === 'subjectSettingsTab' && typeof window.loadClassSubjectSettings === 'function') window.loadClassSubjectSettings();
+  const tabs = document.querySelectorAll('.content-tab');
+  tabs.forEach(tab => tab.classList.add('d-none'));
+
+  const selectedTab = document.getElementById(tabId);
+  if (selectedTab) {
+    selectedTab.classList.remove('d-none');
+  }
+
+  // Update active state in menu
+  const menuButtons = document.querySelectorAll('#desktopTabMenu .nav-link, #mobileTabMenu .nav-link');
+  menuButtons.forEach(btn => btn.classList.remove('active'));
+  
+  const activeBtn = document.querySelector(`[onclick*="${tabId}"]`);
+  if (activeBtn) activeBtn.classList.add('active');
 };
