@@ -20,7 +20,6 @@ body {
 /* ==========================================
    LOGOS & BRANDING STYLES
    ========================================== */
-/* Navbar Logo Styling */
 .app-navbar-logo {
   width: 32px;
   height: 32px;
@@ -30,7 +29,6 @@ body {
   padding: 2px;
 }
 
-/* Auth Page Logo Styling */
 .brand-logo-container {
   width: 75px;
   height: 75px;
@@ -49,7 +47,6 @@ body {
   object-fit: contain;
 }
 
-/* Header Institution Photo */
 .inst-header-photo {
   width: 32px !important;
   height: 32px !important;
@@ -81,7 +78,6 @@ body {
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08) !important;
 }
 
-/* Clean Tables */
 .table th {
   font-weight: 600 !important;
   color: #475569 !important;
@@ -95,7 +91,6 @@ body {
   color: #334155 !important;
 }
 
-/* Home Gallery Image Styling */
 .gallery-img {
   height: 220px !important;
   object-fit: contain !important;
@@ -106,62 +101,72 @@ body {
 }
 
 /* ==========================================
-   PREMIUM SIDEBAR NAVIGATION
+   PREMIUM SIDEBAR NAVIGATION DESIGN
    ========================================== */
-/* Sidebar Card Container */
 .desktop-sidebar-card {
-  background: #ffffff;
+  background: #ffffff !important;
   border-radius: 20px !important;
-  border: 1px solid rgba(226, 232, 240, 0.8) !important;
-  box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.05) !important;
-  padding: 16px !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.06) !important;
+  padding: 16px 12px !important;
 }
 
-/* Premium Sidebar Links */
 .nav-pills .nav-link {
   color: #475569 !important;
   font-weight: 600 !important;
   font-size: 0.95rem !important;
   border-radius: 12px !important;
-  padding: 12px 18px !important;
-  margin-bottom: 6px !important;
+  padding: 12px 16px !important;
+  margin-bottom: 4px !important;
   display: flex !important;
   align-items: center !important;
-  gap: 12px !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  gap: 14px !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
   background: transparent !important;
   border: 1px solid transparent !important;
+  border-bottom: 1px solid #f1f5f9 !important;
 }
 
-/* Hover State */
+.nav-pills .nav-link:last-child {
+  border-bottom: 1px solid transparent !important;
+}
+
+.nav-pills .nav-link i {
+  font-size: 1.15rem !important;
+  width: 28px !important;
+  height: 28px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 8px !important;
+  background-color: #f8fafc !important;
+  color: #64748b !important;
+  transition: all 0.25s ease !important;
+}
+
 .nav-pills .nav-link:hover {
   background-color: var(--primary-light) !important;
   color: var(--primary) !important;
-  transform: translateX(4px) !important;
-  border-color: #e2e8f0 !important;
-}
-
-/* Active State (Glowing Gradient Pill Effect) */
-.nav-pills .nav-link.active {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
-  color: #ffffff !important;
-  box-shadow: 0 8px 16px -4px rgba(15, 81, 50, 0.35) !important;
-  border-color: transparent !important;
-  transform: translateX(4px) !important;
-}
-
-/* Icon Styles inside Links */
-.nav-pills .nav-link i {
-  font-size: 1.1rem !important;
-  width: 24px !important;
-  text-align: center !important;
-  transition: transform 0.2s ease !important;
+  transform: translateX(5px) !important;
+  border-bottom-color: transparent !important;
 }
 
 .nav-pills .nav-link:hover i {
-  transform: scale(1.15) !important;
+  background-color: #ffffff !important;
+  color: var(--primary) !important;
+  transform: scale(1.1) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+}
+
+.nav-pills .nav-link.active {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 20px -4px rgba(15, 81, 50, 0.35) !important;
+  border-bottom-color: transparent !important;
+  transform: translateX(4px) !important;
 }
 
 .nav-pills .nav-link.active i {
+  background-color: rgba(255, 255, 255, 0.2) !important;
   color: #ffffff !important;
 }
