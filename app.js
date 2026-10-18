@@ -67,9 +67,9 @@ window.populateClassDropdowns = function() {
   });
 };
 
+// Load Institution Settings & Gallery Photos from Firestore
 window.loadInstitutionSettings = async () => {
   let currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
-  
   if (!currentInstitutionId) {
     const user = auth.currentUser;
     if (user) {
@@ -129,6 +129,7 @@ window.loadInstitutionSettings = async () => {
     console.error("Error loading settings:", e);
   }
 };
+
 window.saveSpecialFundsSetting = async () => {
   const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
   const rawInput = document.getElementById("settingSpecialFundsInput")?.value || "";
@@ -564,7 +565,6 @@ window.saveInstitutionPhotosSetting = async function() {
 
         let savedPhotos = [photo1Data, photo2Data, photo3Data].filter(p => p !== null);
         
-        // Save to local cache for instant loading
         localStorage.setItem('cachedGalleryPhotos_' + currentInstitutionId, JSON.stringify(savedPhotos));
 
         window.loadHomeInstitutionPhotos(savedPhotos);
@@ -597,14 +597,17 @@ window.loadHomeInstitutionPhotos = function(photosList = null) {
         }
     }
 
-    // ഒരൊറ്റ ഫോട്ടോ മാത്രം സെന്ററിൽ കാണിക്കുന്നു
     if (validPhotos.length > 0) {
         cardContainer.style.display = 'block';
-        let photo = validPhotos[0]; // ആദ്യത്തെ ഫോട്ടോ മാത്രം
+        
+        // ഹോം പേജിൽ ഒരൊറ്റ ഫോട്ടോ മനോഹരമായി സെന്ററിൽ കാണിക്കാൻ
+        let photo = validPhotos[0]; 
         container.innerHTML = `
-            <div class="position-relative">
-                <img src="${photo.url}" alt="${photo.caption || 'Institution Photo'}" class="img-fluid rounded shadow-sm w-100" style="max-height: 320px; object-fit: contain; background: #000;">
-                ${photo.caption ? `<h5 class="fw-bold text-dark mt-2">${photo.caption}</h5>` : ''}
+            <div class="col-12 text-center">
+                <div class="card p-2 border-0 shadow-sm bg-transparent">
+                    <img src="${photo.url}" alt="${photo.caption || 'Institution Photo'}" class="img-fluid rounded shadow-sm w-100 gallery-img" style="max-height: 320px; object-fit: contain; background: #000;">
+                    ${photo.caption ? `<h6 class="fw-bold text-dark mt-2">${photo.caption}</h6>` : ''}
+                </div>
             </div>
         `;
     } else {
@@ -613,5 +616,5 @@ window.loadHomeInstitutionPhotos = function(photosList = null) {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    window.loadHomeInstitutionPhotos();
+    window.loadInstitutionSettings();
 });
