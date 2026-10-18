@@ -484,9 +484,6 @@ window.loadSuperAdminRequests = async () => {
   }
 };
 
-// ==========================================
-// SESSION & AUTH STATE LISTENER (ROLE ROUTING FIX)
-// ==========================================
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     try {
@@ -532,7 +529,7 @@ onAuthStateChanged(auth, async (user) => {
         const feeSettingsBtn = document.getElementById("feeSettingsBtn");
         const subjectSettingsBtn = document.getElementById("subjectSettingsBtn");
 
-        // Settings Data
+        // Load Settings Data
         if (!window.isSuperAdmin) {
           const instDoc = await getDoc(doc(db, "settings", window.currentInstitutionId));
           if (instDoc.exists()) {
@@ -551,10 +548,10 @@ onAuthStateChanged(auth, async (user) => {
         }
 
         // ==========================================
-        // STRICT ROLE BASED NAVIGATION ROUTING
+        // STRICT ROLE BASED UI VISIBILITY
         // ==========================================
         if (window.isSuperAdmin) {
-          // ONLY Super Admin gets access to "All Madrasas"
+          // Unhide for Super Admin ONLY
           if (superMasterBtn) superMasterBtn.classList.remove("d-none");
           if (userRoleEl) userRoleEl.innerText = "Super Admin";
           
@@ -563,8 +560,11 @@ onAuthStateChanged(auth, async (user) => {
             window.loadSuperAdminRequests();
           }
         } else {
-          // STRICTLY HIDE Super Admin Menu for everyone else
-          if (superMasterBtn) superMasterBtn.classList.add("d-none");
+          // Strictly HIDE "All Madrasas" for Institution Admins & Teachers
+          if (superMasterBtn) {
+            superMasterBtn.classList.add("d-none");
+            superMasterBtn.style.display = "none"; // Hard hide fallback
+          }
           
           if (userRoleEl) {
             userRoleEl.innerText = window.currentUserRole === "admin" 
@@ -579,7 +579,6 @@ onAuthStateChanged(auth, async (user) => {
           if (marksMenuBtn) marksMenuBtn.classList.remove("d-none");
           if (performanceMenuBtn) performanceMenuBtn.classList.remove("d-none");
 
-          // Institution Admin & Principal Specific Options
           if (window.currentUserRole === "admin" || window.currentUserRole === "principal") {
             if (instAdminStaffBtn) instAdminStaffBtn.classList.remove("d-none");
             if (settingsMenuBtn) settingsMenuBtn.classList.remove("d-none");
@@ -593,7 +592,7 @@ onAuthStateChanged(auth, async (user) => {
             if (subjectSettingsBtn) subjectSettingsBtn.classList.remove("d-none");
           }
 
-          // ROUTE INSTITUTION ADMINS DIRECTLY TO HOME DASHBOARD (Not SuperAdmin Tab)
+          // Force Home tab for Non-Super Admins
           window.showTab('homeDashboardTab');
           if (typeof window.loadLeaderboard === 'function') {
             window.loadLeaderboard();
@@ -610,6 +609,8 @@ onAuthStateChanged(auth, async (user) => {
           window.populateClassDropdowns();
           window.loadInstitutionSettings();
         }
+        
+        // Sync mobile menu AFTER applying visibility classes
         window.syncMobileMenu();
       }
     } catch (e) {
