@@ -596,19 +596,19 @@
 
           <!-- Home Dashboard Tab -->
           <div id="homeDashboardTab" class="content-tab">
+            <!-- 1. TOP: Institution Photo Banner -->
+            <div class="card p-3 mb-4 border-0 shadow-sm text-center" id="homeGalleryCard" style="display: none;">
+              <h5 class="fw-bold text-success mb-3 text-start"><i class="fa-solid fa-images me-2"></i>Institution Photo</h5>
+              <div class="row g-3 justify-content-center" id="homeGalleryContainer">
+                <!-- Photo loads dynamically via JavaScript -->
+              </div>
+            </div>
+
             <div class="row g-4">
-              <!-- Left Side: Institution Photo Banner, Quick Links & Leaderboard -->
+              <!-- Left Side: Quick Links & Leaderboard -->
               <div class="col-lg-8">
                 
-                <!-- Institution Photo Gallery Banner -->
-                <div class="card p-3 mb-4 border-0 shadow-sm text-center" id="homeGalleryCard" style="display: none;">
-                  <h5 class="fw-bold text-success mb-3 text-start"><i class="fa-solid fa-images me-2"></i>Institution Photo</h5>
-                  <div class="row g-3 justify-content-center" id="homeGalleryContainer">
-                    <!-- Photo loads dynamically via JavaScript -->
-                  </div>
-                </div>
-
-                <!-- Quick Links Section -->
+                <!-- 2. Quick Links Section -->
                 <div class="card p-3 mb-4 border-0 shadow-sm">
                   <h6 class="fw-bold text-success mb-3"><i class="fa-solid fa-bolt me-2"></i>Quick Links</h6>
                   <div class="row g-2">
@@ -639,7 +639,7 @@
                   </div>
                 </div>
 
-                <!-- Leaderboard Section -->
+                <!-- 3. Leaderboard Section -->
                 <div class="card p-4 mb-4">
                   <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-trophy me-2"></i>Top Performers Leaderboard</h5>
                   <div class="row g-3 text-center" id="homeLeaderboardArea">
@@ -997,7 +997,7 @@
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-gears"></i> Institution Settings</h5>
               <div class="alert alert-info small">Manage custom settings and special funds for your institution.</div>
               
-              <!-- സ്ഥാപനത്തിന്റെ ഫോട്ടോകൾ അപ്‌ലോഡ് ചെയ്യാനുള്ള സെക്ഷൻ -->
+              <!-- സ്ഥാപനത്തിന്റെ ഫോട്ടോ അപ്‌ലോഡ് ചെയ്യുന്ന സെക്ഷൻ -->
               <div class="mb-4 p-3 border rounded bg-light">
                 <label class="form-label fw-bold"><i class="fa-solid fa-images me-1"></i> Institution Photos / Gallery (Max 3)</label>
                 <p class="small text-muted mb-2">സ്ഥാപനത്തിന്റെ ഫോട്ടോകളും അടിക്കുറിപ്പുകളും നൽകുക (പരമാവധി 3 എണ്ണം).</p>
