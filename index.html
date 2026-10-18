@@ -997,29 +997,30 @@
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-gears"></i> Institution Settings</h5>
               <div class="alert alert-info small">Manage custom settings and special funds for your institution.</div>
               
-              <!-- സ്ഥാപനത്തിന്റെ ഫോട്ടോ അപ്‌ലോഡ് ചെയ്യുന്ന സെക്ഷൻ -->
-              <div class="mb-4 p-3 border rounded bg-light">
-                <label class="form-label fw-bold"><i class="fa-solid fa-images me-1"></i> Institution Photos / Gallery (Max 3)</label>
-                <p class="small text-muted mb-2">സ്ഥാപനത്തിന്റെ ഫോട്ടോകളും അടിക്കുറിപ്പുകളും നൽകുക (പരമാവധി 3 എണ്ണം).</p>
-                <div class="row g-2 mb-3">
-                  <div class="col-md-4">
-                    <label class="form-label small">Photo 1 & Caption</label>
-                    <input type="file" id="instPhoto1File" class="form-control form-control-sm mb-1" accept="image/*">
-                    <input type="text" id="instCaption1" class="form-control form-control-sm text-uppercase" placeholder="Caption 1">
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label small">Photo 2 & Caption</label>
-                    <input type="file" id="instPhoto2File" class="form-control form-control-sm mb-1" accept="image/*">
-                    <input type="text" id="instCaption2" class="form-control form-control-sm text-uppercase" placeholder="Caption 2">
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label small">Photo 3 & Caption</label>
-                    <input type="file" id="instPhoto3File" class="form-control form-control-sm mb-1" accept="image/*">
-                    <input type="text" id="instCaption3" class="form-control form-control-sm text-uppercase" placeholder="Caption 3">
-                  </div>
-                </div>
-                <button class="btn btn-success btn-sm px-4" onclick="saveInstitutionPhotosSetting()"><i class="fa-solid fa-save me-1"></i> Save Photos</button>
-              </div>
+             <!-- സ്ഥാപനത്തിന്റെ ഫോട്ടോ അപ്‌ലോഡ് ചെയ്യുന്ന സെക്ഷൻ (Single Photo) -->
+<div class="mb-4 p-3 border rounded bg-light">
+  <label class="form-label fw-bold"><i class="fa-solid fa-image me-1"></i> Institution Photo & Caption</label>
+  <p class="small text-muted mb-2">സ്ഥാപനത്തിന്റെ പ്രധാന ഫോട്ടോയും അടിക്കുറിപ്പും നൽകുക.</p>
+  
+  <div class="row g-2 mb-3">
+    <div class="col-md-6">
+      <label class="form-label small">Choose Photo</label>
+      <input type="file" id="instPhoto1File" class="form-control form-control-sm mb-1" accept="image/*">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label small">Caption</label>
+      <input type="text" id="instCaption1" class="form-control form-control-sm text-uppercase" placeholder="Enter Photo Caption">
+    </div>
+  </div>
+
+  <!-- അപ്‌ലോഡ് ചെയ്ത ചിത്രത്തിന്റെ ഒരു ചെറിയ പ്രിവ്യൂ (പേജ് റിഫ്രഷ് ചെയ്താലും കാണാൻ) -->
+  <div id="instPhotoPreviewArea" class="mb-3 d-none">
+    <small class="text-muted d-block mb-1">Current Saved Photo:</small>
+    <img id="instPhotoPreviewImg" src="" alt="Institution Photo" style="max-height: 120px; border-radius: 8px; border: 1px solid #ccc; padding: 2px;">
+  </div>
+
+  <button class="btn btn-success btn-sm px-4" onclick="saveInstitutionPhotosSetting()"><i class="fa-solid fa-save me-1"></i> Save Photo</button>
+</div>
 
               <div class="mb-4 p-3 border rounded bg-light">
                 <label class="form-label fw-bold">Special Fund Categories (Comma Separated)</label>
