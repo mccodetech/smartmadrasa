@@ -108,8 +108,20 @@
     .card { border-radius: 14px; border: 1px solid #e2e8f0; box-shadow: 0 4px 16px rgba(0,0,0,0.03); }
     .nav-pills .nav-link { color: #475569; font-weight: 600; border-radius: 10px; padding: 10px 14px; }
     .nav-pills .nav-link.active { background-color: var(--primary); color: #fff; }
-    .dashboard-card { cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease; border-radius: 14px; }
-    .dashboard-card:hover { transform: translateY(-4px); box-shadow: 0 10px 24px rgba(0,0,0,0.08); }
+    
+    .quick-link-card { 
+      cursor: pointer; 
+      transition: transform 0.2s ease, box-shadow 0.2s ease; 
+      border-radius: 12px;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+    }
+    .quick-link-card:hover { 
+      transform: translateY(-3px); 
+      box-shadow: 0 8px 20px rgba(0,0,0,0.06); 
+      border-color: var(--accent);
+    }
+
     .star-badge { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; font-weight: 700; border-radius: 20px; padding: 4px 12px; }
     
     .month-grid {
@@ -585,37 +597,44 @@
           <!-- Home Dashboard Tab -->
           <div id="homeDashboardTab" class="content-tab">
             <div class="row g-4">
-              <!-- Left Side: Gallery Banner, Cards & Leaderboard -->
+              <!-- Left Side: Institution Photo Banner, Quick Links & Leaderboard -->
               <div class="col-lg-8">
-                <!-- Institution Gallery Banner -->
+                
+                <!-- Institution Photo Gallery Banner -->
                 <div class="card p-3 mb-4 border-0 shadow-sm text-center" id="homeGalleryCard" style="display: none;">
-                  <h5 class="fw-bold text-success mb-3 text-start"><i class="fa-solid fa-images me-2"></i>Institution Gallery & Photos</h5>
+                  <h5 class="fw-bold text-success mb-3 text-start"><i class="fa-solid fa-images me-2"></i>Institution Photo</h5>
                   <div class="row g-3 justify-content-center" id="homeGalleryContainer">
-                    <!-- Photo will load here dynamically -->
+                    <!-- Photo loads dynamically via JavaScript -->
                   </div>
                 </div>
 
-                <!-- Dashboard Cards -->
-                <div class="row g-3 mb-4">
-                  <div class="col-md-4">
-                    <div class="card p-4 text-center dashboard-card border-start border-4 border-success h-100" onclick="showTab('attendanceTab')">
-                      <i class="fa-solid fa-calendar-check fa-3x text-success mb-2"></i>
-                      <h5 class="fw-bold">Attendance</h5>
-                      <p class="text-muted small m-0">Record daily attendance</p>
+                <!-- Quick Links Section -->
+                <div class="card p-3 mb-4 border-0 shadow-sm">
+                  <h6 class="fw-bold text-success mb-3"><i class="fa-solid fa-bolt me-2"></i>Quick Links</h6>
+                  <div class="row g-2">
+                    <div class="col-4 col-md-3">
+                      <div class="p-3 text-center quick-link-card" onclick="showTab('attendanceTab')">
+                        <i class="fa-solid fa-calendar-check fa-2x text-success mb-2 d-block"></i>
+                        <span class="small fw-semibold text-dark">Attendance</span>
+                      </div>
                     </div>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="card p-4 text-center dashboard-card border-start border-4 border-warning h-100" onclick="showTab('performanceTab')">
-                      <i class="fa-solid fa-star fa-3x text-warning mb-2"></i>
-                      <h5 class="fw-bold">Performance Board</h5>
-                      <p class="text-muted small m-0">Tasks & Star Points</p>
+                    <div class="col-4 col-md-3">
+                      <div class="p-3 text-center quick-link-card" onclick="showTab('performanceTab')">
+                        <i class="fa-solid fa-star fa-2x text-warning mb-2 d-block"></i>
+                        <span class="small fw-semibold text-dark">Performance</span>
+                      </div>
                     </div>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="card p-4 text-center dashboard-card border-start border-4 border-primary h-100" onclick="showTab('marksTab')">
-                      <i class="fa-solid fa-award fa-3x text-primary mb-2"></i>
-                      <h5 class="fw-bold">Marks Entry</h5>
-                      <p class="text-muted small m-0">Exam scores & evaluations</p>
+                    <div class="col-4 col-md-3">
+                      <div class="p-3 text-center quick-link-card" onclick="showTab('marksTab')">
+                        <i class="fa-solid fa-award fa-2x text-primary mb-2 d-block"></i>
+                        <span class="small fw-semibold text-dark">Marks Entry</span>
+                      </div>
+                    </div>
+                    <div class="col-4 col-md-3">
+                      <div class="p-3 text-center quick-link-card" onclick="showTab('feesTab')">
+                        <i class="fa-solid fa-receipt fa-2x text-info mb-2 d-block"></i>
+                        <span class="small fw-semibold text-dark">Fees Collection</span>
+                      </div>
                     </div>
                   </div>
                 </div>
