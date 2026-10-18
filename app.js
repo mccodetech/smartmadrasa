@@ -597,27 +597,16 @@ window.loadHomeInstitutionPhotos = function(photosList = null) {
         }
     }
 
+    // ഒരൊറ്റ ഫോട്ടോ മാത്രം സെന്ററിൽ കാണിക്കുന്നു
     if (validPhotos.length > 0) {
         cardContainer.style.display = 'block';
-        
-        let colClass = "col-md-4";
-        if (validPhotos.length === 1) {
-            colClass = "col-12";
-        } else if (validPhotos.length === 2) {
-            colClass = "col-md-6";
-        }
-
-        validPhotos.forEach(photo => {
-            let col = document.createElement('div');
-            col.className = `${colClass} text-center mb-3`;
-            col.innerHTML = `
-                <div class="card p-2 border shadow-sm h-100">
-                    <img src="${photo.url}" alt="${photo.caption || 'Institution Photo'}" class="img-fluid rounded mb-2 gallery-img">
-                    <h6 class="fw-bold text-dark small m-0">${photo.caption || ''}</h6>
-                </div>
-            `;
-            container.appendChild(col);
-        });
+        let photo = validPhotos[0]; // ആദ്യത്തെ ഫോട്ടോ മാത്രം
+        container.innerHTML = `
+            <div class="position-relative">
+                <img src="${photo.url}" alt="${photo.caption || 'Institution Photo'}" class="img-fluid rounded shadow-sm w-100" style="max-height: 320px; object-fit: contain; background: #000;">
+                ${photo.caption ? `<h5 class="fw-bold text-dark mt-2">${photo.caption}</h5>` : ''}
+            </div>
+        `;
     } else {
         cardContainer.style.display = 'none';
     }
