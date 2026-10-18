@@ -485,7 +485,7 @@ window.loadSuperAdminRequests = async () => {
 };
 
 // ==========================================
-// SESSION & AUTH STATE LISTENER
+// SESSION & AUTH STATE LISTENER (ROLE ROUTING FIX)
 // ==========================================
 onAuthStateChanged(auth, async (user) => {
   if (user) {
@@ -493,6 +493,8 @@ onAuthStateChanged(auth, async (user) => {
       const userDoc = await getDoc(doc(db, "users", user.uid));
       if (userDoc.exists()) {
         const userData = userDoc.data();
+        
+        // Strict Super Admin Check
         window.isSuperAdmin = (user.email === SUPER_ADMIN_EMAIL);
         
         if (!window.isSuperAdmin && userData.status === "pending") {
@@ -511,7 +513,11 @@ onAuthStateChanged(auth, async (user) => {
         }
 
         const instNameEl = document.getElementById("displayMadrassaName");
-        if (instNameEl) instNameEl.innerText = window.isSuperAdmin ? "Smart Madrasa - Master Control Center" : (userData.institutionName || "Smart Madrasa");
+        if (instNameEl) {
+          instNameEl.innerText = window.isSuperAdmin 
+            ? "Smart Madrasa - Master Control Center" 
+            : (userData.institutionName || "Smart Madrasa");
+        }
 
         const userRoleEl = document.getElementById("displayUserRole");
         const superMasterBtn = document.getElementById("superAdminMasterBtn");
@@ -526,6 +532,7 @@ onAuthStateChanged(auth, async (user) => {
         const feeSettingsBtn = document.getElementById("feeSettingsBtn");
         const subjectSettingsBtn = document.getElementById("subjectSettingsBtn");
 
+        // Settings Data
         if (!window.isSuperAdmin) {
           const instDoc = await getDoc(doc(db, "settings", window.currentInstitutionId));
           if (instDoc.exists()) {
@@ -536,23 +543,43 @@ onAuthStateChanged(auth, async (user) => {
             let data = instDoc.data();
             if (data.photo1) {
               localStorage.setItem('cachedGalleryPhotos_' + window.currentInstitutionId, JSON.stringify([data.photo1]));
-              window.loadHomeInstitutionPhotos([data.photo1]);
+              if (typeof window.loadHomeInstitutionPhotos === 'function') {
+                window.loadHomeInstitutionPhotos([data.photo1]);
+              }
             }
           }
         }
 
+        // ==========================================
+        // STRICT ROLE BASED NAVIGATION ROUTING
+        // ==========================================
         if (window.isSuperAdmin) {
+          // ONLY Super Admin gets access to "All Madrasas"
           if (superMasterBtn) superMasterBtn.classList.remove("d-none");
           if (userRoleEl) userRoleEl.innerText = "Super Admin";
+          
           window.showTab('superAdminTab');
-          if (typeof window.loadSuperAdminRequests === 'function') window.loadSuperAdminRequests();
+          if (typeof window.loadSuperAdminRequests === 'function') {
+            window.loadSuperAdminRequests();
+          }
         } else {
+          // STRICTLY HIDE Super Admin Menu for everyone else
           if (superMasterBtn) superMasterBtn.classList.add("d-none");
-          if (userRoleEl) userRoleEl.innerText = window.currentUserRole === "admin" ? "Admin" : (window.currentUserRole === "principal" ? "Principal" : "Teacher");
+          
+          if (userRoleEl) {
+            userRoleEl.innerText = window.currentUserRole === "admin" 
+              ? "Admin" 
+              : (window.currentUserRole === "principal" ? "Principal" : "Teacher");
+          }
           
           if (studentsMenuBtn) studentsMenuBtn.classList.remove("d-none");
           if (feesMenuBtn) feesMenuBtn.classList.remove("d-none");
+          if (homeMenuBtn) homeMenuBtn.classList.remove("d-none");
+          if (attendanceMenuBtn) attendanceMenuBtn.classList.remove("d-none");
+          if (marksMenuBtn) marksMenuBtn.classList.remove("d-none");
+          if (performanceMenuBtn) performanceMenuBtn.classList.remove("d-none");
 
+          // Institution Admin & Principal Specific Options
           if (window.currentUserRole === "admin" || window.currentUserRole === "principal") {
             if (instAdminStaffBtn) instAdminStaffBtn.classList.remove("d-none");
             if (settingsMenuBtn) settingsMenuBtn.classList.remove("d-none");
@@ -562,22 +589,14 @@ onAuthStateChanged(auth, async (user) => {
           }
 
           if (window.currentUserRole === "admin") {
-            if (homeMenuBtn) homeMenuBtn.classList.remove("d-none");
-            if (attendanceMenuBtn) attendanceMenuBtn.classList.remove("d-none");
-            if (marksMenuBtn) marksMenuBtn.classList.remove("d-none");
-            if (performanceMenuBtn) performanceMenuBtn.classList.remove("d-none");
             if (feeSettingsBtn) feeSettingsBtn.classList.remove("d-none");
             if (subjectSettingsBtn) subjectSettingsBtn.classList.remove("d-none");
+          }
 
-            window.showTab('instAdminTab'); 
-            if (typeof window.loadPrincipalsList === 'function') window.loadPrincipalsList();
-          } else {
-            if (homeMenuBtn) homeMenuBtn.classList.remove("d-none");
-            if (attendanceMenuBtn) attendanceMenuBtn.classList.remove("d-none");
-            if (marksMenuBtn) marksMenuBtn.classList.remove("d-none");
-            if (performanceMenuBtn) performanceMenuBtn.classList.remove("d-none");
-            window.showTab('homeDashboardTab');
-            if (typeof window.loadLeaderboard === 'function') window.loadLeaderboard();
+          // ROUTE INSTITUTION ADMINS DIRECTLY TO HOME DASHBOARD (Not SuperAdmin Tab)
+          window.showTab('homeDashboardTab');
+          if (typeof window.loadLeaderboard === 'function') {
+            window.loadLeaderboard();
           }
         }
 
