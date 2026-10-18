@@ -466,9 +466,9 @@
         <div class="d-flex align-items-center gap-2">
           <button class="btn btn-outline-light btn-sm d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas"><i class="fa-solid fa-bars"></i></button>
           <a class="navbar-brand fw-bold m-0 d-flex align-items-center gap-2 top-brand-text" href="#" onclick="showTab('homeDashboardTab')">
-  <img src="images.png" alt="Logo" class="app-navbar-logo">
-  <span id="displayMadrassaName">Smart Madrasa</span>
-</a>
+            <img src="images.png" alt="Logo" class="app-navbar-logo" style="height: 30px;">
+            <span id="displayMadrassaName">Smart Madrasa</span>
+          </a>
         </div>
         <div class="d-flex align-items-center gap-2 text-white">
           <button class="btn btn-sm btn-outline-warning d-none" id="superAdminBackBtn" onclick="returnToSuperAdminConsole()"><i class="fa-solid fa-arrow-left me-1"></i> Console</button>
@@ -582,95 +582,86 @@
             </div>
           </div>
 
-         <div id="homeDashboardTab" class="content-tab">
-  
-  <!-- സ്ഥാപനത്തിന്റെ ഫോട്ടോ ഗാലറി ബാനർ (ഏറ്റവും മുകളിൽ) -->
-  <div class="card p-4 mb-4 border-0 shadow-sm" id="homeGalleryCard" style="display: none;">
-    <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-images me-2"></i>Institution Gallery & Photos</h5>
-    <div class="row g-3 justify-content-center" id="homeGalleryContainer">
-      <!-- ഡൈനാമിക് ആയി ഫോട്ടോകൾ ഇവിടെ വരും -->
-    </div>
-  </div>
+          <!-- Home Dashboard Tab -->
+          <div id="homeDashboardTab" class="content-tab">
+            <div class="row g-4">
+              <!-- Left Side: Gallery Banner, Cards & Leaderboard -->
+              <div class="col-lg-8">
+                <!-- Institution Gallery Banner -->
+                <div class="card p-3 mb-4 border-0 shadow-sm text-center" id="homeGalleryCard" style="display: none;">
+                  <h5 class="fw-bold text-success mb-3 text-start"><i class="fa-solid fa-images me-2"></i>Institution Gallery & Photos</h5>
+                  <div class="row g-3 justify-content-center" id="homeGalleryContainer">
+                    <!-- Photo will load here dynamically -->
+                  </div>
+                </div>
 
-  <!-- ബാക്കി ഡാഷ്‌ബോർഡ് കാർഡുകൾ -->
-  <div class="row g-3 mb-4">
-      <div class="col-md-4"><div class="card p-4 text-center dashboard-card border-start border-4 border-success" onclick="showTab('attendanceTab')"><i class="fa-solid fa-calendar-check fa-3x text-success mb-2"></i><h5 class="fw-bold">Attendance</h5><p class="text-muted small m-0">Record daily attendance</p></div></div>
-      <div class="col-md-4"><div class="card p-4 text-center dashboard-card border-start border-4 border-warning" onclick="showTab('performanceTab')"><i class="fa-solid fa-star fa-3x text-warning mb-2"></i><h5 class="fw-bold">Performance Board</h5><p class="text-muted small m-0">Tasks & Star Points</p></div></div>
-      <div class="col-md-4"><div class="card p-4 text-center dashboard-card border-start border-4 border-primary" onclick="showTab('marksTab')"><i class="fa-solid fa-award fa-3x text-primary mb-2"></i><h5 class="fw-bold">Marks Entry</h5><p class="text-muted small m-0">Exam scores & evaluations</p></div></div>
-  </div>
-  
-  <!-- ലീഡർബോർഡ് സെക്ഷൻ -->
-  <div class="card p-4">
-    <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-trophy me-2"></i>Top Performers Leaderboard</h5>
-    <div class="row g-3 text-center" id="homeLeaderboardArea">
-      <div class="col-md-4"><div class="card p-3 bg-light"><span class="star-badge mb-2 d-inline-block">Today's Star</span><h5 class="fw-bold mt-2" id="starTodayName">-</h5><small class="text-muted" id="starTodayClass">-</small></div></div>
-      <div class="col-md-4"><div class="card p-3 bg-light"><span class="star-badge mb-2 d-inline-block">Weekly Star</span><h5 class="fw-bold mt-2" id="starWeekName">-</h5><small class="text-muted" id="starWeekClass">-</small></div></div>
-      <div class="col-md-4"><div class="card p-3 bg-light"><span class="star-badge mb-2 d-inline-block">Monthly Star</span><h5 class="fw-bold mt-2" id="starMonthName">-</h5><small class="text-muted" id="starMonthClass">-</small></div></div>
-    </div>
-  </div>
-</div>
+                <!-- Dashboard Cards -->
+                <div class="row g-3 mb-4">
+                  <div class="col-md-4">
+                    <div class="card p-4 text-center dashboard-card border-start border-4 border-success h-100" onclick="showTab('attendanceTab')">
+                      <i class="fa-solid fa-calendar-check fa-3x text-success mb-2"></i>
+                      <h5 class="fw-bold">Attendance</h5>
+                      <p class="text-muted small m-0">Record daily attendance</p>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="card p-4 text-center dashboard-card border-start border-4 border-warning h-100" onclick="showTab('performanceTab')">
+                      <i class="fa-solid fa-star fa-3x text-warning mb-2"></i>
+                      <h5 class="fw-bold">Performance Board</h5>
+                      <p class="text-muted small m-0">Tasks & Star Points</p>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="card p-4 text-center dashboard-card border-start border-4 border-primary h-100" onclick="showTab('marksTab')">
+                      <i class="fa-solid fa-award fa-3x text-primary mb-2"></i>
+                      <h5 class="fw-bold">Marks Entry</h5>
+                      <p class="text-muted small m-0">Exam scores & evaluations</p>
+                    </div>
+                  </div>
+                </div>
 
-      <!-- ലീഡർബോർഡ് സെക്ഷൻ -->
-      <div class="card p-4 mb-4">
-        <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-trophy me-2"></i>Top Performers Leaderboard</h5>
-        <div class="row g-3 text-center" id="homeLeaderboardArea">
-          <div class="col-md-4"><div class="card p-3 bg-light"><span class="star-badge mb-2 d-inline-block">Today's Star</span><h5 class="fw-bold mt-2" id="starTodayName">-</h5><small class="text-muted" id="starTodayClass">-</small></div></div>
-          <div class="col-md-4"><div class="card p-3 bg-light"><span class="star-badge mb-2 d-inline-block">Weekly Star</span><h5 class="fw-bold mt-2" id="starWeekName">-</h5><small class="text-muted" id="starWeekClass">-</small></div></div>
-          <div class="col-md-4"><div class="card p-3 bg-light"><span class="star-badge mb-2 d-inline-block">Monthly Star</span><h5 class="fw-bold mt-2" id="starMonthName">-</h5><small class="text-muted" id="starMonthClass">-</small></div></div>
-        </div>
-      </div>
+                <!-- Leaderboard Section -->
+                <div class="card p-4 mb-4">
+                  <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-trophy me-2"></i>Top Performers Leaderboard</h5>
+                  <div class="row g-3 text-center" id="homeLeaderboardArea">
+                    <div class="col-md-4"><div class="card p-3 bg-light"><span class="star-badge mb-2 d-inline-block">Today's Star</span><h5 class="fw-bold mt-2" id="starTodayName">-</h5><small class="text-muted" id="starTodayClass">-</small></div></div>
+                    <div class="col-md-4"><div class="card p-3 bg-light"><span class="star-badge mb-2 d-inline-block">Weekly Star</span><h5 class="fw-bold mt-2" id="starWeekName">-</h5><small class="text-muted" id="starWeekClass">-</small></div></div>
+                    <div class="col-md-4"><div class="card p-3 bg-light"><span class="star-badge mb-2 d-inline-block">Monthly Star</span><h5 class="fw-bold mt-2" id="starMonthName">-</h5><small class="text-muted" id="starMonthClass">-</small></div></div>
+                  </div>
+                </div>
+              </div>
 
-    </div>
+              <!-- Right Side: Notifications Panel -->
+              <div class="col-lg-4">
+                <div class="card p-4 border-0 shadow-sm mb-4">
+                  <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-bullhorn me-2"></i>Notifications</h5>
+                  <div class="list-group list-group-flush" id="homeNotificationsList">
+                    <div class="list-group-item px-0 text-muted small">
+                      <i class="fa-solid fa-circle-info text-primary me-2"></i> പുതിയ അക്കാദമിക് വർഷത്തെ വിവരങ്ങൾ ഉടൻ അപ്ഡേറ്റ് ചെയ്യുന്നതാണ്.
+                    </div>
+                    <div class="list-group-item px-0 text-muted small">
+                      <i class="fa-solid fa-calendar-days text-success me-2"></i> അടുത്ത മാസത്തെ പൊതു പരീക്ഷാ തീയതികൾ പ്രസിദ്ധീകരിച്ചു.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-    <!-- വലതുവശത്തെ നോറ്റിഫിക്കേഷൻ പാനൽ -->
-    <div class="col-lg-4">
-      <div class="card p-4 border-0 shadow-sm mb-4">
-        <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-bullhorn me-2"></i>Notifications</h5>
-        <div class="list-group list-group-flush" id="homeNotificationsList">
-          <div class="list-group-item px-0 text-muted small">
-            <i class="fa-solid fa-circle-info text-primary me-2"></i> പുതിയ അക്കാദമിക് വർഷത്തെ വിവരങ്ങൾ ഉടൻ അപ്ഡേറ്റ് ചെയ്യുന്നതാണ്.
+            <!-- Footer Contact Section -->
+            <div class="card p-4 border-0 shadow-sm mt-3 bg-white">
+              <div class="row">
+                <div class="col-md-6 mb-3 mb-md-0">
+                  <h5 class="fw-bold text-success mb-2"><i class="fa-solid fa-school me-2"></i>About Institution</h5>
+                  <p class="text-muted small m-0">ഉന്നതമായ മൂല്യങ്ങളും മികച്ച മതഭൗതിക വിദ്യാഭ്യാസവും നൽകിക്കൊണ്ട് പ്രവർത്തിക്കുന്ന സ്ഥാപനം.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                  <h5 class="fw-bold text-success mb-2"><i class="fa-solid fa-address-book me-2"></i>Contact Us</h5>
+                  <p class="text-muted small mb-1"><i class="fa-solid fa-location-dot me-1"></i> ഓഫീസ് വിലാസം, പ്രധാന റോഡ്, കേരളം</p>
+                  <p class="text-muted small mb-0"><i class="fa-brands fa-whatsapp text-success me-1"></i> WhatsApp: <a href="https://wa.me/" class="text-decoration-none text-success" id="instWhatsAppLink">+91 XXXXXXXXXX</a></p>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="list-group-item px-0 text-muted small">
-            <i class="fa-solid fa-calendar-days text-success me-2"></i> അടുത്ത മാസത്തെ പൊതു പരീക്ഷാ തീയതികൾ പ്രസിദ്ധീകരിച്ചു.
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- താഴ്ഭാഗത്തുള്ള കോൺടാക്ട് & അഡ്രസ്സ് സെക്ഷൻ -->
-  <div class="card p-4 border-0 shadow-sm mt-3 bg-white">
-    <div class="row">
-      <div class="col-md-6 mb-3 mb-md-0">
-        <h5 class="fw-bold text-success mb-2"><i class="fa-solid fa-school me-2"></i>About Institution</h5>
-        <p class="text-muted small m-0">ഉന്നതമായ മൂല്യങ്ങളും മികച്ച മതഭൗതിക വിദ്യാഭ്യാസവും നൽകിക്കൊണ്ട് പ്രവർത്തിക്കുന്ന സ്ഥാപനം.</p>
-      </div>
-      <div class="col-md-6 text-md-end">
-        <h5 class="fw-bold text-success mb-2"><i class="fa-solid fa-address-book me-2"></i>Contact Us</h5>
-        <p class="text-muted small mb-1"><i class="fa-solid fa-location-dot me-1"></i> ഓഫീസ് വിലാസം, പ്രധാന റോഡ്, കേരളം</p>
-        <p class="text-muted small mb-0"><i class="fa-brands fa-whatsapp text-success me-1"></i> WhatsApp: <a href="https://wa.me/" class="text-decoration-none text-success" id="instWhatsAppLink">+91 XXXXXXXXXX</a></p>
-      </div>
-    </div>
-  </div>
-
-</div>
-             <div class="row g-3 mb-4">
-            <div class="col-md-4"><div class="card p-4 text-center dashboard-card border-start border-4 border-success" onclick="showTab('attendanceTab')"><i class="fa-solid fa-calendar-check fa-3x text-success mb-2"></i><h5 class="fw-bold">Attendance</h5><p class="text-muted small m-0">Record daily attendance</p></div></div>
-            <div class="col-md-4"><div class="card p-4 text-center dashboard-card border-start border-4 border-warning" onclick="showTab('performanceTab')"><i class="fa-solid fa-star fa-3x text-warning mb-2"></i><h5 class="fw-bold">Performance Board</h5><p class="text-muted small m-0">Tasks & Star Points</p></div></div>
-            <div class="col-md-4"><div class="card p-4 text-center dashboard-card border-start border-4 border-primary" onclick="showTab('marksTab')"><i class="fa-solid fa-award fa-3x text-primary mb-2"></i><h5 class="fw-bold">Marks Entry</h5><p class="text-muted small m-0">Exam scores & evaluations</p></div></div>
-        </div>
-
-
-        <div class="card p-4">
-          <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-trophy me-2"></i>Top Performers Leaderboard</h5>
-          <div class="row g-3 text-center" id="homeLeaderboardArea">
-            <div class="col-md-4"><div class="card p-3 bg-light"><span class="star-badge mb-2 d-inline-block">Today's Star</span><h5 class="fw-bold mt-2" id="starTodayName">-</h5><small class="text-muted" id="starTodayClass">-</small></div></div>
-            <div class="col-md-4"><div class="card p-3 bg-light"><span class="star-badge mb-2 d-inline-block">Weekly Star</span><h5 class="fw-bold mt-2" id="starWeekName">-</h5><small class="text-muted" id="starWeekClass">-</small></div></div>
-            <div class="col-md-4"><div class="card p-3 bg-light"><span class="star-badge mb-2 d-inline-block">Monthly Star</span><h5 class="fw-bold mt-2" id="starMonthName">-</h5><small class="text-muted" id="starMonthClass">-</small></div></div>
-          </div>
-        </div>
-      </div>
 
           <div id="studentsListTab" class="content-tab d-none">
             <div class="card p-4">
@@ -987,7 +978,7 @@
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-gears"></i> Institution Settings</h5>
               <div class="alert alert-info small">Manage custom settings and special funds for your institution.</div>
               
-              <!-- സ്ഥാപനത്തിന്റെ ഫോട്ടോകൾ അപ്‌ലോഡ് ചെയ്യാനുള്ള പുതിയ സെക്ഷൻ -->
+              <!-- സ്ഥാപനത്തിന്റെ ഫോട്ടോകൾ അപ്‌ലോഡ് ചെയ്യാനുള്ള സെക്ഷൻ -->
               <div class="mb-4 p-3 border rounded bg-light">
                 <label class="form-label fw-bold"><i class="fa-solid fa-images me-1"></i> Institution Photos / Gallery (Max 3)</label>
                 <p class="small text-muted mb-2">സ്ഥാപനത്തിന്റെ ഫോട്ടോകളും അടിക്കുറിപ്പുകളും നൽകുക (പരമാവധി 3 എണ്ണം).</p>
@@ -1035,6 +1026,7 @@
   </div>
 
   <!-- MODALS -->
+  <!-- Staff Profile Modal -->
   <div class="modal fade" id="staffProfileModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
       <div class="modal-content border-0 shadow">
@@ -1166,6 +1158,7 @@
     </div>
   </div>
 
+  <!-- Student Profile Modal -->
   <div class="modal fade" id="studentProfileModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
       <div class="modal-content border-0 shadow">
@@ -1327,52 +1320,6 @@
     </div>
   </div>
 
-  <!-- PWA Install Floating Button & Script -->
-  <div id="pwaInstallContainer" class="d-none position-fixed bottom-0 end-0 p-3" style="z-index: 9999;">
-    <button id="btnInstallApp" class="btn btn-success shadow-lg rounded-pill px-4 py-2 fw-bold d-flex align-items-center gap-2">
-      <i class="fa-solid fa-download"></i> Install App
-    </button>
-  </div>
-
-  <script>
-    let deferredPrompt;
-    const installContainer = document.getElementById('pwaInstallContainer');
-    const installButton = document.getElementById('btnInstallApp');
-
-    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
-      if (installContainer) installContainer.classList.add('d-none');
-    } else {
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        if (installContainer) installContainer.classList.remove('d-none');
-      });
-
-      installButton.addEventListener('click', async () => {
-        if (deferredPrompt) {
-          deferredPrompt.prompt();
-          const { outcome } = await deferredPrompt.userChoice;
-          if (outcome === 'accepted') {
-            console.log('User accepted the install prompt');
-          }
-          deferredPrompt = null;
-          installContainer.classList.add('d-none');
-        }
-      });
-    }
-
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then((reg) => console.log('Service Worker registered', reg))
-          .catch((err) => console.log('Service Worker registration failed', err));
-      });
-    }
-  </script>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script type="module" src="app.js"></script>
-  
   <!-- Fee Payment Modal -->
   <div class="modal fade" id="feePaymentModal" tabindex="-1" aria-labelledby="feePaymentModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -1454,5 +1401,54 @@
       </div>
     </div>
   </div>
+
+  <!-- PWA Install Floating Button -->
+  <div id="pwaInstallContainer" class="d-none position-fixed bottom-0 end-0 p-3" style="z-index: 9999;">
+    <button id="btnInstallApp" class="btn btn-success shadow-lg rounded-pill px-4 py-2 fw-bold d-flex align-items-center gap-2">
+      <i class="fa-solid fa-download"></i> Install App
+    </button>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script>
+    let deferredPrompt;
+    const installContainer = document.getElementById('pwaInstallContainer');
+    const installButton = document.getElementById('btnInstallApp');
+
+    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+      if (installContainer) installContainer.classList.add('d-none');
+    } else {
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        if (installContainer) installContainer.classList.remove('d-none');
+      });
+
+      if (installButton) {
+        installButton.addEventListener('click', async () => {
+          if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+              console.log('User accepted the install prompt');
+            }
+            deferredPrompt = null;
+            installContainer.classList.add('d-none');
+          }
+        });
+      }
+    }
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then((reg) => console.log('Service Worker registered', reg))
+          .catch((err) => console.log('Service Worker registration failed', err));
+      });
+    }
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>
