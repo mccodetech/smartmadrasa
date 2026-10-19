@@ -55,9 +55,6 @@ window.saveCustomTask = (e) => {
   window.showToast("Custom task added successfully!", "success");
 };
 
-// ==========================================
-// UTILITY: DYNAMIC STUDENT SORTING LOGIC
-// ==========================================
 function sortStudentsList(studentsList, sortOrder) {
   if (sortOrder === "NAME_ASC") {
     studentsList.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
@@ -78,7 +75,6 @@ function sortStudentsList(studentsList, sortOrder) {
       return (Number(a.regNo) || 0) - (Number(b.regNo) || 0);
     });
   } else {
-    // Default Reg No Order
     studentsList.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
   }
   return studentsList;
