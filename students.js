@@ -10,7 +10,7 @@ let localStudentsCache = [];
 let currentPage = 1;
 const pageSize = 50;
 
-// സ്റ്റുഡന്റ് പ്രൊഫൈൽ മോഡൽ തുറക്കാൻ (New / Edit)
+// Student profile modal open cheyyan (New / Edit)
 window.openStudentProfileModal = (docId) => {
   document.getElementById("studentProfileForm").reset();
 
@@ -37,7 +37,7 @@ window.openStudentProfileModal = (docId) => {
   new bootstrap.Modal(document.getElementById('studentProfileModal')).show();
 };
 
-// സ്റ്റുഡന്റ് ഡാറ്റ സേവ് ചെയ്യാൻ (Add / Update)
+// Student details save cheyyan
 window.saveStudentProfile = async (e) => {
   if (e) e.preventDefault();
   
@@ -81,7 +81,7 @@ window.saveStudentProfile = async (e) => {
   }
 };
 
-// ഒറ്റ വിദ്യാർത്ഥിയെ ഡിലീറ്റ് ചെയ്യാൻ
+// Single Student-ne delete cheyyan
 window.deleteStudent = async (docId, name) => {
   if (confirm(`Are you sure you want to delete ${name}?`)) {
     try {
@@ -94,7 +94,7 @@ window.deleteStudent = async (docId, name) => {
   }
 };
 
-// എല്ലാ വിദ്യാർത്ഥികളെയും ഡിലീറ്റ് ചെയ്യാൻ
+// All Students-ne delete cheyyan
 window.deleteAllStudents = async () => {
   const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
   if (confirm("WARNING: Are you sure you want to delete ALL student records for this madrasa?")) {
@@ -115,7 +115,7 @@ window.deleteAllStudents = async () => {
   }
 };
 
-// ക്ലാസ്സ് അനുസരിച്ച് വിദ്യാർത്ഥികളെ ലോഡ് ചെയ്യാനും Dynamic Sorting ബാധകമാക്കാനും
+// Class wise students load cheyyan & Dynamic Sorting apply cheyyan
 window.loadStudentsByClass = async (forceRefresh = false) => {
   const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
   let selectedClass = document.getElementById("filterClassSelect")?.value || "ALL";
@@ -137,29 +137,42 @@ window.loadStudentsByClass = async (forceRefresh = false) => {
       localStudentsCache = [];
       snap.forEach(d => localStudentsCache.push({ id: d.id, ...d.data() }));
 
-// Dynamic Sorting based on Super Admin Settings
-if (window.sysSortOrder === "NAME_ASC") {
-  localStudentsCache.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-} else if (window.sysSortOrder === "BOYS_FIRST") {
-  localStudentsCache.sort((a, b) => {
-    const gA = (a.gender || '').toLowerCase();
-    const gB = (b.gender || '').toLowerCase();
-    if (gA === 'male' && gB !== 'male') return -1;
-    if (gA !== 'male' && gB === 'male') return 1;
-    return (Number(a.regNo) || 0) - (Number(b.regNo) || 0);
-  });
-} else if (window.sysSortOrder === "GIRLS_FIRST") {
-  localStudentsCache.sort((a, b) => {
-    const gA = (a.gender || '').toLowerCase();
-    const gB = (b.gender || '').toLowerCase();
-    if (gA === 'female' && gB !== 'female') return -1;
-    if (gA !== 'female' && gB === 'female') return 1;
-    return (Number(a.regNo) || 0) - (Number(b.regNo) || 0);
-  });
-} else {
-  // Default Reg No Order
-  localStudentsCache.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
-}
+      // DYNAMIC SORTING LOGIC
+      if (window.sysSortOrder === "NAME_ASC") {
+        localStudentsCache.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+      } else if (window.sysSortOrder === "BOYS_FIRST") {
+        localStudentsCache.sort((a, b) => {
+          const gA = (a.gender || '').toLowerCase();
+          const gB = (b.gender || '').toLowerCase();
+          if (gA === 'male' && gB !== 'male') return -1;
+          if (gA !== 'male' && gB === 'male') return 1;
+          return (Number(a.regNo) || 0) - (Number(b.regNo) || 0);
+        });
+      } else if (window.sysSortOrder === "GIRLS_FIRST") {
+        localStudentsCache.sort((a, b) => {
+          const gA = (a.gender || '').toLowerCase();
+          const gB = (b.gender || '').toLowerCase();
+          if (gA === 'female' && gB !== 'female') return -1;
+          if (gA !== 'female' && gB === 'female') return 1;
+          return (Number(a.regNo) || 0) - (Number(b.regNo) || 0);
+        });
+      } else {
+        localStudentsCache.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
+      }
+    }
+
+    let filtered = localStudentsCache;
+    if (selectedClass !== "ALL") {
+      filtered = localStudentsCache.filter(s => String(s.currentClass) === String(selectedClass.replace(/Class\s*/i, "").trim()));
+    }
+
+    currentPage = 1;
+    renderPaginatedTable(filtered);
+  } catch (err) {
+    console.error("Error loading students:", err);
+    window.showToast("Error loading students: " + err.message, "error");
+  }
+};
 
 function renderPaginatedTable(dataArray = localStudentsCache) {
   const tbody = document.getElementById("studentsTableBody");
@@ -260,7 +273,6 @@ window.changeStudentPage = (page) => {
   renderPaginatedTable(filtered);
 };
 
-// ലോക്കൽ ഫിൽട്ടർ ചെയ്യുമ്പോഴും പേജിനേഷൻ വരുന്ന രീതിയിൽ
 window.filterStudentsLocal = () => {
   const term = document.getElementById("searchBox").value.toLowerCase();
   const filtered = localStudentsCache.filter(s => 
@@ -272,7 +284,6 @@ window.filterStudentsLocal = () => {
   renderPaginatedTable(filtered);
 };
 
-// CSV ഫോർമാറ്റ് ഡൗൺലോഡ് ചെയ്യാൻ
 window.downloadCSVFormat = () => {
   const headers = "REG NO.,STUDENT NAME,CURRENT CLASS,FATHER NAME,MOBILE NUMBER\n";
   const sampleData = "101,MUHAMMED,1,ABDULLA,9876543210\n";
@@ -286,10 +297,7 @@ window.downloadCSVFormat = () => {
   document.body.removeChild(link);
 };
 
-// ==========================================
-// STUDENT PROFILE VIEW MODULE
-// ==========================================
-
+// Student profile details modal view
 window.viewStudentProfile = (docId) => {
   const s = localStudentsCache.find(x => x.id === docId);
   if (!s) return;
