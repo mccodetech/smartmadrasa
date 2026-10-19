@@ -435,7 +435,7 @@ window.deleteStaffAccount = async (userId, name) => {
   }
 };
 
-// Super Admin ലിസ്റ്റ് ലോഡ് ചെയ്യുന്ന ഫങ്ഷൻ
+// Super Admin ലിസ്റ്റ് ലോഡ് ചെയ്യുന്ന ഫങ്ഷൻ (Edit & Delete ബട്ടണുകളോടെ)
 window.loadSuperAdminRequests = async () => {
   const tableBody = document.getElementById("superAdminTableBody");
   if (!tableBody) return;
@@ -443,7 +443,6 @@ window.loadSuperAdminRequests = async () => {
   tableBody.innerHTML = `<tr><td colspan="8" class="text-center text-muted">Loading institutions...</td></tr>`;
 
   try {
-    // 1. Users കളക്ഷനിൽ നിന്നും Admin റോൾ ഉള്ളവരെ എടുക്കുന്നു
     const q = query(collection(db, "users"), where("role", "==", "admin"));
     const querySnapshot = await getDocs(q);
     let html = "";
@@ -471,10 +470,21 @@ window.loadSuperAdminRequests = async () => {
             </span>
           </td>
           <td class="text-center">
-            ${isPending 
-              ? `<button class="btn btn-sm btn-success px-3" onclick="approveMadrasaAdmin('${docSnap.id}')"><i class="fa-solid fa-check me-1"></i> Approve</button>`
-              : `<span class="badge bg-light text-dark">Approved</span>`
-            }
+            <div class="d-flex align-items-center justify-content-center gap-1">
+              ${isPending 
+                ? `<button class="btn btn-sm btn-success px-2" onclick="approveMadrasaAdmin('${docSnap.id}')" title="Approve"><i class="fa-solid fa-check"></i></button>`
+                : `<span class="badge bg-light text-dark border me-1">Approved</span>`
+              }
+              <!-- Edit Button -->
+              <button class="btn btn-sm btn-outline-primary px-2" onclick="editMadrasaDetails('${docSnap.id}', '${user.institutionName || ''}', '${user.name || ''}', '${user.phone || ''}')" title="Edit Madrasa">
+                <i class="fa-solid fa-pen"></i>
+              </button>
+              
+              <!-- Delete Button -->
+              <button class="btn btn-sm btn-outline-danger px-2" onclick="deleteMadrasaAdmin('${docSnap.id}', '${user.institutionName || 'this institution'}')" title="Delete Madrasa">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
           </td>
         </tr>
       `;
