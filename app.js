@@ -753,3 +753,119 @@ window.deleteMadrasaAdmin = async (userId, instName) => {
     window.showToast("Error deleting account: " + e.message, "error");
   }
 };
+
+// 1. എഡിറ്റ് മോഡൽ ഓപ്പൺ ചെയ്യാനുള്ള ഫങ്ഷൻ
+window.editMadrasaDetails = function(userId, currentInstName, currentAdminName, currentPhone, currentShortCode, currentEmail) {
+  document.getElementById("editMadrasaDocId").value = userId;
+  document.getElementById("editMadrasaShortCode").value = currentShortCode !== '-' ? currentShortCode : '';
+  document.getElementById("editMadrasaName").value = currentInstName || '';
+  document.getElementById("editMadrasaAdminName").value = currentAdminName || '';
+  document.getElementById("editMadrasaPhone").value = currentPhone || '';
+  document.getElementById("editMadrasaEmail").value = (currentEmail && currentEmail !== '-') ? currentEmail : '';
+
+  const modalEl = document.getElementById("editMadrasaModal");
+  if (modalEl) {
+    const modal = new bootstrap.Modal(modalEl);
+    modal.show();
+  }
+};
+
+// 2. മോഡലിൽ നിന്ന് മാറ്റി എഴുതിയ വിവരങ്ങൾ ഫയർസ്റ്റോറിൽ സേവ് ചെയ്യാനുള്ള ഫങ്ഷൻ
+window.saveEditedMadrasaDetails = async function() {
+  const userId = document.getElementById("editMadrasaDocId").value;
+  const shortCode = document.getElementById("editMadrasaShortCode").value.trim().toUpperCase();
+  const instName = document.getElementById("editMadrasaName").value.trim().toUpperCase();
+  const adminName = document.getElementById("editMadrasaAdminName").value.trim().toUpperCase();
+  const phone = document.getElementById("editMadrasaPhone").value.trim();
+  const email = document.getElementById("editMadrasaEmail").value.trim().toLowerCase();
+
+  if (!userId) {
+    window.showToast("Invalid record ID", "error");
+    return;
+  }
+
+  try {
+    // Users കളക്ഷനിൽ ഡാറ്റ അപ്‌ഡേറ്റ് ചെയ്യുന്നു
+    await updateDoc(doc(db, "users", userId), {
+      shortCode: shortCode || "-",
+      institutionName: instName,
+      name: adminName,
+      phone: phone,
+      email: email,
+      updatedAt: serverTimestamp()
+    });
+
+    window.showToast("Madrasa details updated successfully!", "success");
+
+    // Modal ക്ലോസ് ചെയ്യുന്നു
+    const modalEl = document.getElementById("editMadrasaModal");
+    const modal = bootstrap.Modal.getInstance(modalEl);
+    if (modal) modal.hide();
+
+    // Table റീഫ്രഷ് ചെയ്യുന്നു
+    window.loadSuperAdminRequests();
+  } catch (e) {
+    console.error("Error updating madrasa:", e);
+    window.showToast("Error updating details: " + e.message, "error");
+  }
+};
+
+// 3. Table Render ചെയ്യുമ്പോൾ ഈ ഫങ്ഷൻ വിളിക്കുന്ന രീതി:
+window.loadSuperAdminRequests = async () => {
+  const tableBody = document.getElementById("superAdminTableBody");
+  if (!tableBody) return;
+
+  tableBody.innerHTML = `<tr><td colspan="8" class="text-center text-muted">Loading institutions...</td></tr>`;
+
+  try {
+    const q = query(collection(db, "users"), where("role", "==", "admin"));
+    const querySnapshot = await getDocs(q);
+    let html = "";
+
+    if (querySnapshot.empty) {
+      tableBody.innerHTML = `<tr><td colspan="8" class="text-center text-muted">No Madrasa Registrations Found.</td></tr>`;
+      return;
+    }
+
+    querySnapshot.forEach((docSnap) => {
+      const user = docSnap.data();
+      const isPending = user.status === "pending";
+      const shortCode = user.shortCode || "-";
+
+      html += `
+        <tr>
+          <td><span class="badge bg-primary fs-6">${shortCode}</span></td>
+          <td><b>${user.institutionId || '-'}</b></td>
+          <td>${user.institutionName || 'Smart Madrasa'}</td>
+          <td>${user.email || '-'}</td>
+          <td>${user.name || '-'}</td>
+          <td class="text-center">${user.phone || '-'}</td>
+          <td>
+            <span class="badge ${isPending ? 'bg-warning text-dark' : 'bg-success'}">
+              ${isPending ? 'Pending' : 'Active'}
+            </span>
+          </td>
+          <td class="text-center">
+            <div class="d-flex align-items-center justify-content-center gap-1">
+              ${isPending 
+                ? `<button class="btn btn-sm btn-success px-2" onclick="approveMadrasaAdmin('${docSnap.id}')" title="Approve"><i class="fa-solid fa-check"></i></button>`
+                : `<span class="badge bg-light text-dark border me-1">Approved</span>`
+              }
+              <button class="btn btn-sm btn-outline-primary px-2" onclick="editMadrasaDetails('${docSnap.id}', '${(user.institutionName || '').replace(/'/g, "\\'")}', '${(user.name || '').replace(/'/g, "\\'")}', '${user.phone || ''}', '${shortCode}', '${user.email || ''}')" title="Edit Madrasa">
+                <i class="fa-solid fa-pen"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger px-2" onclick="deleteMadrasaAdmin('${docSnap.id}', '${(user.institutionName || 'this institution').replace(/'/g, "\\'")}')" title="Delete Madrasa">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    });
+
+    tableBody.innerHTML = html;
+  } catch (e) {
+    console.error("Error loading super admin data:", e);
+    tableBody.innerHTML = `<tr><td colspan="8" class="text-center text-danger">Error loading data: ${e.message}</td></tr>`;
+  }
+};
