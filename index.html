@@ -553,123 +553,8 @@
         <!-- Content Area -->
         <div class="col-lg-9 col-xl-10">
           
-          <!-- index.html-ൽ superAdminTab കണ്ടെയ്നറിന്റെ ഉള്ളിൽ ചേർക്കുക -->
-<div id="superAdminTab" class="content-tab d-none">
-  <!-- 1. Madrasa Table Area -->
-  <div class="card p-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-shield-halved me-2"></i>Madrasa Master Console</h5>
-      <button class="btn btn-sm btn-outline-success" onclick="loadSuperAdminRequests()"><i class="fa-solid fa-rotate"></i> Reload</button>
-    </div>
-    <div class="table-responsive">
-      <table class="table table-hover table-bordered align-middle">
-        <thead class="table-light">
-          <tr>
-            <th>Short ID</th>
-            <th>Inst. ID</th>
-            <th>Madrasa Name</th>
-            <th>Place / Email</th>
-            <th>Admin Name</th>
-            <th class="text-center">Phone</th>
-            <th>Status</th>
-            <th class="text-center">Actions</th>
-          </tr>
-        </thead>
-        <tbody id="superAdminTableBody"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- 👇 2. Super Admin Master Settings Control Panel (ഇവിടെ വേണം പേസ്റ്റ് ചെയ്യാൻ) 👇 -->
-  <div class="card p-4 border-0 shadow-sm rounded-4 mt-4">
-    <h5 class="fw-bold text-success mb-2">
-      <i class="fa-solid fa-sliders me-2"></i>Institution Feature & Preference Controls
-    </h5>
-    <p class="text-muted small mb-3">താഴെ പറയുന്ന ഡ്രോപ്പ്ഡൗണിൽ നിന്ന് സ്ഥാപനം തിരഞ്ഞെടുത്ത് ഓരോ മദ്രസയ്ക്കുമുള്ള അനുമതികളും ക്രമീകരണങ്ങളും മാറ്റുക.</p>
-
-    <!-- Select Institution Dropdown -->
-    <div class="p-3 bg-light border rounded-3 mb-4">
-      <div class="row align-items-center">
-        <div class="col-md-7">
-          <label class="form-label fw-bold text-dark mb-1">
-            <i class="fa-solid fa-building-columns me-1 text-success"></i> Select Institution (സ്ഥാപനം തിരഞ്ഞെടുക്കുക):
-          </label>
-          <select id="saSelectedInstitutionSelect" class="form-select border-success fw-bold" onchange="loadSelectedInstitutionSettings()">
-            <option value="">-- Loading Approved Institutions... --</option>
-          </select>
-        </div>
-        <div class="col-md-5 mt-2 mt-md-0 text-md-end">
-          <span class="badge bg-success-subtle text-success border border-success px-3 py-2 small">
-            Active Institution ID: <b id="displaySelectedInstId">-</b>
-          </span>
-        </div>
-      </div>
-    </div>
-
-    <div class="row g-4">
-      <!-- Student Sorting Order -->
-      <div class="col-md-6">
-        <div class="p-3 border rounded bg-light">
-          <label class="form-label fw-bold text-dark"><i class="fa-solid fa-arrow-down-a-z me-1"></i> Student Directory Sorting Order</label>
-          <select id="saSettingSortOrder" class="form-select form-select-sm">
-            <option value="REG_NO">Registration Number (Default)</option>
-            <option value="NAME_ASC">Alphabetical (A to Z)</option>
-            <option value="BOYS_FIRST">Boys First, then Girls</option>
-            <option value="GIRLS_FIRST">Girls First, then Boys</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Attendance Permission -->
-      <div class="col-md-6">
-        <div class="p-3 border rounded bg-light">
-          <label class="form-label fw-bold text-dark"><i class="fa-solid fa-calendar-check me-1"></i> Attendance Marking Permission</label>
-          <select id="saSettingAttPermission" class="form-select form-select-sm">
-            <option value="ASSIGNED_ONLY">Assigned Class Teacher Only</option>
-            <option value="ALL_TEACHERS">All Teachers & Staff</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Fee Permission -->
-      <div class="col-md-6">
-        <div class="p-3 border rounded bg-light">
-          <label class="form-label fw-bold text-dark"><i class="fa-solid fa-receipt me-1"></i> Fee Collection Permission</label>
-          <select id="saSettingFeePermission" class="form-select form-select-sm">
-            <option value="ADMIN_ONLY">Only Institution Admin</option>
-            <option value="ADMIN_PRINCIPAL">Admin & Principal</option>
-            <option value="ALL">Admin, Principal & All Teachers</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Feature Toggles -->
-      <div class="col-md-6">
-        <div class="p-3 border rounded bg-light h-100">
-          <label class="form-label fw-bold text-dark mb-2"><i class="fa-solid fa-toggle-on me-1"></i> Feature Controls</label>
-          <div class="form-check form-switch mb-2">
-            <input class="form-check-input" type="checkbox" id="saSettingAllowPhoto" checked>
-            <label class="form-check-label small" for="saSettingAllowPhoto">Allow Institution Photo Upload</label>
-          </div>
-          <div class="form-check form-switch mb-2">
-            <input class="form-check-input" type="checkbox" id="saSettingParentStarPoints" checked>
-            <label class="form-check-label small" for="saSettingParentStarPoints">Show Performance Points in Parent Portal</label>
-          </div>
-          <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" id="saSettingReqManualReceipt">
-            <label class="form-check-label small" for="saSettingReqManualReceipt">Require Manual Receipt Book Number</label>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="mt-4 text-end">
-      <button class="btn btn-success px-4 rounded-3" onclick="saveMasterControlSettings()">
-        <i class="fa-solid fa-save me-1"></i> Save Control Settings for Selected Institution
-      </button>
-    </div>
-  </div>
-</div>
+          <!-- Super Admin Tab Container Placeholder (Loads components/superadmin-tab.html) -->
+          <div id="superAdminTab" class="content-tab d-none"></div>
 
           <div id="instAdminTab" class="content-tab d-none">
             <div class="card p-4">
@@ -725,19 +610,13 @@
 
           <!-- Home Dashboard Tab -->
           <div id="homeDashboardTab" class="content-tab">
-            <!-- 1. TOP: Institution Photo Banner -->
             <div class="card p-3 mb-4 border-0 shadow-sm text-center" id="homeGalleryCard" style="display: none;">
               <h5 class="fw-bold text-success mb-3 text-start"><i class="fa-solid fa-images me-2"></i>Institution Photo</h5>
-              <div class="row g-3 justify-content-center" id="homeGalleryContainer">
-                <!-- Photo loads dynamically via JavaScript -->
-              </div>
+              <div class="row g-3 justify-content-center" id="homeGalleryContainer"></div>
             </div>
 
             <div class="row g-4">
-              <!-- Left Side: Quick Links & Leaderboard -->
               <div class="col-lg-8">
-                
-                <!-- 2. Quick Links Section -->
                 <div class="card p-3 mb-4 border-0 shadow-sm">
                   <h6 class="fw-bold text-success mb-3"><i class="fa-solid fa-bolt me-2"></i>Quick Links</h6>
                   <div class="row g-2">
@@ -768,7 +647,6 @@
                   </div>
                 </div>
 
-                <!-- 3. Leaderboard Section -->
                 <div class="card p-4 mb-4">
                   <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-trophy me-2"></i>Top Performers Leaderboard</h5>
                   <div class="row g-3 text-center" id="homeLeaderboardArea">
@@ -779,7 +657,6 @@
                 </div>
               </div>
 
-              <!-- Right Side: Notifications Panel -->
               <div class="col-lg-4">
                 <div class="card p-4 border-0 shadow-sm mb-4">
                   <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-bullhorn me-2"></i>Notifications</h5>
@@ -795,7 +672,6 @@
               </div>
             </div>
 
-            <!-- Footer Contact Section -->
             <div class="card p-4 border-0 shadow-sm mt-3 bg-white">
               <div class="row">
                 <div class="col-md-6 mb-3 mb-md-0">
@@ -1126,7 +1002,6 @@
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-gears"></i> Institution Settings</h5>
               <div class="alert alert-info small">Manage custom settings and special funds for your institution.</div>
               
-              <!-- സ്ഥാപനത്തിന്റെ ഫോട്ടോ അപ്‌ലോഡ് ചെയ്യുന്ന സെക്ഷൻ (Single Photo) -->
               <div class="mb-4 p-3 border rounded bg-light">
                 <label class="form-label fw-bold"><i class="fa-solid fa-image me-1"></i> Institution Photo & Caption</label>
                 <p class="small text-muted mb-2">സ്ഥാപനത്തിന്റെ പ്രധാന ഫോട്ടോയും അടിക്കുറിപ്പും നൽകുക.</p>
@@ -1142,7 +1017,6 @@
                   </div>
                 </div>
 
-                <!-- അപ്‌ലോഡ് ചെയ്ത ചിത്രത്തിന്റെ പ്രിവ്യൂ -->
                 <div id="instPhotoPreviewArea" class="mb-3 d-none">
                   <small class="text-muted d-block mb-1">Current Saved Photo:</small>
                   <img id="instPhotoPreviewImg" src="" alt="Institution Photo" style="max-height: 120px; border-radius: 8px; border: 1px solid #ccc; padding: 2px;">
@@ -1151,7 +1025,6 @@
                 <button type="button" class="btn btn-success btn-sm px-4" onclick="saveSinglePhotoSetting()"><i class="fa-solid fa-save me-1"></i> Save Photo</button>
               </div>
 
-              <!-- Special Fund Categories Section -->
               <div class="mb-4 p-3 border rounded bg-light">
                 <label class="form-label fw-bold">Special Fund Categories (Comma Separated)</label>
                 <div class="input-group">
@@ -1160,7 +1033,6 @@
                 </div>
               </div>
 
-              <!-- Total Working Days Section -->
               <div class="mb-3 p-3 border rounded bg-light">
                 <label class="form-label fw-bold">Total Working Days (ഇതുവരെയുള്ള ആകെ പ്രവൃത്തി ദിവസങ്ങൾ)</label>
                 <div class="input-group">
@@ -1177,432 +1049,9 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- MODALS SECTION                            -->
+  <!-- MODALS CONTAINER PLACEHOLDER              -->
   <!-- ========================================== -->
-
-  <!-- Staff Profile Modal -->
-  <div class="modal fade" id="staffProfileModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
-    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-      <div class="modal-content border-0 shadow">
-        <div class="modal-header bg-madrassa text-white">
-          <h5 class="modal-title fw-bold" id="staffModalTitle">Staff Profile</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body p-0">
-          <form id="staffProfileForm">
-            <input type="hidden" id="spDocId">
-            <div id="spAuthSection" class="p-3 bg-light border-bottom">
-               <h6 class="fw-bold text-danger mb-2"><i class="fa-solid fa-key me-1"></i> Account Setup (For New Staff)</h6>
-               <div class="row g-2">
-                    <div class="col-md-6"><label class="form-label small">Email Address *</label><input type="email" id="spAuthEmail" class="form-control" oninput="this.value = this.value.toLowerCase()"></div>
-                    <div class="col-md-6">
-                      <label class="form-label small">Password *</label>
-                      <div class="input-group">
-                        <input type="password" id="spAuthPassword" class="form-control" placeholder="Min 6 characters">
-                        <button class="btn btn-outline-secondary password-toggle-btn" type="button" onclick="togglePasswordVisibility('spAuthPassword', this)"><i class="fa-solid fa-eye"></i></button>
-                      </div>
-                    </div>
-               </div>
-            </div>
-            <div class="px-3 pt-3">
-              <ul class="nav nav-tabs" id="staffTabs" role="tablist">
-                <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-personal" type="button">Personal Info</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-contact" type="button">Contact</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-education" type="button">Education</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-employment" type="button">Employment</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-bank" type="button">Bank Details</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-transfer" type="button">Relieving</button></li>
-              </ul>
-              <div class="tab-content p-3 border border-top-0 rounded-bottom mb-3" style="background:#fff;">
-                <div class="tab-pane fade show active" id="tab-personal">
-                  <div class="row g-3">
-                    <div class="col-md-12"><label class="form-label small">Full Name *</label><input type="text" id="spName" class="form-control text-uppercase"></div>
-                    <div class="col-md-4"><label class="form-label small">Gender</label><select id="spGender" class="form-select"><option value="Male">Male</option><option value="Female">Female</option></select></div>
-                    <div class="col-md-4"><label class="form-label small">Date of Birth</label><input type="date" id="spDob" class="form-control"></div>
-                    <div class="col-md-4"><label class="form-label small">Blood Group</label><select id="spBlood" class="form-select"><option value="">Select</option><option value="A+">A+</option><option value="A-">A-</option><option value="B+">B+</option><option value="B-">B-</option><option value="O+">O+</option><option value="O-">O-</option><option value="AB+">AB+</option><option value="AB-">AB-</option></select></div>
-                    <div class="col-md-4"><label class="form-label small">Father's / Spouse's Name</label><input type="text" id="spGuardian" class="form-control text-uppercase"></div>
-                    <div class="col-md-4"><label class="form-label small">Marital Status</label><select id="spMarital" class="form-select"><option value="Single">Single</option><option value="Married">Married</option></select></div>
-                    <div class="col-md-4"><label class="form-label small">Aadhaar Number</label><input type="text" id="spAadhaar" class="form-control"></div>
-                  </div>
-                </div>
-                <div class="tab-pane fade" id="tab-contact">
-                  <div class="row g-3">
-                    <div class="col-md-4"><label class="form-label small">Mobile Number *</label><input type="tel" id="spPhone" class="form-control"></div>
-                    <div class="col-md-4"><label class="form-label small">WhatsApp Number</label><input type="tel" id="spWhatsapp" class="form-control"></div>
-                    <div class="col-md-4"><label class="form-label small">Emergency Contact Number</label><input type="tel" id="spEmergency" class="form-control"></div>
-                    <div class="col-md-12"><label class="form-label small">House Name / Number</label><input type="text" id="spHouse" class="form-control text-uppercase"></div>
-                    <div class="col-md-4"><label class="form-label small">Post Office (PO)</label><input type="text" id="spPo" class="form-control text-uppercase"></div>
-                    <div class="col-md-4"><label class="form-label small">Pincode</label><input type="text" id="spPin" class="form-control"></div>
-                    <div class="col-md-4"><label class="form-label small">District</label><input type="text" id="spDistrict" class="form-control text-uppercase"></div>
-                    <div class="col-md-4"><label class="form-label small">State</label><input type="text" id="spState" class="form-control text-uppercase" value="KERALA"></div>
-                  </div>
-                </div>
-                <div class="tab-pane fade" id="tab-education">
-                  <div class="row g-3">
-                    <div class="col-md-6"><label class="form-label small">Religious Education Qualifications</label><input type="text" id="spRelEdu" class="form-control text-uppercase" placeholder="e.g. Baqavi, Darimi, Faizy"></div>
-                    <div class="col-md-6"><label class="form-label small">General Education Qualifications</label><input type="text" id="spGenEdu" class="form-control text-uppercase" placeholder="e.g. SSLC, B.A, B.Ed"></div>
-                    <div class="col-md-6"><label class="form-label small">Languages Known</label><input type="text" id="spLanguages" class="form-control text-uppercase" placeholder="Malayalam, English, Arabic"></div>
-                    <div class="col-md-6"><label class="form-label small">Key Skills</label><input type="text" id="spSkills" class="form-control text-uppercase"></div>
-                    <div class="col-md-12"><label class="form-label small">Awards & Achievements</label><input type="text" id="spAwards" class="form-control text-uppercase"></div>
-                  </div>
-                </div>
-                <div class="tab-pane fade" id="tab-employment">
-                  <div class="row g-3">
-                    <div class="col-md-4"><label class="form-label small">System Role *</label><select id="spRole" class="form-select"><option value="teacher">Teacher (മുഅല്ലിം)</option><option value="principal">Principal (സദർ)</option></select></div>
-                    <div class="col-md-4"><label class="form-label small">Designation / പദവി</label>
-                      <select id="spDesignationSelect" class="form-select" onchange="toggleCustomDesignation(this.value)">
-                        <option value="സദർ മുഅല്ലിം">സദർ മുഅല്ലിം (Principal)</option>
-                        <option value="വൈസ് സദർ">വൈസ് സദർ (Vice Principal)</option>
-                        <option value="സദർ ഇൻ-ചാർജ്">സദർ ഇൻ-ചാർജ് (In-Charge)</option>
-                        <option value="മുഅല്ലിം" selected>മുഅല്ലിം (Teacher)</option>
-                        <option value="Other">Other (Specify Below)</option>
-                      </select>
-                      <input type="text" id="spDesignationCustom" class="form-control text-uppercase mt-2 d-none" placeholder="Type Designation">
-                    </div>
-                    <div class="col-md-4"><label class="form-label small">Muallim Registration (MSR) No</label><input type="text" id="spMsr" class="form-control text-uppercase"></div>
-                    <div class="col-md-4"><label class="form-label small">Employment Type</label><select id="spEmpType" class="form-select"><option value="Full Time">Full Time</option><option value="Part Time">Part Time</option></select></div>
-                    <div class="col-md-4"><label class="form-label small">Teaching Experience (Years)</label><input type="number" id="spExp" class="form-control"></div>
-                    <div class="col-md-4"><label class="form-label small">Date of Joining</label><input type="date" id="spDoj" class="form-control"></div>
-                    <div class="col-md-12" id="spClassesDiv">
-                      <label class="form-label small">Assigned Classes (Select Multiple)</label>
-                      <div class="d-flex flex-wrap gap-2">
-                        <div class="form-check"><input type="checkbox" class="form-check-input sp-class-cb" value="1" id="spc1"><label class="form-check-label" for="spc1">Class 1</label></div>
-                        <div class="form-check"><input type="checkbox" class="form-check-input sp-class-cb" value="2" id="spc2"><label class="form-check-label" for="spc2">Class 2</label></div>
-                        <div class="form-check"><input type="checkbox" class="form-check-input sp-class-cb" value="3" id="spc3"><label class="form-check-label" for="spc3">Class 3</label></div>
-                        <div class="form-check"><input type="checkbox" class="form-check-input sp-class-cb" value="4" id="spc4"><label class="form-check-label" for="spc4">Class 4</label></div>
-                        <div class="form-check"><input type="checkbox" class="form-check-input sp-class-cb" value="5" id="spc5"><label class="form-check-label" for="spc5">Class 5</label></div>
-                        <div class="form-check"><input type="checkbox" class="form-check-input sp-class-cb" value="6" id="spc6"><label class="form-check-label" for="spc6">Class 6</label></div>
-                        <div class="form-check"><input type="checkbox" class="form-check-input sp-class-cb" value="7" id="spc7"><label class="form-check-label" for="spc7">Class 7</label></div>
-                        <div class="form-check"><input type="checkbox" class="form-check-input sp-class-cb" value="8" id="spc8"><label class="form-check-label" for="spc8">Class 8</label></div>
-                        <div class="form-check"><input type="checkbox" class="form-check-input sp-class-cb" value="9" id="spc9"><label class="form-check-label" for="spc9">Class 9</label></div>
-                        <div class="form-check"><input type="checkbox" class="form-check-input sp-class-cb" value="10" id="spc10"><label class="form-check-label" for="spc10">Class 10</label></div>
-                        <div class="form-check"><input type="checkbox" class="form-check-input sp-class-cb" value="11" id="spc11"><label class="form-check-label" for="spc11">Class 11</label></div>
-                        <div class="form-check"><input type="checkbox" class="form-check-input sp-class-cb" value="12" id="spc12"><label class="form-check-label" for="spc12">Class 12</label></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="tab-pane fade" id="tab-bank">
-                  <div class="row g-3">
-                    <div class="col-md-6"><label class="form-label small">Account Holder Name</label><input type="text" id="spAccName" class="form-control text-uppercase"></div>
-                    <div class="col-md-6"><label class="form-label small">Account Number</label><input type="text" id="spAccNo" class="form-control"></div>
-                    <div class="col-md-4"><label class="form-label small">IFSC Code</label><input type="text" id="spIfsc" class="form-control text-uppercase"></div>
-                    <div class="col-md-4"><label class="form-label small">Bank Name</label><input type="text" id="spBank" class="form-control text-uppercase"></div>
-                    <div class="col-md-4"><label class="form-label small">Branch</label><input type="text" id="spBranch" class="form-control text-uppercase"></div>
-                  </div>
-                </div>
-                <div class="tab-pane fade" id="tab-transfer">
-                  <div class="alert alert-secondary small py-2 mb-3">Fill this section only if the staff is transferred or leaving the institution.</div>
-                  <div class="row g-3">
-                    <div class="col-md-6"><label class="form-label small">Transferred From</label><input type="text" id="spTransFrom" class="form-control text-uppercase"></div>
-                    <div class="col-md-6"><label class="form-label small">Transferred To</label><input type="text" id="spTransTo" class="form-control text-uppercase"></div>
-                    <div class="col-md-4"><label class="form-label small">Date of Leaving</label><input type="date" id="spDol" class="form-control"></div>
-                    <div class="col-md-8"><label class="form-label small">Reason for Leaving</label><input type="text" id="spReason" class="form-control text-uppercase"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </form>
-        </div>
-        <div class="modal-footer bg-light">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-success" onclick="saveStaffProfile(event)"><i class="fa-solid fa-save me-1"></i> Save Profile Details</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Student Profile Modal -->
-  <div class="modal fade" id="studentProfileModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
-    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-      <div class="modal-content border-0 shadow">
-        <div class="modal-header bg-madrassa text-white">
-          <h5 class="modal-title fw-bold" id="stuModalTitle">Student Profile</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body p-0">
-          <form id="studentProfileForm">
-            <input type="hidden" id="stuDocId">
-            <div class="px-3 pt-3">
-              <ul class="nav nav-tabs" id="studentTabs" role="tablist">
-                <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-stu-personal" type="button">Personal Info</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-stu-academic" type="button">Academic</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-stu-family" type="button">Family Info</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-stu-address" type="button">Address</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-stu-transfer" type="button">Transfer/TC</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-stu-other" type="button">Other</button></li>
-              </ul>
-              <div class="tab-content p-3 border border-top-0 rounded-bottom mb-3" style="background:#fff;">
-                <div class="tab-pane fade show active" id="tab-stu-personal">
-                  <div class="row g-3">
-                    <div class="col-md-4"><label class="form-label small">Reg No. *</label><input type="number" id="stuRegNo" class="form-control fw-bold"></div>
-                    <div class="col-md-4"><label class="form-label small">ID No.</label><input type="text" id="stuIdNo" class="form-control text-uppercase"></div>
-                    <div class="col-md-4"><label class="form-label small">Aadhaar Number</label><input type="text" id="stuAadhaar" class="form-control"></div>
-                    <div class="col-md-12"><label class="form-label small">Student Name *</label><input type="text" id="stuName" class="form-control text-uppercase"></div>
-                    <div class="col-md-4"><label class="form-label small">Gender</label><select id="stuGender" class="form-select"><option value="Male">Male</option><option value="Female">Female</option></select></div>
-                    <div class="col-md-4"><label class="form-label small">Date of Birth</label><input type="date" id="stuDob" class="form-control"></div>
-                    <div class="col-md-4"><label class="form-label small">Blood Group</label><select id="stuBlood" class="form-select"><option value="">Select</option><option value="A+">A+</option><option value="A-">A-</option><option value="B+">B+</option><option value="B-">B-</option><option value="O+">O+</option><option value="O-">O-</option><option value="AB+">AB+</option><option value="AB-">AB-</option></select></div>
-                  </div>
-                </div>
-                <div class="tab-pane fade" id="tab-stu-academic">
-                  <div class="row g-3">
-                    <div class="col-md-6">
-                      <label class="form-label small">Current Class *</label>
-                      <select id="stuCurrentClass" class="form-select">
-                        <option value="1">Class 1</option><option value="2">Class 2</option><option value="3">Class 3</option>
-                        <option value="4">Class 4</option><option value="5">Class 5</option><option value="6">Class 6</option>
-                        <option value="7">Class 7</option><option value="8">Class 8</option><option value="9">Class 9</option>
-                        <option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option>
-                      </select>
-                    </div>
-                    <div class="col-md-6"><label class="form-label small">Joined Class</label><input type="text" id="stuJoinedClass" class="form-control text-uppercase" placeholder="e.g. Class 1"></div>
-                    <div class="col-md-4"><label class="form-label small">Date of Joining</label><input type="date" id="stuDoj" class="form-control"></div>
-                    <div class="col-md-4"><label class="form-label small">Student's Presence</label><input type="text" id="stuPresence" class="form-control text-uppercase" placeholder="e.g. Regular"></div>
-                    <div class="col-md-4"><label class="form-label small fw-bold text-success">Monthly Fee (₹)</label><input type="number" id="stuMonthlyFee" class="form-control border-success" placeholder="e.g. 200"></div>
-                  </div>
-                </div>
-                <div class="tab-pane fade" id="tab-stu-family">
-                  <div class="row g-3">
-                    <div class="col-md-4"><label class="form-label small">Father's Name *</label><input type="text" id="stuFatherName" class="form-control text-uppercase"></div>
-                    <div class="col-md-4"><label class="form-label small">Mother's Name</label><input type="text" id="stuMotherName" class="form-control text-uppercase"></div>
-                    <div class="col-md-4"><label class="form-label small">Guardian's Name</label><input type="text" id="stuGuardianName" class="form-control text-uppercase"></div>
-                    <div class="col-md-4"><label class="form-label small">Relationship</label><input type="text" id="stuRelation" class="form-control text-uppercase"></div>
-                    <div class="col-md-4"><label class="form-label small">Occupation</label><input type="text" id="stuGuardianJob" class="form-control text-uppercase"></div>
-                    <div class="col-md-4"><label class="form-label small">Mobile Number *</label><input type="tel" id="stuPhone" class="form-control"></div>
-                    <div class="col-md-4"><label class="form-label small">Emergency / WhatsApp</label><input type="tel" id="stuEmergency" class="form-control"></div>
-                  </div>
-                </div>
-                <div class="tab-pane fade" id="tab-stu-address">
-                  <div class="row g-3">
-                    <div class="col-md-12"><label class="form-label small">House Name / Number *</label><input type="text" id="stuHouse" class="form-control text-uppercase"></div>
-                    <div class="col-md-6"><label class="form-label small">Place *</label><input type="text" id="stuPlace" class="form-control text-uppercase"></div>
-                    <div class="col-md-6"><label class="form-label small">Post Office (PO)</label><input type="text" id="stuPo" class="form-control text-uppercase"></div>
-                    <div class="col-md-4"><label class="form-label small">Pincode</label><input type="text" id="stuPin" class="form-control"></div>
-                    <div class="col-md-4"><label class="form-label small">District</label><input type="text" id="stuDistrict" class="form-control text-uppercase"></div>
-                    <div class="col-md-4"><label class="form-label small">State</label><input type="text" id="stuState" class="form-control text-uppercase" value="KERALA"></div>
-                  </div>
-                </div>
-                <div class="tab-pane fade" id="tab-stu-transfer">
-                  <div class="alert alert-secondary small py-2 mb-3">Fill if student is leaving or transferring.</div>
-                  <div class="row g-3">
-                    <div class="col-md-6"><label class="form-label small">Transferred To</label><input type="text" id="stuTransTo" class="form-control text-uppercase"></div>
-                    <div class="col-md-6"><label class="form-label small">Reason</label><input type="text" id="stuReason" class="form-control text-uppercase"></div>
-                    <div class="col-md-4"><label class="form-label small">Date of Departure</label><input type="date" id="stuDol" class="form-control"></div>
-                    <div class="col-md-4"><label class="form-label small">TC Issued?</label><select id="stuTcIssued" class="form-select"><option value="No">No</option><option value="Yes">Yes</option></select></div>
-                    <div class="col-md-4"><label class="form-label small">TC Details</label><input type="text" id="stuTcDetails" class="form-control text-uppercase"></div>
-                  </div>
-                </div>
-                <div class="tab-pane fade" id="tab-stu-other">
-                  <div class="row g-3">
-                    <div class="col-md-12"><label class="form-label small">Identification Marks</label><textarea id="stuMarks" class="form-control text-uppercase" rows="2"></textarea></div>
-                    <div class="col-md-12"><label class="form-label small">Special Information</label><textarea id="stuMethods" class="form-control text-uppercase" rows="2"></textarea></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </form>
-        </div>
-        <div class="modal-footer bg-light">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-success" onclick="saveStudentProfile(event)"><i class="fa-solid fa-save me-1"></i> Save Student Details</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Custom Task Modal -->
-  <div class="modal fade" id="customTaskModal" tabindex="-1" aria-labelledby="customTaskModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <form id="customTaskForm" onsubmit="saveCustomTask(event)">
-          <div class="modal-header bg-success text-white">
-            <h5 class="modal-title" id="customTaskModalLabel"><i class="fa-solid fa-star me-2"></i>Add Custom Task</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <div class="mb-3">
-              <label class="form-label fw-bold">Task Name</label>
-              <input type="text" id="customTaskName" class="form-control text-uppercase" placeholder="e.g. QURAN MEMORIZATION" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label fw-bold">Points (Pts)</label>
-              <input type="number" id="customTaskPoints" class="form-control" placeholder="e.g. 10" required>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-success px-4">Save Task</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <!-- Committee Member Modal -->
-  <div class="modal fade" id="committeeModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <form id="committeeForm" onsubmit="saveCommitteeMember(event)">
-          <div class="modal-header bg-success text-white">
-            <h5 class="modal-title fw-bold">Add Committee Member</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-            <div class="mb-3">
-              <label class="form-label small fw-bold">Full Name *</label>
-              <input type="text" id="commName" class="form-control text-uppercase" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label small fw-bold">Designation (പദവി) *</label>
-              <input type="text" id="commDesignation" class="form-control text-uppercase" placeholder="e.g. President, Secretary" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label small fw-bold">Phone Number *</label>
-              <input type="tel" id="commPhone" class="form-control" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label small fw-bold">Upload Photo (ഫോട്ടോ തിരഞ്ഞെടുക്കുക)</label>
-              <input type="file" id="commPhotoFile" class="form-control" accept="image/*">
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-success">Save Member</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <!-- Fee Payment Modal -->
-  <div class="modal fade" id="feePaymentModal" tabindex="-1" aria-labelledby="feePaymentModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <form id="feePaymentForm" onsubmit="saveFeePayment(event)">
-          <div class="modal-header bg-success text-white">
-            <h5 class="modal-title" id="feePaymentModalLabel"><i class="fa-solid fa-indian-rupee-sign me-2"></i>Collect Fee</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <input type="hidden" id="payStudentId">
-            <input type="hidden" id="payStudentReg">
-            <input type="hidden" id="payStudentName">
-            <input type="hidden" id="payStudentClass">
-            <input type="hidden" id="payStudentPhone">
-            <input type="hidden" id="payBaseFee">
-
-            <div class="mb-3">
-              <label class="form-label fw-bold text-muted">Student Name</label>
-              <div id="payStudentNameDisplay" class="form-control bg-light fw-bold text-dark"></div>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label fw-bold">Academic Year</label>
-              <select id="payAcademicYear" class="form-select">
-                <option value="2026-2027" selected>2026-2027</option>
-                <option value="2025-2026">2025-2026</option>
-              </select>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label fw-bold">Fee Category</label>
-              <select id="pagesFeeCategory" class="form-select" onchange="toggleFeeCategoryOptions()">
-                <option value="Monthly Fee">Monthly Fee</option>
-                <option value="Special Fee / Fund">Special Fee / Fund</option>
-                <option value="Admission Fee">Admission Fee</option>
-                <option value="Exam Fee">Exam Fee</option>
-              </select>
-            </div>
-
-            <div class="mb-3" id="monthSelectionDiv">
-              <label class="form-label fw-bold">Select Months</label>
-              <div class="d-flex flex-wrap gap-2 p-2 border rounded bg-light">
-                <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="APR" id="m_apr" checked onchange="calculateFeeAmount()"><label class="form-check-label" for="m_apr">APR</label></div>
-                <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="MAY" id="m_may" checked onchange="calculateFeeAmount()"><label class="form-check-label" for="m_may">MAY</label></div>
-                <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="JUN" id="m_jun" checked onchange="calculateFeeAmount()"><label class="form-check-label" for="m_jun">JUN</label></div>
-                <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="JUL" id="m_jul" checked onchange="calculateFeeAmount()"><label class="form-check-label" for="m_jul">JUL</label></div>
-                <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="AUG" id="m_aug" checked onchange="calculateFeeAmount()"><label class="form-check-label" for="m_aug">AUG</label></div>
-                <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="SEP" id="m_sep" checked onchange="calculateFeeAmount()"><label class="form-check-label" for="m_sep">SEP</label></div>
-                <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="OCT" id="m_oct" checked onchange="calculateFeeAmount()"><label class="form-check-label" for="m_oct">OCT</label></div>
-                <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="NOV" id="m_nov" checked onchange="calculateFeeAmount()"><label class="form-check-label" for="m_nov">NOV</label></div>
-                <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="DEC" id="m_dec" checked onchange="calculateFeeAmount()"><label class="form-check-label" for="m_dec">DEC</label></div>
-                <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="JAN" id="m_jan" checked onchange="calculateFeeAmount()"><label class="form-check-label" for="m_jan">JAN</label></div>
-                <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="FEB" id="m_feb" checked onchange="calculateFeeAmount()"><label class="form-check-label" for="m_feb">FEB</label></div>
-                <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="MAR" id="m_mar" checked onchange="calculateFeeAmount()"><label class="form-check-label" for="m_mar">MAR</label></div>
-              </div>
-            </div>
-
-            <div class="mb-3 d-none" id="specialFeeTypeDiv">
-              <label class="form-label fw-bold">Select Fund Type</label>
-              <select id="paySpecialFeeSelect" class="form-select"></select>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label fw-bold">Total Amount (₹)</label>
-              <input type="number" id="payAmount" class="form-control fw-bold text-success fs-5" readonly>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label fw-bold">Manual Receipt No (Optional)</label>
-              <input type="text" id="payManualReceiptInput" class="form-control" placeholder="Enter manual receipt number if any">
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-success px-4"><i class="fa-solid fa-check me-1"></i> Save & Print Receipt</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <!-- Edit Madrasa Modal Pop-up (Placed cleanly before </body> to fix z-index issues) -->
-  <div class="modal fade" id="editMadrasaModal" tabindex="-1" aria-labelledby="editMadrasaModalLabel" aria-hidden="true" style="z-index: 1060;">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content border-0 shadow-lg rounded-4">
-        <div class="modal-header bg-success text-white rounded-top-4">
-          <h5 class="modal-title fw-bold" id="editMadrasaModalLabel">
-            <i class="fa-solid fa-pen-to-square me-2"></i>Edit Madrasa Details
-          </h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body p-4">
-          <input type="hidden" id="editMadrasaDocId">
-          
-          <div class="mb-3">
-            <label class="form-label fw-semibold text-secondary">Short Code / ID</label>
-            <input type="text" class="form-control" id="editMadrasaShortCode" placeholder="e.g. MD01">
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label fw-semibold text-secondary">Madrasa Name</label>
-            <input type="text" class="form-control" id="editMadrasaName" placeholder="Madrasa Name">
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label fw-semibold text-secondary">Admin Name</label>
-            <input type="text" class="form-control" id="editMadrasaAdminName" placeholder="Admin Name">
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label fw-semibold text-secondary">Phone Number</label>
-            <input type="text" class="form-control" id="editMadrasaPhone" placeholder="Phone Number">
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label fw-semibold text-secondary">Email Address</label>
-            <input type="email" class="form-control" id="editMadrasaEmail" placeholder="Email Address">
-          </div>
-        </div>
-        <div class="modal-footer bg-light border-0 rounded-bottom-4">
-          <button type="button" class="btn btn-secondary px-4 rounded-3" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-success px-4 rounded-3" onclick="window.saveEditedMadrasaDetails()">
-            <i class="fa-solid fa-check me-1"></i> Save Changes
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+  <div id="modalsContainer"></div>
 
   <!-- PWA Install Floating Button -->
   <div id="pwaInstallContainer" class="d-none position-fixed bottom-0 end-0 p-3" style="z-index: 9999;">
@@ -1611,8 +1060,27 @@
     </button>
   </div>
 
-  <!-- SCRIPTS -->
+  <!-- ========================================== -->
+  <!-- DYNAMIC COMPONENT LOADER & SCRIPTS        -->
+  <!-- ========================================== -->
   <script>
+    // Components (superadmin-tab.html & modals.html) load cheyyunna script
+    async function loadComponent(elementId, filePath) {
+      try {
+        const response = await fetch(filePath);
+        if (response.ok) {
+          document.getElementById(elementId).innerHTML = await response.text();
+        }
+      } catch (err) {
+        console.error(`Error loading ${filePath}:`, err);
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadComponent('superAdminTab', 'components/superadmin-tab.html');
+      loadComponent('modalsContainer', 'components/modals.html');
+    });
+
     let deferredPrompt;
     const installContainer = document.getElementById('pwaInstallContainer');
     const installButton = document.getElementById('btnInstallApp');
@@ -1652,76 +1120,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script type="module" src="app.js?v=2"></script>
-  <!-- Super Admin Master Settings Control Panel -->
-<div class="card p-4 border-0 shadow-sm rounded-4 mt-4">
-  <h5 class="fw-bold text-success mb-3">
-    <i class="fa-solid fa-sliders me-2"></i>Institution Feature & Preference Controls
-  </h5>
-  <p class="text-muted small mb-4">തെരഞ്ഞെടുത്ത സ്ഥാപനത്തിന് നൽകേണ്ട അനുമതികളും (Permissions) ലിസ്റ്റ് ഓർഡറുകളും ഇവിടെ ക്രമീകരിക്കാം.</p>
-
-  <div class="row g-4">
-    <!-- Student Sorting Order -->
-    <div class="col-md-6">
-      <div class="p-3 border rounded bg-light">
-        <label class="form-label fw-bold text-dark"><i class="fa-solid fa-arrow-down-a-z me-1"></i> Student Directory Sorting Order</label>
-        <select id="saSettingSortOrder" class="form-select form-select-sm">
-          <option value="REG_NO">Registration Number (Default)</option>
-          <option value="NAME_ASC">Alphabetical (A to Z)</option>
-          <option value="BOYS_FIRST">Boys First, then Girls</option>
-          <option value="GIRLS_FIRST">Girls First, then Boys</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Attendance Permission -->
-    <div class="col-md-6">
-      <div class="p-3 border rounded bg-light">
-        <label class="form-label fw-bold text-dark"><i class="fa-solid fa-calendar-check me-1"></i> Attendance Marking Permission</label>
-        <select id="saSettingAttPermission" class="form-select form-select-sm">
-          <option value="ASSIGNED_ONLY">Assigned Class Teacher Only</option>
-          <option value="ALL_TEACHERS">All Teachers & Staff</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Fee Permission -->
-    <div class="col-md-6">
-      <div class="p-3 border rounded bg-light">
-        <label class="form-label fw-bold text-dark"><i class="fa-solid fa-receipt me-1"></i> Fee Collection Permission</label>
-        <select id="saSettingFeePermission" class="form-select form-select-sm">
-          <option value="ADMIN_ONLY">Only Institution Admin</option>
-          <option value="ADMIN_PRINCIPAL">Admin & Principal</option>
-          <option value="ALL">Admin, Principal & All Teachers</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Feature Toggles -->
-    <div class="col-md-6">
-      <div class="p-3 border rounded bg-light h-100">
-        <label class="form-label fw-bold text-dark mb-2"><i class="fa-solid fa-toggle-on me-1"></i> Feature Controls</label>
-        <div class="form-check form-switch mb-2">
-          <input class="form-check-input" type="checkbox" id="saSettingAllowPhoto" checked>
-          <label class="form-check-label small" for="saSettingAllowPhoto">Allow Institution Photo Upload</label>
-        </div>
-        <div class="form-check form-switch mb-2">
-          <input class="form-check-input" type="checkbox" id="saSettingParentStarPoints" checked>
-          <label class="form-check-label small" for="saSettingParentStarPoints">Show Performance Points in Parent Portal</label>
-        </div>
-        <div class="form-check form-switch">
-          <input class="form-check-input" type="checkbox" id="saSettingReqManualReceipt">
-          <label class="form-check-label small" for="saSettingReqManualReceipt">Require Manual Receipt Book Number</label>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="mt-4 text-end">
-    <button class="btn btn-success px-4 rounded-3" onclick="saveMasterControlSettings()">
-      <i class="fa-solid fa-save me-1"></i> Save Control Settings
-    </button>
-  </div>
-</div>
+  <script type="module" src="superadmin.js?v=1"></script>
 
 </body>
 </html>
