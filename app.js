@@ -681,3 +681,46 @@ window.viewInstitution = async function(instDocId) {
     window.showToast("Error loading details: " + error.message, "error");
   }
 };
+// മദ്രസ അഡ്മിൻ എഡിറ്റ് ചെയ്യാനുള്ള ഫങ്ഷൻ
+window.editMadrasaDetails = async (userId, currentInstName, currentAdminName, currentPhone) => {
+  const newInstName = prompt("Edit Madrasa Name:", currentInstName);
+  if (newInstName === null) return; // Cancel ചെയ്തു
+
+  const newAdminName = prompt("Edit Admin Name:", currentAdminName);
+  if (newAdminName === null) return;
+
+  const newPhone = prompt("Edit Phone Number:", currentPhone);
+  if (newPhone === null) return;
+
+  try {
+    // Users കളക്ഷനിൽ അപ്ഡേറ്റ് ചെയ്യുന്നു
+    await updateDoc(doc(db, "users", userId), {
+      institutionName: newInstName.trim().toUpperCase(),
+      name: newAdminName.trim().toUpperCase(),
+      phone: newPhone.trim(),
+      updatedAt: serverTimestamp()
+    });
+
+    window.showToast("Madrasa details updated successfully!", "success");
+    window.loadSuperAdminRequests(); // ലിസ്റ്റ് റീഫ്രഷ് ചെയ്യുന്നു
+  } catch (e) {
+    console.error("Error updating madrasa:", e);
+    window.showToast("Error updating details: " + e.message, "error");
+  }
+};
+
+// മദ്രസ അക്കൗണ്ട് ഡിലീറ്റ് ചെയ്യാനുള്ള ഫങ്ഷൻ
+window.deleteMadrasaAdmin = async (userId, instName) => {
+  if (!confirm(`Are you sure you want to delete ${instName}? This action cannot be undone.`)) {
+    return;
+  }
+
+  try {
+    await deleteDoc(doc(db, "users", userId));
+    window.showToast("Madrasa account removed successfully!", "success");
+    window.loadSuperAdminRequests(); // ലിസ്റ്റ് റീഫ്രഷ് ചെയ്യുന്നു
+  } catch (e) {
+    console.error("Error deleting madrasa:", e);
+    window.showToast("Error deleting account: " + e.message, "error");
+  }
+};
