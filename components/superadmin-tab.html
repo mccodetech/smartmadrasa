@@ -1,0 +1,132 @@
+<!-- 1. Madrasa Master Console Table Section -->
+<div class="card p-4 mb-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="fw-bold text-success m-0">
+      <i class="fa-solid fa-shield-halved me-2"></i>Madrasa Master Console
+    </h5>
+    <button class="btn btn-sm btn-outline-success" onclick="window.loadSuperAdminRequests()">
+      <i class="fa-solid fa-rotate"></i> Reload
+    </button>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover table-bordered align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Short ID</th>
+          <th>Inst. ID</th>
+          <th>Madrasa Name</th>
+          <th>Place / Email</th>
+          <th>Admin Name</th>
+          <th class="text-center">Phone</th>
+          <th>Status</th>
+          <th class="text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="superAdminTableBody">
+        <tr>
+          <td colspan="8" class="text-center text-muted">Loading institutions...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 2. Institution Feature & Preference Controls Section -->
+<div class="card p-4 border-0 shadow-sm rounded-4">
+  <h5 class="fw-bold text-success mb-2">
+    <i class="fa-solid fa-sliders me-2"></i>Institution Feature & Preference Controls
+  </h5>
+  <p class="text-muted small mb-3">
+    താഴെ പറയുന്ന ഡ്രോപ്പ്ഡൗണിൽ നിന്ന് സ്ഥാപനം തിരഞ്ഞെടുത്ത് ഓരോ മദ്രസയ്ക്കുമുള്ള അനുമതികളും ക്രമീകരണങ്ങളും മാറ്റുക.
+  </p>
+
+  <!-- Select Institution Dropdown -->
+  <div class="p-3 bg-light border rounded-3 mb-4">
+    <div class="row align-items-center">
+      <div class="col-md-7">
+        <label class="form-label fw-bold text-dark mb-1">
+          <i class="fa-solid fa-building-columns me-1 text-success"></i> Select Institution (സ്ഥാപനം തിരഞ്ഞെടുക്കുക):
+        </label>
+        <select id="saSelectedInstitutionSelect" class="form-select border-success fw-bold" onchange="window.loadSelectedInstitutionSettings()">
+          <option value="">-- Loading Approved Institutions... --</option>
+        </select>
+      </div>
+      <div class="col-md-5 mt-2 mt-md-0 text-md-end">
+        <span class="badge bg-success-subtle text-success border border-success px-3 py-2 small">
+          Active Institution ID: <b id="displaySelectedInstId">-</b>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Student Sorting Order Controls -->
+    <div class="col-md-6">
+      <div class="p-3 border rounded bg-light">
+        <label class="form-label fw-bold text-dark">
+          <i class="fa-solid fa-arrow-down-a-z me-1"></i> Student Directory Sorting Order
+        </label>
+        <select id="saSettingSortOrder" class="form-select form-select-sm">
+          <option value="REG_NO">Registration Number (Default)</option>
+          <option value="NAME_ASC">Alphabetical (A to Z)</option>
+          <option value="BOYS_FIRST">Boys First, then Girls</option>
+          <option value="GIRLS_FIRST">Girls First, then Boys</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Attendance Permission Controls -->
+    <div class="col-md-6">
+      <div class="p-3 border rounded bg-light">
+        <label class="form-label fw-bold text-dark">
+          <i class="fa-solid fa-calendar-check me-1"></i> Attendance Marking Permission
+        </label>
+        <select id="saSettingAttPermission" class="form-select form-select-sm">
+          <option value="ASSIGNED_ONLY">Assigned Class Teacher Only</option>
+          <option value="ALL_TEACHERS">All Teachers & Staff</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Fee Permission Controls -->
+    <div class="col-md-6">
+      <div class="p-3 border rounded bg-light">
+        <label class="form-label fw-bold text-dark">
+          <i class="fa-solid fa-receipt me-1"></i> Fee Collection Permission
+        </label>
+        <select id="saSettingFeePermission" class="form-select form-select-sm">
+          <option value="ADMIN_ONLY">Only Institution Admin</option>
+          <option value="ADMIN_PRINCIPAL">Admin & Principal</option>
+          <option value="ALL">Admin, Principal & All Teachers</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Feature Toggles -->
+    <div class="col-md-6">
+      <div class="p-3 border rounded bg-light h-100">
+        <label class="form-label fw-bold text-dark mb-2">
+          <i class="fa-solid fa-toggle-on me-1"></i> Feature Controls
+        </label>
+        <div class="form-check form-switch mb-2">
+          <input class="form-check-input" type="checkbox" id="saSettingAllowPhoto" checked>
+          <label class="form-check-label small" for="saSettingAllowPhoto">Allow Institution Photo Upload</label>
+        </div>
+        <div class="form-check form-switch mb-2">
+          <input class="form-check-input" type="checkbox" id="saSettingParentStarPoints" checked>
+          <label class="form-check-label small" for="saSettingParentStarPoints">Show Performance Points in Parent Portal</label>
+        </div>
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" id="saSettingReqManualReceipt">
+          <label class="form-check-label small" for="saSettingReqManualReceipt">Require Manual Receipt Book Number</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-4 text-end">
+    <button class="btn btn-success px-4 rounded-3" onclick="window.saveMasterControlSettings()">
+      <i class="fa-solid fa-save me-1"></i> Save Control Settings for Selected Institution
+    </button>
+  </div>
+</div>
