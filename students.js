@@ -137,46 +137,29 @@ window.loadStudentsByClass = async (forceRefresh = false) => {
       localStudentsCache = [];
       snap.forEach(d => localStudentsCache.push({ id: d.id, ...d.data() }));
 
-      // ==========================================
-      // DYNAMIC SORTING LOGIC BASED ON SUPER ADMIN SETTINGS
-      // ==========================================
-      if (window.sysSortOrder === "NAME_ASC") {
-        localStudentsCache.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-      } else if (window.sysSortOrder === "BOYS_FIRST") {
-        localStudentsCache.sort((a, b) => {
-          const gA = (a.gender || '').toLowerCase();
-          const gB = (b.gender || '').toLowerCase();
-          if (gA === 'male' && gB !== 'male') return -1;
-          if (gA !== 'male' && gB === 'male') return 1;
-          return (Number(a.regNo) || 0) - (Number(b.regNo) || 0);
-        });
-      } else if (window.sysSortOrder === "GIRLS_FIRST") {
-        localStudentsCache.sort((a, b) => {
-          const gA = (a.gender || '').toLowerCase();
-          const gB = (b.gender || '').toLowerCase();
-          if (gA === 'female' && gB !== 'female') return -1;
-          if (gA !== 'female' && gB === 'female') return 1;
-          return (Number(a.regNo) || 0) - (Number(b.regNo) || 0);
-        });
-      } else {
-        // Default Reg No Order
-        localStudentsCache.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
-      }
-    }
-
-    // ക്ലാസ് ഫിൽട്ടറിങ് ലോക്കൽ ക്യാഷിൽ നിന്ന്
-    let filtered = localStudentsCache;
-    if (selectedClass !== "ALL") {
-      filtered = localStudentsCache.filter(s => String(s.currentClass) === String(selectedClass.replace(/Class\s*/i, "").trim()));
-    }
-
-    currentPage = 1;
-    renderPaginatedTable(filtered);
-  } catch (err) {
-    console.error("Error loading students:", err);
-    window.showToast("Error loading students: " + err.message, "error");
-  }
-};
+// Dynamic Sorting based on Super Admin Settings
+if (window.sysSortOrder === "NAME_ASC") {
+  localStudentsCache.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+} else if (window.sysSortOrder === "BOYS_FIRST") {
+  localStudentsCache.sort((a, b) => {
+    const gA = (a.gender || '').toLowerCase();
+    const gB = (b.gender || '').toLowerCase();
+    if (gA === 'male' && gB !== 'male') return -1;
+    if (gA !== 'male' && gB === 'male') return 1;
+    return (Number(a.regNo) || 0) - (Number(b.regNo) || 0);
+  });
+} else if (window.sysSortOrder === "GIRLS_FIRST") {
+  localStudentsCache.sort((a, b) => {
+    const gA = (a.gender || '').toLowerCase();
+    const gB = (b.gender || '').toLowerCase();
+    if (gA === 'female' && gB !== 'female') return -1;
+    if (gA !== 'female' && gB === 'female') return 1;
+    return (Number(a.regNo) || 0) - (Number(b.regNo) || 0);
+  });
+} else {
+  // Default Reg No Order
+  localStudentsCache.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
+}
 
 function renderPaginatedTable(dataArray = localStudentsCache) {
   const tbody = document.getElementById("studentsTableBody");
