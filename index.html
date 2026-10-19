@@ -1560,6 +1560,76 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script type="module" src="app.js?v=2"></script>
+  <!-- Super Admin Master Settings Control Panel -->
+<div class="card p-4 border-0 shadow-sm rounded-4 mt-4">
+  <h5 class="fw-bold text-success mb-3">
+    <i class="fa-solid fa-sliders me-2"></i>Institution Feature & Preference Controls
+  </h5>
+  <p class="text-muted small mb-4">തെരഞ്ഞെടുത്ത സ്ഥാപനത്തിന് നൽകേണ്ട അനുമതികളും (Permissions) ലിസ്റ്റ് ഓർഡറുകളും ഇവിടെ ക്രമീകരിക്കാം.</p>
+
+  <div class="row g-4">
+    <!-- Student Sorting Order -->
+    <div class="col-md-6">
+      <div class="p-3 border rounded bg-light">
+        <label class="form-label fw-bold text-dark"><i class="fa-solid fa-arrow-down-a-z me-1"></i> Student Directory Sorting Order</label>
+        <select id="saSettingSortOrder" class="form-select form-select-sm">
+          <option value="REG_NO">Registration Number (Default)</option>
+          <option value="NAME_ASC">Alphabetical (A to Z)</option>
+          <option value="BOYS_FIRST">Boys First, then Girls</option>
+          <option value="GIRLS_FIRST">Girls First, then Boys</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Attendance Permission -->
+    <div class="col-md-6">
+      <div class="p-3 border rounded bg-light">
+        <label class="form-label fw-bold text-dark"><i class="fa-solid fa-calendar-check me-1"></i> Attendance Marking Permission</label>
+        <select id="saSettingAttPermission" class="form-select form-select-sm">
+          <option value="ASSIGNED_ONLY">Assigned Class Teacher Only</option>
+          <option value="ALL_TEACHERS">All Teachers & Staff</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Fee Permission -->
+    <div class="col-md-6">
+      <div class="p-3 border rounded bg-light">
+        <label class="form-label fw-bold text-dark"><i class="fa-solid fa-receipt me-1"></i> Fee Collection Permission</label>
+        <select id="saSettingFeePermission" class="form-select form-select-sm">
+          <option value="ADMIN_ONLY">Only Institution Admin</option>
+          <option value="ADMIN_PRINCIPAL">Admin & Principal</option>
+          <option value="ALL">Admin, Principal & All Teachers</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Feature Toggles -->
+    <div class="col-md-6">
+      <div class="p-3 border rounded bg-light h-100">
+        <label class="form-label fw-bold text-dark mb-2"><i class="fa-solid fa-toggle-on me-1"></i> Feature Controls</label>
+        <div class="form-check form-switch mb-2">
+          <input class="form-check-input" type="checkbox" id="saSettingAllowPhoto" checked>
+          <label class="form-check-label small" for="saSettingAllowPhoto">Allow Institution Photo Upload</label>
+        </div>
+        <div class="form-check form-switch mb-2">
+          <input class="form-check-input" type="checkbox" id="saSettingParentStarPoints" checked>
+          <label class="form-check-label small" for="saSettingParentStarPoints">Show Performance Points in Parent Portal</label>
+        </div>
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" id="saSettingReqManualReceipt">
+          <label class="form-check-label small" for="saSettingReqManualReceipt">Require Manual Receipt Book Number</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-4 text-end">
+    <button class="btn btn-success px-4 rounded-3" onclick="saveMasterControlSettings()">
+      <i class="fa-solid fa-save me-1"></i> Save Control Settings
+    </button>
+  </div>
+</div>
 
 </body>
 </html>
