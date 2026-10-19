@@ -643,3 +643,31 @@ onAuthStateChanged(auth, async (user) => {
 document.addEventListener('DOMContentLoaded', () => {
     window.loadInstitutionSettings();
 });
+
+// Super Admin - View Institution Details Function
+window.viewInstitution = async function(instDocId) {
+  try {
+    const docRef = doc(db, "settings", instDocId);
+    const snap = await getDoc(docRef);
+
+    if (snap.exists()) {
+      const data = snap.data();
+      
+      // വിവരങ്ങൾ കാണിക്കുന്ന വിൻഡോ (Alert / Toast)
+      alert(
+        `📌 MASJID / MADRASA DETAILS\n\n` +
+        `• Name: ${data.institutionName || '-'}\n` +
+        `• ID: ${data.institutionId || instDocId}\n` +
+        `• Admin: ${data.adminName || '-'}\n` +
+        `• Email: ${data.email || '-'}\n` +
+        `• Phone: ${data.phone || '-'}\n` +
+        `• Place: ${data.place || '-'}`
+      );
+    } else {
+      window.showToast("Institution details not found.", "warning");
+    }
+  } catch (error) {
+    console.error("Error viewing institution:", error);
+    window.showToast("Error loading details: " + error.message, "error");
+  }
+};
