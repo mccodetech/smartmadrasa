@@ -435,7 +435,7 @@ window.deleteStaffAccount = async (userId, name) => {
   }
 };
 
-// Super Admin ലിസ്റ്റ് ലോഡ് ചെയ്യുന്ന ഫങ്ഷൻ (Edit & Delete ബട്ടണുകളോടെ)
+// Super Admin List Load Function with Custom Short Code Support
 window.loadSuperAdminRequests = async () => {
   const tableBody = document.getElementById("superAdminTableBody");
   if (!tableBody) return;
@@ -455,15 +455,16 @@ window.loadSuperAdminRequests = async () => {
     querySnapshot.forEach((docSnap) => {
       const user = docSnap.data();
       const isPending = user.status === "pending";
+      const shortCode = user.shortCode || "-";
 
       html += `
         <tr>
+          <td><span class="badge bg-primary fs-6">${shortCode}</span></td>
           <td><b>${user.institutionId || '-'}</b></td>
           <td>${user.institutionName || 'Smart Madrasa'}</td>
           <td>${user.email || '-'}</td>
           <td>${user.name || '-'}</td>
           <td class="text-center">${user.phone || '-'}</td>
-          <td class="text-center">-</td>
           <td>
             <span class="badge ${isPending ? 'bg-warning text-dark' : 'bg-success'}">
               ${isPending ? 'Pending' : 'Active'}
@@ -475,12 +476,9 @@ window.loadSuperAdminRequests = async () => {
                 ? `<button class="btn btn-sm btn-success px-2" onclick="approveMadrasaAdmin('${docSnap.id}')" title="Approve"><i class="fa-solid fa-check"></i></button>`
                 : `<span class="badge bg-light text-dark border me-1">Approved</span>`
               }
-              <!-- Edit Button -->
-              <button class="btn btn-sm btn-outline-primary px-2" onclick="editMadrasaDetails('${docSnap.id}', '${user.institutionName || ''}', '${user.name || ''}', '${user.phone || ''}')" title="Edit Madrasa">
+              <button class="btn btn-sm btn-outline-primary px-2" onclick="editMadrasaDetails('${docSnap.id}', '${user.institutionName || ''}', '${user.name || ''}', '${user.phone || ''}', '${shortCode}')" title="Edit Madrasa">
                 <i class="fa-solid fa-pen"></i>
               </button>
-              
-              <!-- Delete Button -->
               <button class="btn btn-sm btn-outline-danger px-2" onclick="deleteMadrasaAdmin('${docSnap.id}', '${user.institutionName || 'this institution'}')" title="Delete Madrasa">
                 <i class="fa-solid fa-trash"></i>
               </button>
@@ -494,6 +492,37 @@ window.loadSuperAdminRequests = async () => {
   } catch (e) {
     console.error("Error loading super admin data:", e);
     tableBody.innerHTML = `<tr><td colspan="8" class="text-center text-danger">Error loading data: ${e.message}</td></tr>`;
+  }
+};
+
+// Edit Function to assign/update Short Code (e.g., MD01)
+window.editMadrasaDetails = async (userId, currentInstName, currentAdminName, currentPhone, currentShortCode) => {
+  const newShortCode = prompt("Enter Custom Short Code (e.g., MD01, MD02):", currentShortCode !== '-' ? currentShortCode : "MD01");
+  if (newShortCode === null) return;
+
+  const newInstName = prompt("Edit Madrasa Name:", currentInstName);
+  if (newInstName === null) return;
+
+  const newAdminName = prompt("Edit Admin Name:", currentAdminName);
+  if (newAdminName === null) return;
+
+  const newPhone = prompt("Edit Phone Number:", currentPhone);
+  if (newPhone === null) return;
+
+  try {
+    await updateDoc(doc(db, "users", userId), {
+      shortCode: newShortCode.trim().toUpperCase(),
+      institutionName: newInstName.trim().toUpperCase(),
+      name: newAdminName.trim().toUpperCase(),
+      phone: newPhone.trim(),
+      updatedAt: serverTimestamp()
+    });
+
+    window.showToast("Madrasa details & Short Code updated successfully!", "success");
+    window.loadSuperAdminRequests();
+  } catch (e) {
+    console.error("Error updating madrasa:", e);
+    window.showToast("Error updating details: " + e.message, "error");
   }
 };
 
