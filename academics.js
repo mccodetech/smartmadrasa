@@ -56,6 +56,35 @@ window.saveCustomTask = (e) => {
 };
 
 // ==========================================
+// UTILITY: DYNAMIC STUDENT SORTING LOGIC
+// ==========================================
+function sortStudentsList(studentsList, sortOrder) {
+  if (sortOrder === "NAME_ASC") {
+    studentsList.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  } else if (sortOrder === "BOYS_FIRST") {
+    studentsList.sort((a, b) => {
+      const gA = (a.gender || '').toLowerCase();
+      const gB = (b.gender || '').toLowerCase();
+      if (gA === 'male' && gB !== 'male') return -1;
+      if (gA !== 'male' && gB === 'male') return 1;
+      return (Number(a.regNo) || 0) - (Number(b.regNo) || 0);
+    });
+  } else if (sortOrder === "GIRLS_FIRST") {
+    studentsList.sort((a, b) => {
+      const gA = (a.gender || '').toLowerCase();
+      const gB = (b.gender || '').toLowerCase();
+      if (gA === 'female' && gB !== 'female') return -1;
+      if (gA !== 'female' && gB === 'female') return 1;
+      return (Number(a.regNo) || 0) - (Number(b.regNo) || 0);
+    });
+  } else {
+    // Default Reg No Order
+    studentsList.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
+  }
+  return studentsList;
+}
+
+// ==========================================
 // 1. SUBJECT SETTINGS MODULE
 // ==========================================
 window.loadClassSubjectSettings = async () => {
@@ -102,7 +131,7 @@ window.saveClassSubjects = async () => {
 };
 
 // ==========================================
-// 2. MARKS ENTRY MODULE (With Total Column)
+// 2. MARKS ENTRY MODULE (With Total Column & Dynamic Sorting)
 // ==========================================
 window.resetMarksButton = () => {
   const btn = document.getElementById("btnSaveMarks");
@@ -128,13 +157,20 @@ window.loadMarksEntrySheet = async () => {
   if (area) area.classList.remove("d-none");
 
   let currentSubjects = DEFAULT_SUBJECTS;
+  let sortOrder = "REG_NO";
+
   try {
     const subDoc = await getDoc(doc(db, "subjectSettings", `${currentInstitutionId}_Class_${cleanClass}`));
     if (subDoc.exists() && subDoc.data().subjects && subDoc.data().subjects.length > 0) {
       currentSubjects = subDoc.data().subjects;
     }
+
+    const settingsSnap = await getDoc(doc(db, "settings", currentInstitutionId));
+    if (settingsSnap.exists()) {
+      sortOrder = settingsSnap.data().sortOrder || "REG_NO";
+    }
   } catch (e) {
-    console.log("Using default subjects");
+    console.log("Using default subjects / settings");
   }
 
   const examName = document.getElementById("markExamSelect")?.value || "Quarterly Exam";
@@ -156,7 +192,7 @@ window.loadMarksEntrySheet = async () => {
 
   let students = [];
   snap.forEach(d => students.push({ id: d.id, ...d.data() }));
-  students.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
+  students = sortStudentsList(students, sortOrder);
 
   let bodyHtml = "";
   students.forEach(s => {
@@ -253,7 +289,7 @@ window.saveClassMarks = async () => {
 };
 
 // ==========================================
-// 3. ATTENDANCE MODULE
+// 3. ATTENDANCE MODULE (With Dynamic Sorting)
 // ==========================================
 window.resetAttendanceButton = () => {
   const btn = document.getElementById("btnSaveAttendance");
@@ -275,12 +311,27 @@ window.loadAttendanceSheet = async () => {
   if (tbody) tbody.innerHTML = `<tr><td colspan="3" class="text-center">Loading students...</td></tr>`;
   if (area) area.classList.remove("d-none");
 
-  const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", selClass.replace(/Class\s*/i, "").trim()), where("status", "==", "active"));
+  let sortOrder = "REG_NO";
+  try {
+    const settingsSnap = await getDoc(doc(db, "settings", currentInstitutionId));
+    if (settingsSnap.exists()) {
+      sortOrder = settingsSnap.data().sortOrder || "REG_NO";
+    }
+  } catch (e) {
+    console.log("Error reading sort order setting");
+  }
+
+  const q = query(
+    collection(db, "students"), 
+    where("institutionId", "==", currentInstitutionId), 
+    where("currentClass", "==", selClass.replace(/Class\s*/i, "").trim()), 
+    where("status", "==", "active")
+  );
   const snap = await getDocs(q);
 
   let students = [];
   snap.forEach(d => students.push({ id: d.id, ...d.data() }));
-  students.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
+  students = sortStudentsList(students, sortOrder);
 
   let html = "";
   students.forEach(s => {
@@ -402,7 +453,7 @@ window.saveClassAttendance = async () => {
 };
 
 // ==========================================
-// 4. PERFORMANCE MODULE
+// 4. PERFORMANCE MODULE (With Dynamic Sorting)
 // ==========================================
 window.loadStudentsForPerfSheet = async () => {
   const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
@@ -422,6 +473,12 @@ window.loadStudentsForPerfSheet = async () => {
   if (sheetArea) sheetArea.classList.remove("d-none");
 
   try {
+    let sortOrder = "REG_NO";
+    const settingsSnap = await getDoc(doc(db, "settings", currentInstitutionId));
+    if (settingsSnap.exists()) {
+      sortOrder = settingsSnap.data().sortOrder || "REG_NO";
+    }
+
     const q = query(
       collection(db, "students"), 
       where("institutionId", "==", currentInstitutionId), 
@@ -434,7 +491,7 @@ window.loadStudentsForPerfSheet = async () => {
       students.push({ id: d.id, ...d.data() });
     });
 
-    students.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
+    students = sortStudentsList(students, sortOrder);
 
     let html = "";
     if (students.length === 0) {
@@ -473,7 +530,7 @@ window.toggleSelectAllPerf = () => {
 };
 
 // ==========================================
-// 3.1. MANUAL PREVIOUS ATTENDANCE MODULE
+// 3.1. MANUAL PREVIOUS ATTENDANCE MODULE (With Dynamic Sorting)
 // ==========================================
 
 window.populateManualAttendanceClasses = () => {
@@ -503,8 +560,11 @@ window.loadManualAttendanceSheet = async () => {
   try {
     const settingsDoc = await getDoc(doc(db, "settings", currentInstitutionId));
     let totalWorkingDays = 0;
+    let sortOrder = "REG_NO";
+
     if (settingsDoc.exists()) {
       totalWorkingDays = Number(settingsDoc.data().totalWorkingDays) || 0;
+      sortOrder = settingsDoc.data().sortOrder || "REG_NO";
     }
     const displayEl = document.getElementById("displayTotalWorkingDays");
     if (displayEl) displayEl.innerText = totalWorkingDays;
@@ -522,7 +582,7 @@ window.loadManualAttendanceSheet = async () => {
 
     let students = [];
     snap.forEach(d => students.push({ id: d.id, ...d.data() }));
-    students.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
+    students = sortStudentsList(students, sortOrder);
 
     let html = "";
     students.forEach(s => {
