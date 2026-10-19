@@ -435,9 +435,7 @@ window.deleteStaffAccount = async (userId, name) => {
   }
 };
 
-// ==========================================
-// SUPER ADMIN MASTER CONSOLE MODULE
-// ==========================================
+// Super Admin ലിസ്റ്റ് ലോഡ് ചെയ്യുന്ന ഫങ്ഷൻ
 window.loadSuperAdminRequests = async () => {
   const tableBody = document.getElementById("superAdminTableBody");
   if (!tableBody) return;
@@ -445,33 +443,38 @@ window.loadSuperAdminRequests = async () => {
   tableBody.innerHTML = `<tr><td colspan="8" class="text-center text-muted">Loading institutions...</td></tr>`;
 
   try {
-    const querySnapshot = await getDocs(collection(db, "settings"));
+    // 1. Users കളക്ഷനിൽ നിന്നും Admin റോൾ ഉള്ളവരെ എടുക്കുന്നു
+    const q = query(collection(db, "users"), where("role", "==", "admin"));
+    const querySnapshot = await getDocs(q);
     let html = "";
 
     if (querySnapshot.empty) {
-      tableBody.innerHTML = `<tr><td colspan="8" class="text-center text-muted">No Madrasas found.</td></tr>`;
+      tableBody.innerHTML = `<tr><td colspan="8" class="text-center text-muted">No Madrasa Registrations Found.</td></tr>`;
       return;
     }
 
     querySnapshot.forEach((docSnap) => {
-      const data = docSnap.data();
-      
-      const instId = data.institutionId || docSnap.id;
-      const instName = data.institutionName || data.name || 'Smart Madrasa';
-      const place = data.place || data.regPlace || '-';        
-      const adminName = data.adminName || data.userName || '-'; 
+      const user = docSnap.data();
+      const isPending = user.status === "pending";
 
       html += `
         <tr>
-          <td><b>${instId}</b></td>
-          <td>${instName}</td>
-          <td>${place}</td>
-          <td>${adminName}</td>
+          <td><b>${user.institutionId || '-'}</b></td>
+          <td>${user.institutionName || 'Smart Madrasa'}</td>
+          <td>${user.email || '-'}</td>
+          <td>${user.name || '-'}</td>
+          <td class="text-center">${user.phone || '-'}</td>
           <td class="text-center">-</td>
-          <td class="text-center">-</td>
-          <td><span class="badge bg-success">Active</span></td>
+          <td>
+            <span class="badge ${isPending ? 'bg-warning text-dark' : 'bg-success'}">
+              ${isPending ? 'Pending' : 'Active'}
+            </span>
+          </td>
           <td class="text-center">
-            <button class="btn btn-sm btn-outline-primary" onclick="viewInstitution('${docSnap.id}')">View</button>
+            ${isPending 
+              ? `<button class="btn btn-sm btn-success px-3" onclick="approveMadrasaAdmin('${docSnap.id}')"><i class="fa-solid fa-check me-1"></i> Approve</button>`
+              : `<span class="badge bg-light text-dark">Approved</span>`
+            }
           </td>
         </tr>
       `;
@@ -484,6 +487,19 @@ window.loadSuperAdminRequests = async () => {
   }
 };
 
+// Super Admin സ്ഥാപനങ്ങൾ അപ്രൂവ് ചെയ്യാനുള്ള പുതിയ ഫങ്ഷൻ
+window.approveMadrasaAdmin = async (userId) => {
+  try {
+    await updateDoc(doc(db, "users", userId), {
+      status: "active",
+      updatedAt: serverTimestamp()
+    });
+    window.showToast("Madrasa registration approved successfully!", "success");
+    window.loadSuperAdminRequests(); // ലിസ്റ്റ് റീഫ്രഷ് ചെയ്യുക
+  } catch (e) {
+    window.showToast("Error approving Madrasa: " + e.message, "error");
+  }
+};
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     try {
