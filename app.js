@@ -838,3 +838,36 @@ window.deleteMadrasaAdmin = async function(userId, instName) {
     window.showToast("Error deleting: " + e.message, "error");
   }
 };
+
+// Master Control Settings - Save Function
+window.saveMasterControlSettings = async function() {
+  const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
+  if (!currentInstitutionId) {
+    window.showToast("Institution ID not found.", "error");
+    return;
+  }
+
+  const sortOrder = document.getElementById("saSettingSortOrder")?.value || "REG_NO";
+  const attPerm = document.getElementById("saSettingAttPermission")?.value || "ASSIGNED_ONLY";
+  const feePerm = document.getElementById("saSettingFeePermission")?.value || "ALL";
+  const allowPhoto = document.getElementById("saSettingAllowPhoto")?.checked ?? true;
+  const showParentStars = document.getElementById("saSettingParentStarPoints")?.checked ?? true;
+  const reqManualReceipt = document.getElementById("saSettingReqManualReceipt")?.checked ?? false;
+
+  try {
+    await setDoc(doc(db, "settings", currentInstitutionId), {
+      sortOrder: sortOrder,
+      attendancePermission: attPerm,
+      feePermission: feePerm,
+      allowPhotoUpload: allowPhoto,
+      showParentStarPoints: showParentStars,
+      reqManualReceipt: reqManualReceipt,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+
+    window.showToast("Master Control Settings updated successfully!", "success");
+  } catch (e) {
+    console.error("Error saving master control settings:", e);
+    window.showToast("Failed to save settings: " + e.message, "error");
+  }
+};
