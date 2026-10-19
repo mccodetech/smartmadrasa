@@ -504,51 +504,52 @@
     <div class="container-fluid px-3 px-md-4 py-4">
       <div class="row">
         <!-- Desktop Sidebar Container -->
-<div class="col-lg-3 col-xl-2 d-none d-lg-block mb-4">
-  <div class="card desktop-sidebar-card">
-    <div class="nav flex-column nav-pills gap-1" id="desktopTabMenu">
-      <button class="nav-link active text-start" id="homeMenuBtn" onclick="showTab('homeDashboardTab')">
-        <i class="fa-solid fa-house"></i> Home
-      </button>
-      <button class="nav-link text-start d-none" id="superAdminMasterBtn" onclick="showTab('superAdminTab')">
-        <i class="fa-solid fa-shield-halved"></i> All Madrasas
-      </button>
-      <button class="nav-link text-start d-none" id="instAdminStaffBtn" onclick="showTab('instAdminTab'); loadPrincipalsList();">
-        <i class="fa-solid fa-user-tie"></i> Manage Staff
-      </button>
-      <button class="nav-link text-start d-none" id="studentsMenuBtn" onclick="showTab('studentsListTab')">
-        <i class="fa-solid fa-users"></i> Students
-      </button>
-      <button class="nav-link text-start d-none" id="attendanceMenuBtn" onclick="showTab('attendanceTab')">
-        <i class="fa-solid fa-calendar-check"></i> Attendance
-      </button>
-      <button class="nav-link text-start d-none" id="marksMenuBtn" onclick="showTab('marksTab')">
-        <i class="fa-solid fa-award"></i> Marks Entry
-      </button>
-      <button class="nav-link text-start d-none" id="performanceMenuBtn" onclick="showTab('performanceTab')">
-        <i class="fa-solid fa-star"></i> Performance
-      </button>
-      <button class="nav-link text-start d-none" id="feesMenuBtn" onclick="showTab('feesTab')">
-        <i class="fa-solid fa-receipt"></i> Fees & Receipts
-      </button>
-      <button class="nav-link text-start d-none" id="subjectSettingsBtn" onclick="showTab('subjectSettingsTab')">
-        <i class="fa-solid fa-book"></i> Subject Settings
-      </button>
-      <button class="nav-link text-start d-none" id="feeSettingsBtn" onclick="showTab('feeSettingsTab')">
-        <i class="fa-solid fa-gear"></i> Fee Settings
-      </button>
-      <button class="nav-link text-start d-none" id="promotionMenuBtn" onclick="showTab('promotionTab')">
-        <i class="fa-solid fa-graduation-cap"></i> Class Promotion
-      </button>
-      <button class="nav-link text-start" id="committeeMenuBtn" onclick="showTab('committeeTab'); loadCommitteeMembers();">
-        <i class="fa-solid fa-users-gear"></i> Managing Committee
-      </button>
-      <button class="nav-link text-start d-none" id="settingsMenuBtn" onclick="showTab('settingsTab'); loadInstitutionSettings();">
-        <i class="fa-solid fa-gears"></i> Settings
-      </button>
-    </div>
-  </div>
-</div>
+        <div class="col-lg-3 col-xl-2 d-none d-lg-block mb-4">
+          <div class="card desktop-sidebar-card">
+            <div class="nav flex-column nav-pills gap-1" id="desktopTabMenu">
+              <button class="nav-link active text-start" id="homeMenuBtn" onclick="showTab('homeDashboardTab')">
+                <i class="fa-solid fa-house"></i> Home
+              </button>
+              <button class="nav-link text-start d-none" id="superAdminMasterBtn" onclick="showTab('superAdminTab')">
+                <i class="fa-solid fa-shield-halved"></i> All Madrasas
+              </button>
+              <button class="nav-link text-start d-none" id="instAdminStaffBtn" onclick="showTab('instAdminTab'); loadPrincipalsList();">
+                <i class="fa-solid fa-user-tie"></i> Manage Staff
+              </button>
+              <button class="nav-link text-start d-none" id="studentsMenuBtn" onclick="showTab('studentsListTab')">
+                <i class="fa-solid fa-users"></i> Students
+              </button>
+              <button class="nav-link text-start d-none" id="attendanceMenuBtn" onclick="showTab('attendanceTab')">
+                <i class="fa-solid fa-calendar-check"></i> Attendance
+              </button>
+              <button class="nav-link text-start d-none" id="marksMenuBtn" onclick="showTab('marksTab')">
+                <i class="fa-solid fa-award"></i> Marks Entry
+              </button>
+              <button class="nav-link text-start d-none" id="performanceMenuBtn" onclick="showTab('performanceTab')">
+                <i class="fa-solid fa-star"></i> Performance
+              </button>
+              <button class="nav-link text-start d-none" id="feesMenuBtn" onclick="showTab('feesTab')">
+                <i class="fa-solid fa-receipt"></i> Fees & Receipts
+              </button>
+              <button class="nav-link text-start d-none" id="subjectSettingsBtn" onclick="showTab('subjectSettingsTab')">
+                <i class="fa-solid fa-book"></i> Subject Settings
+              </button>
+              <button class="nav-link text-start d-none" id="feeSettingsBtn" onclick="showTab('feeSettingsTab')">
+                <i class="fa-solid fa-gear"></i> Fee Settings
+              </button>
+              <button class="nav-link text-start d-none" id="promotionMenuBtn" onclick="showTab('promotionTab')">
+                <i class="fa-solid fa-graduation-cap"></i> Class Promotion
+              </button>
+              <button class="nav-link text-start" id="committeeMenuBtn" onclick="showTab('committeeTab'); loadCommitteeMembers();">
+                <i class="fa-solid fa-users-gear"></i> Managing Committee
+              </button>
+              <button class="nav-link text-start d-none" id="settingsMenuBtn" onclick="showTab('settingsTab'); loadInstitutionSettings();">
+                <i class="fa-solid fa-gears"></i> Settings
+              </button>
+            </div>
+          </div>
+        </div>
+
         <!-- Content Area -->
         <div class="col-lg-9 col-xl-10">
           
@@ -560,18 +561,19 @@
               </div>
               <div class="table-responsive">
                 <table class="table table-hover table-bordered align-middle">
-<thead class="table-light">
-  <tr>
-    <th>Short ID</th>
-    <th>Inst. ID</th>
-    <th>Madrasa Name</th>
-    <th>Place / Email</th>
-    <th>Admin Name</th>
-    <th class="text-center">Phone</th>
-    <th>Status</th>
-    <th class="text-center">Actions</th>
-  </tr>
-</thead>                  <tbody id="superAdminTableBody"></tbody>
+                  <thead class="table-light">
+                    <tr>
+                      <th>Short ID</th>
+                      <th>Inst. ID</th>
+                      <th>Madrasa Name</th>
+                      <th>Place / Email</th>
+                      <th>Admin Name</th>
+                      <th class="text-center">Phone</th>
+                      <th>Status</th>
+                      <th class="text-center">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="superAdminTableBody"></tbody>
                 </table>
               </div>
             </div>
@@ -1032,50 +1034,60 @@
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-gears"></i> Institution Settings</h5>
               <div class="alert alert-info small">Manage custom settings and special funds for your institution.</div>
               
-<!-- സ്ഥാപനത്തിന്റെ ഫോട്ടോ അപ്‌ലോഡ് ചെയ്യുന്ന സെക്ഷൻ (Single Photo) -->
-<div class="mb-4 p-3 border rounded bg-light">
-  <label class="form-label fw-bold"><i class="fa-solid fa-image me-1"></i> Institution Photo & Caption</label>
-  <p class="small text-muted mb-2">സ്ഥാപനത്തിന്റെ പ്രധാന ഫോട്ടോയും അടിക്കുറിപ്പും നൽകുക.</p>
-  
-  <div class="row g-2 mb-3">
-    <div class="col-md-6">
-      <label class="form-label small">Choose Photo</label>
-      <input type="file" id="instPhoto1File" class="form-control form-control-sm mb-1" accept="image/*">
+              <!-- സ്ഥാപനത്തിന്റെ ഫോട്ടോ അപ്‌ലോഡ് ചെയ്യുന്ന സെക്ഷൻ (Single Photo) -->
+              <div class="mb-4 p-3 border rounded bg-light">
+                <label class="form-label fw-bold"><i class="fa-solid fa-image me-1"></i> Institution Photo & Caption</label>
+                <p class="small text-muted mb-2">സ്ഥാപനത്തിന്റെ പ്രധാന ഫോട്ടോയും അടിക്കുറിപ്പും നൽകുക.</p>
+                
+                <div class="row g-2 mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label small">Choose Photo</label>
+                    <input type="file" id="instPhoto1File" class="form-control form-control-sm mb-1" accept="image/*">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small">Caption</label>
+                    <input type="text" id="instCaption1" class="form-control form-control-sm text-uppercase" placeholder="Enter Photo Caption">
+                  </div>
+                </div>
+
+                <!-- അപ്‌ലോഡ് ചെയ്ത ചിത്രത്തിന്റെ പ്രിവ്യൂ -->
+                <div id="instPhotoPreviewArea" class="mb-3 d-none">
+                  <small class="text-muted d-block mb-1">Current Saved Photo:</small>
+                  <img id="instPhotoPreviewImg" src="" alt="Institution Photo" style="max-height: 120px; border-radius: 8px; border: 1px solid #ccc; padding: 2px;">
+                </div>
+
+                <button type="button" class="btn btn-success btn-sm px-4" onclick="saveSinglePhotoSetting()"><i class="fa-solid fa-save me-1"></i> Save Photo</button>
+              </div>
+
+              <!-- Special Fund Categories Section -->
+              <div class="mb-4 p-3 border rounded bg-light">
+                <label class="form-label fw-bold">Special Fund Categories (Comma Separated)</label>
+                <div class="input-group">
+                  <input type="text" id="settingSpecialFundsInput" class="form-control" placeholder="e.g. BUILDING FUND, ANNUAL DAY">
+                  <button class="btn btn-success btn-sm px-3" onclick="saveSpecialFundsSetting()"><i class="fa-solid fa-save me-1"></i> Save</button>
+                </div>
+              </div>
+
+              <!-- Total Working Days Section -->
+              <div class="mb-3 p-3 border rounded bg-light">
+                <label class="form-label fw-bold">Total Working Days (ഇതുവരെയുള്ള ആകെ പ്രവൃത്തി ദിവസങ്ങൾ)</label>
+                <div class="input-group">
+                  <input type="number" id="settingTotalWorkingDays" class="form-control" placeholder="e.g. 65">
+                  <button class="btn btn-primary btn-sm px-3" onclick="saveWorkingDaysSetting()"><i class="fa-solid fa-save me-1"></i> Save</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
     </div>
-    <div class="col-md-6">
-      <label class="form-label small">Caption</label>
-      <input type="text" id="instCaption1" class="form-control form-control-sm text-uppercase" placeholder="Enter Photo Caption">
-    </div>
   </div>
 
-  <!-- അപ്‌ലോഡ് ചെയ്ത ചിത്രത്തിന്റെ പ്രിവ്യൂ (പേജ് റിഫ്രഷ് ചെയ്താലും ഇവിടെ കാണും) -->
-  <div id="instPhotoPreviewArea" class="mb-3 d-none">
-    <small class="text-muted d-block mb-1">Current Saved Photo:</small>
-    <img id="instPhotoPreviewImg" src="" alt="Institution Photo" style="max-height: 120px; border-radius: 8px; border: 1px solid #ccc; padding: 2px;">
-  </div>
+  <!-- ========================================== -->
+  <!-- MODALS SECTION                            -->
+  <!-- ========================================== -->
 
-  <button type="button" class="btn btn-success btn-sm px-4" onclick="saveSinglePhotoSetting()"><i class="fa-solid fa-save me-1"></i> Save Photo</button>
-</div>
-
-<!-- Special Fund Categories Section -->
-<div class="mb-4 p-3 border rounded bg-light">
-  <label class="form-label fw-bold">Special Fund Categories (Comma Separated)</label>
-  <div class="input-group">
-    <input type="text" id="settingSpecialFundsInput" class="form-control" placeholder="e.g. BUILDING FUND, ANNUAL DAY">
-    <button class="btn btn-success btn-sm px-3" onclick="saveSpecialFundsSetting()"><i class="fa-solid fa-save me-1"></i> Save</button>
-  </div>
-</div>
-
-<!-- Total Working Days Section -->
-<div class="mb-3 p-3 border rounded bg-light">
-  <label class="form-label fw-bold">Total Working Days (ഇതുവരെയുള്ള ആകെ പ്രവൃത്തി ദിവസങ്ങൾ)</label>
-  <div class="input-group">
-    <input type="number" id="settingTotalWorkingDays" class="form-control" placeholder="e.g. 65">
-    <button class="btn btn-primary btn-sm px-3" onclick="saveWorkingDaysSetting()"><i class="fa-solid fa-save me-1"></i> Save</button>
-  </div>
-</div>
-
-  <!-- MODALS -->
   <!-- Staff Profile Modal -->
   <div class="modal fade" id="staffProfileModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
@@ -1452,6 +1464,54 @@
     </div>
   </div>
 
+  <!-- Edit Madrasa Modal Pop-up (Placed cleanly before </body> to fix z-index issues) -->
+  <div class="modal fade" id="editMadrasaModal" tabindex="-1" aria-labelledby="editMadrasaModalLabel" aria-hidden="true" style="z-index: 1060;">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg rounded-4">
+        <div class="modal-header bg-success text-white rounded-top-4">
+          <h5 class="modal-title fw-bold" id="editMadrasaModalLabel">
+            <i class="fa-solid fa-pen-to-square me-2"></i>Edit Madrasa Details
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <input type="hidden" id="editMadrasaDocId">
+          
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-secondary">Short Code / ID</label>
+            <input type="text" class="form-control" id="editMadrasaShortCode" placeholder="e.g. MD01">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-secondary">Madrasa Name</label>
+            <input type="text" class="form-control" id="editMadrasaName" placeholder="Madrasa Name">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-secondary">Admin Name</label>
+            <input type="text" class="form-control" id="editMadrasaAdminName" placeholder="Admin Name">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-secondary">Phone Number</label>
+            <input type="text" class="form-control" id="editMadrasaPhone" placeholder="Phone Number">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-secondary">Email Address</label>
+            <input type="email" class="form-control" id="editMadrasaEmail" placeholder="Email Address">
+          </div>
+        </div>
+        <div class="modal-footer bg-light border-0 rounded-bottom-4">
+          <button type="button" class="btn btn-secondary px-4 rounded-3" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-success px-4 rounded-3" onclick="window.saveEditedMadrasaDetails()">
+            <i class="fa-solid fa-check me-1"></i> Save Changes
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- PWA Install Floating Button -->
   <div id="pwaInstallContainer" class="d-none position-fixed bottom-0 end-0 p-3" style="z-index: 9999;">
     <button id="btnInstallApp" class="btn btn-success shadow-lg rounded-pill px-4 py-2 fw-bold d-flex align-items-center gap-2">
@@ -1500,53 +1560,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script type="module" src="app.js?v=2"></script>
-<!-- Edit Madrasa Modal Pop-up -->
-<div class="modal fade" id="editMadrasaModal" tabindex="-1" aria-labelledby="editMadrasaModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-0 shadow-lg rounded-4">
-      <div class="modal-header bg-success text-white rounded-top-4">
-        <h5 class="modal-title fw-bold" id="editMadrasaModalLabel">
-          <i class="fa-solid fa-pen-to-square me-2"></i>Edit Madrasa Details
-        </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body p-4">
-        <input type="hidden" id="editMadrasaDocId">
-        
-        <div class="mb-3">
-          <label class="form-label fw-semibold text-secondary">Short Code / ID</label>
-          <input type="text" class="form-control" id="editMadrasaShortCode" placeholder="e.g. MD01">
-        </div>
 
-        <div class="mb-3">
-          <label class="form-label fw-semibold text-secondary">Madrasa Name</label>
-          <input type="text" class="form-control" id="editMadrasaName" placeholder="Madrasa Name">
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label fw-semibold text-secondary">Admin Name</label>
-          <input type="text" class="form-control" id="editMadrasaAdminName" placeholder="Admin Name">
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label fw-semibold text-secondary">Phone Number</label>
-          <input type="text" class="form-control" id="editMadrasaPhone" placeholder="Phone Number">
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label fw-semibold text-secondary">Email Address</label>
-          <input type="email" class="form-control" id="editMadrasaEmail" placeholder="Email Address">
-        </div>
-      </div>
-      <div class="modal-footer bg-light border-0 rounded-bottom-4">
-        <button type="button" class="btn btn-secondary px-4 rounded-3" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-success px-4 rounded-3" onclick="saveEditedMadrasaDetails()">
-          <i class="fa-solid fa-check me-1"></i> Save Changes
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-              
 </body>
 </html>
