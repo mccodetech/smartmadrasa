@@ -299,52 +299,97 @@ window.resetAttendanceButton = () => {
 window.loadAttendanceSheet = async () => {
   window.resetAttendanceButton();
   const selClass = document.getElementById("attClassSelect")?.value;
-  const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
-  if (!selClass) { document.getElementById("attendanceSheetArea")?.classList.add("d-none"); return; }
+  
+  // 1. Current Institution ID ഏതാണെന്ന് കൃത്യമായി കണ്ടുപിടിക്കുന്നു
+  const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId") || localStorage.getItem("currentInstitutionId");
+  
+  if (!selClass) { 
+    document.getElementById("attendanceSheetArea")?.classList.add("d-none"); 
+    return; 
+  }
 
   const area = document.getElementById("attendanceSheetArea");
   const tbody = document.getElementById("attendanceTableBody");
-  if (tbody) tbody.innerHTML = `<tr><td colspan="3" class="text-center">Loading students...</td></tr>`;
+  if (tbody) tbody.innerHTML = `<tr><td colspan="3" class="text-center py-3"><i class="fa-solid fa-spinner fa-spin me-2"></i>Loading students...</td></tr>`;
   if (area) area.classList.remove("d-none");
 
   let sortOrder = "REG_NO";
+
   try {
-    const settingsSnap = await getDoc(doc(db, "settings", currentInstitutionId));
-    if (settingsSnap.exists()) {
-      sortOrder = settingsSnap.data().sortOrder || "REG_NO";
+    // 2. Super Admin ഈ മദ്രസയ്ക്ക് ഏത് Sorting Order ആണോ സെറ്റ് ചെയ്തത് അത് ഫയർസ്റ്റോറിൽ നിന്ന് എടുക്കുന്നു
+    if (currentInstitutionId) {
+      const settingsSnap = await getDoc(doc(db, "settings", currentInstitutionId));
+      if (settingsSnap.exists()) {
+        sortOrder = settingsSnap.data().sortOrder || "REG_NO";
+      }
     }
-  } catch (e) {
-    console.log("Error reading sort order setting");
+
+    const cleanClass = selClass.replace(/Class\s*/i, "").trim();
+
+    // 3. കുട്ടികളുടെ വിവരങ്ങൾ എടുക്കുന്നു
+    const q = query(
+      collection(db, "students"), 
+      where("institutionId", "==", currentInstitutionId), 
+      where("currentClass", "==", cleanClass), 
+      where("status", "==", "active")
+    );
+    const snap = await getDocs(q);
+
+    let students = [];
+    snap.forEach(d => students.push({ id: d.id, ...d.data() }));
+
+    // 4. Super Admin തന്ന Sorting Order പ്രകാരം കുട്ടികളുടെ പട്ടിക മാറ്റി ക്രമീകരിക്കുന്നു
+    if (typeof sortStudentsList === 'function') {
+      students = sortStudentsList(students, sortOrder);
+    } else {
+      // Fallback Sorting
+      if (sortOrder === "NAME_ASC") {
+        students.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+      } else if (sortOrder === "BOYS_FIRST") {
+        students.sort((a, b) => {
+          const gA = (a.gender || '').toLowerCase();
+          const gB = (b.gender || '').toLowerCase();
+          if (gA === 'male' && gB !== 'male') return -1;
+          if (gA !== 'male' && gB === 'male') return 1;
+          return (Number(a.regNo) || 0) - (Number(b.regNo) || 0);
+        });
+      } else if (sortOrder === "GIRLS_FIRST") {
+        students.sort((a, b) => {
+          const gA = (a.gender || '').toLowerCase();
+          const gB = (b.gender || '').toLowerCase();
+          if (gA === 'female' && gB !== 'female') return -1;
+          if (gA !== 'female' && gB === 'female') return 1;
+          return (Number(a.regNo) || 0) - (Number(b.regNo) || 0);
+        });
+      } else {
+        students.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
+      }
+    }
+
+    // 5. ടേബിളിൽ ഡിസ്‌പ്ലേ ചെയ്യുന്നു
+    let html = "";
+    students.forEach(s => {
+      html += `
+        <tr data-sid="${s.id}">
+          <td style="white-space: nowrap;"><b>${s.regNo || '-'}</b></td>
+          <td><b>${s.name}</b></td>
+          <td class="text-center">
+            <input type="checkbox" class="form-check-input form-check-input-lg att-checkbox" id="att_${s.id}" checked onchange="updateAttendanceCount()">
+          </td>
+        </tr>
+      `;
+    });
+
+    if (tbody) tbody.innerHTML = html || `<tr><td colspan="3" class="text-center">No active students in this class.</td></tr>`;
+    
+    const selectAllAtt = document.getElementById("selectAllAtt");
+    if (selectAllAtt) selectAllAtt.checked = true;
+    window.updateAttendanceCount();
+
+  } catch (err) {
+    console.error("Error loading attendance sheet:", err);
+    if (tbody) tbody.innerHTML = `<tr><td colspan="3" class="text-center text-danger">Error loading data: ${err.message}</td></tr>`;
   }
-
-  const q = query(
-    collection(db, "students"), 
-    where("institutionId", "==", currentInstitutionId), 
-    where("currentClass", "==", selClass.replace(/Class\s*/i, "").trim()), 
-    where("status", "==", "active")
-  );
-  const snap = await getDocs(q);
-
-  let students = [];
-  snap.forEach(d => students.push({ id: d.id, ...d.data() }));
-  students = sortStudentsList(students, sortOrder);
-
-  let html = "";
-  students.forEach(s => {
-    html += `
-      <tr data-sid="${s.id}">
-        <td style="white-space: nowrap;"><b>${s.regNo || '-'}</b></td>
-        <td><b>${s.name}</b></td>
-        <td class="text-center">
-          <input type="checkbox" class="form-check-input form-check-input-lg att-checkbox" id="att_${s.id}" checked onchange="updateAttendanceCount()">
-        </td>
-      </tr>
-    `;
-  });
-  if (tbody) tbody.innerHTML = html || `<tr><td colspan="3" class="text-center">No active students in this class.</td></tr>`;
-  const selectAllAtt = document.getElementById("selectAllAtt");
-  if (selectAllAtt) selectAllAtt.checked = true;
-  window.updateAttendanceCount();
 };
 
 window.toggleSelectAllAttendance = () => {
