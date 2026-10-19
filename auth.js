@@ -95,12 +95,10 @@ window.showSignupForm = (type) => {
   }
 };
 
-// ==========================================
-// SECTION 3: STAFF & ADMIN REGISTRATION
-// ==========================================
 window.handleSignUp = async (e) => {
   e.preventDefault();
-  
+  const form = e.target;
+
   const board = document.getElementById("regBoard")?.value || "";
   const instCode = document.getElementById("regInstCode")?.value.trim().toUpperCase() || "";
   const instName = document.getElementById("regInstName")?.value.trim().toUpperCase() || "";
@@ -127,7 +125,7 @@ window.handleSignUp = async (e) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    // Create User Document in Firestore
+    // 1. users കളക്ഷനിൽ അക്കൗണ്ട് വിവരങ്ങൾ സേവ് ചെയ്യുന്നു (status: pending)
     await setDoc(doc(db, "users", user.uid), {
       uid: user.uid,
       name: adminName,
@@ -141,7 +139,7 @@ window.handleSignUp = async (e) => {
       createdAt: serverTimestamp()
     });
 
-    // Create Settings Document for the Madrasa
+    // 2. settings കളക്ഷനിൽ സ്ഥാപനത്തിന്റെ വിവരങ്ങൾ സേവ് ചെയ്യുന്നു
     await setDoc(doc(db, "settings", institutionId), {
       institutionId: institutionId,
       institutionName: instName,
@@ -161,10 +159,10 @@ window.handleSignUp = async (e) => {
 
     window.showToast("Registration submitted for Super Admin approval!", "success");
 
-    // Clear all fields in the form upon successful submission
-    e.target.reset();
+    // ഫോമിലെ എല്ലാ ഫീൽഡുകളും ക്ലിയർ ചെയ്യുന്നു
+    form.reset();
 
-    // Switch back to login view
+    // ലോഗിൻ ടാബിലേക്ക് തിരികെ മാറ്റുന്നു
     window.switchAuthTab('login');
 
   } catch (error) {
