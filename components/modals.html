@@ -54,7 +54,7 @@
 <div class="modal fade" id="customTaskModal" tabindex="-1" aria-labelledby="customTaskModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <form id="customTaskForm" onsubmit="saveCustomTask(event)">
+      <form id="customTaskForm" onsubmit="window.saveCustomTask(event)">
         <div class="modal-header bg-success text-white">
           <h5 class="modal-title" id="customTaskModalLabel"><i class="fa-solid fa-star me-2"></i>Add Custom Task</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -84,7 +84,7 @@
 <div class="modal fade" id="committeeModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <form id="committeeForm" onsubmit="saveCommitteeMember(event)">
+      <form id="committeeForm" onsubmit="window.saveCommitteeMember(event)">
         <div class="modal-header bg-success text-white">
           <h5 class="modal-title fw-bold">Add Committee Member</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
@@ -122,7 +122,7 @@
 <div class="modal fade" id="feePaymentModal" tabindex="-1" aria-labelledby="feePaymentModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <form id="feePaymentForm" onsubmit="saveFeePayment(event)">
+      <form id="feePaymentForm" onsubmit="window.saveFeePayment(event)">
         <div class="modal-header bg-success text-white">
           <h5 class="modal-title" id="feePaymentModalLabel"><i class="fa-solid fa-indian-rupee-sign me-2"></i>Collect Fee</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -150,7 +150,7 @@
 
           <div class="mb-3">
             <label class="form-label fw-bold">Fee Category</label>
-            <select id="pagesFeeCategory" class="form-select" onchange="toggleFeeCategoryOptions()">
+            <select id="pagesFeeCategory" class="form-select" onchange="window.toggleFeeCategoryOptions()">
               <option value="Monthly Fee">Monthly Fee</option>
               <option value="Special Fee / Fund">Special Fee / Fund</option>
               <option value="Admission Fee">Admission Fee</option>
@@ -161,18 +161,18 @@
           <div class="mb-3" id="monthSelectionDiv">
             <label class="form-label fw-bold">Select Months</label>
             <div class="d-flex flex-wrap gap-2 p-2 border rounded bg-light">
-              <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="APR" id="m_apr" checked onchange="calculateFeeAmount()"><label class="form-check-label" for="m_apr">APR</label></div>
-              <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="MAY" id="m_may" checked onchange="calculateFeeAmount()"><label class="form-check-label" for="m_may">MAY</label></div>
-              <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="JUN" id="m_jun" checked onchange="calculateFeeAmount()"><label class="form-check-label" for="m_jun">JUN</label></div>
-              <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="JUL" id="m_jul" checked onchange="calculateFeeAmount()"><label class="form-check-label" for="m_jul">JUL</label></div>
-              <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="AUG" id="m_aug" checked onchange="calculateFeeAmount()"><label class="form-check-label" for="m_aug">AUG</label></div>
-              <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="SEP" id="m_sep" checked onchange="calculateFeeAmount()"><label class="form-check-label" for="m_sep">SEP</label></div>
-              <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="OCT" id="m_oct" checked onchange="calculateFeeAmount()"><label class="form-check-label" for="m_oct">OCT</label></div>
-              <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="NOV" id="m_nov" checked onchange="calculateFeeAmount()"><label class="form-check-label" for="m_nov">NOV</label></div>
-              <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="DEC" id="m_dec" checked onchange="calculateFeeAmount()"><label class="form-check-label" for="m_dec">DEC</label></div>
-              <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="JAN" id="m_jan" checked onchange="calculateFeeAmount()"><label class="form-check-label" for="m_jan">JAN</label></div>
-              <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="FEB" id="m_feb" checked onchange="calculateFeeAmount()"><label class="form-check-label" for="m_feb">FEB</label></div>
-              <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="MAR" id="m_mar" checked onchange="calculateFeeAmount()"><label class="form-check-label" for="m_mar">MAR</label></div>
+              <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="APR" id="m_apr" checked onchange="window.calculateFeeAmount()"><label class="form-check-label" for="m_apr">APR</label></div>
+              <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="MAY" id="m_may" checked onchange="window.calculateFeeAmount()"><label class="form-check-label" for="m_may">MAY</label></div>
+              <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="JUN" id="m_jun" checked onchange="window.calculateFeeAmount()"><label class="form-check-label" for="m_jun">JUN</label></div>
+              <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="JUL" id="m_jul" checked onchange="window.calculateFeeAmount()"><label class="form-check-label" for="m_jul">JUL</label></div>
+              <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="AUG" id="m_aug" checked onchange="window.calculateFeeAmount()"><label class="form-check-label" for="m_aug">AUG</label></div>
+              <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="SEP" id="m_sep" checked onchange="window.calculateFeeAmount()"><label class="form-check-label" for="m_sep">SEP</label></div>
+              <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="OCT" id="m_oct" checked onchange="window.calculateFeeAmount()"><label class="form-check-label" for="m_oct">OCT</label></div>
+              <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="NOV" id="m_nov" checked onchange="window.calculateFeeAmount()"><label class="form-check-label" for="m_nov">NOV</label></div>
+              <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="DEC" id="m_dec" checked onchange="window.calculateFeeAmount()"><label class="form-check-label" for="m_dec">DEC</label></div>
+              <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="JAN" id="m_jan" checked onchange="window.calculateFeeAmount()"><label class="form-check-label" for="m_jan">JAN</label></div>
+              <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="FEB" id="m_feb" checked onchange="window.calculateFeeAmount()"><label class="form-check-label" for="m_feb">FEB</label></div>
+              <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="MAR" id="m_mar" checked onchange="window.calculateFeeAmount()"><label class="form-check-label" for="m_mar">MAR</label></div>
             </div>
           </div>
 
@@ -196,6 +196,103 @@
           <button type="submit" class="btn btn-success px-4"><i class="fa-solid fa-check me-1"></i> Save & Print Receipt</button>
         </div>
       </form>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- 5. Student Profile Add / Edit Modal        -->
+<!-- ========================================== -->
+<div class="modal fade" id="studentProfileModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header bg-madrassa text-white">
+        <h5 class="modal-title fw-bold" id="stuModalTitle">Student Profile</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-0">
+        <form id="studentProfileForm" onsubmit="window.saveStudentProfile(event)">
+          <input type="hidden" id="stuDocId">
+          <div class="p-3">
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label small fw-bold">Reg No. *</label>
+                <input type="number" id="stuRegNo" class="form-control fw-bold" required>
+              </div>
+              <div class="col-md-8">
+                <label class="form-label small fw-bold">Student Name *</label>
+                <input type="text" id="stuName" class="form-control text-uppercase" required>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small fw-bold">Gender *</label>
+                <select id="stuGender" class="form-select">
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small fw-bold">Current Class *</label>
+                <select id="stuCurrentClass" class="form-select">
+                  <option value="1">Class 1</option><option value="2">Class 2</option><option value="3">Class 3</option>
+                  <option value="4">Class 4</option><option value="5">Class 5</option><option value="6">Class 6</option>
+                  <option value="7">Class 7</option><option value="8">Class 8</option><option value="9">Class 9</option>
+                  <option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small fw-bold">Father's Name</label>
+                <input type="text" id="stuFatherName" class="form-control text-uppercase">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small fw-bold">Mobile Number</label>
+                <input type="tel" id="stuPhone" class="form-control">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small fw-bold">Place</label>
+                <input type="text" id="stuPlace" class="form-control text-uppercase">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small fw-bold">Monthly Fee (₹)</label>
+                <input type="number" id="stuMonthlyFee" class="form-control">
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-success" onclick="window.saveStudentProfile(event)"><i class="fa-solid fa-save me-1"></i> Save Details</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- 6. Student Profile Full Details View Modal -->
+<!-- ========================================== -->
+<div class="modal fade" id="studentDetailsViewModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title fw-bold"><i class="fa-solid fa-id-card me-2"></i>Student Details</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="row g-3">
+          <div class="col-md-6"><p class="mb-1 text-muted small">Student Name:</p><h6 class="fw-bold" id="viewStuName">-</h6></div>
+          <div class="col-md-3"><p class="mb-1 text-muted small">Reg No:</p><h6 class="fw-bold text-success" id="viewStuRegNo">-</h6></div>
+          <div class="col-md-3"><p class="mb-1 text-muted small">Class:</p><h6 class="fw-bold" id="viewStuClass">-</h6></div>
+          <hr class="my-2">
+          <div class="col-md-4"><p class="mb-1 text-muted small">Gender:</p><h6 class="fw-bold" id="viewStuGender">-</h6></div>
+          <div class="col-md-4"><p class="mb-1 text-muted small">Father's Name:</p><h6 class="fw-bold" id="viewStuFather">-</h6></div>
+          <div class="col-md-4"><p class="mb-1 text-muted small">Phone:</p><h6 class="fw-bold" id="viewStuPhone">-</h6></div>
+          <div class="col-md-4"><p class="mb-1 text-muted small">Place:</p><h6 class="fw-bold" id="viewStuPlace">-</h6></div>
+          <div class="col-md-4"><p class="mb-1 text-muted small">Monthly Fee:</p><h6 class="fw-bold text-primary" id="viewStuFee">-</h6></div>
+        </div>
+      </div>
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
     </div>
   </div>
 </div>
