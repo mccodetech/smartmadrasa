@@ -435,7 +435,6 @@ window.deleteStaffAccount = async (userId, name) => {
   }
 };
 
-// Super Admin List Load Function with Custom Short Code Support
 window.loadSuperAdminRequests = async () => {
   const tableBody = document.getElementById("superAdminTableBody");
   if (!tableBody) return;
@@ -457,6 +456,10 @@ window.loadSuperAdminRequests = async () => {
       const isPending = user.status === "pending";
       const shortCode = user.shortCode || "-";
 
+      const safeInstName = (user.institutionName || '').replace(/'/g, "\\'");
+      const safeAdminName = (user.name || '').replace(/'/g, "\\'");
+      const safeEmail = (user.email || '').replace(/'/g, "\\'");
+
       html += `
         <tr>
           <td><span class="badge bg-primary fs-6">${shortCode}</span></td>
@@ -476,10 +479,10 @@ window.loadSuperAdminRequests = async () => {
                 ? `<button class="btn btn-sm btn-success px-2" onclick="approveMadrasaAdmin('${docSnap.id}')" title="Approve"><i class="fa-solid fa-check"></i></button>`
                 : `<span class="badge bg-light text-dark border me-1">Approved</span>`
               }
-              <button class="btn btn-sm btn-outline-primary px-2" onclick="editMadrasaDetails('${docSnap.id}', '${user.institutionName || ''}', '${user.name || ''}', '${user.phone || ''}', '${shortCode}')" title="Edit Madrasa">
+              <button class="btn btn-sm btn-outline-primary px-2" onclick="window.editMadrasaDetails('${docSnap.id}', '${safeInstName}', '${safeAdminName}', '${user.phone || ''}', '${shortCode}', '${safeEmail}')" title="Edit Madrasa">
                 <i class="fa-solid fa-pen"></i>
               </button>
-              <button class="btn btn-sm btn-outline-danger px-2" onclick="deleteMadrasaAdmin('${docSnap.id}', '${user.institutionName || 'this institution'}')" title="Delete Madrasa">
+              <button class="btn btn-sm btn-outline-danger px-2" onclick="window.deleteMadrasaAdmin('${docSnap.id}', '${safeInstName}')" title="Delete Madrasa">
                 <i class="fa-solid fa-trash"></i>
               </button>
             </div>
