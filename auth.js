@@ -100,6 +100,124 @@ window.showSignupForm = (type) => {
 // ==========================================
 window.handleSignUp = async (e) => {
   e.preventDefault();
+  
+  const board = document.getElementById("regBoard")?.value || "";
+  const instCode = document.getElementById("regInstCode")?.value.trim().toUpperCase() || "";
+  const instName = document.getElementById("regInstName")?.value.trim().toUpperCase() || "";
+  const address = document.getElementById("regAddress")?.value.trim().toUpperCase() || "";
+  const place = document.getElementById("regPlace")?.value.trim().toUpperCase() || "";
+  const po = document.getElementById("regPo")?.value.trim().toUpperCase() || "";
+  const district = document.getElementById("regDistrict")?.value.trim().toUpperCase() || "";
+  const pincode = document.getElementById("regPincode")?.value.trim() || "";
+  const adminName = document.getElementById("regUserName")?.value.trim().toUpperCase() || "";
+  const phone = document.getElementById("regPhone")?.value.trim() || "";
+  const whatsapp = document.getElementById("regWhatsapp")?.value.trim() || "";
+  const email = document.getElementById("regEmail")?.value.trim().toLowerCase() || "";
+  const password = document.getElementById("regPassword")?.value || "";
+  const confirmPassword = document.getElementById("regPasswordConfirm")?.value || "";
+
+  if (password !== confirmPassword) {
+    window.showToast("Passwords do not match!", "error");
+    return;
+  }
+
+  const institutionId = `${board}_${instCode}`;
+
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    // Create User Document in Firestore
+    await setDoc(doc(db, "users", user.uid), {
+      uid: user.uid,
+      name: adminName,
+      email: email,
+      phone: phone,
+      whatsapp: whatsapp,
+      role: "admin",
+      status: "pending",
+      institutionId: institutionId,
+      institutionName: instName,
+      createdAt: serverTimestamp()
+    });
+
+    // Create Settings Document for the Madrasa
+    await setDoc(doc(db, "settings", institutionId), {
+      institutionId: institutionId,
+      institutionName: instName,
+      board: board,
+      code: instCode,
+      address: address,
+      place: place,
+      po: po,
+      district: district,
+      pincode: pincode,
+      adminName: adminName,
+      phone: phone,
+      whatsapp: whatsapp,
+      email: email,
+      createdAt: serverTimestamp()
+    }, { merge: true });
+
+    window.showToast("Registration submitted for Super Admin approval!", "success");
+
+    // Clear all fields in the form upon successful submission
+    e.target.reset();
+
+    // Switch back to login view
+    window.switchAuthTab('login');
+
+  } catch (error) {
+    window.showToast("Registration Error: " + error.message, "error");
+  }
+};
+
+window.handleStaffSignUp = async (e) => {
+  e.preventDefault();
+
+  const role = document.getElementById("staffRole")?.value || "teacher";
+  const board = document.getElementById("staffBoard")?.value || "";
+  const instCode = document.getElementById("staffInstCode")?.value.trim().toUpperCase() || "";
+  const staffName = document.getElementById("staffName")?.value.trim().toUpperCase() || "";
+  const phone = document.getElementById("staffPhone")?.value.trim() || "";
+  const whatsapp = document.getElementById("staffWhatsapp")?.value.trim() || "";
+  const email = document.getElementById("staffEmail")?.value.trim().toLowerCase() || "";
+  const password = document.getElementById("staffPassword")?.value || "";
+  const confirmPassword = document.getElementById("staffPasswordConfirm")?.value || "";
+
+  if (password !== confirmPassword) {
+    window.showToast("Passwords do not match!", "error");
+    return;
+  }
+
+  const institutionId = `${board}_${instCode}`;
+
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    await setDoc(doc(db, "users", user.uid), {
+      uid: user.uid,
+      name: staffName,
+      email: email,
+      phone: phone,
+      whatsapp: whatsapp,
+      role: role,
+      status: "pending",
+      institutionId: institutionId,
+      createdAt: serverTimestamp()
+    });
+
+    window.showToast("Staff registration submitted for Admin approval!", "success");
+
+    // Clear all fields in the form
+    e.target.reset();
+
+    window.switchAuthTab('login');
+
+  } catch (error) {
+    window.showToast("Staff Registration Error: " + error.message, "error");
+  }
 };
 
 // ==========================================
@@ -111,7 +229,7 @@ window.handleUnifiedLogin = async (e) => {
   e.preventDefault();
   const identifier = document.getElementById("loginIdentifier")?.value.trim() || "";
 
-  // രക്ഷിതാക്കളുടെ ലോഗിൻ (റീജസ്ട്രേഷൻ നമ്പർ വഴി)
+  // Parent Login (via Student Registration Number)
   if (/^\d+$/.test(identifier)) {
     const reg = Number(identifier);
     const mobile = document.getElementById("loginMobile")?.value.trim().slice(-10);
@@ -198,7 +316,7 @@ window.switchParentStudent = () => {
   if (selectedStudent) loadParentStudentData(selectedStudent);
 };
 
-// പാരന്റ് പോർട്ടലിൽ കുട്ടിയുടെ ഫീസ്, മാർക്ക്, അറ്റൻഡൻസ്, പെർഫോമൻസ് എന്നിവ ലോഡ് ചെയ്യുന്ന ഫംഗ്ഷൻ
+// Function to load student fee, marks, attendance, and performance in Parent Portal
 async function loadParentStudentData(student) {
   const nameEl = document.getElementById("pvStudentName");
   const classEl = document.getElementById("pvClass");
@@ -269,7 +387,7 @@ async function loadParentStudentData(student) {
       marksTableBody.innerHTML = marksHtml || `<tr><td colspan="3" class="text-center text-muted">No exam marks found</td></tr>`;
     }
 
-    // 3. Attendance Summary Calculation (മാനുവൽ ഡാറ്റയും ഡെയിലി അറ്റൻഡൻസും ചേർത്ത്)
+    // 3. Attendance Summary Calculation
     const settingsDoc = await getDoc(doc(db, "settings", student.institutionId));
     let manualTotalDays = 0;
     if (settingsDoc.exists()) {
@@ -333,4 +451,4 @@ async function loadParentStudentData(student) {
   } catch (e) {
     console.error("Error loading parent data:", e);
   }
-};
+}
