@@ -115,7 +115,7 @@ window.deleteAllStudents = async () => {
   }
 };
 
-// ക്ലാസ്സ് അനുസരിച്ച് വിദ്യാർത്ഥികളെ ലോഡ് ചെയ്യാൻ
+// ക്ലാസ്സ് അനുസരിച്ച് വിദ്യാർത്ഥികളെ ലോഡ് ചെയ്യാനും Dynamic Sorting ബാധകമാക്കാനും
 window.loadStudentsByClass = async (forceRefresh = false) => {
   const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
   let selectedClass = document.getElementById("filterClassSelect")?.value || "ALL";
@@ -137,7 +137,31 @@ window.loadStudentsByClass = async (forceRefresh = false) => {
       localStudentsCache = [];
       snap.forEach(d => localStudentsCache.push({ id: d.id, ...d.data() }));
 
-      localStudentsCache.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
+      // ==========================================
+      // DYNAMIC SORTING LOGIC BASED ON SUPER ADMIN SETTINGS
+      // ==========================================
+      if (window.sysSortOrder === "NAME_ASC") {
+        localStudentsCache.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+      } else if (window.sysSortOrder === "BOYS_FIRST") {
+        localStudentsCache.sort((a, b) => {
+          const gA = (a.gender || '').toLowerCase();
+          const gB = (b.gender || '').toLowerCase();
+          if (gA === 'male' && gB !== 'male') return -1;
+          if (gA !== 'male' && gB === 'male') return 1;
+          return (Number(a.regNo) || 0) - (Number(b.regNo) || 0);
+        });
+      } else if (window.sysSortOrder === "GIRLS_FIRST") {
+        localStudentsCache.sort((a, b) => {
+          const gA = (a.gender || '').toLowerCase();
+          const gB = (b.gender || '').toLowerCase();
+          if (gA === 'female' && gB !== 'female') return -1;
+          if (gA !== 'female' && gB === 'female') return 1;
+          return (Number(a.regNo) || 0) - (Number(b.regNo) || 0);
+        });
+      } else {
+        // Default Reg No Order
+        localStudentsCache.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
+      }
     }
 
     // ക്ലാസ് ഫിൽട്ടറിങ് ലോക്കൽ ക്യാഷിൽ നിന്ന്
@@ -280,7 +304,7 @@ window.downloadCSVFormat = () => {
 };
 
 // ==========================================
-// STUDENT PROFILE VIEW MODULE (students.js)
+// STUDENT PROFILE VIEW MODULE
 // ==========================================
 
 window.viewStudentProfile = (docId) => {
