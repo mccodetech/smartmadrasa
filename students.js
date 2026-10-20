@@ -76,7 +76,6 @@ window.openStudentProfileModal = (docId) => {
 
   const modalEl = document.getElementById('studentProfileModal');
   if (modalEl) {
-    // Backdrop ലേയറുകൾ കുടുങ്ങിക്കിടക്കുന്നത് ഒഴിവാക്കാൻ
     document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
     document.body.classList.remove('modal-open');
 
@@ -213,6 +212,7 @@ window.deleteAllStudents = async () => {
   }
 };
 
+// ക്ലാസ് അനുസരിച്ച് വിദ്യാർത്ഥികളെ ലോഡ് ചെയ്യാൻ (രജിസ്റ്ററിൽ എപ്പോഴും Reg No ഓർഡർ മാത്രം)
 window.loadStudentsByClass = async (forceRefresh = false) => {
   const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
   let selectedClass = document.getElementById("filterClassSelect")?.value || "ALL";
@@ -222,20 +222,6 @@ window.loadStudentsByClass = async (forceRefresh = false) => {
   tbody.innerHTML = `<tr><td colspan="9" class="text-center text-muted py-3">Loading data...</td></tr>`;
 
   try {
-    // Read current sorting setting from Firestore
-    let sortOrder = window.sysSortOrder || "REG_NO";
-    if (currentInstitutionId) {
-      try {
-        const settingsSnap = await getDoc(doc(db, "settings", currentInstitutionId));
-        if (settingsSnap.exists()) {
-          sortOrder = settingsSnap.data().sortOrder || "REG_NO";
-          window.sysSortOrder = sortOrder;
-        }
-      } catch (e) {
-        console.log("Error reading sorting settings:", e);
-      }
-    }
-
     if (localStudentsCache.length === 0 || forceRefresh) {
       let q;
       if (selectedClass === "ALL") {
@@ -245,34 +231,10 @@ window.loadStudentsByClass = async (forceRefresh = false) => {
       }
 
       const snap = await getDocs(q);
-      // students.js-ൽ loadStudentsByClass ഫങ്ഷൻ ഉള്ളിൽ:
-localStudentsCache = [];
-snap.forEach(d => localStudentsCache.push({ id: d.id, ...d.data() }));
+      localStudentsCache = [];
+      snap.forEach(d => localStudentsCache.push({ id: d.id, ...d.data() }));
 
-// എപ്പോഴും റെജിസ്ട്രേഷൻ നമ്പർ (Reg No) ക്രമത്തിൽ മാത്രം ലിസ്റ്റ് ചെയ്യും
-localStudentsCache.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
-    }
-
-    // Dynamic Sorting Logic Execution
-    if (sortOrder === "NAME_ASC") {
-      localStudentsCache.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-    } else if (sortOrder === "BOYS_FIRST") {
-      localStudentsCache.sort((a, b) => {
-        const gA = (a.gender || '').toLowerCase();
-        const gB = (b.gender || '').toLowerCase();
-        if (gA === 'male' && gB !== 'male') return -1;
-        if (gA !== 'male' && gB === 'male') return 1;
-        return (Number(a.regNo) || 0) - (Number(b.regNo) || 0);
-      });
-    } else if (sortOrder === "GIRLS_FIRST") {
-      localStudentsCache.sort((a, b) => {
-        const gA = (a.gender || '').toLowerCase();
-        const gB = (b.gender || '').toLowerCase();
-        if (gA === 'female' && gB !== 'female') return -1;
-        if (gA !== 'female' && gB === 'female') return 1;
-        return (Number(a.regNo) || 0) - (Number(b.regNo) || 0);
-      });
-    } else {
+      // രജിസ്റ്ററിൽ എപ്പോഴും രജിസ്ട്രേഷൻ നമ്പർ (Reg No) ക്രമത്തിൽ മാത്രം ലിസ്റ്റ് ചെയ്യും
       localStudentsCache.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
     }
 
@@ -288,6 +250,7 @@ localStudentsCache.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0
     window.showToast("Error loading students: " + err.message, "error");
   }
 };
+
 function renderPaginatedTable(dataArray = localStudentsCache) {
   const tbody = document.getElementById("studentsTableBody");
   if (!tbody) return;
@@ -313,7 +276,9 @@ function renderPaginatedTable(dataArray = localStudentsCache) {
   pageData.forEach((s, index) => {
     const slNo = startIndex + index + 1;
     const cleanClass = (s.currentClass || '-').replace(/Class\s*/i, "").trim();
-    const genderBadge = s.gender === 'Female' 
+    const g = (s.gender || '').toString().trim().toLowerCase();
+    const isGirl = g === 'female' || g === 'girl' || g === 'f';
+    const genderBadge = isGirl 
       ? `<span class="badge bg-danger-subtle text-danger border border-danger">Female</span>` 
       : `<span class="badge bg-primary-subtle text-primary border border-primary">Male</span>`;
 
@@ -416,7 +381,7 @@ window.downloadCSVFormat = () => {
   document.body.removeChild(link);
 };
 
-// Student Profile View
+// Student Profile Full Details View
 window.viewStudentProfile = (docId) => {
   const s = localStudentsCache.find(x => x.id === docId);
   if (!s) return;
