@@ -561,9 +561,10 @@ onAuthStateChanged(auth, async (user) => {
         window.currentUserName = userData.name || "Staff";
 
         if (window.currentInstitutionId) {
-          sessionStorage.setItem("currentInstitutionId", window.currentInstitutionId);
-          await window.loadInstitutionSystemSettings(window.currentInstitutionId);
-        }
+  sessionStorage.setItem("currentInstitutionId", window.currentInstitutionId);
+  // Settings fully load aayadhinu shesham maathram baaki UI load aakan await cheyyunnu
+  await window.loadInstitutionSettings(); 
+}
 
         const instNameEl = document.getElementById("displayMadrassaName");
         if (instNameEl) {
