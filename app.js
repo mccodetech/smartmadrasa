@@ -23,6 +23,7 @@ window.isSuperAdmin = false;
 window.sysFeePermission = "all";
 window.sysReqManualReceipt = false;
 window.customSpecialFunds = [];
+window.sysSortOrder = "REG_NO";
 
 // Toast Notification
 window.showToast = (message, type = "success") => {
@@ -35,7 +36,11 @@ window.showToast = (message, type = "success") => {
   if (type === "warning") icon = "fa-triangle-exclamation";
   toast.innerHTML = `<i class="fa-solid ${icon} fs-5"></i> <span>${message}</span>`;
   container.appendChild(toast);
-  setTimeout(() => { toast.style.transition = "all 0.4s ease"; toast.style.opacity = "0"; setTimeout(() => toast.remove(), 400); }, 4000);
+  setTimeout(() => { 
+    toast.style.transition = "all 0.4s ease"; 
+    toast.style.opacity = "0"; 
+    setTimeout(() => toast.remove(), 400); 
+  }, 4000);
 };
 
 // Sync Mobile Menu
@@ -49,12 +54,16 @@ window.syncMobileMenu = () => {
 
 window.populateClassDropdowns = function() {
   const allClasses = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
-  const allowedClasses = (window.currentUserRole === "principal" || window.currentUserRole === "admin" || window.isSuperAdmin) ? allClasses : window.currentUserAssignedClasses;
+  const allowedClasses = (window.currentUserRole === "principal" || window.currentUserRole === "admin" || window.isSuperAdmin) 
+    ? allClasses 
+    : window.currentUserAssignedClasses;
 
   const filterSelect = document.getElementById("filterClassSelect");
   if (filterSelect) {
     filterSelect.innerHTML = "";
-    if (window.currentUserRole === "principal" || window.currentUserRole === "admin" || window.isSuperAdmin) filterSelect.innerHTML += `<option value="ALL">All Classes</option>`;
+    if (window.currentUserRole === "principal" || window.currentUserRole === "admin" || window.isSuperAdmin) {
+      filterSelect.innerHTML += `<option value="ALL">All Classes</option>`;
+    }
     allowedClasses.forEach(c => filterSelect.innerHTML += `<option value="${c}">Class ${c}</option>`);
   }
 
@@ -91,6 +100,10 @@ window.loadInstitutionSettings = async () => {
     if (snap.exists()) {
       const data = snap.data();
       
+      window.sysSortOrder = data.sortOrder || "REG_NO";
+      window.sysFeePermission = data.feePermission || "all";
+      window.sysReqManualReceipt = data.reqManualReceipt || false;
+
       if (data.specialFeeCategories && inputEl) {
         inputEl.value = data.specialFeeCategories.join(", ");
         window.customSpecialFunds = data.specialFeeCategories;
@@ -122,133 +135,146 @@ window.loadInstitutionSettings = async () => {
   }
 };
 
-// ==========================================
-// SINGLE PHOTO SAVE & LOAD SYSTEM
-// ==========================================
-
-window.saveSinglePhotoSetting = async function() {
-    const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
-    if (!currentInstitutionId) {
-        window.showToast("Institution ID not found.", "error");
-        return;
+// Settings sync for active institution
+window.loadInstitutionSystemSettings = async function(institutionId) {
+  if (!institutionId) return;
+  try {
+    const docRef = doc(db, "settings", institutionId);
+    const snap = await getDoc(docRef);
+    if (snap.exists()) {
+      const data = snap.data();
+      window.sysSortOrder = data.sortOrder || "REG_NO";
+    } else {
+      window.sysSortOrder = "REG_NO";
     }
-
-    try {
-        const fileInput = document.getElementById('instPhoto1File');
-        const captionInput = document.getElementById('instCaption1');
-
-        const file1 = (fileInput && fileInput.files && fileInput.files.length > 0) ? fileInput.files[0] : null;
-        const caption1 = captionInput ? captionInput.value.trim() : '';
-
-        const compressImage = (file) => {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = (event) => {
-                    const img = new Image();
-                    img.src = event.target.result;
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        let width = img.width;
-                        let height = img.height;
-                        const maxWidth = 800;
-                        if (width > maxWidth) {
-                            height = Math.round((height * maxWidth) / width);
-                            width = maxWidth;
-                        }
-                        canvas.width = width;
-                        canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-                        resolve(canvas.toDataURL('image/jpeg', 0.7));
-                    };
-                    img.onerror = (error) => reject(error);
-                };
-                reader.onerror = (error) => reject(error);
-            });
-        };
-
-        let photo1Data = null;
-
-        if (file1) {
-            let compressedUrl = await compressImage(file1);
-            photo1Data = { url: compressedUrl, caption: caption1 };
-        } else {
-            const docRef = doc(db, "settings", currentInstitutionId);
-            const snap = await getDoc(docRef);
-            if (snap.exists() && snap.data().photo1) {
-                photo1Data = { url: snap.data().photo1.url, caption: caption1 };
-            }
-        }
-
-        if (!photo1Data) {
-            window.showToast("Please choose a photo to upload.", "warning");
-            return;
-        }
-
-        await setDoc(doc(db, "settings", currentInstitutionId), {
-            photo1: photo1Data,
-            updatedAt: serverTimestamp()
-        }, { merge: true });
-
-        localStorage.setItem('cachedGalleryPhotos_' + currentInstitutionId, JSON.stringify([photo1Data]));
-
-        const previewArea = document.getElementById('instPhotoPreviewArea');
-        const previewImg = document.getElementById('instPhotoPreviewImg');
-        if (previewImg) previewImg.src = photo1Data.url;
-        if (previewArea) previewArea.classList.remove('d-none');
-
-        if (typeof window.loadHomeInstitutionPhotos === 'function') {
-            window.loadHomeInstitutionPhotos([photo1Data]);
-        }
-
-        window.showToast("Institution photo saved successfully!", "success");
-    } catch (error) {
-        console.error('Error saving photo:', error);
-        window.showToast("Failed to save photo: " + error.message, "error");
-    }
+  } catch (err) {
+    console.error("Error loading institution settings:", err);
+    window.sysSortOrder = "REG_NO";
+  }
 };
 
-// Aliasing for safety
+// SINGLE PHOTO SAVE & LOAD SYSTEM
+window.saveSinglePhotoSetting = async function() {
+  const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
+  if (!currentInstitutionId) {
+    window.showToast("Institution ID not found.", "error");
+    return;
+  }
+
+  try {
+    const fileInput = document.getElementById('instPhoto1File');
+    const captionInput = document.getElementById('instCaption1');
+
+    const file1 = (fileInput && fileInput.files && fileInput.files.length > 0) ? fileInput.files[0] : null;
+    const caption1 = captionInput ? captionInput.value.trim() : '';
+
+    const compressImage = (file) => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+          const img = new Image();
+          img.src = event.target.result;
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+            const maxWidth = 800;
+            if (width > maxWidth) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            }
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL('image/jpeg', 0.7));
+          };
+          img.onerror = (error) => reject(error);
+        };
+        reader.onerror = (error) => reject(error);
+      });
+    };
+
+    let photo1Data = null;
+
+    if (file1) {
+      let compressedUrl = await compressImage(file1);
+      photo1Data = { url: compressedUrl, caption: caption1 };
+    } else {
+      const docRef = doc(db, "settings", currentInstitutionId);
+      const snap = await getDoc(docRef);
+      if (snap.exists() && snap.data().photo1) {
+        photo1Data = { url: snap.data().photo1.url, caption: caption1 };
+      }
+    }
+
+    if (!photo1Data) {
+      window.showToast("Please choose a photo to upload.", "warning");
+      return;
+    }
+
+    await setDoc(doc(db, "settings", currentInstitutionId), {
+      photo1: photo1Data,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+
+    localStorage.setItem('cachedGalleryPhotos_' + currentInstitutionId, JSON.stringify([photo1Data]));
+
+    const previewArea = document.getElementById('instPhotoPreviewArea');
+    const previewImg = document.getElementById('instPhotoPreviewImg');
+    if (previewImg) previewImg.src = photo1Data.url;
+    if (previewArea) previewArea.classList.remove('d-none');
+
+    if (typeof window.loadHomeInstitutionPhotos === 'function') {
+      window.loadHomeInstitutionPhotos([photo1Data]);
+    }
+
+    window.showToast("Institution photo saved successfully!", "success");
+  } catch (error) {
+    console.error('Error saving photo:', error);
+    window.showToast("Failed to save photo: " + error.message, "error");
+  }
+};
+
 window.saveInstitutionPhotosSetting = window.saveSinglePhotoSetting;
 
 window.loadHomeInstitutionPhotos = function(photosList = null) {
-    const container = document.getElementById('homeGalleryContainer');
-    const cardContainer = document.getElementById('homeGalleryCard');
-    if (!container || !cardContainer) return;
-    
-    container.innerHTML = '';
-    
-    let validPhotos = [];
-    if (photosList) {
-        validPhotos = photosList.filter(p => p && p.url);
-    } else {
-        const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
-        let cached = localStorage.getItem('cachedGalleryPhotos_' + currentInstitutionId);
-        if (cached) {
-            try {
-                validPhotos = JSON.parse(cached).filter(p => p && p.url);
-            } catch(e) {
-                validPhotos = [];
-            }
-        }
+  const container = document.getElementById('homeGalleryContainer');
+  const cardContainer = document.getElementById('homeGalleryCard');
+  if (!container || !cardContainer) return;
+  
+  container.innerHTML = '';
+  
+  let validPhotos = [];
+  if (photosList) {
+    validPhotos = photosList.filter(p => p && p.url);
+  } else {
+    const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
+    let cached = localStorage.getItem('cachedGalleryPhotos_' + currentInstitutionId);
+    if (cached) {
+      try {
+        validPhotos = JSON.parse(cached).filter(p => p && p.url);
+      } catch(e) {
+        validPhotos = [];
+      }
     }
+  }
 
-    if (validPhotos.length > 0) {
-        cardContainer.style.display = 'block';
-        
-        let photo = validPhotos[0]; 
-        container.innerHTML = `
-            <div class="col-12 text-center">
-                <div class="card p-2 border-0 shadow-sm bg-transparent">
-                    <img src="${photo.url}" alt="${photo.caption || 'Institution Photo'}" class="img-fluid rounded shadow-sm w-100 gallery-img" style="max-height: 320px; object-fit: contain; background: #000;">
-                    ${photo.caption ? `<h6 class="fw-bold text-dark mt-2">${photo.caption}</h6>` : ''}
-                </div>
-            </div>
-        `;
-    } else {
-        cardContainer.style.display = 'none';
-    }
+  if (validPhotos.length > 0) {
+    cardContainer.style.display = 'block';
+    let photo = validPhotos[0]; 
+    container.innerHTML = `
+      <div class="col-12 text-center">
+        <div class="card p-2 border-0 shadow-sm bg-transparent">
+          <img src="${photo.url}" alt="${photo.caption || 'Institution Photo'}" class="img-fluid rounded shadow-sm w-100 gallery-img" style="max-height: 320px; object-fit: contain; background: #000;">
+          ${photo.caption ? `<h6 class="fw-bold text-dark mt-2">${photo.caption}</h6>` : ''}
+        </div>
+      </div>
+    `;
+  } else {
+    cardContainer.style.display = 'none';
+  }
 };
 
 window.saveSpecialFundsSetting = async () => {
@@ -287,10 +313,7 @@ window.saveWorkingDaysSetting = async () => {
   }
 };
 
-// ==========================================
 // STAFF MANAGEMENT & CLASS ASSIGNMENT MODULE
-// ==========================================
-
 window.openStaffProfileModal = (staffId = null) => {
   const modalEl = document.getElementById("staffProfileModal");
   if (!modalEl) {
@@ -357,10 +380,7 @@ window.instAssignClassesToStaff = async (e) => {
 
 window.loadPrincipalsList = async () => {
   const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
-  if (!currentInstitutionId) {
-    console.warn("Institution ID not found.");
-    return;
-  }
+  if (!currentInstitutionId) return;
 
   try {
     const q = query(collection(db, "users"), where("institutionId", "==", currentInstitutionId));
@@ -435,113 +455,91 @@ window.deleteStaffAccount = async (userId, name) => {
   }
 };
 
-window.loadSuperAdminRequests = async () => {
-  const tableBody = document.getElementById("superAdminTableBody");
-  if (!tableBody) return;
+// Super Admin - Edit Modal Data Setter
+window.editMadrasaDetails = function(userId, currentInstName, currentAdminName, currentPhone, currentShortCode, currentEmail) {
+  const idEl = document.getElementById("editMadrasaDocId");
+  const codeEl = document.getElementById("editMadrasaShortCode");
+  const nameEl = document.getElementById("editMadrasaName");
+  const adminEl = document.getElementById("editMadrasaAdminName");
+  const phoneEl = document.getElementById("editMadrasaPhone");
+  const emailEl = document.getElementById("editMadrasaEmail");
 
-  tableBody.innerHTML = `<tr><td colspan="8" class="text-center text-muted">Loading institutions...</td></tr>`;
+  if (idEl) idEl.value = userId;
+  if (codeEl) codeEl.value = (currentShortCode && currentShortCode !== '-') ? currentShortCode : '';
+  if (nameEl) nameEl.value = currentInstName || '';
+  if (adminEl) adminEl.value = currentAdminName || '';
+  if (phoneEl) phoneEl.value = currentPhone || '';
+  if (emailEl) emailEl.value = (currentEmail && currentEmail !== '-') ? currentEmail : '';
 
-  try {
-    const q = query(collection(db, "users"), where("role", "==", "admin"));
-    const querySnapshot = await getDocs(q);
-    let html = "";
-
-    if (querySnapshot.empty) {
-      tableBody.innerHTML = `<tr><td colspan="8" class="text-center text-muted">No Madrasa Registrations Found.</td></tr>`;
-      return;
-    }
-
-    querySnapshot.forEach((docSnap) => {
-      const user = docSnap.data();
-      const isPending = user.status === "pending";
-      const shortCode = user.shortCode || "-";
-
-      const safeInstName = (user.institutionName || '').replace(/'/g, "\\'");
-      const safeAdminName = (user.name || '').replace(/'/g, "\\'");
-      const safeEmail = (user.email || '').replace(/'/g, "\\'");
-
-      html += `
-        <tr>
-          <td><span class="badge bg-primary fs-6">${shortCode}</span></td>
-          <td><b>${user.institutionId || '-'}</b></td>
-          <td>${user.institutionName || 'Smart Madrasa'}</td>
-          <td>${user.email || '-'}</td>
-          <td>${user.name || '-'}</td>
-          <td class="text-center">${user.phone || '-'}</td>
-          <td>
-            <span class="badge ${isPending ? 'bg-warning text-dark' : 'bg-success'}">
-              ${isPending ? 'Pending' : 'Active'}
-            </span>
-          </td>
-          <td class="text-center">
-            <div class="d-flex align-items-center justify-content-center gap-1">
-              ${isPending 
-                ? `<button class="btn btn-sm btn-success px-2" onclick="approveMadrasaAdmin('${docSnap.id}')" title="Approve"><i class="fa-solid fa-check"></i></button>`
-                : `<span class="badge bg-light text-dark border me-1">Approved</span>`
-              }
-              <button class="btn btn-sm btn-outline-primary px-2" onclick="window.editMadrasaDetails('${docSnap.id}', '${safeInstName}', '${safeAdminName}', '${user.phone || ''}', '${shortCode}', '${safeEmail}')" title="Edit Madrasa">
-                <i class="fa-solid fa-pen"></i>
-              </button>
-              <button class="btn btn-sm btn-outline-danger px-2" onclick="window.deleteMadrasaAdmin('${docSnap.id}', '${safeInstName}')" title="Delete Madrasa">
-                <i class="fa-solid fa-trash"></i>
-              </button>
-            </div>
-          </td>
-        </tr>
-      `;
-    });
-
-    tableBody.innerHTML = html;
-  } catch (e) {
-    console.error("Error loading super admin data:", e);
-    tableBody.innerHTML = `<tr><td colspan="8" class="text-center text-danger">Error loading data: ${e.message}</td></tr>`;
+  const modalEl = document.getElementById("editMadrasaModal");
+  if (modalEl) {
+    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+    document.body.classList.remove('modal-open');
+    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    modal.show();
+  } else {
+    window.showToast("Edit modal not found in HTML", "error");
   }
 };
 
-// Edit Function to assign/update Short Code (e.g., MD01)
-window.editMadrasaDetails = async (userId, currentInstName, currentAdminName, currentPhone, currentShortCode) => {
-  const newShortCode = prompt("Enter Custom Short Code (e.g., MD01, MD02):", currentShortCode !== '-' ? currentShortCode : "MD01");
-  if (newShortCode === null) return;
+// Save Edited Madrasa Details
+window.saveEditedMadrasaDetails = async function() {
+  const userId = document.getElementById("editMadrasaDocId")?.value;
+  const shortCode = document.getElementById("editMadrasaShortCode")?.value.trim().toUpperCase();
+  const instName = document.getElementById("editMadrasaName")?.value.trim().toUpperCase();
+  const adminName = document.getElementById("editMadrasaAdminName")?.value.trim().toUpperCase();
+  const phone = document.getElementById("editMadrasaPhone")?.value.trim();
+  const email = document.getElementById("editMadrasaEmail")?.value.trim().toLowerCase();
 
-  const newInstName = prompt("Edit Madrasa Name:", currentInstName);
-  if (newInstName === null) return;
-
-  const newAdminName = prompt("Edit Admin Name:", currentAdminName);
-  if (newAdminName === null) return;
-
-  const newPhone = prompt("Edit Phone Number:", currentPhone);
-  if (newPhone === null) return;
+  if (!userId) {
+    window.showToast("Invalid record ID", "error");
+    return;
+  }
 
   try {
     await updateDoc(doc(db, "users", userId), {
-      shortCode: newShortCode.trim().toUpperCase(),
-      institutionName: newInstName.trim().toUpperCase(),
-      name: newAdminName.trim().toUpperCase(),
-      phone: newPhone.trim(),
+      shortCode: shortCode || "-",
+      institutionName: instName,
+      name: adminName,
+      phone: phone,
+      email: email,
       updatedAt: serverTimestamp()
     });
 
-    window.showToast("Madrasa details & Short Code updated successfully!", "success");
-    window.loadSuperAdminRequests();
+    window.showToast("Madrasa details updated successfully!", "success");
+
+    const modalEl = document.getElementById("editMadrasaModal");
+    if (modalEl && window.bootstrap) {
+      const modal = bootstrap.Modal.getInstance(modalEl);
+      if (modal) modal.hide();
+    }
+
+    if (typeof window.loadSuperAdminRequests === 'function') {
+      window.loadSuperAdminRequests();
+    }
   } catch (e) {
     console.error("Error updating madrasa:", e);
     window.showToast("Error updating details: " + e.message, "error");
   }
 };
 
-// Super Admin സ്ഥാപനങ്ങൾ അപ്രൂവ് ചെയ്യാനുള്ള പുതിയ ഫങ്ഷൻ
-window.approveMadrasaAdmin = async (userId) => {
+// Delete Madrasa Account
+window.deleteMadrasaAdmin = async function(userId, instName) {
+  if (!confirm(`Are you sure you want to delete ${instName}?`)) return;
+
   try {
-    await updateDoc(doc(db, "users", userId), {
-      status: "active",
-      updatedAt: serverTimestamp()
-    });
-    window.showToast("Madrasa registration approved successfully!", "success");
-    window.loadSuperAdminRequests(); // ലിസ്റ്റ് റീഫ്രഷ് ചെയ്യുക
+    await deleteDoc(doc(db, "users", userId));
+    window.showToast("Madrasa removed successfully!", "success");
+    if (typeof window.loadSuperAdminRequests === 'function') {
+      window.loadSuperAdminRequests();
+    }
   } catch (e) {
-    window.showToast("Error approving Madrasa: " + e.message, "error");
+    console.error("Error deleting madrasa:", e);
+    window.showToast("Error deleting: " + e.message, "error");
   }
 };
+
+// Authentication Observer
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     try {
@@ -549,7 +547,6 @@ onAuthStateChanged(auth, async (user) => {
       if (userDoc.exists()) {
         const userData = userDoc.data();
         
-        // Strict Super Admin Check
         window.isSuperAdmin = (user.email === SUPER_ADMIN_EMAIL);
         
         if (!window.isSuperAdmin && userData.status === "pending") {
@@ -565,6 +562,7 @@ onAuthStateChanged(auth, async (user) => {
 
         if (window.currentInstitutionId) {
           sessionStorage.setItem("currentInstitutionId", window.currentInstitutionId);
+          await window.loadInstitutionSystemSettings(window.currentInstitutionId);
         }
 
         const instNameEl = document.getElementById("displayMadrassaName");
@@ -587,29 +585,7 @@ onAuthStateChanged(auth, async (user) => {
         const feeSettingsBtn = document.getElementById("feeSettingsBtn");
         const subjectSettingsBtn = document.getElementById("subjectSettingsBtn");
 
-        // Load Settings Data
-        if (!window.isSuperAdmin) {
-          const instDoc = await getDoc(doc(db, "settings", window.currentInstitutionId));
-          if (instDoc.exists()) {
-            window.sysFeePermission = instDoc.data().feePermission || "all";
-            window.sysReqManualReceipt = instDoc.data().reqManualReceipt || false;
-            window.customSpecialFunds = instDoc.data().specialFeeCategories || [];
-            
-            let data = instDoc.data();
-            if (data.photo1) {
-              localStorage.setItem('cachedGalleryPhotos_' + window.currentInstitutionId, JSON.stringify([data.photo1]));
-              if (typeof window.loadHomeInstitutionPhotos === 'function') {
-                window.loadHomeInstitutionPhotos([data.photo1]);
-              }
-            }
-          }
-        }
-
-        // ==========================================
-        // STRICT ROLE BASED UI VISIBILITY
-        // ==========================================
         if (window.isSuperAdmin) {
-          // Unhide for Super Admin ONLY
           if (superMasterBtn) superMasterBtn.classList.remove("d-none");
           if (userRoleEl) userRoleEl.innerText = "Super Admin";
           
@@ -618,10 +594,9 @@ onAuthStateChanged(auth, async (user) => {
             window.loadSuperAdminRequests();
           }
         } else {
-          // Strictly HIDE "All Madrasas" for Institution Admins & Teachers
           if (superMasterBtn) {
             superMasterBtn.classList.add("d-none");
-            superMasterBtn.style.display = "none"; // Hard hide fallback
+            superMasterBtn.style.display = "none";
           }
           
           if (userRoleEl) {
@@ -650,15 +625,14 @@ onAuthStateChanged(auth, async (user) => {
             if (subjectSettingsBtn) subjectSettingsBtn.classList.remove("d-none");
           }
 
-          // Force Home tab for Non-Super Admins
           window.showTab('homeDashboardTab');
           if (typeof window.loadLeaderboard === 'function') {
             window.loadLeaderboard();
           }
         }
 
-        document.getElementById("authSection").classList.add("d-none");
-        document.getElementById("appSection").classList.remove("d-none");
+        document.getElementById("authSection")?.classList.add("d-none");
+        document.getElementById("appSection")?.classList.remove("d-none");
         
         const attDateEl = document.getElementById("attDate");
         if (attDateEl) attDateEl.valueAsDate = new Date();
@@ -668,7 +642,6 @@ onAuthStateChanged(auth, async (user) => {
           window.loadInstitutionSettings();
         }
         
-        // Sync mobile menu AFTER applying visibility classes
         window.syncMobileMenu();
       }
     } catch (e) {
@@ -676,198 +649,12 @@ onAuthStateChanged(auth, async (user) => {
     }
   } else {
     if (!sessionStorage.getItem("parentLoggedIn")) {
-      document.getElementById("authSection").classList.remove("d-none");
-      document.getElementById("appSection").classList.add("d-none");
+      document.getElementById("authSection")?.classList.remove("d-none");
+      document.getElementById("appSection")?.classList.add("d-none");
     }
   }
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-    window.loadInstitutionSettings();
+  window.loadInstitutionSettings();
 });
-
-// Super Admin - View Institution Details Function
-window.viewInstitution = async function(instDocId) {
-  try {
-    const docRef = doc(db, "settings", instDocId);
-    const snap = await getDoc(docRef);
-
-    if (snap.exists()) {
-      const data = snap.data();
-      
-      // വിവരങ്ങൾ കാണിക്കുന്ന വിൻഡോ (Alert / Toast)
-      alert(
-        `📌 MASJID / MADRASA DETAILS\n\n` +
-        `• Name: ${data.institutionName || '-'}\n` +
-        `• ID: ${data.institutionId || instDocId}\n` +
-        `• Admin: ${data.adminName || '-'}\n` +
-        `• Email: ${data.email || '-'}\n` +
-        `• Phone: ${data.phone || '-'}\n` +
-        `• Place: ${data.place || '-'}`
-      );
-    } else {
-      window.showToast("Institution details not found.", "warning");
-    }
-  } catch (error) {
-    console.error("Error viewing institution:", error);
-    window.showToast("Error loading details: " + error.message, "error");
-  }
-};
-// മദ്രസ അഡ്മിൻ എഡിറ്റ് ചെയ്യാനുള്ള ഫങ്ഷൻ
-window.editMadrasaDetails = async (userId, currentInstName, currentAdminName, currentPhone) => {
-  const newInstName = prompt("Edit Madrasa Name:", currentInstName);
-  if (newInstName === null) return; // Cancel ചെയ്തു
-
-  const newAdminName = prompt("Edit Admin Name:", currentAdminName);
-  if (newAdminName === null) return;
-
-  const newPhone = prompt("Edit Phone Number:", currentPhone);
-  if (newPhone === null) return;
-
-  try {
-    // Users കളക്ഷനിൽ അപ്ഡേറ്റ് ചെയ്യുന്നു
-    await updateDoc(doc(db, "users", userId), {
-      institutionName: newInstName.trim().toUpperCase(),
-      name: newAdminName.trim().toUpperCase(),
-      phone: newPhone.trim(),
-      updatedAt: serverTimestamp()
-    });
-
-    window.showToast("Madrasa details updated successfully!", "success");
-    window.loadSuperAdminRequests(); // ലിസ്റ്റ് റീഫ്രഷ് ചെയ്യുന്നു
-  } catch (e) {
-    console.error("Error updating madrasa:", e);
-    window.showToast("Error updating details: " + e.message, "error");
-  }
-};
-
-// മദ്രസ അക്കൗണ്ട് ഡിലീറ്റ് ചെയ്യാനുള്ള ഫങ്ഷൻ
-window.deleteMadrasaAdmin = async (userId, instName) => {
-  if (!confirm(`Are you sure you want to delete ${instName}? This action cannot be undone.`)) {
-    return;
-  }
-
-  try {
-    await deleteDoc(doc(db, "users", userId));
-    window.showToast("Madrasa account removed successfully!", "success");
-    window.loadSuperAdminRequests(); // ലിസ്റ്റ് റീഫ്രഷ് ചെയ്യുന്നു
-  } catch (e) {
-    console.error("Error deleting madrasa:", e);
-    window.showToast("Error deleting account: " + e.message, "error");
-  }
-};
-
-// 1. Modal open cheyyunna function (window.editMadrasaDetails)
-window.editMadrasaDetails = function(userId, currentInstName, currentAdminName, currentPhone, currentShortCode, currentEmail) {
-  const idEl = document.getElementById("editMadrasaDocId");
-  const codeEl = document.getElementById("editMadrasaShortCode");
-  const nameEl = document.getElementById("editMadrasaName");
-  const adminEl = document.getElementById("editMadrasaAdminName");
-  const phoneEl = document.getElementById("editMadrasaPhone");
-  const emailEl = document.getElementById("editMadrasaEmail");
-
-  if (idEl) idEl.value = userId;
-  if (codeEl) codeEl.value = (currentShortCode && currentShortCode !== '-') ? currentShortCode : '';
-  if (nameEl) nameEl.value = currentInstName || '';
-  if (adminEl) adminEl.value = currentAdminName || '';
-  if (phoneEl) phoneEl.value = currentPhone || '';
-  if (emailEl) emailEl.value = (currentEmail && currentEmail !== '-') ? currentEmail : '';
-
-  const modalEl = document.getElementById("editMadrasaModal");
-  if (modalEl) {
-    const modal = new bootstrap.Modal(modalEl);
-    modal.show();
-  } else {
-    window.showToast("Edit modal not found in HTML", "error");
-  }
-};
-
-// 2. Data save cheyyunna function (window.saveEditedMadrasaDetails)
-window.saveEditedMadrasaDetails = async function() {
-  const userId = document.getElementById("editMadrasaDocId")?.value;
-  const shortCode = document.getElementById("editMadrasaShortCode")?.value.trim().toUpperCase();
-  const instName = document.getElementById("editMadrasaName")?.value.trim().toUpperCase();
-  const adminName = document.getElementById("editMadrasaAdminName")?.value.trim().toUpperCase();
-  const phone = document.getElementById("editMadrasaPhone")?.value.trim();
-  const email = document.getElementById("editMadrasaEmail")?.value.trim().toLowerCase();
-
-  if (!userId) {
-    window.showToast("Invalid record ID", "error");
-    return;
-  }
-
-  try {
-    await updateDoc(doc(db, "users", userId), {
-      shortCode: shortCode || "-",
-      institutionName: instName,
-      name: adminName,
-      phone: phone,
-      email: email,
-      updatedAt: serverTimestamp()
-    });
-
-    window.showToast("Madrasa details updated successfully!", "success");
-
-    const modalEl = document.getElementById("editMadrasaModal");
-    if (modalEl) {
-      const modal = bootstrap.Modal.getInstance(modalEl);
-      if (modal) modal.hide();
-    }
-
-    if (typeof window.loadSuperAdminRequests === 'function') {
-      window.loadSuperAdminRequests();
-    }
-  } catch (e) {
-    console.error("Error updating madrasa:", e);
-    window.showToast("Error updating details: " + e.message, "error");
-  }
-};
-
-// 3. Delete function (window.deleteMadrasaAdmin)
-window.deleteMadrasaAdmin = async function(userId, instName) {
-  if (!confirm(`Are you sure you want to delete ${instName}?`)) return;
-
-  try {
-    await deleteDoc(doc(db, "users", userId));
-    window.showToast("Madrasa removed successfully!", "success");
-    if (typeof window.loadSuperAdminRequests === 'function') {
-      window.loadSuperAdminRequests();
-    }
-  } catch (e) {
-    console.error("Error deleting madrasa:", e);
-    window.showToast("Error deleting: " + e.message, "error");
-  }
-};
-
-// Master Control Settings - Save Function
-window.saveMasterControlSettings = async function() {
-  const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
-  if (!currentInstitutionId) {
-    window.showToast("Institution ID not found.", "error");
-    return;
-  }
-
-  const sortOrder = document.getElementById("saSettingSortOrder")?.value || "REG_NO";
-  const attPerm = document.getElementById("saSettingAttPermission")?.value || "ASSIGNED_ONLY";
-  const feePerm = document.getElementById("saSettingFeePermission")?.value || "ALL";
-  const allowPhoto = document.getElementById("saSettingAllowPhoto")?.checked ?? true;
-  const showParentStars = document.getElementById("saSettingParentStarPoints")?.checked ?? true;
-  const reqManualReceipt = document.getElementById("saSettingReqManualReceipt")?.checked ?? false;
-
-  try {
-    await setDoc(doc(db, "settings", currentInstitutionId), {
-      sortOrder: sortOrder,
-      attendancePermission: attPerm,
-      feePermission: feePerm,
-      allowPhotoUpload: allowPhoto,
-      showParentStarPoints: showParentStars,
-      reqManualReceipt: reqManualReceipt,
-      updatedAt: serverTimestamp()
-    }, { merge: true });
-
-    window.showToast("Master Control Settings updated successfully!", "success");
-  } catch (e) {
-    console.error("Error saving master control settings:", e);
-    window.showToast("Failed to save settings: " + e.message, "error");
-  }
-};
