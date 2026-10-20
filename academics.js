@@ -9,7 +9,7 @@ import {
 const DEFAULT_SUBJECTS = ["Quran", "Tajweed", "Fiqh", "Aqeedah", "Tareekh", "Lisan"];
 
 // ------------------------------------------
-// DYNAMIC SORTING UTILITY FUNCTION
+// FIXED DYNAMIC SORTING UTILITY FUNCTION
 // ------------------------------------------
 window.sortStudentsList = async (studentsList) => {
   if (!Array.isArray(studentsList) || studentsList.length === 0) return [];
@@ -28,22 +28,26 @@ window.sortStudentsList = async (studentsList) => {
     console.error("Error reading sort order from settings:", err);
   }
 
-  const cleanGender = (s) => (s.gender || '').toString().trim().toLowerCase();
-  
+  // ഫയർസ്റ്റോറിലെ gender ഫീൽഡ് മാത്രം കൃത്യമായി പരിശോധിച്ച് ശുദ്ധീകരിക്കുന്നു
+  const getCleanGender = (s) => {
+    if (!s || !s.gender) return '';
+    return s.gender.toString().trim().toLowerCase();
+  };
+
   const isBoy = (s) => {
-    const g = cleanGender(s);
+    const g = getCleanGender(s);
     return g === 'male' || g === 'boy' || g === 'm';
   };
 
   const isGirl = (s) => {
-    const g = cleanGender(s);
+    const g = getCleanGender(s);
     return g === 'female' || g === 'girl' || g === 'f';
   };
 
-  // 1. അടിസ്ഥാനപരമായി Reg No അനുസരിച്ച് സോർട്ട് ചെയ്യുന്നു
+  // 1. അടിസ്ഥാനപരമായി രജിസ്ട്രേഷൻ നമ്പർ അനുസരിച്ച് സോർട്ട് ചെയ്യുന്നു
   const baseSorted = [...studentsList].sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
 
-  // 2. Super Admin നൽകിയ സെറ്റിംഗ്സ് അനുസരിച്ച് വേർതിരിക്കുന്നു
+  // 2. Super Admin നൽകിയ സെറ്റിംഗ്സ് അനുസരിച്ച് തരംതിരിക്കുന്നു
   if (sortOrder === "BOYS_FIRST") {
     const boysList = baseSorted.filter(s => isBoy(s));
     const girlsList = baseSorted.filter(s => isGirl(s));
@@ -60,6 +64,7 @@ window.sortStudentsList = async (studentsList) => {
     return baseSorted.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
   } 
   else {
+    // Default Reg No Order
     return baseSorted;
   }
 };
