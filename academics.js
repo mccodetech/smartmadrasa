@@ -301,7 +301,7 @@ window.loadAttendanceSheet = async () => {
   const selClass = document.getElementById("attClassSelect")?.value;
   const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId") || localStorage.getItem("currentInstitutionId");
 
-  if (!selClass || !currentInstitutionId) {
+  if (!selClass) {
     document.getElementById("attendanceSheetArea")?.classList.add("d-none");
     return;
   }
@@ -312,17 +312,27 @@ window.loadAttendanceSheet = async () => {
   if (area) area.classList.remove("d-none");
 
   try {
-    // 1. Settings direct aayi Firestore-il ninnu AWAIT cheidhu edukkunnu
-    let sortOrder = "REG_NO";
-    const settingsSnap = await getDoc(doc(db, "settings", currentInstitutionId));
-    if (settingsSnap.exists()) {
-      sortOrder = settingsSnap.data().sortOrder || "REG_NO";
-      window.sysSortOrder = sortOrder;
+    // 1. Super Admin Settings കൃത്യമായി വായിക്കുന്നു (Fallback mechanism സഹിതം)
+    let sortOrder = window.sysSortOrder || "REG_NO";
+
+    if (currentInstitutionId) {
+      const settingsSnap = await getDoc(doc(db, "settings", currentInstitutionId));
+      if (settingsSnap.exists() && settingsSnap.data().sortOrder) {
+        sortOrder = settingsSnap.data().sortOrder;
+      } else {
+        // ID മാച്ച് ആവാത്ത അവസ്ഥ വന്നാൽ സെറ്റിംഗ്സ് ഡയറക്റ്റ് എടുക്കുന്നു
+        const allSettings = await getDocs(collection(db, "settings"));
+        allSettings.forEach(sDoc => {
+          if (sDoc.data().sortOrder) {
+            sortOrder = sDoc.data().sortOrder;
+          }
+        });
+      }
     }
 
     const cleanClass = selClass.replace(/Class\s*/i, "").trim();
 
-    // 2. Query Active Students
+    // 2. ഈ ക്ലാസിലെ കുട്ടികളുടെ വിവരങ്ങൾ എടുക്കുന്നു
     const q = query(
       collection(db, "students"),
       where("institutionId", "==", currentInstitutionId),
@@ -336,19 +346,17 @@ window.loadAttendanceSheet = async () => {
 
     const getGender = (s) => (s.gender || '').toString().trim().toLowerCase();
 
-    // 3. Super Admin Sorting Execution
-    if (sortOrder === "NAME_ASC") {
-      students.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-    } else if (sortOrder === "BOYS_FIRST") {
+    // 3. BOYS FIRST, THEN GIRLS STRICT SORTING LOGIC
+    if (sortOrder === "BOYS_FIRST") {
       students.sort((a, b) => {
         const gA = getGender(a);
         const gB = getGender(b);
         const isBoyA = (gA === 'male' || gA === 'boy');
         const isBoyB = (gB === 'male' || gB === 'boy');
 
-        if (isBoyA && !isBoyB) return -1;
-        if (!isBoyA && isBoyB) return 1;
-        return (Number(a.regNo) || 0) - (Number(b.regNo) || 0);
+        if (isBoyA && !isBoyB) return -1; // ആൺകുട്ടികളെ മുകളിലേക്ക് മാറ്റുന്നു
+        if (!isBoyA && isBoyB) return 1;  // പെൺകുട്ടികളെ താഴേക്ക് മാറ്റുന്നു
+        return (Number(a.regNo) || 0) - (Number(b.regNo) || 0); // ഒരേ ജെൻഡർ ഉള്ളവരെ Reg No അനുസരിച്ച് ക്രമീകരിക്കുന്നു
       });
     } else if (sortOrder === "GIRLS_FIRST") {
       students.sort((a, b) => {
@@ -361,11 +369,13 @@ window.loadAttendanceSheet = async () => {
         if (!isGirlA && isGirlB) return 1;
         return (Number(a.regNo) || 0) - (Number(b.regNo) || 0);
       });
+    } else if (sortOrder === "NAME_ASC") {
+      students.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
     } else {
       students.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
     }
 
-    // 4. Attendance Table rows print cheyyunnu
+    // 4. ടേബിൾ റെൻഡർ ചെയ്യുന്നു
     let html = "";
     students.forEach(s => {
       const gDisplay = (getGender(s) === 'female' || getGender(s) === 'girl') 
@@ -394,6 +404,7 @@ window.loadAttendanceSheet = async () => {
     if (tbody) tbody.innerHTML = `<tr><td colspan="3" class="text-center text-danger">Error loading data: ${err.message}</td></tr>`;
   }
 };
+
 window.toggleSelectAllAttendance = () => {
   const isChecked = document.getElementById("selectAllAtt")?.checked;
   document.querySelectorAll(".att-checkbox").forEach(cb => cb.checked = isChecked);
