@@ -312,9 +312,8 @@ window.loadAttendanceSheet = async () => {
   if (area) area.classList.remove("d-none");
 
   try {
-    let sortOrder = "BOYS_FIRST"; // നിർബന്ധമായും Boys First ഡീഫോൾട്ട് ആയി വെക്കുന്നു
-
-    // സെറ്റിംഗ്സിൽ നോക്കുന്നു
+    // 1. Super Admin Settings വായിക്കുന്നു
+    let sortOrder = "BOYS_FIRST";
     try {
       if (currentInstitutionId) {
         const settingsSnap = await getDoc(doc(db, "settings", currentInstitutionId));
@@ -323,12 +322,12 @@ window.loadAttendanceSheet = async () => {
         }
       }
     } catch (e) {
-      console.log("Settings fetch error, using BOYS_FIRST", e);
+      console.log("Error reading sort order setting:", e);
     }
 
     const cleanClass = selClass.replace(/Class\s*/i, "").trim();
 
-    // വിദ്യാർത്ഥികളെ ഫെച്ച് ചെയ്യുന്നു
+    // 2. ഈ ക്ലാസിലെ കുട്ടികളുടെ വിവരങ്ങൾ എടുക്കുന്നു
     const q = query(
       collection(db, "students"),
       where("institutionId", "==", currentInstitutionId),
@@ -340,7 +339,7 @@ window.loadAttendanceSheet = async () => {
     let students = [];
     snap.forEach(d => students.push({ id: d.id, ...d.data() }));
 
-    // Gender സുരക്ഷിതമായി ചെക്ക് ചെയ്യാനുള്ള ഹെൽപ്പർ
+    // Gender സേഫ് ആയി ചെക്ക് ചെയ്യാനുള്ള ഹെൽപ്പർ
     const isMale = (s) => {
       const g = (s.gender || '').toString().trim().toLowerCase();
       return g === 'male' || g === 'boy' || g === 'm';
@@ -351,23 +350,27 @@ window.loadAttendanceSheet = async () => {
       return g === 'female' || g === 'girl' || g === 'f';
     };
 
-    // STRICT SORTING LOGIC
-    if (sortOrder === "BOYS_FIRST" || !sortOrder) {
+    // 3. STRICT SORTING LOGIC FOR BOYS FIRST
+    if (sortOrder === "BOYS_FIRST") {
       students.sort((a, b) => {
-        const aIsMale = isMale(a);
-        const bIsMale = isMale(b);
+        const aMale = isMale(a);
+        const bMale = isMale(b);
 
-        if (aIsMale && !bIsMale) return -1; // Male മുകളിൽ
-        if (!aIsMale && bIsMale) return 1;  // Female താഴെ
-        return (Number(a.regNo) || 0) - (Number(b.regNo) || 0); // ഗ്രൂപ്പിനുള്ളിൽ Reg No പ്രകാരം
+        // a ആൺകുട്ടിയും b പെൺകുട്ടിയും ആണെങ്കിൽ a മുകളിൽ വരണം (-1)
+        if (aMale && !bMale) return -1;
+        // a പെൺകുട്ടിയും b ആൺകുട്ടിയും ആണെങ്കിൽ b മുകളിൽ വരണം (1)
+        if (!aMale && bMale) return 1;
+        
+        // രണ്ടാളും ഒരേ ജെൻഡർ ആണെങ്കിൽ Reg No പ്രകാരം സോർട്ട് ചെയ്യുന്നു
+        return (Number(a.regNo) || 0) - (Number(b.regNo) || 0);
       });
     } else if (sortOrder === "GIRLS_FIRST") {
       students.sort((a, b) => {
-        const aIsFemale = isFemale(a);
-        const bIsFemale = isFemale(b);
+        const aFemale = isFemale(a);
+        const bFemale = isFemale(b);
 
-        if (aIsFemale && !bIsFemale) return -1;
-        if (!aIsFemale && bIsFemale) return 1;
+        if (aFemale && !bFemale) return -1;
+        if (!aFemale && bFemale) return 1;
         return (Number(a.regNo) || 0) - (Number(b.regNo) || 0);
       });
     } else if (sortOrder === "NAME_ASC") {
@@ -376,7 +379,7 @@ window.loadAttendanceSheet = async () => {
       students.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
     }
 
-    // ടേബിൾ റെൻഡർ ചെയ്യുന്നു
+    // 4. ടേബിളിൽ പ്രിന്റ് ചെയ്യുന്നു
     let html = "";
     students.forEach(s => {
       const gDisplay = isFemale(s)
