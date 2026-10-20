@@ -213,7 +213,6 @@ window.deleteAllStudents = async () => {
   }
 };
 
-// ക്ലാസ്സ് അനുസരിച്ച് വിദ്യാർത്ഥികളെ ലോഡ് ചെയ്യാനും Dynamic Sorting ബാധകമാക്കാനും
 window.loadStudentsByClass = async (forceRefresh = false) => {
   const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
   let selectedClass = document.getElementById("filterClassSelect")?.value || "ALL";
@@ -223,6 +222,20 @@ window.loadStudentsByClass = async (forceRefresh = false) => {
   tbody.innerHTML = `<tr><td colspan="9" class="text-center text-muted py-3">Loading data...</td></tr>`;
 
   try {
+    // Read current sorting setting from Firestore
+    let sortOrder = window.sysSortOrder || "REG_NO";
+    if (currentInstitutionId) {
+      try {
+        const settingsSnap = await getDoc(doc(db, "settings", currentInstitutionId));
+        if (settingsSnap.exists()) {
+          sortOrder = settingsSnap.data().sortOrder || "REG_NO";
+          window.sysSortOrder = sortOrder;
+        }
+      } catch (e) {
+        console.log("Error reading sorting settings:", e);
+      }
+    }
+
     if (localStudentsCache.length === 0 || forceRefresh) {
       let q;
       if (selectedClass === "ALL") {
@@ -234,29 +247,29 @@ window.loadStudentsByClass = async (forceRefresh = false) => {
       const snap = await getDocs(q);
       localStudentsCache = [];
       snap.forEach(d => localStudentsCache.push({ id: d.id, ...d.data() }));
+    }
 
-      // Dynamic Sorting Logic
-      if (window.sysSortOrder === "NAME_ASC") {
-        localStudentsCache.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-      } else if (window.sysSortOrder === "BOYS_FIRST") {
-        localStudentsCache.sort((a, b) => {
-          const gA = (a.gender || '').toLowerCase();
-          const gB = (b.gender || '').toLowerCase();
-          if (gA === 'male' && gB !== 'male') return -1;
-          if (gA !== 'male' && gB === 'male') return 1;
-          return (Number(a.regNo) || 0) - (Number(b.regNo) || 0);
-        });
-      } else if (window.sysSortOrder === "GIRLS_FIRST") {
-        localStudentsCache.sort((a, b) => {
-          const gA = (a.gender || '').toLowerCase();
-          const gB = (b.gender || '').toLowerCase();
-          if (gA === 'female' && gB !== 'female') return -1;
-          if (gA !== 'female' && gB === 'female') return 1;
-          return (Number(a.regNo) || 0) - (Number(b.regNo) || 0);
-        });
-      } else {
-        localStudentsCache.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
-      }
+    // Dynamic Sorting Logic Execution
+    if (sortOrder === "NAME_ASC") {
+      localStudentsCache.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    } else if (sortOrder === "BOYS_FIRST") {
+      localStudentsCache.sort((a, b) => {
+        const gA = (a.gender || '').toLowerCase();
+        const gB = (b.gender || '').toLowerCase();
+        if (gA === 'male' && gB !== 'male') return -1;
+        if (gA !== 'male' && gB === 'male') return 1;
+        return (Number(a.regNo) || 0) - (Number(b.regNo) || 0);
+      });
+    } else if (sortOrder === "GIRLS_FIRST") {
+      localStudentsCache.sort((a, b) => {
+        const gA = (a.gender || '').toLowerCase();
+        const gB = (b.gender || '').toLowerCase();
+        if (gA === 'female' && gB !== 'female') return -1;
+        if (gA !== 'female' && gB === 'female') return 1;
+        return (Number(a.regNo) || 0) - (Number(b.regNo) || 0);
+      });
+    } else {
+      localStudentsCache.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
     }
 
     let filtered = localStudentsCache;
@@ -271,7 +284,6 @@ window.loadStudentsByClass = async (forceRefresh = false) => {
     window.showToast("Error loading students: " + err.message, "error");
   }
 };
-
 function renderPaginatedTable(dataArray = localStudentsCache) {
   const tbody = document.getElementById("studentsTableBody");
   if (!tbody) return;
