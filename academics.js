@@ -8,7 +8,7 @@ import {
 
 const DEFAULT_SUBJECTS = ["Quran", "Tajweed", "Fiqh", "Aqeedah", "Tareekh", "Lisan"];
 
-// കസ്റ്റം ടാസ്ക് മോഡൽ സുരക്ഷിതമായി ഓപ്പൺ ചെയ്യാൻ
+// കസ്റ്റം ടാസ്ക് മോഡൽ തുറക്കാൻ
 window.openCustomTaskModal = () => {
   try {
     const modalEl = document.getElementById("customTaskModal");
@@ -55,30 +55,48 @@ window.saveCustomTask = (e) => {
   window.showToast("Custom task added successfully!", "success");
 };
 
-function sortStudentsList(studentsList, sortOrder) {
-  if (sortOrder === "NAME_ASC") {
-    studentsList.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-  } else if (sortOrder === "BOYS_FIRST") {
-    studentsList.sort((a, b) => {
-      const gA = (a.gender || '').toLowerCase();
-      const gB = (b.gender || '').toLowerCase();
-      if (gA === 'male' && gB !== 'male') return -1;
-      if (gA !== 'male' && gB === 'male') return 1;
-      return (Number(a.regNo) || 0) - (Number(b.regNo) || 0);
-    });
-  } else if (sortOrder === "GIRLS_FIRST") {
-    studentsList.sort((a, b) => {
-      const gA = (a.gender || '').toLowerCase();
-      const gB = (b.gender || '').toLowerCase();
-      if (gA === 'female' && gB !== 'female') return -1;
-      if (gA !== 'female' && gB === 'female') return 1;
-      return (Number(a.regNo) || 0) - (Number(b.regNo) || 0);
-    });
-  } else {
-    studentsList.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
+// ------------------------------------------
+// GLOBAL STUDENT SORTING UTILITY (Partitioning Logic)
+// ------------------------------------------
+window.sortStudentsList = (studentsList, sortOrder = "BOYS_FIRST") => {
+  if (!Array.isArray(studentsList)) return [];
+
+  const cleanGender = (s) => (s.gender || '').toString().trim().toLowerCase();
+
+  const isBoy = (s) => {
+    const g = cleanGender(s);
+    return g === 'male' || g === 'boy' || g === 'm';
+  };
+
+  const isGirl = (s) => {
+    const g = cleanGender(s);
+    return g === 'female' || g === 'girl' || g === 'f';
+  };
+
+  // തന്നിരിക്കുന്ന ലിസ്റ്റിലെ കുട്ടികളുടെ ലിസ്റ്റ് ആദ്യം രജിസ്ട്രേഷൻ നമ്പർ പ്രകാരം ക്രമീകരിക്കുന്നു
+  const baseSorted = [...studentsList].sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
+
+  if (sortOrder === "BOYS_FIRST" || !sortOrder) {
+    const boysList = baseSorted.filter(s => isBoy(s));
+    const girlsList = baseSorted.filter(s => isGirl(s));
+    const othersList = baseSorted.filter(s => !isBoy(s) && !isGirl(s));
+
+    return [...boysList, ...girlsList, ...othersList];
+  } 
+  else if (sortOrder === "GIRLS_FIRST") {
+    const girlsList = baseSorted.filter(s => isGirl(s));
+    const boysList = baseSorted.filter(s => isBoy(s));
+    const othersList = baseSorted.filter(s => !isBoy(s) && !isGirl(s));
+
+    return [...girlsList, ...boysList, ...othersList];
+  } 
+  else if (sortOrder === "NAME_ASC") {
+    return baseSorted.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  } 
+  else {
+    return baseSorted;
   }
-  return studentsList;
-}
+};
 
 // ==========================================
 // 1. SUBJECT SETTINGS MODULE
@@ -127,7 +145,7 @@ window.saveClassSubjects = async () => {
 };
 
 // ==========================================
-// 2. MARKS ENTRY MODULE (With Total Column & Dynamic Sorting)
+// 2. MARKS ENTRY MODULE (With Dynamic Sorting)
 // ==========================================
 window.resetMarksButton = () => {
   const btn = document.getElementById("btnSaveMarks");
@@ -186,12 +204,13 @@ window.loadMarksEntrySheet = async () => {
   const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", cleanClass), where("status", "==", "active"));
   const snap = await getDocs(q);
 
-  let students = [];
-  snap.forEach(d => students.push({ id: d.id, ...d.data() }));
-  students = sortStudentsList(students, sortOrder);
+  let rawStudents = [];
+  snap.forEach(d => rawStudents.push({ id: d.id, ...d.data() }));
+  
+  const sortedStudents = window.sortStudentsList(rawStudents, sortOrder);
 
   let bodyHtml = "";
-  students.forEach(s => {
+  sortedStudents.forEach(s => {
     const studentMarks = existingMarks[s.regNo] || {};
     let rowTotal = 0;
 
@@ -285,7 +304,7 @@ window.saveClassMarks = async () => {
 };
 
 // ==========================================
-// 3. ATTENDANCE MODULE (With Dynamic Sorting)
+// 3. ATTENDANCE MODULE (With Strict Grouping)
 // ==========================================
 window.resetAttendanceButton = () => {
   const btn = document.getElementById("btnSaveAttendance");
@@ -301,7 +320,7 @@ window.loadAttendanceSheet = async () => {
   const selClass = document.getElementById("attClassSelect")?.value;
   const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId") || localStorage.getItem("currentInstitutionId");
 
-  if (!selClass) {
+  if (!selClass || !currentInstitutionId) {
     document.getElementById("attendanceSheetArea")?.classList.add("d-none");
     return;
   }
@@ -312,7 +331,6 @@ window.loadAttendanceSheet = async () => {
   if (area) area.classList.remove("d-none");
 
   try {
-    // 1. Settings fetching
     let sortOrder = "BOYS_FIRST";
     try {
       if (currentInstitutionId) {
@@ -327,7 +345,6 @@ window.loadAttendanceSheet = async () => {
 
     const cleanClass = selClass.replace(/Class\s*/i, "").trim();
 
-    // 2. Fetch Active Students
     const q = query(
       collection(db, "students"),
       where("institutionId", "==", currentInstitutionId),
@@ -336,52 +353,17 @@ window.loadAttendanceSheet = async () => {
     );
     const snap = await getDocs(q);
 
-    let allStudents = [];
-    snap.forEach(d => allStudents.push({ id: d.id, ...d.data() }));
+    let rawStudents = [];
+    snap.forEach(d => rawStudents.push({ id: d.id, ...d.data() }));
 
-    const isMale = (s) => {
-      const g = (s.gender || '').toString().trim().toLowerCase();
-      return g === 'male' || g === 'boy' || g === 'm';
-    };
+    // ഗ്രൂപ്പിംഗ് സോർട്ടിങ് ഉപയോഗിച്ച് തരംതിരിക്കുന്നു
+    const sortedStudents = window.sortStudentsList(rawStudents, sortOrder);
 
-    const isFemale = (s) => {
-      const g = (s.gender || '').toString().trim().toLowerCase();
-      return g === 'female' || g === 'girl' || g === 'f';
-    };
-
-    let sortedStudents = [];
-
-    // 3. PERFECT PARTITIONING & GROUPING LOGIC
-    if (sortOrder === "BOYS_FIRST" || !sortOrder) {
-      // Reg No order-il sort cheyyunnu
-      allStudents.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
-
-      const boysList = allStudents.filter(s => isMale(s));
-      const girlsList = allStudents.filter(s => isFemale(s));
-      const othersList = allStudents.filter(s => !isMale(s) && !isFemale(s));
-
-      // Aadyam Boys, Pinne Girls, Pinne Baakki
-      sortedStudents = [...boysList, ...girlsList, ...othersList];
-
-    } else if (sortOrder === "GIRLS_FIRST") {
-      allStudents.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
-
-      const girlsList = allStudents.filter(s => isFemale(s));
-      const boysList = allStudents.filter(s => isMale(s));
-      const othersList = allStudents.filter(s => !isMale(s) && !isFemale(s));
-
-      sortedStudents = [...girlsList, ...boysList, ...othersList];
-
-    } else if (sortOrder === "NAME_ASC") {
-      sortedStudents = allStudents.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-    } else {
-      sortedStudents = allStudents.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
-    }
-
-    // 4. Render Table Rows
     let html = "";
     sortedStudents.forEach(s => {
-      const gDisplay = isFemale(s)
+      const g = (s.gender || '').toString().trim().toLowerCase();
+      const isGirl = g === 'female' || g === 'girl' || g === 'f';
+      const gDisplay = isGirl 
         ? `<span class="badge bg-danger-subtle text-danger ms-2 small">Female</span>`
         : `<span class="badge bg-primary-subtle text-primary ms-2 small">Male</span>`;
 
@@ -407,6 +389,7 @@ window.loadAttendanceSheet = async () => {
     if (tbody) tbody.innerHTML = `<tr><td colspan="3" class="text-center text-danger">Error loading data: ${err.message}</td></tr>`;
   }
 };
+
 window.updateAttendanceCount = () => {
   const total = document.querySelectorAll(".att-checkbox").length;
   const present = document.querySelectorAll(".att-checkbox:checked").length;
@@ -536,18 +519,18 @@ window.loadStudentsForPerfSheet = async () => {
     );
     const snap = await getDocs(q);
     
-    let students = [];
+    let rawStudents = [];
     snap.forEach(d => {
-      students.push({ id: d.id, ...d.data() });
+      rawStudents.push({ id: d.id, ...d.data() });
     });
 
-    students = sortStudentsList(students, sortOrder);
+    const sortedStudents = window.sortStudentsList(rawStudents, sortOrder);
 
     let html = "";
-    if (students.length === 0) {
+    if (sortedStudents.length === 0) {
       html = `<tr><td colspan="3" class="text-center text-muted py-3">No students found in Class ${selectedClass}.</td></tr>`;
     } else {
-      students.forEach((stu) => {
+      sortedStudents.forEach((stu) => {
         html += `
           <tr>
             <td><b>${stu.regNo || '-'}</b></td>
@@ -580,9 +563,8 @@ window.toggleSelectAllPerf = () => {
 };
 
 // ==========================================
-// 3.1. MANUAL PREVIOUS ATTENDANCE MODULE (With Dynamic Sorting)
+// 3.1. MANUAL PREVIOUS ATTENDANCE MODULE
 // ==========================================
-
 window.populateManualAttendanceClasses = () => {
   const classesList = ["Class 1", "Class 2", "Class 3", "Class 4", "Class 5", "Class 6", "Class 7", "Class 8", "Class 9", "Class 10", "Class 11", "Class 12"];
   const manualSelect = document.getElementById("manualAttClassSelect");
@@ -630,12 +612,13 @@ window.loadManualAttendanceSheet = async () => {
       if (data.regNo) existingManualAtt[data.regNo] = data.presentDays || 0;
     });
 
-    let students = [];
-    snap.forEach(d => students.push({ id: d.id, ...d.data() }));
-    students = sortStudentsList(students, sortOrder);
+    let rawStudents = [];
+    snap.forEach(d => rawStudents.push({ id: d.id, ...d.data() }));
+    
+    const sortedStudents = window.sortStudentsList(rawStudents, sortOrder);
 
     let html = "";
-    students.forEach(s => {
+    sortedStudents.forEach(s => {
       const presentDays = existingManualAtt[s.regNo] || 0;
       html += `
         <tr data-sid="${s.id}" data-reg="${s.regNo}">
