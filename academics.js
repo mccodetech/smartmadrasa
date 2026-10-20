@@ -11,7 +11,47 @@ const DEFAULT_SUBJECTS = ["Quran", "Tajweed", "Fiqh", "Aqeedah", "Tareekh", "Lis
 // കസ്റ്റം ടാസ്ക് മോഡൽ തുറക്കാൻ
 window.openCustomTaskModal = () => {
   try {
-    const modalEl = document.getElementById("customTaskModal");
+    const modalEl = document.getElementById("customTaskModal");// Attendance, Marks, Performance എന്നിവയ്ക്ക് മാത്രം ബാധകമായ Sorting Logic
+window.sortStudentsList = (studentsList, sortOrder = "BOYS_FIRST") => {
+  if (!Array.isArray(studentsList)) return [];
+
+  const cleanGender = (s) => (s.gender || '').toString().trim().toLowerCase();
+
+  const isBoy = (s) => {
+    const g = cleanGender(s);
+    return g === 'male' || g === 'boy' || g === 'm';
+  };
+
+  const isGirl = (s) => {
+    const g = cleanGender(s);
+    return g === 'female' || g === 'girl' || g === 'f';
+  };
+
+  // 1. പ്രവേശന നമ്പർ അനുസരിച്ച് ആദ്യം സോർട്ട് ചെയ്യുന്നു
+  const baseSorted = [...studentsList].sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
+
+  // 2. Boys First ആണെങ്കിൽ ഗ്രൂപ്പുകളായി വേർതിരിച്ച് ചേர்க்கുന്നു
+  if (sortOrder === "BOYS_FIRST" || !sortOrder) {
+    const boysList = baseSorted.filter(s => isBoy(s));
+    const girlsList = baseSorted.filter(s => isGirl(s));
+    const othersList = baseSorted.filter(s => !isBoy(s) && !isGirl(s));
+
+    return [...boysList, ...girlsList, ...othersList];
+  } 
+  else if (sortOrder === "GIRLS_FIRST") {
+    const girlsList = baseSorted.filter(s => isGirl(s));
+    const boysList = baseSorted.filter(s => isBoy(s));
+    const othersList = baseSorted.filter(s => !isBoy(s) && !isGirl(s));
+
+    return [...girlsList, ...boysList, ...othersList];
+  } 
+  else if (sortOrder === "NAME_ASC") {
+    return baseSorted.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  } 
+  else {
+    return baseSorted;
+  }
+};
     if (modalEl) {
       if (window.bootstrap && window.bootstrap.Modal) {
         const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
