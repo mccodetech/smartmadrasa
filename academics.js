@@ -312,20 +312,21 @@ window.loadAttendanceSheet = async () => {
   if (area) area.classList.remove("d-none");
 
   try {
-    // 1. Super Admin Settings ഫയർസ്റ്റോറിൽ നിന്ന് ലൈവായി വായിക്കുന്നു
+    // 1. Settings direct aayi Firestore-il ninnu AWAIT cheidhu edukkunnu
     let sortOrder = "REG_NO";
     const settingsSnap = await getDoc(doc(db, "settings", currentInstitutionId));
     if (settingsSnap.exists()) {
       sortOrder = settingsSnap.data().sortOrder || "REG_NO";
+      window.sysSortOrder = sortOrder;
     }
 
     const cleanClass = selClass.replace(/Class\s*/i, "").trim();
 
-    // 2. ഈ ക്ലാസിലെ കുട്ടികളെ ലോഡ് ചെയ്യുന്നു
+    // 2. Query Active Students
     const q = query(
-      collection(db, "students"), 
-      where("institutionId", "==", currentInstitutionId), 
-      where("currentClass", "==", cleanClass), 
+      collection(db, "students"),
+      where("institutionId", "==", currentInstitutionId),
+      where("currentClass", "==", cleanClass),
       where("status", "==", "active")
     );
     const snap = await getDocs(q);
@@ -333,10 +334,9 @@ window.loadAttendanceSheet = async () => {
     let students = [];
     snap.forEach(d => students.push({ id: d.id, ...d.data() }));
 
-    // Helper: Safely normalize gender values
     const getGender = (s) => (s.gender || '').toString().trim().toLowerCase();
 
-    // 3. Attendance Sheet-ൽ മാത്രം Super Admin Sorting ബാധകമാക്കുന്നു
+    // 3. Super Admin Sorting Execution
     if (sortOrder === "NAME_ASC") {
       students.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
     } else if (sortOrder === "BOYS_FIRST") {
@@ -362,11 +362,10 @@ window.loadAttendanceSheet = async () => {
         return (Number(a.regNo) || 0) - (Number(b.regNo) || 0);
       });
     } else {
-      // Reg No Order (Default)
       students.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
     }
 
-    // 4. Attendance Table Rows പ്രിന്റ് ചെയ്യുന്നു
+    // 4. Attendance Table rows print cheyyunnu
     let html = "";
     students.forEach(s => {
       const gDisplay = (getGender(s) === 'female' || getGender(s) === 'girl') 
@@ -385,7 +384,7 @@ window.loadAttendanceSheet = async () => {
     });
 
     if (tbody) tbody.innerHTML = html || `<tr><td colspan="3" class="text-center">No active students in this class.</td></tr>`;
-    
+
     const selectAllAtt = document.getElementById("selectAllAtt");
     if (selectAllAtt) selectAllAtt.checked = true;
     window.updateAttendanceCount();
@@ -395,7 +394,6 @@ window.loadAttendanceSheet = async () => {
     if (tbody) tbody.innerHTML = `<tr><td colspan="3" class="text-center text-danger">Error loading data: ${err.message}</td></tr>`;
   }
 };
-
 window.toggleSelectAllAttendance = () => {
   const isChecked = document.getElementById("selectAllAtt")?.checked;
   document.querySelectorAll(".att-checkbox").forEach(cb => cb.checked = isChecked);
