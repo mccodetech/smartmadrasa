@@ -245,8 +245,12 @@ window.loadStudentsByClass = async (forceRefresh = false) => {
       }
 
       const snap = await getDocs(q);
-      localStudentsCache = [];
-      snap.forEach(d => localStudentsCache.push({ id: d.id, ...d.data() }));
+      // students.js-ൽ loadStudentsByClass ഫങ്ഷൻ ഉള്ളിൽ:
+localStudentsCache = [];
+snap.forEach(d => localStudentsCache.push({ id: d.id, ...d.data() }));
+
+// എപ്പോഴും റെജിസ്ട്രേഷൻ നമ്പർ (Reg No) ക്രമത്തിൽ മാത്രം ലിസ്റ്റ് ചെയ്യും
+localStudentsCache.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
     }
 
     // Dynamic Sorting Logic Execution
