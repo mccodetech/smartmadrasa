@@ -312,23 +312,23 @@ window.loadAttendanceSheet = async () => {
   if (area) area.classList.remove("d-none");
 
   try {
-    // 1. Super Admin Settings വായിക്കുന്നു (ഏത് ID ആയിരുന്നാലും Settings ഫയലിൽ നിന്ന് വായിക്കും)
-    let sortOrder = "BOYS_FIRST"; // Default Fallback as requested
+    let sortOrder = "BOYS_FIRST"; // നിർബന്ധമായും Boys First ഡീഫോൾട്ട് ആയി വെക്കുന്നു
 
+    // സെറ്റിംഗ്സിൽ നോക്കുന്നു
     try {
-      const allSettings = await getDocs(collection(db, "settings"));
-      allSettings.forEach(sDoc => {
-        if (sDoc.data() && sDoc.data().sortOrder) {
-          sortOrder = sDoc.data().sortOrder;
+      if (currentInstitutionId) {
+        const settingsSnap = await getDoc(doc(db, "settings", currentInstitutionId));
+        if (settingsSnap.exists() && settingsSnap.data().sortOrder) {
+          sortOrder = settingsSnap.data().sortOrder;
         }
-      });
-    } catch (err) {
-      console.log("Error fetching settings, applying fallback:", err);
+      }
+    } catch (e) {
+      console.log("Settings fetch error, using BOYS_FIRST", e);
     }
 
     const cleanClass = selClass.replace(/Class\s*/i, "").trim();
 
-    // 2. ഈ ക്ലാസിലെ കുട്ടികളുടെ വിവരങ്ങൾ എടുക്കുന്നു
+    // വിദ്യാർത്ഥികളെ ഫെച്ച് ചെയ്യുന്നു
     const q = query(
       collection(db, "students"),
       where("institutionId", "==", currentInstitutionId),
@@ -340,29 +340,34 @@ window.loadAttendanceSheet = async () => {
     let students = [];
     snap.forEach(d => students.push({ id: d.id, ...d.data() }));
 
-    const getGender = (s) => (s.gender || '').toString().trim().toLowerCase();
+    // Gender സുരക്ഷിതമായി ചെക്ക് ചെയ്യാനുള്ള ഹെൽപ്പർ
+    const isMale = (s) => {
+      const g = (s.gender || '').toString().trim().toLowerCase();
+      return g === 'male' || g === 'boy' || g === 'm';
+    };
 
-    // 3. STRICT SORTING LOGIC: BOYS FIRST, THEN GIRLS
-    if (sortOrder === "BOYS_FIRST") {
+    const isFemale = (s) => {
+      const g = (s.gender || '').toString().trim().toLowerCase();
+      return g === 'female' || g === 'girl' || g === 'f';
+    };
+
+    // STRICT SORTING LOGIC
+    if (sortOrder === "BOYS_FIRST" || !sortOrder) {
       students.sort((a, b) => {
-        const gA = getGender(a);
-        const gB = getGender(b);
-        const isBoyA = (gA === 'male' || gA === 'boy');
-        const isBoyB = (gB === 'male' || gB === 'boy');
+        const aIsMale = isMale(a);
+        const bIsMale = isMale(b);
 
-        if (isBoyA && !isBoyB) return -1; // ആൺകുട്ടികളെ മുകളിലേക്ക് മാറ്റുന്നു
-        if (!isBoyA && isBoyB) return 1;  // പെൺകുട്ടികളെ താഴേക്ക് മാറ്റുന്നു
-        return (Number(a.regNo) || 0) - (Number(b.regNo) || 0); // ഒരേ ജെൻഡർ ഉള്ളവരെ Reg No ക്രമത്തിൽ മാറ്റുന്നു
+        if (aIsMale && !bIsMale) return -1; // Male മുകളിൽ
+        if (!aIsMale && bIsMale) return 1;  // Female താഴെ
+        return (Number(a.regNo) || 0) - (Number(b.regNo) || 0); // ഗ്രൂപ്പിനുള്ളിൽ Reg No പ്രകാരം
       });
     } else if (sortOrder === "GIRLS_FIRST") {
       students.sort((a, b) => {
-        const gA = getGender(a);
-        const gB = getGender(b);
-        const isGirlA = (gA === 'female' || gA === 'girl');
-        const isGirlB = (gB === 'female' || gB === 'girl');
+        const aIsFemale = isFemale(a);
+        const bIsFemale = isFemale(b);
 
-        if (isGirlA && !isGirlB) return -1;
-        if (!isGirlA && isGirlB) return 1;
+        if (aIsFemale && !bIsFemale) return -1;
+        if (!aIsFemale && bIsFemale) return 1;
         return (Number(a.regNo) || 0) - (Number(b.regNo) || 0);
       });
     } else if (sortOrder === "NAME_ASC") {
@@ -371,10 +376,10 @@ window.loadAttendanceSheet = async () => {
       students.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
     }
 
-    // 4. ടേബിളിൽ ഡിസ്‌പ്ലേ ചെയ്യുന്നു
+    // ടേബിൾ റെൻഡർ ചെയ്യുന്നു
     let html = "";
     students.forEach(s => {
-      const gDisplay = (getGender(s) === 'female' || getGender(s) === 'girl') 
+      const gDisplay = isFemale(s)
         ? `<span class="badge bg-danger-subtle text-danger ms-2 small">Female</span>`
         : `<span class="badge bg-primary-subtle text-primary ms-2 small">Male</span>`;
 
@@ -399,12 +404,6 @@ window.loadAttendanceSheet = async () => {
     console.error("Error loading attendance sheet:", err);
     if (tbody) tbody.innerHTML = `<tr><td colspan="3" class="text-center text-danger">Error loading data: ${err.message}</td></tr>`;
   }
-};
-
-window.toggleSelectAllAttendance = () => {
-  const isChecked = document.getElementById("selectAllAtt")?.checked;
-  document.querySelectorAll(".att-checkbox").forEach(cb => cb.checked = isChecked);
-  window.updateAttendanceCount();
 };
 
 window.updateAttendanceCount = () => {
