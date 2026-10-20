@@ -312,22 +312,18 @@ window.loadAttendanceSheet = async () => {
   if (area) area.classList.remove("d-none");
 
   try {
-    // 1. Super Admin Settings കൃത്യമായി വായിക്കുന്നു (Fallback mechanism സഹിതം)
-    let sortOrder = window.sysSortOrder || "REG_NO";
+    // 1. Super Admin Settings വായിക്കുന്നു (ഏത് ID ആയിരുന്നാലും Settings ഫയലിൽ നിന്ന് വായിക്കും)
+    let sortOrder = "BOYS_FIRST"; // Default Fallback as requested
 
-    if (currentInstitutionId) {
-      const settingsSnap = await getDoc(doc(db, "settings", currentInstitutionId));
-      if (settingsSnap.exists() && settingsSnap.data().sortOrder) {
-        sortOrder = settingsSnap.data().sortOrder;
-      } else {
-        // ID മാച്ച് ആവാത്ത അവസ്ഥ വന്നാൽ സെറ്റിംഗ്സ് ഡയറക്റ്റ് എടുക്കുന്നു
-        const allSettings = await getDocs(collection(db, "settings"));
-        allSettings.forEach(sDoc => {
-          if (sDoc.data().sortOrder) {
-            sortOrder = sDoc.data().sortOrder;
-          }
-        });
-      }
+    try {
+      const allSettings = await getDocs(collection(db, "settings"));
+      allSettings.forEach(sDoc => {
+        if (sDoc.data() && sDoc.data().sortOrder) {
+          sortOrder = sDoc.data().sortOrder;
+        }
+      });
+    } catch (err) {
+      console.log("Error fetching settings, applying fallback:", err);
     }
 
     const cleanClass = selClass.replace(/Class\s*/i, "").trim();
@@ -346,7 +342,7 @@ window.loadAttendanceSheet = async () => {
 
     const getGender = (s) => (s.gender || '').toString().trim().toLowerCase();
 
-    // 3. BOYS FIRST, THEN GIRLS STRICT SORTING LOGIC
+    // 3. STRICT SORTING LOGIC: BOYS FIRST, THEN GIRLS
     if (sortOrder === "BOYS_FIRST") {
       students.sort((a, b) => {
         const gA = getGender(a);
@@ -356,7 +352,7 @@ window.loadAttendanceSheet = async () => {
 
         if (isBoyA && !isBoyB) return -1; // ആൺകുട്ടികളെ മുകളിലേക്ക് മാറ്റുന്നു
         if (!isBoyA && isBoyB) return 1;  // പെൺകുട്ടികളെ താഴേക്ക് മാറ്റുന്നു
-        return (Number(a.regNo) || 0) - (Number(b.regNo) || 0); // ഒരേ ജെൻഡർ ഉള്ളവരെ Reg No അനുസരിച്ച് ക്രമീകരിക്കുന്നു
+        return (Number(a.regNo) || 0) - (Number(b.regNo) || 0); // ഒരേ ജെൻഡർ ഉള്ളവരെ Reg No ക്രമത്തിൽ മാറ്റുന്നു
       });
     } else if (sortOrder === "GIRLS_FIRST") {
       students.sort((a, b) => {
@@ -375,7 +371,7 @@ window.loadAttendanceSheet = async () => {
       students.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
     }
 
-    // 4. ടേബിൾ റെൻഡർ ചെയ്യുന്നു
+    // 4. ടേബിളിൽ ഡിസ്‌പ്ലേ ചെയ്യുന്നു
     let html = "";
     students.forEach(s => {
       const gDisplay = (getGender(s) === 'female' || getGender(s) === 'girl') 
