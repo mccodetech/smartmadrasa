@@ -55,9 +55,7 @@ window.saveCustomTask = (e) => {
   window.showToast("Custom task added successfully!", "success");
 };
 
-// ------------------------------------------
-// GLOBAL STUDENT SORTING UTILITY (Partitioning Logic)
-// ------------------------------------------
+// Attendance, Marks, Performance എന്നിവയ്ക്ക് മാത്രം ബാധകമായ Sorting Logic
 window.sortStudentsList = (studentsList, sortOrder = "BOYS_FIRST") => {
   if (!Array.isArray(studentsList)) return [];
 
@@ -73,9 +71,10 @@ window.sortStudentsList = (studentsList, sortOrder = "BOYS_FIRST") => {
     return g === 'female' || g === 'girl' || g === 'f';
   };
 
-  // തന്നിരിക്കുന്ന ലിസ്റ്റിലെ കുട്ടികളുടെ ലിസ്റ്റ് ആദ്യം രജിസ്ട്രേഷൻ നമ്പർ പ്രകാരം ക്രമീകരിക്കുന്നു
+  // 1. പ്രവേശന നമ്പർ അനുസരിച്ച് ആദ്യം സോർട്ട് ചെയ്യുന്നു
   const baseSorted = [...studentsList].sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
 
+  // 2. Boys First ആണെങ്കിൽ ഗ്രൂപ്പുകളായി വേർതിരിച്ച് ചേர்க்கുന്നു
   if (sortOrder === "BOYS_FIRST" || !sortOrder) {
     const boysList = baseSorted.filter(s => isBoy(s));
     const girlsList = baseSorted.filter(s => isGirl(s));
