@@ -328,6 +328,9 @@ window.resetAttendanceButton = () => {
   }
 };
 
+// ==========================================
+// 3. DAILY ATTENDANCE MODULE (Direct Group Sorting)
+// ==========================================
 window.loadAttendanceSheet = async () => {
   window.resetAttendanceButton();
   const selClass = document.getElementById("attClassSelect")?.value;
@@ -344,8 +347,20 @@ window.loadAttendanceSheet = async () => {
   if (area) area.classList.remove("d-none");
 
   try {
+    // 1. Settings നേരെ വായിക്കുന്നു
+    let sortOrder = "BOYS_FIRST";
+    try {
+      const settingsSnap = await getDoc(doc(db, "settings", currentInstitutionId));
+      if (settingsSnap.exists() && settingsSnap.data().sortOrder) {
+        sortOrder = settingsSnap.data().sortOrder;
+      }
+    } catch (e) {
+      console.error("Error loading sorting settings:", e);
+    }
+
     const cleanClass = selClass.replace(/Class\s*/i, "").trim();
 
+    // 2. ഈ ക്ലാസിലെ കുട്ടികളെ എടുത്തു
     const q = query(
       collection(db, "students"),
       where("institutionId", "==", currentInstitutionId),
@@ -357,13 +372,43 @@ window.loadAttendanceSheet = async () => {
     let rawStudents = [];
     snap.forEach(d => rawStudents.push({ id: d.id, ...d.data() }));
 
-    // Dynamic Async Sorting ബാധകമാക്കുന്നു
-    const sortedStudents = await window.sortStudentsList(rawStudents);
-
-    let html = "";
-    sortedStudents.forEach(s => {
+    // 3. Gender ചെക്കിംഗ് ഫങ്ഷൻ
+    const isMale = (s) => {
       const g = (s.gender || '').toString().trim().toLowerCase();
-      const isGirl = g === 'female' || g === 'girl' || g === 'f';
+      return g === 'male' || g === 'boy' || g === 'm';
+    };
+
+    const isFemale = (s) => {
+      const g = (s.gender || '').toString().trim().toLowerCase();
+      return g === 'female' || g === 'girl' || g === 'f';
+    };
+
+    // 4. അടിസ്ഥാനപരമായി ആദ്യം Reg No പ്രകാരം സോർട്ട് ചെയ്യുന്നു
+    rawStudents.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
+
+    let finalStudentsList = [];
+
+    // 5. DIRECT GROUP PARTITIONING (അറ്റൻഡൻസിന് തനിയെ ബാധകം)
+    if (sortOrder === "BOYS_FIRST" || !sortOrder) {
+      const boys = rawStudents.filter(s => isMale(s));
+      const girls = rawStudents.filter(s => isFemale(s));
+      const others = rawStudents.filter(s => !isMale(s) && !isFemale(s));
+      finalStudentsList = [...boys, ...girls, ...others];
+    } else if (sortOrder === "GIRLS_FIRST") {
+      const girls = rawStudents.filter(s => isFemale(s));
+      const boys = rawStudents.filter(s => isMale(s));
+      const others = rawStudents.filter(s => !isMale(s) && !isFemale(s));
+      finalStudentsList = [...girls, ...boys, ...others];
+    } else if (sortOrder === "NAME_ASC") {
+      finalStudentsList = rawStudents.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    } else {
+      finalStudentsList = rawStudents;
+    }
+
+    // 6. ടേബിൾ റെൻഡർ ചെയ്യൽ
+    let html = "";
+    finalStudentsList.forEach(s => {
+      const isGirl = isFemale(s);
       const gDisplay = isGirl 
         ? `<span class="badge bg-danger-subtle text-danger ms-2 small">Female</span>`
         : `<span class="badge bg-primary-subtle text-primary ms-2 small">Male</span>`;
