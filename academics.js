@@ -312,7 +312,7 @@ window.loadAttendanceSheet = async () => {
   if (area) area.classList.remove("d-none");
 
   try {
-    // 1. Super Admin Settings വായിക്കുന്നു
+    // 1. Settings fetching
     let sortOrder = "BOYS_FIRST";
     try {
       if (currentInstitutionId) {
@@ -327,7 +327,7 @@ window.loadAttendanceSheet = async () => {
 
     const cleanClass = selClass.replace(/Class\s*/i, "").trim();
 
-    // 2. ഈ ക്ലാസിലെ കുട്ടികളുടെ വിവരങ്ങൾ എടുക്കുന്നു
+    // 2. Fetch Active Students
     const q = query(
       collection(db, "students"),
       where("institutionId", "==", currentInstitutionId),
@@ -336,10 +336,9 @@ window.loadAttendanceSheet = async () => {
     );
     const snap = await getDocs(q);
 
-    let students = [];
-    snap.forEach(d => students.push({ id: d.id, ...d.data() }));
+    let allStudents = [];
+    snap.forEach(d => allStudents.push({ id: d.id, ...d.data() }));
 
-    // Gender സേഫ് ആയി ചെക്ക് ചെയ്യാനുള്ള ഹെൽപ്പർ
     const isMale = (s) => {
       const g = (s.gender || '').toString().trim().toLowerCase();
       return g === 'male' || g === 'boy' || g === 'm';
@@ -350,38 +349,38 @@ window.loadAttendanceSheet = async () => {
       return g === 'female' || g === 'girl' || g === 'f';
     };
 
-    // 3. STRICT SORTING LOGIC FOR BOYS FIRST
-    if (sortOrder === "BOYS_FIRST") {
-      students.sort((a, b) => {
-        const aMale = isMale(a);
-        const bMale = isMale(b);
+    let sortedStudents = [];
 
-        // a ആൺകുട്ടിയും b പെൺകുട്ടിയും ആണെങ്കിൽ a മുകളിൽ വരണം (-1)
-        if (aMale && !bMale) return -1;
-        // a പെൺകുട്ടിയും b ആൺകുട്ടിയും ആണെങ്കിൽ b മുകളിൽ വരണം (1)
-        if (!aMale && bMale) return 1;
-        
-        // രണ്ടാളും ഒരേ ജെൻഡർ ആണെങ്കിൽ Reg No പ്രകാരം സോർട്ട് ചെയ്യുന്നു
-        return (Number(a.regNo) || 0) - (Number(b.regNo) || 0);
-      });
+    // 3. PERFECT PARTITIONING & GROUPING LOGIC
+    if (sortOrder === "BOYS_FIRST" || !sortOrder) {
+      // Reg No order-il sort cheyyunnu
+      allStudents.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
+
+      const boysList = allStudents.filter(s => isMale(s));
+      const girlsList = allStudents.filter(s => isFemale(s));
+      const othersList = allStudents.filter(s => !isMale(s) && !isFemale(s));
+
+      // Aadyam Boys, Pinne Girls, Pinne Baakki
+      sortedStudents = [...boysList, ...girlsList, ...othersList];
+
     } else if (sortOrder === "GIRLS_FIRST") {
-      students.sort((a, b) => {
-        const aFemale = isFemale(a);
-        const bFemale = isFemale(b);
+      allStudents.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
 
-        if (aFemale && !bFemale) return -1;
-        if (!aFemale && bFemale) return 1;
-        return (Number(a.regNo) || 0) - (Number(b.regNo) || 0);
-      });
+      const girlsList = allStudents.filter(s => isFemale(s));
+      const boysList = allStudents.filter(s => isMale(s));
+      const othersList = allStudents.filter(s => !isMale(s) && !isFemale(s));
+
+      sortedStudents = [...girlsList, ...boysList, ...othersList];
+
     } else if (sortOrder === "NAME_ASC") {
-      students.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+      sortedStudents = allStudents.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
     } else {
-      students.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
+      sortedStudents = allStudents.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
     }
 
-    // 4. ടേബിളിൽ പ്രിന്റ് ചെയ്യുന്നു
+    // 4. Render Table Rows
     let html = "";
-    students.forEach(s => {
+    sortedStudents.forEach(s => {
       const gDisplay = isFemale(s)
         ? `<span class="badge bg-danger-subtle text-danger ms-2 small">Female</span>`
         : `<span class="badge bg-primary-subtle text-primary ms-2 small">Male</span>`;
@@ -408,7 +407,6 @@ window.loadAttendanceSheet = async () => {
     if (tbody) tbody.innerHTML = `<tr><td colspan="3" class="text-center text-danger">Error loading data: ${err.message}</td></tr>`;
   }
 };
-
 window.updateAttendanceCount = () => {
   const total = document.querySelectorAll(".att-checkbox").length;
   const present = document.querySelectorAll(".att-checkbox:checked").length;
