@@ -212,7 +212,6 @@ window.deleteAllStudents = async () => {
   }
 };
 
-// Student Directory എപ്പോഴും Registration Number ക്രമത്തിൽ മാത്രം ലോഡ് ചെയ്യും
 window.loadStudentsByClass = async (forceRefresh = false) => {
   const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
   let selectedClass = document.getElementById("filterClassSelect")?.value || "ALL";
@@ -235,7 +234,7 @@ window.loadStudentsByClass = async (forceRefresh = false) => {
       snap.forEach(d => localStudentsCache.push({ id: d.id, ...d.data() }));
     }
 
-    // REGISTRATION NUMBER ORDER (ONLY FOR STUDENT DIRECTORY)
+    // Student Directory-യിൽ എപ്പോഴും Reg No അടിസ്ഥാനത്തിൽ മാത്രം ക്രമീകരിക്കുന്നു
     localStudentsCache.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
 
     let filtered = localStudentsCache;
