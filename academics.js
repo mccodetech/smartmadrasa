@@ -311,23 +311,21 @@ window.loadAttendanceSheet = async () => {
   if (tbody) tbody.innerHTML = `<tr><td colspan="3" class="text-center py-3"><i class="fa-solid fa-spinner fa-spin me-2"></i>Loading students...</td></tr>`;
   if (area) area.classList.remove("d-none");
 
-  let sortOrder = window.sysSortOrder || "REG_NO";
-
   try {
-    // 1. Settings collection-il ninnu sortOrder direct aayi vaayikkunnu
+    // 1. Super Admin Settings ഫയർസ്റ്റോറിൽ നിന്ന് ലൈവായി വായിക്കുന്നു
+    let sortOrder = "REG_NO";
     const settingsSnap = await getDoc(doc(db, "settings", currentInstitutionId));
     if (settingsSnap.exists()) {
       sortOrder = settingsSnap.data().sortOrder || "REG_NO";
-      window.sysSortOrder = sortOrder;
     }
 
     const cleanClass = selClass.replace(/Class\s*/i, "").trim();
 
-    // 2. Class-ile active students-ne query cheyyunnu
+    // 2. ഈ ക്ലാസിലെ കുട്ടികളെ ലോഡ് ചെയ്യുന്നു
     const q = query(
-      collection(db, "students"),
-      where("institutionId", "==", currentInstitutionId),
-      where("currentClass", "==", cleanClass),
+      collection(db, "students"), 
+      where("institutionId", "==", currentInstitutionId), 
+      where("currentClass", "==", cleanClass), 
       where("status", "==", "active")
     );
     const snap = await getDocs(q);
@@ -335,36 +333,50 @@ window.loadAttendanceSheet = async () => {
     let students = [];
     snap.forEach(d => students.push({ id: d.id, ...d.data() }));
 
-    // 3. Dynamic Sorting Execution
+    // Helper: Safely normalize gender values
+    const getGender = (s) => (s.gender || '').toString().trim().toLowerCase();
+
+    // 3. Attendance Sheet-ൽ മാത്രം Super Admin Sorting ബാധകമാക്കുന്നു
     if (sortOrder === "NAME_ASC") {
       students.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
     } else if (sortOrder === "BOYS_FIRST") {
       students.sort((a, b) => {
-        const gA = (a.gender || '').toLowerCase();
-        const gB = (b.gender || '').toLowerCase();
-        if (gA === 'male' && gB !== 'male') return -1;
-        if (gA !== 'male' && gB === 'male') return 1;
+        const gA = getGender(a);
+        const gB = getGender(b);
+        const isBoyA = (gA === 'male' || gA === 'boy');
+        const isBoyB = (gB === 'male' || gB === 'boy');
+
+        if (isBoyA && !isBoyB) return -1;
+        if (!isBoyA && isBoyB) return 1;
         return (Number(a.regNo) || 0) - (Number(b.regNo) || 0);
       });
     } else if (sortOrder === "GIRLS_FIRST") {
       students.sort((a, b) => {
-        const gA = (a.gender || '').toLowerCase();
-        const gB = (b.gender || '').toLowerCase();
-        if (gA === 'female' && gB !== 'female') return -1;
-        if (gA !== 'female' && gB === 'female') return 1;
+        const gA = getGender(a);
+        const gB = getGender(b);
+        const isGirlA = (gA === 'female' || gA === 'girl');
+        const isGirlB = (gB === 'female' || gB === 'girl');
+
+        if (isGirlA && !isGirlB) return -1;
+        if (!isGirlA && isGirlB) return 1;
         return (Number(a.regNo) || 0) - (Number(b.regNo) || 0);
       });
     } else {
+      // Reg No Order (Default)
       students.sort((a, b) => (Number(a.regNo) || 0) - (Number(b.regNo) || 0));
     }
 
-    // 4. Attendance Table rows render cheyyunnu
+    // 4. Attendance Table Rows പ്രിന്റ് ചെയ്യുന്നു
     let html = "";
     students.forEach(s => {
+      const gDisplay = (getGender(s) === 'female' || getGender(s) === 'girl') 
+        ? `<span class="badge bg-danger-subtle text-danger ms-2 small">Female</span>`
+        : `<span class="badge bg-primary-subtle text-primary ms-2 small">Male</span>`;
+
       html += `
         <tr data-sid="${s.id}">
           <td style="white-space: nowrap;"><b>${s.regNo || '-'}</b></td>
-          <td><b>${s.name || '-'}</b></td>
+          <td><b>${s.name || '-'}</b> ${gDisplay}</td>
           <td class="text-center">
             <input type="checkbox" class="form-check-input form-check-input-lg att-checkbox" id="att_${s.id}" checked onchange="updateAttendanceCount()">
           </td>
@@ -373,7 +385,7 @@ window.loadAttendanceSheet = async () => {
     });
 
     if (tbody) tbody.innerHTML = html || `<tr><td colspan="3" class="text-center">No active students in this class.</td></tr>`;
-
+    
     const selectAllAtt = document.getElementById("selectAllAtt");
     if (selectAllAtt) selectAllAtt.checked = true;
     window.updateAttendanceCount();
@@ -383,6 +395,7 @@ window.loadAttendanceSheet = async () => {
     if (tbody) tbody.innerHTML = `<tr><td colspan="3" class="text-center text-danger">Error loading data: ${err.message}</td></tr>`;
   }
 };
+
 window.toggleSelectAllAttendance = () => {
   const isChecked = document.getElementById("selectAllAtt")?.checked;
   document.querySelectorAll(".att-checkbox").forEach(cb => cb.checked = isChecked);
