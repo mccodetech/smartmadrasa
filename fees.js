@@ -345,20 +345,27 @@ window.openFeeModalObj = (s) => {
 };
 
 window.saveFeePayment = async (e) => {
-  e.preventDefault();
-  const sId = document.getElementById("payStudentId").value;
-  const reg = document.getElementById("payStudentReg").value;
-  const name = document.getElementById("payStudentName").value;
-  const sClass = document.getElementById("payStudentClass").value;
-  const phone = document.getElementById("payStudentPhone").value;
+  if (e) e.preventDefault();
+
+  // Null Check ഉൾപ്പെടുത്തിയ Safe Extraction
+  const sId = document.getElementById("payStudentId")?.value || "";
+  const reg = document.getElementById("payStudentReg")?.value || "";
+  const name = document.getElementById("payStudentName")?.value || "";
+  const sClass = document.getElementById("payStudentClass")?.value || "";
+  const phone = document.getElementById("payStudentPhone")?.value || "";
   
-  const amount = document.getElementById("payAmount").value;
-  const academicYear = document.getElementById("payAcademicYear").value;
-  const category = document.getElementById("payFeeCategory").value;
-  const manual = document.getElementById("payManualReceiptInput").value.trim().toUpperCase();
+  const amount = document.getElementById("payAmount")?.value || 0;
+  const academicYear = document.getElementById("payAcademicYear")?.value || "2026-2027";
+  const category = document.getElementById("payFeeCategory")?.value || "Monthly Fee";
+  const manual = (document.getElementById("payManualReceiptInput")?.value || "").trim().toUpperCase();
+  
   const today = new Date().toLocaleDateString();
   const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
   const currentUserName = window.currentUserName || "Staff";
+
+  if (!sId || !reg) {
+    return window.showToast("Student details missing. Please try again.", "warning");
+  }
 
   let finalFeeTypeStr = category;
   let specificFundName = "";
@@ -368,7 +375,7 @@ window.saveFeePayment = async (e) => {
     if (checkedMonths.length === 0) return window.showToast("Select at least one month.", "warning");
     finalFeeTypeStr = `Monthly Fee (${academicYear}): ${checkedMonths.join(', ')}`;
   } else if (category === "Special Fee / Fund") {
-    specificFundName = document.getElementById("paySpecialFeeSelect").value;
+    specificFundName = document.getElementById("paySpecialFeeSelect")?.value || "GENERAL FUND";
     finalFeeTypeStr = `Fund - ${specificFundName} (${academicYear})`;
   } else {
     finalFeeTypeStr = `${category} (${academicYear})`;
@@ -419,6 +426,7 @@ window.saveFeePayment = async (e) => {
       });
     }
 
+    // Receipt UI Update
     const recMad = document.getElementById("recMadrassaName");
     const recNo = document.getElementById("recNo");
     const recDate = document.getElementById("recDate");
@@ -457,10 +465,13 @@ window.saveFeePayment = async (e) => {
       else waBtn.classList.add("d-none");
     }
 
+    // Close Modal
     const modalElem = document.getElementById('feePaymentModal');
     if (modalElem && window.bootstrap) {
       const modalInstance = bootstrap.Modal.getInstance(modalElem);
       if (modalInstance) modalInstance.hide();
+    } else if (modalElem) {
+      modalElem.style.display = "none";
     }
 
     const appSec = document.getElementById("appSection");
@@ -469,11 +480,13 @@ window.saveFeePayment = async (e) => {
     if (printRec) printRec.classList.remove("d-none");
     
     window.loadStudentsForFees();
+    window.showToast("Fee payment recorded successfully!", "success");
+
   } catch (err) { 
+    console.error("Error saving fee payment:", err);
     window.showToast("Error: " + err.message, "error"); 
   }
 };
-
 window.shareToWhatsApp = () => {
   if (!lastReceiptWhatsAppPayload) return;
   const p = lastReceiptWhatsAppPayload;
