@@ -123,17 +123,45 @@ window.checkFeePermission = async () => {
   return false;
 };
 
-// ക്ലാസ് സെലക്ട് ചെയ്യുമ്പോൾ കുട്ടികളുടെ ഫീസ് വിവരങ്ങൾ ലോഡ് ചെയ്യാൻ
+// ക്ലാസ് സെലക്ട് ചെയ്യുമ്പോൾ കുട്ടികളുടെ ഫീസ് വിവരങ്ങൾ ലോഡ് ചെയ്യാൻ (Fixed Permission)
 window.loadStudentsForFees = async () => {
   const selClass = document.getElementById("feeClassSelect")?.value;
   const tableArea = document.getElementById("feesTableArea");
   const tbody = document.getElementById("feesTableBody");
   const alertArea = document.getElementById("feeCollectionAlert");
   const collectionArea = document.getElementById("feeCollectionArea");
+  
   const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
+  const currentUserRole = (window.currentUserRole || sessionStorage.getItem("currentUserRole") || "").toString().toLowerCase();
 
-  const canCollect = await window.checkFeePermission();
+  // 1. HARDCODED ROLE SAFEGUARD & PERMISSION CHECK
+  let canCollect = false;
 
+  // Super Admin, Admin, Principal എന്നിവർക്ക് എപ്പോഴും നേരിട്ട് അനുവാദം നൽകുന്നു
+  if (window.isSuperAdmin || currentUserRole === "admin" || currentUserRole === "principal") {
+    canCollect = true;
+  } else {
+    // Teacher ആകുമ്പോൾ മാത്രം Firestore-ലെ Settings പരിശോധിക്കുന്നു
+    let sysPerm = (window.sysFeePermission || "ALL").toString().toUpperCase();
+    try {
+      if (currentInstitutionId) {
+        const settingsSnap = await getDoc(doc(db, "settings", currentInstitutionId));
+        if (settingsSnap.exists()) {
+          const data = settingsSnap.data();
+          sysPerm = (data.feePermission || data.saFeePermission || sysPerm).toString().toUpperCase();
+          window.sysFeePermission = sysPerm;
+        }
+      }
+    } catch (e) {
+      console.log("Error checking fee permissions:", e);
+    }
+
+    if (sysPerm === "ALL" || sysPerm === "ADMIN_PRINCIPAL_TEACHERS" || sysPerm === "TEACHERS") {
+      canCollect = true;
+    }
+  }
+
+  // 2. UI VISIBILITY TOGGLE (ബ്ലോക്ക് മെസ്സേജ് മറയ്ക്കുകയും ടേബിൾ കാണിക്കുകയും ചെയ്യുന്നു)
   if (!canCollect) {
     if (alertArea) alertArea.classList.remove("d-none");
     if (collectionArea) collectionArea.classList.add("d-none");
