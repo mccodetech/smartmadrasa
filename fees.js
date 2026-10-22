@@ -3,7 +3,7 @@
 // ==========================================
 import { db, auth } from "./firebase-config.js";
 import { 
-  collection, doc, setDoc, getDocs, query, where, addDoc, runTransaction, serverTimestamp 
+  collection, doc, setDoc, getDoc, getDocs, query, where, addDoc, runTransaction, serverTimestamp 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const ALL_MONTHS = ["APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC", "JAN", "FEB", "MAR"];
@@ -81,6 +81,48 @@ window.toggleFeeCategoryOptions = () => {
   window.calculateFeeAmount();
 };
 
+// ==========================================
+// FEE PERMISSION CHECKER (Comprehensive Fix)
+// ==========================================
+window.checkFeePermission = async () => {
+  const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
+  const currentUserRole = (window.currentUserRole || sessionStorage.getItem("currentUserRole") || "").toString().toLowerCase();
+
+  // Super Admin അല്ലെങ്കിൽ Institution Admin ആണെങ്കിൽ എപ്പോഴും പെർമിഷൻ നൽകും
+  if (window.isSuperAdmin || currentUserRole === "admin") {
+    return true;
+  }
+
+  let sysFeePermission = (window.sysFeePermission || "all").toString().toLowerCase();
+
+  try {
+    if (currentInstitutionId) {
+      const settingsSnap = await getDoc(doc(db, "settings", currentInstitutionId));
+      if (settingsSnap.exists()) {
+        const data = settingsSnap.data();
+        sysFeePermission = (data.feePermission || window.sysFeePermission || "all").toString().toLowerCase();
+        window.sysFeePermission = sysFeePermission;
+      }
+    }
+  } catch (err) {
+    console.error("Error checking fee permissions:", err);
+  }
+
+  // Permissive Matching Logic
+  if (sysFeePermission === "all" || sysFeePermission === "admin_principal_teachers") {
+    return true; // Admin, Principal, Teacher എല്ലാവർക്കും അനുവാദമുണ്ട്
+  } else if (sysFeePermission === "principal" || sysFeePermission === "admin_principal") {
+    return currentUserRole === "admin" || currentUserRole === "principal";
+  } else if (sysFeePermission === "admin" || sysFeePermission === "only_admin") {
+    return currentUserRole === "admin";
+  }
+
+  // Fallback Rule for Principal
+  if (currentUserRole === "principal") return true;
+
+  return false;
+};
+
 // ക്ലാസ് സെലക്ട് ചെയ്യുമ്പോൾ കുട്ടികളുടെ ഫീസ് വിവരങ്ങൾ ലോഡ് ചെയ്യാൻ
 window.loadStudentsForFees = async () => {
   const selClass = document.getElementById("feeClassSelect")?.value;
@@ -89,12 +131,8 @@ window.loadStudentsForFees = async () => {
   const alertArea = document.getElementById("feeCollectionAlert");
   const collectionArea = document.getElementById("feeCollectionArea");
   const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
-  const currentUserRole = window.currentUserRole || sessionStorage.getItem("currentUserRole");
-  const sysFeePermission = window.sysFeePermission || "all";
 
-  let canCollect = (currentUserRole === "admin") || 
-                   (currentUserRole === "principal" && (sysFeePermission === "principal" || sysFeePermission === "all")) || 
-                   (currentUserRole === "teacher" && sysFeePermission === "all");
+  const canCollect = await window.checkFeePermission();
 
   if (!canCollect) {
     if (alertArea) alertArea.classList.remove("d-none");
@@ -107,12 +145,17 @@ window.loadStudentsForFees = async () => {
 
   if (!selClass) { if (tableArea) tableArea.classList.add("d-none"); return; }
   if (tableArea) tableArea.classList.remove("d-none");
-  if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="text-center">Loading student fee status...</td></tr>`;
+  if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="text-center py-3"><i class="fa-solid fa-spinner fa-spin me-2"></i>Loading student fee status...</td></tr>`;
 
   const cleanClass = selClass.replace(/Class\s*/i, "").trim();
 
   try {
-    const q = query(collection(db, "students"), where("institutionId", "==", currentInstitutionId), where("currentClass", "==", cleanClass), where("status", "==", "active"));
+    const q = query(
+      collection(db, "students"), 
+      where("institutionId", "==", currentInstitutionId), 
+      where("currentClass", "==", cleanClass), 
+      where("status", "==", "active")
+    );
     const snap = await getDocs(q);
 
     let students = [];
@@ -124,7 +167,11 @@ window.loadStudentsForFees = async () => {
       return;
     }
 
-    const feeQ = query(collection(db, "feeCollections"), where("institutionId", "==", currentInstitutionId), where("class", "==", cleanClass));
+    const feeQ = query(
+      collection(db, "feeCollections"), 
+      where("institutionId", "==", currentInstitutionId), 
+      where("class", "==", cleanClass)
+    );
     const feeSnap = await getDocs(feeQ);
     
     let studentPaidMonths = {};
@@ -150,7 +197,6 @@ window.loadStudentsForFees = async () => {
       });
       monthBadges += `</div>`;
 
-      // ഡാറ്റ സുരക്ഷിതമായി ആട്രിബ്യൂട്ടിൽ വെക്കുന്നു
       html += `
         <tr>
           <td><b>${s.regNo || '-'}</b></td>
@@ -175,7 +221,6 @@ window.loadStudentsForFees = async () => {
     if (tbody) {
       tbody.innerHTML = html;
       
-      // ഇന്റർനാഷണൽ ഇവന്റ് ലിスナー വഴി ബട്ടൺ വർക്ക് ചെയ്യിക്കുന്നു (യൂണിവേഴ്സൽ ഫിക്സ്)
       document.querySelectorAll(".pay-fee-btn").forEach(btn => {
         btn.addEventListener("click", () => {
           const studentObj = {
@@ -215,7 +260,7 @@ window.calculateFeeAmount = () => {
   if (payAmtEl) payAmtEl.value = total;
 };
 
-// ഒബ്ജക്റ്റ് നേരിട്ട് സ്വീകരിച്ച് മോഡൽ ഓപ്പൺ ചെയ്യുന്ന പുതിയ ഫംഗ്ഷൻ
+// ഒബ്ജക്റ്റ് കൈപ്പറ്റി മോഡൽ ഓപ്പൺ ചെയ്യുന്ന ഫങ്ഷൻ
 window.openFeeModalObj = (s) => {
   try {
     const feeForm = document.getElementById("feePaymentForm");
