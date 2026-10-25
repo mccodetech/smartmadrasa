@@ -122,6 +122,7 @@ window.loadInstitutionSettings = async () => {
     const snap = await getDoc(docRef);
     const inputEl = document.getElementById("settingSpecialFundsInput");
     const workingDaysEl = document.getElementById("settingTotalWorkingDays");
+    const sortOrderSelect = document.getElementById("settingSortOrderSelect");
 
     if (snap.exists()) {
       const data = snap.data();
@@ -129,6 +130,11 @@ window.loadInstitutionSettings = async () => {
       window.sysSortOrder = data.sortOrder || "REG_NO";
       window.sysFeePermission = data.feePermission || "all";
       window.sysReqManualReceipt = data.reqManualReceipt || false;
+
+      // Sorting Order Dropdown സിങ്ക് ചെയ്യുന്നു
+      if (sortOrderSelect && data.sortOrder) {
+        sortOrderSelect.value = data.sortOrder;
+      }
 
       if (data.specialFeeCategories && inputEl) {
         inputEl.value = data.specialFeeCategories.join(", ");
@@ -158,6 +164,35 @@ window.loadInstitutionSettings = async () => {
     }
   } catch (e) {
     console.error("Error loading settings:", e);
+  }
+};
+
+// പ്രിൻസിപ്പലിനും അഡ്മിനും Student Sorting Order സ്വന്തം Settings-ൽ നിന്ന് സേവ് ചെയ്യാനുള്ള ഫങ്ഷൻ
+window.saveSortOrderSetting = async () => {
+  const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
+  const selectedOrder = document.getElementById("settingSortOrderSelect")?.value || "REG_NO";
+
+  if (!currentInstitutionId) {
+    window.showToast("Institution ID not found.", "error");
+    return;
+  }
+
+  try {
+    await setDoc(doc(db, "settings", currentInstitutionId), {
+      sortOrder: selectedOrder,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+
+    window.sysSortOrder = selectedOrder;
+    window.showToast("Student sorting order updated successfully!", "success");
+
+    // അറ്റൻഡൻസ് ക്ലാസ് സെലക്ട് ചെയ്തിട്ടുണ്ടെങ്കിൽ ഉടൻ തനിയെ റീലോഡ് ചെയ്യുന്നു
+    if (typeof window.loadAttendanceSheet === 'function' && document.getElementById("attClassSelect")?.value) {
+      window.loadAttendanceSheet();
+    }
+  } catch (err) {
+    console.error("Error saving sort order:", err);
+    window.showToast("Error updating sort order: " + err.message, "error");
   }
 };
 
@@ -565,11 +600,14 @@ window.deleteMadrasaAdmin = async function(userId, instName) {
   }
 };
 
+// ==========================================
+// SIDEBAR ROLE-BASED VISIBILITY CONTROLLER
+// ==========================================
 window.updateSidebarByRole = (role) => {
   const userRole = (role || window.currentUserRole || "").toString().toLowerCase();
   const isSuper = Boolean(window.isSuperAdmin);
 
-  // 1. All Madrasas ബട്ടൺ സൂപ്പർ അഡ്മിന് മാത്രം നൽകുന്നു
+  // 1. All Madrasas ബട്ടൺ സൂപ്പർ അഡ്മിന് മാത്രം നൽകുന്നു (Strict CSS display: none !important)
   const superAdminBtn = document.getElementById("superAdminMasterBtn");
   if (superAdminBtn) {
     if (isSuper) {
@@ -581,7 +619,7 @@ window.updateSidebarByRole = (role) => {
     }
   }
 
-  // 2. ബാക്കി മെനുകളുടെ നിയന്ത്രണം
+  // 2. ബാക്കി മെനുകൾ റോളുകൾക്കനുസരിച്ച് ക്രമീകരിക്കുന്നു
   const staffBtn = document.getElementById("instAdminStaffBtn");
   const settingsBtn = document.getElementById("settingsMenuBtn");
   const feeSettingsBtn = document.getElementById("feeSettingsBtn");
@@ -603,7 +641,7 @@ window.updateSidebarByRole = (role) => {
         }
       });
   } else if (userRole === "principal") {
-    // Principal
+    // Principal (Manage Staff, Settings എന്നിവ ലഭ്യമാക്കുന്നു)
     if (staffBtn) { staffBtn.classList.remove("d-none"); staffBtn.style.display = ""; }
     if (settingsBtn) { settingsBtn.classList.remove("d-none"); settingsBtn.style.display = ""; }
     if (feeSettingsBtn) { feeSettingsBtn.classList.add("d-none"); feeSettingsBtn.style.display = "none"; }
@@ -613,7 +651,7 @@ window.updateSidebarByRole = (role) => {
       if (btn) { btn.classList.remove("d-none"); btn.style.display = ""; }
     });
   } else {
-    // Teachers (Settings മറയ്ക്കുന്നു)
+    // Teachers (Settings പൂർണ്ണമായി മറയ്ക്കുന്നു)
     [staffBtn, settingsBtn, feeSettingsBtn, subjectSettingsBtn, promotionBtn]
       .forEach(btn => {
         if (btn) {
@@ -630,7 +668,6 @@ window.updateSidebarByRole = (role) => {
       });
   }
 
-  // മൊബൈൽ മെനുവിലേക്ക് മാറ്റങ്ങൾ സിങ്ക് ചെയ്യുന്നു
   window.syncMobileMenu();
 };
 
