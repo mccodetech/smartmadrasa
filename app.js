@@ -52,6 +52,32 @@ window.syncMobileMenu = () => {
   }
 };
 
+// Auth Tab Switching (Direct Madrasa Registration Form)
+window.switchAuthTab = (tab) => {
+  const loginForm = document.getElementById("loginForm");
+  const signupOptions = document.getElementById("signupOptions");
+  const signupForm = document.getElementById("signupForm");
+  const staffSignupForm = document.getElementById("staffSignupForm");
+  const tabLogin = document.getElementById("tabBtnLogin");
+  const tabSignup = document.getElementById("tabBtnSignup");
+
+  if (tab === 'login') {
+    tabLogin?.classList.add("active");
+    tabSignup?.classList.remove("active");
+    loginForm?.classList.remove("d-none");
+    signupOptions?.classList.add("d-none");
+    signupForm?.classList.add("d-none");
+    staffSignupForm?.classList.add("d-none");
+  } else {
+    tabSignup?.classList.add("active");
+    tabLogin?.classList.remove("active");
+    loginForm?.classList.add("d-none");
+    signupOptions?.classList.add("d-none");
+    signupForm?.classList.remove("d-none");
+    staffSignupForm?.classList.add("d-none");
+  }
+};
+
 window.populateClassDropdowns = function() {
   const allClasses = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
   const allowedClasses = (window.currentUserRole === "principal" || window.currentUserRole === "admin" || window.isSuperAdmin) 
@@ -320,7 +346,7 @@ window.openStaffProfileModal = (staffId = null) => {
     window.showToast("Staff profile modal not found in HTML.", "error");
     return;
   }
-  const modal = new bootstrap.Modal(modalEl);
+  const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
   modal.show();
 };
 
@@ -539,7 +565,66 @@ window.deleteMadrasaAdmin = async function(userId, instName) {
   }
 };
 
-// Authentication Observer
+// ==========================================
+// SIDEBAR ROLE-BASED VISIBILITY CONTROLLER
+// ==========================================
+window.updateSidebarByRole = (role) => {
+  const userRole = (role || window.currentUserRole || "").toString().toLowerCase();
+  const isSuper = Boolean(window.isSuperAdmin);
+
+  // 1. All Madrasas ബട്ടൺ സൂപ്പർ അഡ്മിന് മാത്രം നൽകുന്നു
+  const superAdminBtn = document.getElementById("superAdminMasterBtn");
+  if (superAdminBtn) {
+    if (isSuper) {
+      superAdminBtn.classList.remove("d-none");
+      superAdminBtn.style.display = "";
+    } else {
+      superAdminBtn.classList.add("d-none");
+      superAdminBtn.style.display = "none";
+    }
+  }
+
+  // 2. ബാക്കി മെനുകൾ റോളുകൾക്കനുസരിച്ച് ക്രമീകരിക്കുന്നു
+  const staffBtn = document.getElementById("instAdminStaffBtn");
+  const settingsBtn = document.getElementById("settingsMenuBtn");
+  const feeSettingsBtn = document.getElementById("feeSettingsBtn");
+  const subjectSettingsBtn = document.getElementById("subjectSettingsBtn");
+  const promotionBtn = document.getElementById("promotionMenuBtn");
+  const studentsBtn = document.getElementById("studentsMenuBtn");
+  const attBtn = document.getElementById("attendanceMenuBtn");
+  const marksBtn = document.getElementById("marksMenuBtn");
+  const perfBtn = document.getElementById("performanceMenuBtn");
+  const feesBtn = document.getElementById("feesMenuBtn");
+
+  if (isSuper) {
+    [staffBtn, settingsBtn, feeSettingsBtn, subjectSettingsBtn, promotionBtn, studentsBtn, attBtn, marksBtn, perfBtn, feesBtn]
+      .forEach(btn => btn?.classList.remove("d-none"));
+  } else if (userRole === "admin") {
+    // Institution Admin
+    [staffBtn, settingsBtn, feeSettingsBtn, subjectSettingsBtn, promotionBtn, studentsBtn, attBtn, marksBtn, perfBtn, feesBtn]
+      .forEach(btn => btn?.classList.remove("d-none"));
+  } else if (userRole === "principal") {
+    // Principal (Manage Staff, Settings എന്നിവ നിയന്ത്രിക്കുന്നു)
+    staffBtn?.classList.remove("d-none");
+    settingsBtn?.classList.remove("d-none");
+    feeSettingsBtn?.classList.add("d-none");
+    subjectSettingsBtn?.classList.add("d-none");
+    promotionBtn?.classList.remove("d-none");
+    [studentsBtn, attBtn, marksBtn, perfBtn, feesBtn].forEach(btn => btn?.classList.remove("d-none"));
+  } else {
+    // Teachers
+    [staffBtn, settingsBtn, feeSettingsBtn, subjectSettingsBtn, promotionBtn]
+      .forEach(btn => btn?.classList.add("d-none"));
+    [studentsBtn, attBtn, marksBtn, perfBtn, feesBtn]
+      .forEach(btn => btn?.classList.remove("d-none"));
+  }
+
+  window.syncMobileMenu();
+};
+
+// ==========================================
+// AUTHENTICATION OBSERVER
+// ==========================================
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     try {
@@ -561,10 +646,9 @@ onAuthStateChanged(auth, async (user) => {
         window.currentUserName = userData.name || "Staff";
 
         if (window.currentInstitutionId) {
-  sessionStorage.setItem("currentInstitutionId", window.currentInstitutionId);
-  // Settings fully load aayadhinu shesham maathram baaki UI load aakan await cheyyunnu
-  await window.loadInstitutionSettings(); 
-}
+          sessionStorage.setItem("currentInstitutionId", window.currentInstitutionId);
+          await window.loadInstitutionSettings(); 
+        }
 
         const instNameEl = document.getElementById("displayMadrassaName");
         if (instNameEl) {
@@ -574,62 +658,30 @@ onAuthStateChanged(auth, async (user) => {
         }
 
         const userRoleEl = document.getElementById("displayUserRole");
-        const superMasterBtn = document.getElementById("superAdminMasterBtn");
-        const instAdminStaffBtn = document.getElementById("instAdminStaffBtn");
-        const settingsMenuBtn = document.getElementById("settingsMenuBtn");
-        const homeMenuBtn = document.getElementById("homeMenuBtn");
-        const studentsMenuBtn = document.getElementById("studentsMenuBtn");
-        const attendanceMenuBtn = document.getElementById("attendanceMenuBtn");
-        const marksMenuBtn = document.getElementById("marksMenuBtn");
-        const performanceMenuBtn = document.getElementById("performanceMenuBtn");
-        const feesMenuBtn = document.getElementById("feesMenuBtn");
-        const feeSettingsBtn = document.getElementById("feeSettingsBtn");
-        const subjectSettingsBtn = document.getElementById("subjectSettingsBtn");
+        if (userRoleEl) {
+          if (window.isSuperAdmin) {
+            userRoleEl.innerText = "Super Admin";
+          } else {
+            userRoleEl.innerText = window.currentUserRole === "admin" 
+              ? "Admin" 
+              : (window.currentUserRole === "principal" ? "Principal" : "Teacher");
+          }
+        }
+
+        // സൈഡ്‌ബാർ റോൾ അടിസ്ഥാനമാക്കി കൃത്യമായി ലോഡ് ചെയ്യുന്നു
+        window.updateSidebarByRole(window.currentUserRole);
 
         if (window.isSuperAdmin) {
-          if (superMasterBtn) superMasterBtn.classList.remove("d-none");
-          if (userRoleEl) userRoleEl.innerText = "Super Admin";
-          
           window.showTab('superAdminTab');
           if (typeof window.loadSuperAdminRequests === 'function') {
             window.loadSuperAdminRequests();
           }
         } else {
-          if (superMasterBtn) {
-            superMasterBtn.classList.add("d-none");
-            superMasterBtn.style.display = "none";
-          }
-          
-          if (userRoleEl) {
-            userRoleEl.innerText = window.currentUserRole === "admin" 
-              ? "Admin" 
-              : (window.currentUserRole === "principal" ? "Principal" : "Teacher");
-          }
-          
-          if (studentsMenuBtn) studentsMenuBtn.classList.remove("d-none");
-          if (feesMenuBtn) feesMenuBtn.classList.remove("d-none");
-          if (homeMenuBtn) homeMenuBtn.classList.remove("d-none");
-          if (attendanceMenuBtn) attendanceMenuBtn.classList.remove("d-none");
-          if (marksMenuBtn) marksMenuBtn.classList.remove("d-none");
-          if (performanceMenuBtn) performanceMenuBtn.classList.remove("d-none");
-
-          if (window.currentUserRole === "admin" || window.currentUserRole === "principal") {
-            if (instAdminStaffBtn) instAdminStaffBtn.classList.remove("d-none");
-            if (settingsMenuBtn) settingsMenuBtn.classList.remove("d-none");
-          } else {
-            if (instAdminStaffBtn) instAdminStaffBtn.classList.add("d-none");
-            if (settingsMenuBtn) settingsMenuBtn.classList.add("d-none");
-          }
-
-          if (window.currentUserRole === "admin") {
-            if (feeSettingsBtn) feeSettingsBtn.classList.remove("d-none");
-            if (subjectSettingsBtn) subjectSettingsBtn.classList.remove("d-none");
-          }
-
           window.showTab('homeDashboardTab');
           if (typeof window.loadLeaderboard === 'function') {
             window.loadLeaderboard();
           }
+          window.populateClassDropdowns();
         }
 
         document.getElementById("authSection")?.classList.add("d-none");
@@ -637,13 +689,6 @@ onAuthStateChanged(auth, async (user) => {
         
         const attDateEl = document.getElementById("attDate");
         if (attDateEl) attDateEl.valueAsDate = new Date();
-
-        if (!window.isSuperAdmin) {
-          window.populateClassDropdowns();
-          window.loadInstitutionSettings();
-        }
-        
-        window.syncMobileMenu();
       }
     } catch (e) {
       console.error("Auth initialization error:", e);
