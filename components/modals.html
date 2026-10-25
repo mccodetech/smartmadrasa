@@ -148,34 +148,22 @@
             </select>
           </div>
 
+          <!-- Fee Category Dropdown -->
           <div class="mb-3">
             <label class="form-label fw-bold">Fee Category</label>
-            <select id="pagesFeeCategory" class="form-select" onchange="window.toggleFeeCategoryOptions()">
+            <select id="payFeeCategory" class="form-select" onchange="window.toggleFeeCategoryOptions()">
               <option value="Monthly Fee">Monthly Fee</option>
               <option value="Special Fee / Fund">Special Fee / Fund</option>
               <option value="Admission Fee">Admission Fee</option>
               <option value="Exam Fee">Exam Fee</option>
+              <option value="Other">Other</option>
             </select>
           </div>
 
-          <div class="mb-3" id="monthSelectionDiv">
-            <label class="form-label fw-bold">Select Months</label>
-            <div class="d-flex flex-wrap gap-2 p-2 border rounded bg-light">
-              <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="APR" id="m_apr" checked onchange="window.calculateFeeAmount()"><label class="form-check-label" for="m_apr">APR</label></div>
-              <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="MAY" id="m_may" checked onchange="window.calculateFeeAmount()"><label class="form-check-label" for="m_may">MAY</label></div>
-              <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="JUN" id="m_jun" checked onchange="window.calculateFeeAmount()"><label class="form-check-label" for="m_jun">JUN</label></div>
-              <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="JUL" id="m_jul" checked onchange="window.calculateFeeAmount()"><label class="form-check-label" for="m_jul">JUL</label></div>
-              <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="AUG" id="m_aug" checked onchange="window.calculateFeeAmount()"><label class="form-check-label" for="m_aug">AUG</label></div>
-              <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="SEP" id="m_sep" checked onchange="window.calculateFeeAmount()"><label class="form-check-label" for="m_sep">SEP</label></div>
-              <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="OCT" id="m_oct" checked onchange="window.calculateFeeAmount()"><label class="form-check-label" for="m_oct">OCT</label></div>
-              <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="NOV" id="m_nov" checked onchange="window.calculateFeeAmount()"><label class="form-check-label" for="m_nov">NOV</label></div>
-              <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="DEC" id="m_dec" checked onchange="window.calculateFeeAmount()"><label class="form-check-label" for="m_dec">DEC</label></div>
-              <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="JAN" id="m_jan" checked onchange="window.calculateFeeAmount()"><label class="form-check-label" for="m_jan">JAN</label></div>
-              <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="FEB" id="m_feb" checked onchange="window.calculateFeeAmount()"><label class="form-check-label" for="m_feb">FEB</label></div>
-              <div class="form-check"><input class="form-check-input month-cb" type="checkbox" value="MAR" id="m_mar" checked onchange="window.calculateFeeAmount()"><label class="form-check-label" for="m_mar">MAR</label></div>
-            </div>
-          </div>
+          <!-- Months Selection Area (Dynamically rendered via fees.js) -->
+          <div id="monthSelectionDiv" class="mb-3"></div>
 
+          <!-- Special Fee Type Area -->
           <div class="mb-3 d-none" id="specialFeeTypeDiv">
             <label class="form-label fw-bold">Select Fund Type</label>
             <select id="paySpecialFeeSelect" class="form-select"></select>
