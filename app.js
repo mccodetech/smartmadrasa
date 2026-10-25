@@ -565,9 +565,6 @@ window.deleteMadrasaAdmin = async function(userId, instName) {
   }
 };
 
-// ==========================================
-// SIDEBAR ROLE-BASED VISIBILITY CONTROLLER
-// ==========================================
 window.updateSidebarByRole = (role) => {
   const userRole = (role || window.currentUserRole || "").toString().toLowerCase();
   const isSuper = Boolean(window.isSuperAdmin);
@@ -577,14 +574,14 @@ window.updateSidebarByRole = (role) => {
   if (superAdminBtn) {
     if (isSuper) {
       superAdminBtn.classList.remove("d-none");
-      superAdminBtn.style.display = "";
+      superAdminBtn.style.setProperty("display", "block", "important");
     } else {
       superAdminBtn.classList.add("d-none");
-      superAdminBtn.style.display = "none";
+      superAdminBtn.style.setProperty("display", "none", "important");
     }
   }
 
-  // 2. ബാക്കി മെനുകൾ റോളുകൾക്കനുസരിച്ച് ക്രമീകരിക്കുന്നു
+  // 2. ബാക്കി മെനുകളുടെ നിയന്ത്രണം
   const staffBtn = document.getElementById("instAdminStaffBtn");
   const settingsBtn = document.getElementById("settingsMenuBtn");
   const feeSettingsBtn = document.getElementById("feeSettingsBtn");
@@ -596,29 +593,44 @@ window.updateSidebarByRole = (role) => {
   const perfBtn = document.getElementById("performanceMenuBtn");
   const feesBtn = document.getElementById("feesMenuBtn");
 
-  if (isSuper) {
+  if (isSuper || userRole === "admin") {
+    // Super Admin & Institution Admin
     [staffBtn, settingsBtn, feeSettingsBtn, subjectSettingsBtn, promotionBtn, studentsBtn, attBtn, marksBtn, perfBtn, feesBtn]
-      .forEach(btn => btn?.classList.remove("d-none"));
-  } else if (userRole === "admin") {
-    // Institution Admin
-    [staffBtn, settingsBtn, feeSettingsBtn, subjectSettingsBtn, promotionBtn, studentsBtn, attBtn, marksBtn, perfBtn, feesBtn]
-      .forEach(btn => btn?.classList.remove("d-none"));
+      .forEach(btn => {
+        if (btn) {
+          btn.classList.remove("d-none");
+          btn.style.display = "";
+        }
+      });
   } else if (userRole === "principal") {
-    // Principal (Manage Staff, Settings എന്നിവ നിയന്ത്രിക്കുന്നു)
-    staffBtn?.classList.remove("d-none");
-    settingsBtn?.classList.remove("d-none");
-    feeSettingsBtn?.classList.add("d-none");
-    subjectSettingsBtn?.classList.add("d-none");
-    promotionBtn?.classList.remove("d-none");
-    [studentsBtn, attBtn, marksBtn, perfBtn, feesBtn].forEach(btn => btn?.classList.remove("d-none"));
+    // Principal
+    if (staffBtn) { staffBtn.classList.remove("d-none"); staffBtn.style.display = ""; }
+    if (settingsBtn) { settingsBtn.classList.remove("d-none"); settingsBtn.style.display = ""; }
+    if (feeSettingsBtn) { feeSettingsBtn.classList.add("d-none"); feeSettingsBtn.style.display = "none"; }
+    if (subjectSettingsBtn) { subjectSettingsBtn.classList.add("d-none"); subjectSettingsBtn.style.display = "none"; }
+    if (promotionBtn) { promotionBtn.classList.remove("d-none"); promotionBtn.style.display = ""; }
+    [studentsBtn, attBtn, marksBtn, perfBtn, feesBtn].forEach(btn => {
+      if (btn) { btn.classList.remove("d-none"); btn.style.display = ""; }
+    });
   } else {
-    // Teachers
+    // Teachers (Settings മറയ്ക്കുന്നു)
     [staffBtn, settingsBtn, feeSettingsBtn, subjectSettingsBtn, promotionBtn]
-      .forEach(btn => btn?.classList.add("d-none"));
+      .forEach(btn => {
+        if (btn) {
+          btn.classList.add("d-none");
+          btn.style.display = "none";
+        }
+      });
     [studentsBtn, attBtn, marksBtn, perfBtn, feesBtn]
-      .forEach(btn => btn?.classList.remove("d-none"));
+      .forEach(btn => {
+        if (btn) {
+          btn.classList.remove("d-none");
+          btn.style.display = "";
+        }
+      });
   }
 
+  // മൊബൈൽ മെനുവിലേക്ക് മാറ്റങ്ങൾ സിങ്ക് ചെയ്യുന്നു
   window.syncMobileMenu();
 };
 
