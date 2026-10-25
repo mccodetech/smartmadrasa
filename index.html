@@ -216,7 +216,6 @@
         </div>
       </div>
       <div class="row g-4">
-        <!-- Left Profile Card -->
         <div class="col-md-4">
           <div class="card p-4 text-center border-0 shadow-sm mb-4">
             <i class="fa-solid fa-user-graduate fa-4x text-success mb-3"></i>
@@ -231,7 +230,6 @@
           </div>
         </div>
 
-        <!-- Attendance Summary Card -->
         <div class="card p-4 mb-4 border-0 shadow-sm">
           <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-clipboard-user me-2"></i>Attendance Summary</h5>
           <div class="row text-center g-3">
@@ -262,7 +260,6 @@
           </div>
         </div>
 
-        <!-- Right Details Sections -->
         <div class="col-md-8">
           <div class="card p-4 mb-4 border-0 shadow-sm">
             <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-calendar-days me-2"></i>Academic Fee Status</h5>
@@ -503,7 +500,6 @@
     <!-- MAIN APP LAYOUT CONTAINER -->
     <div class="container-fluid px-3 px-md-4 py-4">
       <div class="row">
-        <!-- Desktop Sidebar Container -->
         <div class="col-lg-3 col-xl-2 d-none d-lg-block mb-4">
           <div class="card desktop-sidebar-card">
             <div class="nav flex-column nav-pills gap-1" id="desktopTabMenu">
@@ -550,10 +546,7 @@
           </div>
         </div>
 
-        <!-- Content Area -->
         <div class="col-lg-9 col-xl-10">
-          
-          <!-- Super Admin Tab Container Placeholder (Loads components/superadmin-tab.html) -->
           <div id="superAdminTab" class="content-tab d-none"></div>
 
           <div id="instAdminTab" class="content-tab d-none">
@@ -705,18 +698,18 @@
               <div class="table-responsive">
                 <table class="table table-hover table-bordered align-middle">
                   <thead class="table-light">
-  <tr>
-    <th>#</th>
-    <th>Reg No</th>
-    <th>Name</th>
-    <th>Gender</th>
-    <th>Class</th>
-    <th>Parent / Guardian</th>
-    <th>Place</th>
-    <th>Phone</th>
-    <th class="text-center">Actions</th>
-  </tr>
-</thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Reg No</th>
+                      <th>Name</th>
+                      <th>Gender</th>
+                      <th>Class</th>
+                      <th>Parent / Guardian</th>
+                      <th>Place</th>
+                      <th>Phone</th>
+                      <th class="text-center">Actions</th>
+                    </tr>
+                  </thead>
                   <tbody id="studentsTableBody"><tr><td colspan="8" class="text-center text-muted">Loading data...</td></tr></tbody>
                 </table>
               </div>
@@ -1061,7 +1054,7 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- MODALS CONTAINER PLACEHOLDER              -->
+  <!-- MODALS CONTAINER PLACEHOLDER               -->
   <!-- ========================================== -->
   <div id="modalsContainer"></div>
 
@@ -1073,10 +1066,9 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- DYNAMIC COMPONENT LOADER & SCRIPTS        -->
+  <!-- DYNAMIC COMPONENT LOADER & SCRIPTS         -->
   <!-- ========================================== -->
   <script>
-    // Components (superadmin-tab.html & modals.html) load cheyyunna script
     async function loadComponent(elementId, filePath) {
       try {
         const response = await fetch(filePath);
