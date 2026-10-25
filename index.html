@@ -1003,6 +1003,28 @@
             <div class="card p-4">
               <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-gears"></i> Institution Settings</h5>
               <div class="alert alert-info small">Manage custom settings and special funds for your institution.</div>
+
+              <!-- Student Sorting Order Settings (Principal & Admin) -->
+<div class="mb-4 p-3 border rounded bg-light">
+  <label class="form-label fw-bold text-success"><i class="fa-solid fa-arrow-down-a-z me-1"></i> Student List Sorting Order (വിദ്യാർത്ഥികളുടെ ക്രമീകരണം)</label>
+  <p class="small text-muted mb-2">ഹാജർ, മാർക്ക് ലിസ്റ്റ്, ഫീസ് എന്നിവയിൽ കുട്ടികളുടെ പേരുകൾ ഏത് ക്രമത്തിലാണ് വരേണ്ടതെന്ന് തിരഞ്ഞെടുക്കുക.</p>
+  
+  <div class="row g-2 align-items-center">
+    <div class="col-md-8">
+      <select id="settingSortOrderSelect" class="form-select">
+        <option value="REG_NO">Admission / Reg No. Order (രജിസ്ട്രേഷൻ നമ്പർ ക്രമത്തിൽ)</option>
+        <option value="BOYS_FIRST">Boys First, then Girls (ആദ്യം ആൺകുട്ടികൾ, പിന്നീട് പെൺകുട്ടികൾ)</option>
+        <option value="GIRLS_FIRST">Girls First, then Boys (ആദ്യം പെൺകുട്ടികൾ, പിന്നീട് ആൺകുട്ടികൾ)</option>
+        <option value="NAME_ASC">Alphabetical (A to Z - അക്ഷരമാലാ ക്രമത്തിൽ)</option>
+      </select>
+    </div>
+    <div class="col-md-4">
+      <button type="button" class="btn btn-success w-100" onclick="saveSortOrderSetting()">
+        <i class="fa-solid fa-save me-1"></i> Save Order
+      </button>
+    </div>
+  </div>
+</div>
               
               <div class="mb-4 p-3 border rounded bg-light">
                 <label class="form-label fw-bold"><i class="fa-solid fa-image me-1"></i> Institution Photo & Caption</label>
