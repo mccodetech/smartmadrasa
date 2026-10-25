@@ -8,6 +8,7 @@ import {
 
 const ALL_MONTHS = ["APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC", "JAN", "FEB", "MAR"];
 let lastReceiptWhatsAppPayload = null;
+window.studentPaidMonthsCache = {};
 
 // സ്പെഷ്യൽ ഫണ്ട് കാറ്റഗറി ആഡ് ചെയ്യാൻ
 window.addSpecialFundCategory = () => {
@@ -52,6 +53,38 @@ function renderSpecialFundCategoriesList() {
   listEl.innerHTML = html;
 }
 
+// ------------------------------------------
+// മാസങ്ങളുടെ ചെക്ക്ബോക്സുകൾ ജനറേറ്റ് ചെയ്യാനുള്ള ഫങ്ഷൻ
+// ------------------------------------------
+window.renderMonthSelectionCheckboxes = (paidMonthsSet = new Set()) => {
+  const container = document.getElementById("monthCheckboxesContainer") || document.getElementById("monthSelectionDiv");
+  if (!container) return;
+
+  let html = `<label class="form-label fw-bold small text-muted mb-2">Select Months to Pay:</label><div class="d-flex flex-wrap gap-2">`;
+
+  ALL_MONTHS.forEach(m => {
+    const isPaid = paidMonthsSet.has(m);
+    if (isPaid) {
+      // ഇതിനകം അടച്ച മാസങ്ങൾ ഡിസേബിൾ ചെയ്തു കാണിക്കുന്നു
+      html += `
+        <div class="form-check form-check-inline m-0">
+          <input class="form-check-input" type="checkbox" id="m_${m}" value="${m}" checked disabled>
+          <label class="form-check-label text-success fw-bold small" for="m_${m}">${m} (Paid)</label>
+        </div>`;
+    } else {
+      // അടയ്ക്കാനുള്ള മാസങ്ങൾ ടിക്ക് ചെയ്യാൻ നൽകുന്നു
+      html += `
+        <div class="form-check form-check-inline m-0">
+          <input class="form-check-input month-cb" type="checkbox" id="m_${m}" value="${m}" onchange="window.calculateFeeAmount()">
+          <label class="form-check-label small fw-bold" for="m_${m}">${m}</label>
+        </div>`;
+    }
+  });
+
+  html += `</div>`;
+  container.innerHTML = html;
+};
+
 // ഫീസ് കാറ്റഗറി മാറുമ്പോൾ സ്പെഷ്യൽ ഫണ്ട് ഡ്രോപ്ഡൗൺ കാണിക്കാൻ
 window.toggleFeeCategoryOptions = () => {
   const category = document.getElementById("payFeeCategory")?.value;
@@ -82,13 +115,13 @@ window.toggleFeeCategoryOptions = () => {
 };
 
 // ==========================================
-// FEE PERMISSION CHECKER (Comprehensive Fix)
+// FEE PERMISSION CHECKER
 // ==========================================
 window.checkFeePermission = async () => {
   const currentInstitutionId = window.currentInstitutionId || sessionStorage.getItem("currentInstitutionId");
   const currentUserRole = (window.currentUserRole || sessionStorage.getItem("currentUserRole") || "").toString().toLowerCase();
 
-  // Super Admin അല്ലെങ്കിൽ Institution Admin ആണെങ്കിൽ എപ്പോഴും പെർമിഷൻ നൽകും
+  // Super Admin അല്ലെങ്കിൽ Institution Admin ആണെങ്കിൽ എപ്പോഴും അനുവാദമുണ്ട്
   if (window.isSuperAdmin || currentUserRole === "admin") {
     return true;
   }
@@ -108,22 +141,20 @@ window.checkFeePermission = async () => {
     console.error("Error checking fee permissions:", err);
   }
 
-  // Permissive Matching Logic
   if (sysFeePermission === "all" || sysFeePermission === "admin_principal_teachers") {
-    return true; // Admin, Principal, Teacher എല്ലാവർക്കും അനുവാദമുണ്ട്
+    return true;
   } else if (sysFeePermission === "principal" || sysFeePermission === "admin_principal") {
     return currentUserRole === "admin" || currentUserRole === "principal";
   } else if (sysFeePermission === "admin" || sysFeePermission === "only_admin") {
     return currentUserRole === "admin";
   }
 
-  // Fallback Rule for Principal
   if (currentUserRole === "principal") return true;
 
   return false;
 };
 
-// ക്ലാസ് സെലക്ട് ചെയ്യുമ്പോൾ കുട്ടികളുടെ ഫീസ് വിവരങ്ങൾ ലോഡ് ചെയ്യാൻ (Fixed Permission)
+// ക്ലാസ് സെലക്ട് ചെയ്യുമ്പോൾ കുട്ടികളുടെ ഫീസ് വിവരങ്ങൾ ലോഡ് ചെയ്യാൻ
 window.loadStudentsForFees = async () => {
   const selClass = document.getElementById("feeClassSelect")?.value;
   const tableArea = document.getElementById("feesTableArea");
@@ -137,11 +168,9 @@ window.loadStudentsForFees = async () => {
   // 1. HARDCODED ROLE SAFEGUARD & PERMISSION CHECK
   let canCollect = false;
 
-  // Super Admin, Admin, Principal എന്നിവർക്ക് എപ്പോഴും നേരിട്ട് അനുവാദം നൽകുന്നു
   if (window.isSuperAdmin || currentUserRole === "admin" || currentUserRole === "principal") {
     canCollect = true;
   } else {
-    // Teacher ആകുമ്പോൾ മാത്രം Firestore-ലെ Settings പരിശോധിക്കുന്നു
     let sysPerm = (window.sysFeePermission || "ALL").toString().toUpperCase();
     try {
       if (currentInstitutionId) {
@@ -161,7 +190,7 @@ window.loadStudentsForFees = async () => {
     }
   }
 
-  // 2. UI VISIBILITY TOGGLE (ബ്ലോക്ക് മെസ്സേജ് മറയ്ക്കുകയും ടേബിൾ കാണിക്കുകയും ചെയ്യുന്നു)
+  // 2. UI VISIBILITY TOGGLE
   if (!canCollect) {
     if (alertArea) alertArea.classList.remove("d-none");
     if (collectionArea) collectionArea.classList.add("d-none");
@@ -212,6 +241,9 @@ window.loadStudentsForFees = async () => {
         });
       }
     });
+
+    // മോഡൽ തുറക്കുമ്പോൾ ഉപയോഗിക്കാൻ കാഷെയിൽ സൂക്ഷിക്കുന്നു
+    window.studentPaidMonthsCache = studentPaidMonths;
 
     let html = "";
     students.forEach(s => {
@@ -270,6 +302,9 @@ window.loadStudentsForFees = async () => {
   }
 };
 
+// ------------------------------------------
+// തുക കണക്കാക്കൽ (Amount Calculation)
+// ------------------------------------------
 window.calculateFeeAmount = () => {
   const category = document.getElementById("payFeeCategory")?.value;
   const baseFee = Number(document.getElementById("payBaseFee")?.value) || 0;
@@ -278,6 +313,7 @@ window.calculateFeeAmount = () => {
 
   if (category === "Monthly Fee") {
     if (monthDiv) monthDiv.classList.remove("d-none");
+    // ടിക്ക് ചെയ്ത മാസങ്ങൾ മാത്രം കണക്കാക്കുന്നു
     const checkedCount = document.querySelectorAll(".month-cb:checked").length;
     total = baseFee * checkedCount;
   } else {
@@ -288,7 +324,9 @@ window.calculateFeeAmount = () => {
   if (payAmtEl) payAmtEl.value = total;
 };
 
-// ഒബ്ജക്റ്റ് കൈപ്പറ്റി മോഡൽ ഓപ്പൺ ചെയ്യുന്ന ഫങ്ഷൻ
+// ------------------------------------------
+// ഒബ്ജക്റ്റ് സ്വീകരിച്ച് മോഡൽ തുറക്കുന്ന ഫങ്ഷൻ
+// ------------------------------------------
 window.openFeeModalObj = (s) => {
   try {
     const feeForm = document.getElementById("feePaymentForm");
@@ -304,6 +342,7 @@ window.openFeeModalObj = (s) => {
     const baseFee = document.getElementById("payBaseFee");
     const nameDisplay = document.getElementById("payStudentNameDisplay");
     const feeCategory = document.getElementById("payFeeCategory");
+    const monthDiv = document.getElementById("monthSelectionDiv");
 
     if (sId) sId.value = s.id;
     if (sReg) sReg.value = s.regNo;
@@ -313,8 +352,19 @@ window.openFeeModalObj = (s) => {
     if (baseFee) baseFee.value = s.fee;
     if (nameDisplay) nameDisplay.innerText = `${s.name} (Reg: ${s.regNo})`;
     if (feeCategory) feeCategory.value = "Monthly Fee";
-    
-    window.toggleFeeCategoryOptions();
+
+    // അടച്ച മാസങ്ങൾ കണ്ടെത്തി ചെക്ക്ബോക്സ് ജനറേറ്റ് ചെയ്യുന്നു
+    const paidSet = (window.studentPaidMonthsCache && window.studentPaidMonthsCache[s.regNo]) 
+      ? window.studentPaidMonthsCache[s.regNo] 
+      : new Set();
+
+    if (monthDiv) {
+      monthDiv.classList.remove("d-none");
+      window.renderMonthSelectionCheckboxes(paidSet);
+    }
+
+    const specialDiv = document.getElementById("specialFeeTypeDiv");
+    if (specialDiv) specialDiv.classList.add("d-none");
 
     const manualInput = document.getElementById("payManualReceiptInput");
     const sysReqManualReceipt = window.sysReqManualReceipt || false;
@@ -323,6 +373,7 @@ window.openFeeModalObj = (s) => {
       manualInput.placeholder = sysReqManualReceipt ? "Required" : "Optional";
     }
 
+    // പ്രാരംഭ തുക കണക്കാക്കൽ
     window.calculateFeeAmount();
 
     const modalEl = document.getElementById("feePaymentModal");
@@ -344,10 +395,12 @@ window.openFeeModalObj = (s) => {
   }
 };
 
+// ------------------------------------------
+// ഫീസ് പേയ്മെന്റ് സേവ് ചെയ്യൽ (Null-Safe)
+// ------------------------------------------
 window.saveFeePayment = async (e) => {
   if (e) e.preventDefault();
 
-  // Null Check ഉൾപ്പെടുത്തിയ Safe Extraction
   const sId = document.getElementById("payStudentId")?.value || "";
   const reg = document.getElementById("payStudentReg")?.value || "";
   const name = document.getElementById("payStudentName")?.value || "";
@@ -426,7 +479,6 @@ window.saveFeePayment = async (e) => {
       });
     }
 
-    // Receipt UI Update
     const recMad = document.getElementById("recMadrassaName");
     const recNo = document.getElementById("recNo");
     const recDate = document.getElementById("recDate");
@@ -465,7 +517,6 @@ window.saveFeePayment = async (e) => {
       else waBtn.classList.add("d-none");
     }
 
-    // Close Modal
     const modalElem = document.getElementById('feePaymentModal');
     if (modalElem && window.bootstrap) {
       const modalInstance = bootstrap.Modal.getInstance(modalElem);
@@ -487,6 +538,7 @@ window.saveFeePayment = async (e) => {
     window.showToast("Error: " + err.message, "error"); 
   }
 };
+
 window.shareToWhatsApp = () => {
   if (!lastReceiptWhatsAppPayload) return;
   const p = lastReceiptWhatsAppPayload;
