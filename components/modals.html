@@ -284,3 +284,77 @@
     </div>
   </div>
 </div>
+
+<!-- ========================================== -->
+<!-- 7. Staff / Principal Profile Add/Edit Modal-->
+<!-- ========================================== -->
+<div class="modal fade" id="staffProfileModal" tabindex="-1" aria-labelledby="staffProfileModalLabel" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title fw-bold" id="staffProfileModalLabel">
+          <i class="fa-solid fa-user-tie me-2"></i>Staff / Principal Details
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="staffProfileForm" onsubmit="window.saveStaffProfile(event)">
+        <div class="modal-body p-4">
+          <input type="hidden" id="staffDocId">
+
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Full Name *</label>
+            <input type="text" id="modalStaffName" class="form-control text-uppercase" placeholder="Enter Full Name" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Role / Designation *</label>
+            <select id="modalStaffRole" class="form-select" required>
+              <option value="principal">സദർ മുഅല്ലിം (Principal)</option>
+              <option value="vice_principal">വൈസ് സദർ (Vice Principal)</option>
+              <option value="in_charge">സദർ ഇൻ-ചാർജ് (In-Charge)</option>
+              <option value="teacher" selected>മുഅല്ലിം (Teacher)</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Mobile Phone *</label>
+            <input type="tel" id="modalStaffPhone" class="form-control" placeholder="10 digit mobile" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Email Address *</label>
+            <input type="email" id="modalStaffEmail" class="form-control" placeholder="staff@gmail.com" required>
+          </div>
+
+          <div class="mb-3" id="modalStaffPasswordDiv">
+            <label class="form-label small fw-bold">Login Password *</label>
+            <input type="password" id="modalStaffPassword" class="form-control" placeholder="Password for login">
+            <small class="text-muted">Edit ചെയ്യുമ്പോൾ പാസ്‌വേഡ് മാറ്റേണ്ടതില്ലെങ്കിൽ ഇത് ഒഴിവാക്കാം.</small>
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label small fw-bold">Assign Classes (അനുവദിച്ച ക്ലാസുകൾ)</label>
+            <div class="d-flex flex-wrap gap-2 p-2 border rounded bg-light">
+              <div class="form-check"><input type="checkbox" class="form-check-input staff-class-cb" value="1" id="msc1"><label class="form-check-label" for="msc1">Class 1</label></div>
+              <div class="form-check"><input type="checkbox" class="form-check-input staff-class-cb" value="2" id="msc2"><label class="form-check-label" for="msc2">Class 2</label></div>
+              <div class="form-check"><input type="checkbox" class="form-check-input staff-class-cb" value="3" id="msc3"><label class="form-check-label" for="msc3">Class 3</label></div>
+              <div class="form-check"><input type="checkbox" class="form-check-input staff-class-cb" value="4" id="msc4"><label class="form-check-label" for="msc4">Class 4</label></div>
+              <div class="form-check"><input type="checkbox" class="form-check-input staff-class-cb" value="5" id="msc5"><label class="form-check-label" for="msc5">Class 5</label></div>
+              <div class="form-check"><input type="checkbox" class="form-check-input staff-class-cb" value="6" id="msc6"><label class="form-check-label" for="msc6">Class 6</label></div>
+              <div class="form-check"><input type="checkbox" class="form-check-input staff-class-cb" value="7" id="msc7"><label class="form-check-label" for="msc7">Class 7</label></div>
+              <div class="form-check"><input type="checkbox" class="form-check-input staff-class-cb" value="8" id="msc8"><label class="form-check-label" for="msc8">Class 8</label></div>
+              <div class="form-check"><input type="checkbox" class="form-check-input staff-class-cb" value="9" id="msc9"><label class="form-check-label" for="msc9">Class 9</label></div>
+              <div class="form-check"><input type="checkbox" class="form-check-input staff-class-cb" value="10" id="msc10"><label class="form-check-label" for="msc10">Class 10</label></div>
+              <div class="form-check"><input type="checkbox" class="form-check-input staff-class-cb" value="11" id="msc11"><label class="form-check-label" for="msc11">Class 11</label></div>
+              <div class="form-check"><input type="checkbox" class="form-check-input staff-class-cb" value="12" id="msc12"><label class="form-check-label" for="msc12">Class 12</label></div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary px-3" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-success px-4"><i class="fa-solid fa-save me-1"></i> Save Staff</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
