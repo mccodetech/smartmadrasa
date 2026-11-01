@@ -1,172 +1,145 @@
-/* ==========================================
-   GLOBAL VARIABLES & BASE STYLES
-   ========================================== */
+/* =======================================================
+   SMART MADRASA - MODERN VISUAL IDENTITY & THEME SYSTEM
+   ======================================================= */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Malayalam:wght@400;500;600;700;800&display=swap');
+
 :root {
-  --primary: #0f5132 !important;
-  --primary-dark: #0a3622 !important;
-  --primary-light: #e8f5e9 !important;
-  --accent: #198754 !important;
-  --bg-body: #f4f6f9 !important;
-  --card-bg: #ffffff !important;
-  --text-dark: #1e293b !important;
+  /* 1. Color Palette & Dark Neutrals */
+  --header-bg: #0f172a;        /* bg-slate-900 */
+  --nav-sub-bg: #020617;       /* bg-slate-950 */
+  --border-dark: #1e293b;      /* border-slate-800 */
+  --bg-body: #f8fafc;          /* bg-slate-50 */
+  --card-bg: #ffffff;
+  --text-primary: #0f172a;     /* text-slate-900 */
+  --text-muted: #64748b;       /* text-slate-500 */
+  --border-light: #e2e8f0;     /* border-slate-200 */
+
+  /* 2. Accent & Brand Action Colors */
+  --accent-orange: #f97316;     /* bg-orange-500 */
+  --accent-orange-hover: #ea580c; /* bg-orange-600 */
+  --action-call-blue: #2563eb;  /* bg-blue-600 */
+  --action-msg-green: #16a34a;  /* bg-green-600 */
+  --badge-emerald: #10b981;     /* emerald-500 */
+  --banner-amber-bg: #fffbeb;   /* amber-50 */
+  --banner-amber-border: #fde68a; /* amber-200 */
+  --banner-amber-text: #78350f; /* amber-900 */
+  --danger-red: #dc2626;        /* red-600 */
+
+  /* 3. Category Badge Color System */
+  --badge-retail: #7e22ce;      /* bg-purple-700 */
+  --badge-services: #0f766e;    /* bg-teal-700 */
+  --badge-health: #be123c;      /* bg-rose-700 */
+  --badge-market: #c2410c;      /* bg-orange-600 */
+  --badge-neutral: rgba(15, 23, 42, 0.85); /* bg-slate-900/80 */
 }
 
 body {
   background-color: var(--bg-body) !important;
-  font-family: 'Plus Jakarta Sans', 'Manjari', sans-serif !important;
-  color: var(--text-dark) !important;
+  font-family: 'Noto Sans Malayalam', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
 }
 
-/* ==========================================
-   LOGOS & BRANDING STYLES
-   ========================================== */
-.app-navbar-logo {
-  width: 32px;
-  height: 32px;
-  object-fit: contain;
-  border-radius: 6px;
-  background: #fff;
-  padding: 2px;
+/* Scrollbar Hiding Utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
-.brand-logo-container {
-  width: 75px;
-  height: 75px;
-  border-radius: 20px;
-  background: var(--primary-light);
+/* Header & Sub-bar Navigation */
+.app-header-slate {
+  background-color: var(--header-bg) !important;
+  border-bottom: 1px solid var(--border-dark);
+}
+
+.sub-navbar-slate {
+  background-color: var(--nav-sub-bg) !important;
+  border-top: 1px solid var(--border-dark);
+}
+
+.sub-nav-link {
+  color: #94a3b8;
+  border-bottom: 2px solid transparent;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.sub-nav-link.active,
+.sub-nav-link:hover {
+  color: #fb923c !important; /* text-orange-400 */
+  border-bottom-color: var(--accent-orange) !important;
+}
+
+/* Primary Action / CTA */
+.btn-cta-orange {
+  background-color: var(--accent-orange) !important;
+  color: #ffffff !important;
+  font-weight: 600;
+  border-radius: 10px;
+  border: none;
+  transition: transform 0.1s ease, background-color 0.2s ease;
+}
+
+.btn-cta-orange:hover {
+  background-color: var(--accent-orange-hover) !important;
+}
+
+.btn-cta-orange:active {
+  transform: scale(0.96);
+}
+
+/* Form Controls & Focus States */
+.form-control:focus, .form-select:focus {
+  border-color: var(--accent-orange) !important;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.25) !important;
+}
+
+/* Category Badge Classes */
+.badge-cat-retail { background-color: var(--badge-retail) !important; color: #fff !important; }
+.badge-cat-service { background-color: var(--badge-services) !important; color: #fff !important; }
+.badge-cat-health { background-color: var(--badge-health) !important; color: #fff !important; }
+.badge-cat-market { background-color: var(--badge-market) !important; color: #fff !important; }
+.badge-cat-neutral { background-color: var(--badge-neutral) !important; backdrop-filter: blur(4px); color: #fff !important; }
+
+/* Custom PIN Input Box */
+.pin-input-box {
+  width: 140px;
+  margin: 0 auto;
+  text-align: center;
+  letter-spacing: 0.45em;
+  font-size: 1.25rem;
+  font-weight: 700;
+  padding: 8px;
+  border: 2px solid var(--border-light);
+  border-radius: 12px;
+  background-color: #f8fafc;
+  transition: border-color 0.2s;
+}
+
+.pin-input-box:focus {
+  border-color: var(--accent-orange) !important;
+  outline: none;
+}
+
+/* Toast Styling */
+.modern-toast {
+  background: #0f172a;
+  color: #fff;
+  border-radius: 12px;
+  padding: 12px 18px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
   display: flex;
   align-items: center;
-  justify-content: center;
-  margin: 0 auto;
-  box-shadow: 0 4px 12px rgba(15, 81, 50, 0.15);
+  gap: 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
 }
-
-.auth-app-logo {
-  width: 50px;
-  height: 50px;
-  object-fit: contain;
-}
-
-.inst-header-photo {
-  width: 32px !important;
-  height: 32px !important;
-  object-fit: cover !important;
-  border-radius: 50% !important;
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  background: #fff;
-  display: inline-block;
-}
-
-@media (min-width: 768px) {
-  .inst-header-photo {
-    width: 38px !important;
-    height: 38px !important;
-  }
-}
-
-/* ==========================================
-   CARDS & TABLES
-   ========================================== */
-.card {
-  border-radius: 16px !important;
-  border: 1px solid rgba(226, 232, 240, 0.8) !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important;
-  transition: all 0.3s ease !important;
-}
-
-.card:hover {
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08) !important;
-}
-
-.table th {
-  font-weight: 600 !important;
-  color: #475569 !important;
-  background-color: #f8fafc !important;
-  border-bottom: 2px solid #e2e8f0 !important;
-  padding: 12px !important;
-}
-
-.table td {
-  padding: 14px 12px !important;
-  color: #334155 !important;
-}
-
-.gallery-img {
-  height: 220px !important;
-  object-fit: contain !important;
-  width: 100% !important;
-  background-color: #f8fafc;
-  border-radius: 8px !important;
-  padding: 4px;
-}
-
-/* ==========================================
-   PREMIUM SIDEBAR NAVIGATION DESIGN
-   ========================================== */
-.desktop-sidebar-card {
-  background: #ffffff !important;
-  border-radius: 20px !important;
-  border: 1px solid #e2e8f0 !important;
-  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.06) !important;
-  padding: 16px 12px !important;
-}
-
-.nav-pills .nav-link {
-  color: #475569 !important;
-  font-weight: 600 !important;
-  font-size: 0.95rem !important;
-  border-radius: 12px !important;
-  padding: 12px 16px !important;
-  margin-bottom: 4px !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 14px !important;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  background: transparent !important;
-  border: 1px solid transparent !important;
-  border-bottom: 1px solid #f1f5f9 !important;
-}
-
-.nav-pills .nav-link:last-child {
-  border-bottom: 1px solid transparent !important;
-}
-
-.nav-pills .nav-link i {
-  font-size: 1.15rem !important;
-  width: 28px !important;
-  height: 28px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  border-radius: 8px !important;
-  background-color: #f8fafc !important;
-  color: #64748b !important;
-  transition: all 0.25s ease !important;
-}
-
-.nav-pills .nav-link:hover {
-  background-color: var(--primary-light) !important;
-  color: var(--primary) !important;
-  transform: translateX(5px) !important;
-  border-bottom-color: transparent !important;
-}
-
-.nav-pills .nav-link:hover i {
-  background-color: #ffffff !important;
-  color: var(--primary) !important;
-  transform: scale(1.1) !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
-}
-
-.nav-pills .nav-link.active {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
-  color: #ffffff !important;
-  box-shadow: 0 8px 20px -4px rgba(15, 81, 50, 0.35) !important;
-  border-bottom-color: transparent !important;
-  transform: translateX(4px) !important;
-}
-
-.nav-pills .nav-link.active i {
-  background-color: rgba(255, 255, 255, 0.2) !important;
-  color: #ffffff !important;
-}
+.modern-toast.success { border-left: 4px solid #10b981; }
+.modern-toast.error { border-left: 4px solid #ef4444; }
+.modern-toast.warning { border-left: 4px solid #f59e0b; }
