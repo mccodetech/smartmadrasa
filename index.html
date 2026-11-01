@@ -1,75 +1,108 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" translate="no" class="notranslate">
 <head>
   <!-- ========================================== -->
-  <!-- SECTION 1: HEAD & STYLESHEETS MODULE     -->
+  <!-- SECTION 1: HEAD, META & THEME ASSETS      -->
   <!-- ========================================== -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="google" content="notranslate">
   <title>Smart Madrasa - Academic Suite</title>
   
   <!-- PWA Manifest & Favicon Setup -->
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" href="images.png">
 
+  <!-- Core Libraries & Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manjari:wght@400;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   
-  <link rel="stylesheet" href="style.css?v=2">
+  <!-- Dual Font System: Noto Sans Malayalam & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Malayalam:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css?v=3">
   <style>
     :root {
-      --primary: #0f5132;
-      --primary-dark: #0a3622;
-      --primary-light: #e8f5e9;
-      --accent: #198754;
-      --bg-body: #f8fafc;
+      /* Tailwind Theme - Dark Neutrals */
+      --slate-950: #020617;
+      --slate-900: #0f172a;
+      --slate-800: #1e293b;
+      --slate-700: #334155;
+      --slate-500: #64748b;
+      --slate-400: #94a3b8;
+      --slate-200: #e2e8f0;
+      --slate-100: #f1f5f9;
+      --slate-50:  #f8fafc;
+      
+      /* Vibrant Orange & Brand Accents */
+      --orange-500: #f97316;
+      --orange-600: #ea580c;
+      --blue-600:   #2563eb;
+      --green-600:  #16a34a;
+      --emerald-500:#10b981;
+      --red-600:    #dc2626;
+      --amber-50:   #fffbeb;
+      --amber-900:  #78350f;
+
+      --bg-body: var(--slate-50);
       --card-bg: #ffffff;
-      --text-dark: #0f172a;
-      --text-muted: #64748b;
+      --text-dark: var(--slate-900);
+      --text-muted: var(--slate-500);
     }
+
     body {
       background-color: var(--bg-body);
-      font-family: 'Plus Jakarta Sans', 'Manjari', sans-serif;
+      font-family: 'Noto Sans Malayalam', 'Inter', sans-serif;
       color: var(--text-dark);
       -webkit-font-smoothing: antialiased;
     }
-    .bg-madrassa { background-color: var(--primary) !important; }
-    .btn-madrassa { background-color: var(--accent); color: #fff; border: none; font-weight: 500; }
-    .btn-madrassa:hover { background-color: var(--primary); color: #fff; }
+
+    /* Scrollbar Utility */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Top Navigation Bars */
+    .bg-slate-header { background-color: var(--slate-900) !important; }
+    .bg-slate-subnav { background-color: var(--slate-950) !important; border-top: 1px solid var(--slate-800); }
     
+    .btn-orange-cta {
+      background-color: var(--orange-500) !important;
+      color: #fff !important;
+      font-weight: 600;
+      border: none;
+      transition: background-color 0.2s, transform 0.1s;
+    }
+    .btn-orange-cta:hover { background-color: var(--orange-600) !important; }
+    .btn-orange-cta:active { transform: scale(0.96); }
+
+    .form-control:focus, .form-select:focus {
+      border-color: var(--orange-500) !important;
+      box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.25) !important;
+    }
+
+    /* Auth Wrapper */
     .auth-wrapper {
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: radial-gradient(circle at top left, #dcfce7 0%, #f1f5f9 60%);
+      background: radial-gradient(circle at top left, #fed7aa 0%, var(--slate-50) 65%);
       padding: 20px;
     }
     .auth-card {
       background: var(--card-bg);
       border-radius: 20px;
-      border: 1px solid rgba(226, 232, 240, 0.8);
+      border: 1px solid var(--slate-200);
       box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.08);
       width: 100%;
       max-width: 460px;
       padding: 32px 28px;
     }
-    .brand-icon {
-      width: 64px;
-      height: 64px;
-      border-radius: 18px;
-      background: var(--primary-light);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--primary);
-      font-size: 28px;
-      margin: 0 auto 16px auto;
-    }
     .segmented-control {
-      background: #f1f5f9;
+      background: var(--slate-100);
       border-radius: 12px;
       padding: 4px;
       display: flex;
@@ -83,43 +116,32 @@
       padding: 8px 16px;
       font-weight: 600;
       font-size: 0.9rem;
-      color: var(--text-muted);
+      color: var(--slate-500);
       border-radius: 9px;
       transition: all 0.2s ease;
     }
     .segmented-control button.active {
       background: #ffffff;
-      color: var(--primary);
+      color: var(--slate-900);
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      border-bottom: 2px solid var(--orange-500);
     }
-    .btn-primary-custom {
-      background: var(--primary);
-      color: #fff;
-      font-weight: 600;
-      border-radius: 10px;
-      padding: 11px;
-      border: none;
-      transition: all 0.2s;
-    }
-    .btn-primary-custom:hover {
-      background: var(--primary-dark);
-      color: #fff;
-    }
-    .card { border-radius: 14px; border: 1px solid #e2e8f0; box-shadow: 0 4px 16px rgba(0,0,0,0.03); }
-    .nav-pills .nav-link { color: #475569; font-weight: 600; border-radius: 10px; padding: 10px 14px; }
-    .nav-pills .nav-link.active { background-color: var(--primary); color: #fff; }
+
+    .card { border-radius: 14px; border: 1px solid var(--slate-200); box-shadow: 0 4px 16px rgba(0,0,0,0.03); }
+    .nav-pills .nav-link { color: var(--slate-700); font-weight: 600; border-radius: 10px; padding: 10px 14px; }
+    .nav-pills .nav-link.active { background-color: var(--slate-900); color: #fff; }
     
     .quick-link-card { 
       cursor: pointer; 
       transition: transform 0.2s ease, box-shadow 0.2s ease; 
       border-radius: 12px;
       background: #fff;
-      border: 1px solid #e2e8f0;
+      border: 1px solid var(--slate-200);
     }
     .quick-link-card:hover { 
       transform: translateY(-3px); 
       box-shadow: 0 8px 20px rgba(0,0,0,0.06); 
-      border-color: var(--accent);
+      border-color: var(--orange-500);
     }
 
     .star-badge { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; font-weight: 700; border-radius: 20px; padding: 4px 12px; }
@@ -129,15 +151,6 @@
       grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
       gap: 8px;
     }
-    .month-badge {
-      padding: 8px 4px;
-      border-radius: 8px;
-      text-align: center;
-      font-size: 0.8rem;
-      font-weight: 700;
-    }
-    .month-paid { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
-    .month-pending { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
 
     #appToastContainer {
       position: fixed;
@@ -146,7 +159,7 @@
       z-index: 10000;
     }
     .modern-toast {
-      background: #0f172a;
+      background: var(--slate-900);
       color: #fff;
       border-radius: 12px;
       padding: 14px 20px;
@@ -159,9 +172,9 @@
       min-width: 280px;
       animation: toastSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .modern-toast.success { background: #065f46; border-left: 5px solid #10b981; }
-    .modern-toast.error { background: #991b1b; border-left: 5px solid #ef4444; }
-    .modern-toast.warning { background: #92400e; border-left: 5px solid #f59e0b; }
+    .modern-toast.success { border-left: 5px solid var(--emerald-500); }
+    .modern-toast.error { border-left: 5px solid var(--red-600); }
+    .modern-toast.warning { border-left: 5px solid var(--orange-500); }
     @keyframes toastSlideUp {
       from { transform: translateY(30px); opacity: 0; }
       to { transform: translateY(0); opacity: 1; }
@@ -193,7 +206,7 @@
     }
   </style>
 </head>
-<body>
+<body translate="no" class="notranslate">
 
   <div id="appToastContainer"></div>
 
@@ -201,7 +214,7 @@
   <!-- SECTION 2: PARENT PORTAL VIEW DASHBOARD   -->
   <!-- ========================================== -->
   <div id="parentViewSection" class="d-none">
-    <nav class="navbar navbar-expand-lg bg-madrassa navbar-dark shadow-sm">
+    <nav class="navbar navbar-expand-lg bg-slate-header navbar-dark shadow-sm">
       <div class="container px-4">
         <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="#">
           <span id="parentInstNameDisplay">Smart Madrasa</span>
@@ -224,14 +237,14 @@
             <p class="text-muted mb-0">Reg No: <b id="pvRegNo">-</b></p>
             <p class="text-muted small">Father: <span id="pvFather">-</span></p>
             <div class="border-top pt-3 mt-2">
-              <h6>Total Performance Points</h6>
+              <h6 class="text-slate-500">Total Performance Points</h6>
               <h3 class="fw-bold text-warning mb-0" id="pvTotalPoints">0 Pts</h3>
             </div>
           </div>
         </div>
 
         <div class="card p-4 mb-4 border-0 shadow-sm">
-          <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-clipboard-user me-2"></i>Attendance Summary</h5>
+          <h5 class="fw-bold text-slate-800 mb-3"><i class="fa-solid fa-clipboard-user text-success me-2"></i>Attendance Summary</h5>
           <div class="row text-center g-3">
             <div class="col-3">
               <div class="p-3 border rounded bg-light">
@@ -262,7 +275,7 @@
 
         <div class="col-md-8">
           <div class="card p-4 mb-4 border-0 shadow-sm">
-            <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-calendar-days me-2"></i>Academic Fee Status</h5>
+            <h5 class="fw-bold text-slate-800 mb-3"><i class="fa-solid fa-calendar-days text-success me-2"></i>Academic Fee Status</h5>
             <div id="pvFeeMonthGrid" class="month-grid mb-3"></div>
             <div class="table-responsive">
               <table class="table table-bordered align-middle">
@@ -273,7 +286,7 @@
           </div>
 
           <div class="card p-4 mb-4 border-0 shadow-sm">
-            <h5 class="fw-bold text-primary mb-3"><i class="fa-solid fa-award me-2"></i>Examination Marks & Totals</h5>
+            <h5 class="fw-bold text-slate-800 mb-3"><i class="fa-solid fa-award text-primary me-2"></i>Examination Marks & Totals</h5>
             <div class="table-responsive">
               <table class="table table-bordered align-middle">
                 <thead class="table-light"><tr><th>Exam</th><th>Subject / Total</th><th>Mark Obtained</th></tr></thead>
@@ -283,7 +296,7 @@
           </div>
 
           <div class="card p-4 mb-4 border-0 shadow-sm">
-            <h5 class="fw-bold text-warning text-dark mb-3"><i class="fa-solid fa-star me-2"></i>Performance & Tasks History</h5>
+            <h5 class="fw-bold text-slate-800 mb-3"><i class="fa-solid fa-star text-warning me-2"></i>Performance & Tasks History</h5>
             <div class="table-responsive">
               <table class="table table-bordered align-middle">
                 <thead class="table-light"><tr><th>Date</th><th>Task / Activity</th><th>Points</th></tr></thead>
@@ -302,12 +315,12 @@
   <div id="authSection" class="auth-wrapper">
     <div class="auth-card">
       <div class="text-center mb-3">
-  <div class="brand-icon p-1 bg-transparent">
-    <img src="images.png" alt="Logo" style="width: 50px; height: 50px; object-fit: contain;">
-  </div>
-  <h3 class="fw-bold m-0">Smart Madrasa</h3>
-  <p class="text-muted small mt-1">Digital Madrasa Management Suite</p>
-</div>
+        <div class="p-1 bg-transparent mb-2 d-inline-block">
+          <img src="images.png" alt="Logo" style="width: 50px; height: 50px; object-fit: contain;">
+        </div>
+        <h3 class="fw-bold m-0 text-slate-900">Smart Madrasa</h3>
+        <p class="text-slate-500 small mt-1">Digital Madrasa Management Suite</p>
+      </div>
 
       <div class="segmented-control">
         <button type="button" class="active" id="tabBtnLogin" onclick="switchAuthTab('login')">Sign In</button>
@@ -316,17 +329,17 @@
 
       <form id="loginForm" onsubmit="handleUnifiedLogin(event)">
         <div class="mb-3">
-          <label class="form-label fw-semibold small">Email or Student Reg No.</label>
+          <label class="form-label fw-semibold small text-slate-700">Email or Student Reg No.</label>
           <div class="input-group">
-            <span class="input-group-text bg-light text-muted"><i class="fa-solid fa-user-circle"></i></span>
+            <span class="input-group-text bg-light text-slate-400"><i class="fa-solid fa-user-circle"></i></span>
             <input type="text" id="loginIdentifier" class="form-control" placeholder="name@madrasa.com / 101" oninput="detectLoginMode()" required>
           </div>
         </div>
 
         <div class="mb-3" id="passwordGroup">
-          <label class="form-label fw-semibold small">Password</label>
+          <label class="form-label fw-semibold small text-slate-700">Password</label>
           <div class="input-group">
-            <span class="input-group-text bg-light text-muted"><i class="fa-solid fa-lock"></i></span>
+            <span class="input-group-text bg-light text-slate-400"><i class="fa-solid fa-lock"></i></span>
             <input type="password" id="loginPassword" class="form-control" placeholder="••••••••">
             <button class="btn btn-outline-secondary password-toggle-btn" type="button" onclick="togglePasswordVisibility('loginPassword', this)">
               <i class="fa-solid fa-eye"></i>
@@ -335,70 +348,75 @@
         </div>
 
         <div class="mb-3 d-none" id="phoneGroup">
-          <label class="form-label fw-semibold small">Registered Mobile Number</label>
+          <label class="form-label fw-semibold small text-slate-700">Registered Mobile Number</label>
           <div class="input-group">
-            <span class="input-group-text bg-light text-muted"><i class="fa-solid fa-phone"></i></span>
+            <span class="input-group-text bg-light text-slate-400"><i class="fa-solid fa-phone"></i></span>
             <input type="tel" id="loginMobile" class="form-control" placeholder="9847...">
           </div>
         </div>
 
-        <button type="submit" id="btnAuthSubmit" class="btn btn-primary-custom w-100 mt-2">Sign In</button>
+        <button type="submit" id="btnAuthSubmit" class="btn btn-orange-cta w-100 mt-2 py-2">Sign In</button>
       </form>
 
+      <!-- Single Madrasa Registration Option -->
       <div id="signupOptions" class="d-none">
-          <div class="d-grid gap-3">
-              <button class="btn btn-outline-success p-3 text-start" onclick="showSignupForm('madrasa')">
-                  <i class="fa-solid fa-building-columns fs-4 mb-2 d-block"></i>
-                  <strong class="d-block">Register a New Madrasa</strong>
-                  <small class="text-muted">For Institution Admins</small>
-              </button>
-          </div>
+        <div class="d-grid gap-3">
+          <button class="btn btn-outline-success p-3 text-start" onclick="showSignupForm('madrasa')">
+            <i class="fa-solid fa-building-columns fs-4 mb-2 d-block text-success"></i>
+            <strong class="d-block text-slate-900">Register a New Madrasa</strong>
+            <small class="text-slate-500">For Institution Admins</small>
+          </button>
+        </div>
       </div>
 
       <form id="signupForm" class="d-none" onsubmit="handleSignUp(event)">
-        <button type="button" class="btn btn-sm btn-link text-decoration-none mb-3 p-0" onclick="switchAuthTab('signup')"><i class="fa-solid fa-arrow-left"></i> Back</button>
-        <div class="alert alert-warning py-2 small">New registrations require Developer / Super Admin approval.</div>
+        <button type="button" class="btn btn-sm btn-link text-decoration-none mb-3 p-0 text-slate-500" onclick="switchAuthTab('signup')">
+          <i class="fa-solid fa-arrow-left"></i> Back
+        </button>
+        <div class="alert alert-warning py-2 small" style="background-color: var(--amber-50); border-color: #fde68a; color: var(--amber-900);">
+          New registrations require Developer / Super Admin approval.
+        </div>
         
         <div class="mb-2">
-            <label class="form-label small fw-semibold">Board of Education</label>
-            <select id="regBoard" class="form-select" required>
-                <option value="">Select Board</option>
-                <option value="SKIMVB">SKIMVB</option>
-                <option value="SKSVB">SKSVB</option>
-                <option value="DKIMVB">DKIMVB</option>
-                <option value="MTIK">MTIK</option>
-                <option value="CBSE">CBSE / Other</option>
-                <option value="Other">Other</option>
-            </select>
+          <label class="form-label small fw-semibold text-slate-700">Board of Education</label>
+          <select id="regBoard" class="form-select" required>
+            <option value="">Select Board</option>
+            <option value="SKIMVB">SKIMVB</option>
+            <option value="SKSVB">SKSVB</option>
+            <option value="DKIMVB">DKIMVB</option>
+            <option value="MTIK">MTIK</option>
+            <option value="CBSE">CBSE / Other</option>
+            <option value="Other">Other</option>
+          </select>
         </div>
         <div class="mb-2">
-          <label class="form-label small fw-semibold">Madrasa Reg / Code</label>
+          <label class="form-label small fw-semibold text-slate-700">Madrasa Reg / Code</label>
           <input type="text" id="regInstCode" class="form-control text-uppercase" placeholder="e.g. 1145" required>
         </div>
         <div class="mb-2">
-          <label class="form-label small fw-semibold">Madrasa Name</label>
+          <label class="form-label small fw-semibold text-slate-700">Madrasa Name</label>
           <input type="text" id="regInstName" class="form-control text-uppercase" placeholder="Madrasa Full Name" required>
         </div>
         <div class="mb-2">
-          <label class="form-label small fw-semibold">Address / Building Name</label>
+          <label class="form-label small fw-semibold text-slate-700">Address / Building Name</label>
           <input type="text" id="regAddress" class="form-control text-uppercase" placeholder="Building Name" required>
         </div>
         <div class="row g-2 mb-2">
-            <div class="col-6"><label class="form-label small fw-semibold">Place</label><input type="text" id="regPlace" class="form-control text-uppercase" required></div>
-            <div class="col-6"><label class="form-label small fw-semibold">Post Office</label><input type="text" id="regPo" class="form-control text-uppercase" required></div>
+          <div class="col-6"><label class="form-label small fw-semibold text-slate-700">Place</label><input type="text" id="regPlace" class="form-control text-uppercase" required></div>
+          <div class="col-6"><label class="form-label small fw-semibold text-slate-700">Post Office</label><input type="text" id="regPo" class="form-control text-uppercase" required></div>
         </div>
         <div class="row g-2 mb-2">
-            <div class="col-6"><label class="form-label small fw-semibold">District</label><input type="text" id="regDistrict" class="form-control text-uppercase" required></div>
-            <div class="col-6"><label class="form-label small fw-semibold">Pincode</label><input type="text" id="regPincode" class="form-control" required></div>
+          <div class="col-6"><label class="form-label small fw-semibold text-slate-700">District</label><input type="text" id="regDistrict" class="form-control text-uppercase" required></div>
+          <div class="col-6"><label class="form-label small fw-semibold text-slate-700">Pincode</label><input type="text" id="regPincode" class="form-control" required></div>
         </div>
-        <div class="mb-2"><label class="form-label small fw-semibold">Admin Name</label><input type="text" id="regUserName" class="form-control text-uppercase" required></div>
+        <div class="mb-2"><label class="form-label small fw-semibold text-slate-700">Admin Name</label><input type="text" id="regUserName" class="form-control text-uppercase" required></div>
         <div class="row g-2 mb-2">
-            <div class="col-6"><label class="form-label small fw-semibold">Mobile</label><input type="tel" id="regPhone" class="form-control" required></div>
-            <div class="col-6"><label class="form-label small fw-semibold">WhatsApp</label><input type="tel" id="regWhatsapp" class="form-control"></div>
+          <div class="col-6"><label class="form-label small fw-semibold text-slate-700">Mobile</label><input type="tel" id="regPhone" class="form-control" required></div>
+          <div class="col-6"><label class="form-label small fw-semibold text-slate-700">WhatsApp</label><input type="tel" id="regWhatsapp" class="form-control"></div>
         </div>
-        <div class="mb-2"><label class="form-label small fw-semibold">Email</label><input type="email" id="regEmail" class="form-control" required></div>
+        <div class="mb-2"><label class="form-label small fw-semibold text-slate-700">Email</label><input type="email" id="regEmail" class="form-control" required></div>
         <div class="mb-2">
-          <label class="form-label small fw-semibold">Password</label>
+          <label class="form-label small fw-semibold text-slate-700">Password</label>
           <div class="input-group">
             <input type="password" id="regPassword" class="form-control" required>
             <button class="btn btn-outline-secondary password-toggle-btn" type="button" onclick="togglePasswordVisibility('regPassword', this)"><i class="fa-solid fa-eye"></i></button>
@@ -408,57 +426,7 @@
           <label class="form-label small fw-semibold text-success">Confirm Password</label>
           <input type="text" id="regPasswordConfirm" class="form-control border-success" required>
         </div>
-        <button type="submit" id="btnSubmitSignup" class="btn btn-primary-custom w-100">Submit for Approval</button>
-      </form>
-
-      <form id="staffSignupForm" class="d-none" onsubmit="handleStaffSignUp(event)">
-        <button type="button" class="btn btn-sm btn-link text-decoration-none mb-3 p-0" onclick="switchAuthTab('signup')"><i class="fa-solid fa-arrow-left"></i> Back</button>
-        <div class="alert alert-info py-2 small">Registration requires approval from Institution Admin.</div>
-        <div class="mb-2">
-            <label class="form-label small fw-semibold">Role / Designation</label>
-            <select id="staffRole" class="form-select" required>
-                <option value="principal">സദർ മുഅല്ലിം (Principal)</option>
-                <option value="vice_principal">വൈസ് സദർ (Vice Principal)</option>
-                <option value="in_charge">സദർ ഇൻ-ചാർജ് (In-Charge)</option>
-                <option value="teacher" selected>മുഅല്ലിം (Teacher)</option>
-            </select>
-        </div>
-        <div class="row g-2 mb-2">
-          <div class="col-6">
-            <label class="form-label small fw-semibold">Board</label>
-            <select id="staffBoard" class="form-select" required>
-                <option value="">Select Board</option>
-                <option value="SKIMVB">SKIMVB</option>
-                <option value="SKSVB">SKSVB</option>
-                <option value="DKIMVB">DKIMVB</option>
-                <option value="MTIK">MTIK</option>
-                <option value="CBSE">CBSE / Other</option>
-                <option value="Other">Other</option>
-            </select>
-          </div>
-          <div class="col-6">
-            <label class="form-label small fw-semibold">Madrasa Code</label>
-            <input type="text" id="staffInstCode" class="form-control text-uppercase" required>
-          </div>
-        </div>
-        <div class="mb-2"><label class="form-label small fw-semibold">Full Name</label><input type="text" id="staffName" class="form-control text-uppercase" required></div>
-        <div class="row g-2 mb-2">
-          <div class="col-6"><label class="form-label small fw-semibold">Mobile</label><input type="tel" id="staffPhone" class="form-control" required></div>
-          <div class="col-6"><label class="form-label small fw-semibold">WhatsApp</label><input type="tel" id="staffWhatsapp" class="form-control"></div>
-        </div>
-        <div class="mb-2"><label class="form-label small fw-semibold">Email</label><input type="email" id="staffEmail" class="form-control" required></div>
-        <div class="mb-2">
-          <label class="form-label small fw-semibold">Password</label>
-          <div class="input-group">
-            <input type="password" id="staffPassword" class="form-control" required>
-            <button class="btn btn-outline-secondary password-toggle-btn" type="button" onclick="togglePasswordVisibility('staffPassword', this)"><i class="fa-solid fa-eye"></i></button>
-          </div>
-        </div>
-        <div class="mb-3">
-          <label class="form-label small fw-semibold text-success">Confirm Password</label>
-          <input type="text" id="staffPasswordConfirm" class="form-control border-success" required>
-        </div>
-        <button type="submit" id="btnStaffSubmitSignup" class="btn btn-primary-custom w-100">Submit Request</button>
+        <button type="submit" id="btnSubmitSignup" class="btn btn-orange-cta w-100 py-2">Submit for Approval</button>
       </form>
     </div>
   </div>
@@ -467,26 +435,35 @@
   <!-- SECTION 4: MAIN DASHBOARD & TABS SCREEN   -->
   <!-- ========================================== -->
   <div id="appSection" class="d-none">
-    <nav class="navbar navbar-dark bg-madrassa shadow-sm sticky-top py-2">
-      <div class="container-fluid top-header-bar px-2 px-md-3">
+    <!-- Header Bar: Fixed/Sticky Slate-900 -->
+    <nav class="navbar navbar-dark bg-slate-header sticky-top py-2 px-2 px-md-3 shadow-sm">
+      <div class="container-fluid top-header-bar p-0">
         <div class="d-flex align-items-center gap-2">
-          <button class="btn btn-outline-light btn-sm d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas"><i class="fa-solid fa-bars"></i></button>
+          <button class="btn btn-outline-light btn-sm d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas">
+            <i class="fa-solid fa-bars"></i>
+          </button>
           <a class="navbar-brand fw-bold m-0 d-flex align-items-center gap-2 top-brand-text" href="#" onclick="showTab('homeDashboardTab')">
-            <img src="images.png" alt="Logo" class="app-navbar-logo" style="height: 30px;">
-            <span id="displayMadrassaName">Smart Madrasa</span>
+            <div class="rounded-lg p-1 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background: rgba(255,255,255,0.1); border-radius: 8px;">
+              <img src="images.png" alt="Logo" style="max-height: 24px; max-width: 24px; object-fit: contain;">
+            </div>
+            <div>
+              <span id="displayMadrassaName" class="fw-bold text-white text-sm sm:text-lg tracking-tight d-block leading-tight">Smart Madrasa</span>
+              <small class="text-slate-400 d-block" style="font-size: 10px;">Academic Suite</small>
+            </div>
           </a>
         </div>
         <div class="d-flex align-items-center gap-2 text-white">
           <button class="btn btn-sm btn-outline-warning d-none" id="superAdminBackBtn" onclick="returnToSuperAdminConsole()"><i class="fa-solid fa-arrow-left me-1"></i> Console</button>
-          <span class="badge bg-light text-dark d-none d-md-inline-block" id="displayUserRole">Admin</span>
-          <button class="btn btn-outline-light btn-sm" onclick="handleLogout()"><i class="fa-solid fa-right-from-bracket me-md-1"></i> <span class="d-none d-md-inline-block">Logout</span></button>
+          <span class="badge bg-slate-800 text-slate-300 border border-slate-700 d-none d-md-inline-block px-2.5 py-1.5" id="displayUserRole">Admin</span>
+          <button class="btn btn-sm btn-outline-danger" onclick="handleLogout()"><i class="fa-solid fa-right-from-bracket me-md-1"></i> <span class="d-none d-md-inline-block">Logout</span></button>
         </div>
       </div>
     </nav>
 
-    <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarOffcanvas">
-      <div class="offcanvas-header bg-madrassa text-white">
-        <h5 class="offcanvas-title fw-bold"><i class="fa-solid fa-kaaba me-2"></i> Menu</h5>
+    <!-- Mobile Offcanvas Menu -->
+    <div class="offcanvas offcanvas-start bg-slate-header text-white" tabindex="-1" id="sidebarOffcanvas">
+      <div class="offcanvas-header border-bottom border-slate-800">
+        <h5 class="offcanvas-title fw-bold"><i class="fa-solid fa-kaaba text-warning me-2"></i> Menu</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
       </div>
       <div class="offcanvas-body p-3">
@@ -497,73 +474,76 @@
     <!-- MAIN APP LAYOUT CONTAINER -->
     <div class="container-fluid px-3 px-md-4 py-4">
       <div class="row">
+        <!-- Desktop Sidebar Menu -->
         <div class="col-lg-3 col-xl-2 d-none d-lg-block mb-4">
-          <div class="card desktop-sidebar-card">
+          <div class="card p-2 bg-white border border-slate-200">
             <div class="nav flex-column nav-pills gap-1" id="desktopTabMenu">
               <button class="nav-link active text-start" id="homeMenuBtn" onclick="showTab('homeDashboardTab')">
-                <i class="fa-solid fa-house"></i> Home
+                <i class="fa-solid fa-house me-2"></i> Home
               </button>
               <button class="nav-link text-start d-none" id="superAdminMasterBtn" style="display: none !important;" onclick="showTab('superAdminTab')">
-  <i class="fa-solid fa-shield-halved"></i> All Madrasas
-</button>
+                <i class="fa-solid fa-shield-halved me-2"></i> All Madrasas
+              </button>
               <button class="nav-link text-start d-none" id="instAdminStaffBtn" onclick="showTab('instAdminTab'); loadPrincipalsList();">
-                <i class="fa-solid fa-user-tie"></i> Manage Staff
+                <i class="fa-solid fa-user-tie me-2"></i> Manage Staff
               </button>
               <button class="nav-link text-start d-none" id="studentsMenuBtn" onclick="showTab('studentsListTab')">
-                <i class="fa-solid fa-users"></i> Students
+                <i class="fa-solid fa-users me-2"></i> Students
               </button>
               <button class="nav-link text-start d-none" id="attendanceMenuBtn" onclick="showTab('attendanceTab')">
-                <i class="fa-solid fa-calendar-check"></i> Attendance
+                <i class="fa-solid fa-calendar-check me-2"></i> Attendance
               </button>
               <button class="nav-link text-start d-none" id="marksMenuBtn" onclick="showTab('marksTab')">
-                <i class="fa-solid fa-award"></i> Marks Entry
+                <i class="fa-solid fa-award me-2"></i> Marks Entry
               </button>
               <button class="nav-link text-start d-none" id="performanceMenuBtn" onclick="showTab('performanceTab')">
-                <i class="fa-solid fa-star"></i> Performance
+                <i class="fa-solid fa-star me-2"></i> Performance
               </button>
               <button class="nav-link text-start d-none" id="feesMenuBtn" onclick="showTab('feesTab')">
-                <i class="fa-solid fa-receipt"></i> Fees & Receipts
+                <i class="fa-solid fa-receipt me-2"></i> Fees & Receipts
               </button>
               <button class="nav-link text-start d-none" id="subjectSettingsBtn" onclick="showTab('subjectSettingsTab')">
-                <i class="fa-solid fa-book"></i> Subject Settings
+                <i class="fa-solid fa-book me-2"></i> Subject Settings
               </button>
               <button class="nav-link text-start d-none" id="feeSettingsBtn" onclick="showTab('feeSettingsTab')">
-                <i class="fa-solid fa-gear"></i> Fee Settings
+                <i class="fa-solid fa-gear me-2"></i> Fee Settings
               </button>
               <button class="nav-link text-start d-none" id="promotionMenuBtn" onclick="showTab('promotionTab')">
-                <i class="fa-solid fa-graduation-cap"></i> Class Promotion
+                <i class="fa-solid fa-graduation-cap me-2"></i> Class Promotion
               </button>
               <button class="nav-link text-start" id="committeeMenuBtn" onclick="showTab('committeeTab'); loadCommitteeMembers();">
-                <i class="fa-solid fa-users-gear"></i> Managing Committee
+                <i class="fa-solid fa-users-gear me-2"></i> Managing Committee
               </button>
               <button class="nav-link text-start d-none" id="settingsMenuBtn" onclick="showTab('settingsTab'); loadInstitutionSettings();">
-                <i class="fa-solid fa-gears"></i> Settings
+                <i class="fa-solid fa-gears me-2"></i> Settings
               </button>
             </div>
           </div>
         </div>
 
+        <!-- Content Area -->
         <div class="col-lg-9 col-xl-10">
           <div id="superAdminTab" class="content-tab d-none"></div>
 
+          <!-- Staff / Principal Management Tab -->
           <div id="instAdminTab" class="content-tab d-none">
             <div class="card p-4">
               <div class="d-flex justify-content-between align-items-center mb-3">
-                  <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-user-tie me-2"></i> Manage Principals & Staff</h5>
-                  <button class="btn btn-sm btn-outline-success" onclick="openStaffProfileModal(null)"><i class="fa-solid fa-plus me-1"></i> Add Staff / Principal</button>
+                <h5 class="fw-bold text-slate-900 m-0"><i class="fa-solid fa-user-tie text-success me-2"></i> Manage Principals & Staff</h5>
+                <button class="btn btn-sm btn-orange-cta" onclick="openStaffProfileModal(null)"><i class="fa-solid fa-plus me-1"></i> Add Staff / Principal</button>
               </div>
               <div id="instPendingStaffSection" class="mb-4 d-none">
-                  <h6 class="fw-bold text-warning mb-2"><i class="fa-solid fa-clock me-1"></i> Pending Approvals</h6>
-                  <div class="table-responsive">
-                      <table class="table table-bordered align-middle table-warning">
-                          <thead><tr><th>Name</th><th>Role</th><th>Email</th><th>Phone</th><th class="text-center" style="width:120px;">Action</th></tr></thead>
-                          <tbody id="instPendingStaffTableBody"></tbody>
-                      </table>
-                  </div>
+                <h6 class="fw-bold text-warning mb-2"><i class="fa-solid fa-clock me-1"></i> Pending Approvals</h6>
+                <div class="table-responsive">
+                  <table class="table table-bordered align-middle table-warning">
+                    <thead><tr><th>Name</th><th>Role</th><th>Email</th><th>Phone</th><th class="text-center" style="width:120px;">Action</th></tr></thead>
+                    <tbody id="instPendingStaffTableBody"></tbody>
+                  </table>
+                </div>
               </div>
               <form id="instAssignClassesForm" onsubmit="instAssignClassesToStaff(event)" class="mb-4 d-none border p-3 rounded bg-light">
                 <input type="hidden" id="instAssignStaffId"><input type="hidden" id="instAssignStaffRole">
-                <h6 class="fw-bold text-primary mb-2">Approve <span id="instAssignStaffNameDisplay"></span></h6>
+                <h6 class="fw-bold text-slate-800 mb-2">Approve <span id="instAssignStaffNameDisplay" class="text-orange-600"></span></h6>
                 <div class="row g-3 align-items-end">
                   <div class="col-md-6" id="instClassAssignDiv">
                     <label class="form-label fw-bold">Assign Classes</label>
@@ -583,12 +563,12 @@
                     </div>
                   </div>
                   <div class="col-md-6 text-end">
-                      <button type="button" class="btn btn-secondary me-2" onclick="document.getElementById('instAssignClassesForm').classList.add('d-none');">Cancel</button>
-                      <button type="submit" class="btn btn-success"><i class="fa-solid fa-check me-1"></i> Confirm</button>
+                    <button type="button" class="btn btn-secondary me-2" onclick="document.getElementById('instAssignClassesForm').classList.add('d-none');">Cancel</button>
+                    <button type="submit" class="btn btn-success"><i class="fa-solid fa-check me-1"></i> Confirm</button>
                   </div>
                 </div>
               </form>
-              <h6 class="fw-bold mt-4 mb-2">Assigned Staff & Principals</h6>
+              <h6 class="fw-bold mt-4 mb-2 text-slate-800">Assigned Staff & Principals</h6>
               <div class="table-responsive">
                 <table class="table table-bordered align-middle">
                   <thead class="table-light"><tr><th>Name</th><th>Role</th><th>Email</th><th>Phone</th><th class="text-center">Action</th></tr></thead>
@@ -601,44 +581,44 @@
           <!-- Home Dashboard Tab -->
           <div id="homeDashboardTab" class="content-tab">
             <div class="card p-3 mb-4 border-0 shadow-sm text-center" id="homeGalleryCard" style="display: none;">
-              <h5 class="fw-bold text-success mb-3 text-start"><i class="fa-solid fa-images me-2"></i>Institution Photo</h5>
+              <h5 class="fw-bold text-slate-900 mb-3 text-start"><i class="fa-solid fa-images text-success me-2"></i>Institution Photo</h5>
               <div class="row g-3 justify-content-center" id="homeGalleryContainer"></div>
             </div>
 
             <div class="row g-4">
               <div class="col-lg-8">
                 <div class="card p-3 mb-4 border-0 shadow-sm">
-                  <h6 class="fw-bold text-success mb-3"><i class="fa-solid fa-bolt me-2"></i>Quick Links</h6>
+                  <h6 class="fw-bold text-slate-900 mb-3"><i class="fa-solid fa-bolt text-warning me-2"></i>Quick Links</h6>
                   <div class="row g-2">
                     <div class="col-4 col-md-3">
                       <div class="p-3 text-center quick-link-card" onclick="showTab('attendanceTab')">
                         <i class="fa-solid fa-calendar-check fa-2x text-success mb-2 d-block"></i>
-                        <span class="small fw-semibold text-dark">Attendance</span>
+                        <span class="small fw-semibold text-slate-800">Attendance</span>
                       </div>
                     </div>
                     <div class="col-4 col-md-3">
                       <div class="p-3 text-center quick-link-card" onclick="showTab('performanceTab')">
                         <i class="fa-solid fa-star fa-2x text-warning mb-2 d-block"></i>
-                        <span class="small fw-semibold text-dark">Performance</span>
+                        <span class="small fw-semibold text-slate-800">Performance</span>
                       </div>
                     </div>
                     <div class="col-4 col-md-3">
                       <div class="p-3 text-center quick-link-card" onclick="showTab('marksTab')">
                         <i class="fa-solid fa-award fa-2x text-primary mb-2 d-block"></i>
-                        <span class="small fw-semibold text-dark">Marks Entry</span>
+                        <span class="small fw-semibold text-slate-800">Marks Entry</span>
                       </div>
                     </div>
                     <div class="col-4 col-md-3">
                       <div class="p-3 text-center quick-link-card" onclick="showTab('feesTab')">
                         <i class="fa-solid fa-receipt fa-2x text-info mb-2 d-block"></i>
-                        <span class="small fw-semibold text-dark">Fees Collection</span>
+                        <span class="small fw-semibold text-slate-800">Fees Collection</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 <div class="card p-4 mb-4">
-                  <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-trophy me-2"></i>Top Performers Leaderboard</h5>
+                  <h5 class="fw-bold text-slate-900 mb-3"><i class="fa-solid fa-trophy text-warning me-2"></i>Top Performers Leaderboard</h5>
                   <div class="row g-3 text-center" id="homeLeaderboardArea">
                     <div class="col-md-4"><div class="card p-3 bg-light"><span class="star-badge mb-2 d-inline-block">Today's Star</span><h5 class="fw-bold mt-2" id="starTodayName">-</h5><small class="text-muted" id="starTodayClass">-</small></div></div>
                     <div class="col-md-4"><div class="card p-3 bg-light"><span class="star-badge mb-2 d-inline-block">Weekly Star</span><h5 class="fw-bold mt-2" id="starWeekName">-</h5><small class="text-muted" id="starWeekClass">-</small></div></div>
@@ -649,7 +629,7 @@
 
               <div class="col-lg-4">
                 <div class="card p-4 border-0 shadow-sm mb-4">
-                  <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-bullhorn me-2"></i>Notifications</h5>
+                  <h5 class="fw-bold text-slate-900 mb-3"><i class="fa-solid fa-bullhorn text-orange-500 me-2"></i>Notifications</h5>
                   <div class="list-group list-group-flush" id="homeNotificationsList">
                     <div class="list-group-item px-0 text-muted small">
                       <i class="fa-solid fa-circle-info text-primary me-2"></i> പുതിയ അക്കാദമിക് വർഷത്തെ വിവരങ്ങൾ ഉടൻ അപ്ഡേറ്റ് ചെയ്യുന്നതാണ്.
@@ -665,11 +645,11 @@
             <div class="card p-4 border-0 shadow-sm mt-3 bg-white">
               <div class="row">
                 <div class="col-md-6 mb-3 mb-md-0">
-                  <h5 class="fw-bold text-success mb-2"><i class="fa-solid fa-school me-2"></i>About Institution</h5>
+                  <h5 class="fw-bold text-slate-900 mb-2"><i class="fa-solid fa-school text-success me-2"></i>About Institution</h5>
                   <p class="text-muted small m-0">ഉന്നതമായ മൂല്യങ്ങളും മികച്ച മതഭൗതിക വിദ്യാഭ്യാസവും നൽകിക്കൊണ്ട് പ്രവർത്തിക്കുന്ന സ്ഥാപനം.</p>
                 </div>
                 <div class="col-md-6 text-md-end">
-                  <h5 class="fw-bold text-success mb-2"><i class="fa-solid fa-address-book me-2"></i>Contact Us</h5>
+                  <h5 class="fw-bold text-slate-900 mb-2"><i class="fa-solid fa-address-book text-success me-2"></i>Contact Us</h5>
                   <p class="text-muted small mb-1"><i class="fa-solid fa-location-dot me-1"></i> ഓഫീസ് വിലാസം, പ്രധാന റോഡ്, കേരളം</p>
                   <p class="text-muted small mb-0"><i class="fa-brands fa-whatsapp text-success me-1"></i> WhatsApp: <a href="https://wa.me/" class="text-decoration-none text-success" id="instWhatsAppLink">+91 XXXXXXXXXX</a></p>
                 </div>
@@ -677,12 +657,13 @@
             </div>
           </div>
 
+          <!-- Students List Tab -->
           <div id="studentsListTab" class="content-tab d-none">
             <div class="card p-4">
               <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-                <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-users"></i> Student Directory</h5>
+                <h5 class="fw-bold text-slate-900 m-0"><i class="fa-solid fa-users text-success me-1"></i> Student Directory</h5>
                 <div class="d-flex gap-2" id="adminStudentActions">
-                  <button class="btn btn-sm btn-success" onclick="openStudentProfileModal(null)"><i class="fa-solid fa-user-plus me-1"></i> New Admission</button>
+                  <button class="btn btn-sm btn-orange-cta" onclick="openStudentProfileModal(null)"><i class="fa-solid fa-user-plus me-1"></i> New Admission</button>
                   <button class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#bulkImportModal"><i class="fa-solid fa-file-csv me-1"></i> Bulk Import</button>
                   <button class="btn btn-sm btn-outline-danger" onclick="deleteAllStudents()"><i class="fa-solid fa-trash-can me-1"></i> Delete All</button>
                 </div>
@@ -707,7 +688,7 @@
                       <th class="text-center">Actions</th>
                     </tr>
                   </thead>
-                  <tbody id="studentsTableBody"><tr><td colspan="8" class="text-center text-muted">Loading data...</td></tr></tbody>
+                  <tbody id="studentsTableBody"><tr><td colspan="9" class="text-center text-muted">Loading data...</td></tr></tbody>
                 </table>
               </div>
               <div class="d-flex justify-content-between align-items-center mt-3">
@@ -720,10 +701,10 @@
           <!-- Attendance Module -->
           <div id="attendanceTab" class="content-tab d-none">
             <div class="card p-4 mb-4">
-              <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-calendar-check"></i> Daily Attendance</h5>
+              <h5 class="fw-bold text-slate-900 mb-3"><i class="fa-solid fa-calendar-check text-success me-2"></i> Daily Attendance</h5>
               <div class="row g-3 mb-4">
-                <div class="col-md-4"><label class="form-label">Date</label><input type="date" id="attDate" class="form-control" onchange="resetAttendanceButton()"></div>
-                <div class="col-md-4"><label class="form-label">Select Class</label><select id="attClassSelect" class="form-select" onchange="loadAttendanceSheet()"></select></div>
+                <div class="col-md-4"><label class="form-label text-slate-700">Date</label><input type="date" id="attDate" class="form-control" onchange="resetAttendanceButton()"></div>
+                <div class="col-md-4"><label class="form-label text-slate-700">Select Class</label><select id="attClassSelect" class="form-select" onchange="loadAttendanceSheet()"></select></div>
               </div>
               <div id="attendanceSheetArea" class="d-none">
                 <div class="d-flex justify-content-between align-items-center mb-2">
@@ -736,7 +717,7 @@
                     <tbody id="attendanceTableBody"></tbody>
                   </table>
                 </div>
-                <button id="btnSaveAttendance" class="btn btn-primary-custom px-4 mt-2" onclick="saveClassAttendance()"><i class="fa-solid fa-check-double me-1"></i> Save Attendance</button>
+                <button id="btnSaveAttendance" class="btn btn-orange-cta px-4 mt-2" onclick="saveClassAttendance()"><i class="fa-solid fa-check-double me-1"></i> Save Attendance</button>
               </div>
             </div>
 
@@ -745,7 +726,7 @@
               <p class="small text-muted mb-3">അധ്യായന വർഷത്തിന്റെ ഇടയിൽ ഈ സിസ്റ്റം ഉപയോഗിക്കാൻ തുടങ്ങുമ്പോൾ, ഇതുവരെയുള്ള ഹാജർ നില ഇവിടെ ചേർക്കാവുന്നതാണ്.</p>
               <div class="row g-3 mb-3">
                 <div class="col-md-4">
-                  <label class="form-label fw-bold">Select Class</label>
+                  <label class="form-label fw-bold text-slate-700">Select Class</label>
                   <select id="manualAttClassSelect" class="form-select" onchange="loadManualAttendanceSheet()"></select>
                 </div>
                 <div class="col-md-8 d-flex align-items-end">
@@ -769,7 +750,7 @@
                     <tbody id="manualAttendanceTableBody"></tbody>
                   </table>
                 </div>
-                <button id="btnSaveManualAttendance" class="btn btn-warning px-4 mt-2" onclick="saveManualAttendance()"><i class="fa-solid fa-save me-1"></i> Save Previous Attendance</button>
+                <button id="btnSaveManualAttendance" class="btn btn-warning px-4 mt-2 text-dark fw-bold" onclick="saveManualAttendance()"><i class="fa-solid fa-save me-1"></i> Save Previous Attendance</button>
               </div>
             </div>
           </div>
@@ -778,19 +759,19 @@
           <div id="marksTab" class="content-tab d-none">
             <div class="card p-4">
               <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-award"></i> Examination Marks Entry</h5>
+                <h5 class="fw-bold text-slate-900 m-0"><i class="fa-solid fa-award text-primary me-2"></i> Examination Marks Entry</h5>
                 <button class="btn btn-sm btn-outline-success" onclick="showTab('subjectSettingsTab')"><i class="fa-solid fa-book me-1"></i> Configure Subjects</button>
               </div>
               <div class="row g-3 mb-4">
                 <div class="col-md-6">
-                  <label class="form-label">Select Exam *</label>
+                  <label class="form-label text-slate-700">Select Exam *</label>
                   <select id="markExamSelect" class="form-select" onchange="resetMarksButton()">
                     <option value="Quarterly Exam">Quarterly Exam</option>
                     <option value="Half Yearly Exam">Half Yearly Exam</option>
                     <option value="Annual Exam">Annual Exam</option>
                   </select>
                 </div>
-                <div class="col-md-6"><label class="form-label">Class</label><select id="markClassSelect" class="form-select" onchange="loadMarksEntrySheet()"></select></div>
+                <div class="col-md-6"><label class="form-label text-slate-700">Class</label><select id="markClassSelect" class="form-select" onchange="loadMarksEntrySheet()"></select></div>
               </div>
               <div id="marksSheetArea" class="d-none">
                 <div class="table-responsive">
@@ -799,7 +780,7 @@
                     <tbody id="marksTableBody"></tbody>
                   </table>
                 </div>
-                <button id="btnSaveMarks" class="btn btn-primary-custom px-4 mt-2" onclick="saveClassMarks()"><i class="fa-solid fa-floppy-disk me-1"></i> Save Marks</button>
+                <button id="btnSaveMarks" class="btn btn-orange-cta px-4 mt-2" onclick="saveClassMarks()"><i class="fa-solid fa-floppy-disk me-1"></i> Save Marks</button>
               </div>
             </div>
           </div>
@@ -807,11 +788,11 @@
           <!-- Subject Settings Tab -->
           <div id="subjectSettingsTab" class="content-tab d-none">
             <div class="card p-4">
-              <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-book"></i> Class Subjects Configuration</h5>
+              <h5 class="fw-bold text-slate-900 mb-3"><i class="fa-solid fa-book text-success me-2"></i> Class Subjects Configuration</h5>
               <div class="alert alert-info small">Configure custom subjects for each class.</div>
               <div class="row g-3 mb-4">
                 <div class="col-md-4">
-                  <label class="form-label fw-bold">Select Class</label>
+                  <label class="form-label fw-bold text-slate-700">Select Class</label>
                   <select id="subjectClassSelect" class="form-select" onchange="loadClassSubjectSettings()">
                     <option value="1">Class 1</option><option value="2">Class 2</option><option value="3">Class 3</option>
                     <option value="4">Class 4</option><option value="5">Class 5</option><option value="6">Class 6</option>
@@ -821,9 +802,9 @@
                 </div>
               </div>
               <div id="subjectListArea">
-                <label class="form-label fw-bold">Subjects (Comma Separated)</label>
+                <label class="form-label fw-bold text-slate-700">Subjects (Comma Separated)</label>
                 <input type="text" id="customSubjectsInput" class="form-control mb-3" placeholder="e.g. Quran, Tajweed, Fiqh, Aqeedah, Tareekh, Lisan">
-                <button class="btn btn-primary" onclick="saveClassSubjects()"><i class="fa-solid fa-save me-1"></i> Save Subjects</button>
+                <button class="btn btn-orange-cta px-4" onclick="saveClassSubjects()"><i class="fa-solid fa-save me-1"></i> Save Subjects</button>
               </div>
             </div>
           </div>
@@ -832,19 +813,19 @@
           <div id="performanceTab" class="content-tab d-none">
             <div class="card p-4">
                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-                <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-star me-2"></i>Student Performance & Tasks</h5>
-                <button class="btn btn-sm btn-outline-success" onclick="openCustomTaskModal()"><i class="fa-solid fa-plus me-1"></i> Add Custom Task</button>
+                <h5 class="fw-bold text-slate-900 m-0"><i class="fa-solid fa-star text-warning me-2"></i> Student Performance & Tasks</h5>
+                <button class="btn btn-sm btn-orange-cta" onclick="openCustomTaskModal()"><i class="fa-solid fa-plus me-1"></i> Add Custom Task</button>
               </div>
               <div class="row g-3 mb-4">
                 <div class="col-md-6">
-                  <label class="form-label">Select Task *</label>
+                  <label class="form-label text-slate-700">Select Task *</label>
                   <select id="perfTaskSelect" class="form-select" onchange="resetPerfButton()">
                     <option value="Completed Homework (+10)|10">Completed Homework (+10 Pts)</option>
                     <option value="Proper Uniform (+5)|5">Proper Uniform (+5 Pts)</option>
                     <option value="Quiz / Competition Winner (+20)|20">Quiz / Competition Winner (+20 Pts)</option>
                   </select>
                 </div>
-                <div class="col-md-6"><label class="form-label">Select Class *</label><select id="perfClassSelect" class="form-select" onchange="loadStudentsForPerfSheet()"></select></div>
+                <div class="col-md-6"><label class="form-label text-slate-700">Select Class *</label><select id="perfClassSelect" class="form-select" onchange="loadStudentsForPerfSheet()"></select></div>
               </div>
               <div id="perfSheetArea" class="d-none">
                 <div class="row g-2 align-items-center mb-2">
@@ -859,7 +840,7 @@
                     <tbody id="perfTableBody"></tbody>
                   </table>
                 </div>
-                <button id="btnSavePerf" class="btn btn-primary-custom px-4 mt-2" onclick="saveBulkPerformancePoints()"><i class="fa-solid fa-floppy-disk me-1"></i> Save Points</button>
+                <button id="btnSavePerf" class="btn btn-orange-cta px-4 mt-2" onclick="saveBulkPerformancePoints()"><i class="fa-solid fa-floppy-disk me-1"></i> Save Points</button>
               </div>
             </div>
           </div>
@@ -867,13 +848,13 @@
           <!-- Fees Tab -->
           <div id="feesTab" class="content-tab d-none">
              <div class="card p-4">
-              <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-receipt"></i> Fee Collection & Receipt</h5>
+              <h5 class="fw-bold text-slate-900 mb-3"><i class="fa-solid fa-receipt text-success me-2"></i> Fee Collection & Receipt</h5>
               
               <div id="feeCollectionAlert" class="alert alert-warning d-none">You do not have permission to collect fees.</div>
 
               <div id="feeCollectionArea">
                   <div class="row g-3 mb-4">
-                    <div class="col-md-4"><label class="form-label">Select Class</label><select id="feeClassSelect" class="form-select" onchange="loadStudentsForFees()"></select></div>
+                    <div class="col-md-4"><label class="form-label text-slate-700">Select Class</label><select id="feeClassSelect" class="form-select" onchange="loadStudentsForFees()"></select></div>
                   </div>
                   
                   <div id="feesTableArea" class="d-none">
@@ -915,19 +896,19 @@
           <!-- Fee Settings Tab -->
           <div id="feeSettingsTab" class="content-tab d-none">
             <div class="card p-4">
-              <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-gear"></i> Fee Management Settings</h5>
+              <h5 class="fw-bold text-slate-900 mb-3"><i class="fa-solid fa-gear text-success me-2"></i> Fee Management Settings</h5>
               <div class="alert alert-info small">Configure fee permissions, manual receipt requirements, and special fee categories (e.g., Annual Day, Building Fund).</div>
               
               <div class="row g-4 mt-2">
                   <div class="col-md-6">
                       <div class="p-3 border rounded mb-3">
-                          <h6 class="fw-bold mb-3">Who can collect fees?</h6>
+                          <h6 class="fw-bold mb-3 text-slate-800">Who can collect fees?</h6>
                           <div class="form-check mb-2"><input class="form-check-input" type="radio" name="feePermission" id="feePermAdmin" value="admin"><label class="form-check-label" for="feePermAdmin">Only Institution Admin</label></div>
                           <div class="form-check mb-2"><input class="form-check-input" type="radio" name="feePermission" id="feePermPrincipal" value="principal"><label class="form-check-label" for="feePermPrincipal">Admin & Principal</label></div>
                           <div class="form-check mb-2"><input class="form-check-input" type="radio" name="feePermission" id="feePermAll" value="all" checked><label class="form-check-label" for="feePermAll">Admin, Principal & All Teachers</label></div>
                       </div>
                       <div class="p-3 border rounded">
-                          <h6 class="fw-bold mb-3">Receipt Settings</h6>
+                          <h6 class="fw-bold mb-3 text-slate-800">Receipt Settings</h6>
                           <div class="form-check form-switch mb-3">
                             <input class="form-check-input" type="checkbox" id="reqManualReceipt">
                             <label class="form-check-label" for="reqManualReceipt">Make 'Book Receipt No' mandatory</label>
@@ -937,12 +918,12 @@
 
                   <div class="col-md-6">
                       <div class="p-3 border rounded h-100 bg-light">
-                          <h6 class="fw-bold mb-2 text-success"><i class="fa-solid fa-tags me-1"></i> Special Fee Categories</h6>
+                          <h6 class="fw-bold mb-2 text-slate-800"><i class="fa-solid fa-tags text-success me-1"></i> Special Fee Categories</h6>
                           <p class="small text-muted mb-3">Add special fee types (e.g., Building Fund, Annual Day, Uniform) that can be collected separately.</p>
                           
                           <div class="input-group mb-3">
                               <input type="text" id="newSpecialFeeInput" class="form-control text-uppercase" placeholder="e.g. BUILDING FUND">
-                              <button class="btn btn-success" type="button" onclick="addSpecialFeeCategory()"><i class="fa-solid fa-plus me-1"></i> Add</button>
+                              <button class="btn btn-orange-cta" type="button" onclick="addSpecialFeeCategory()"><i class="fa-solid fa-plus me-1"></i> Add</button>
                           </div>
 
                           <div class="border rounded bg-white p-2" style="max-height: 150px; overflow-y: auto;">
@@ -954,7 +935,7 @@
                   </div>
 
                   <div class="col-12">
-                      <button class="btn btn-primary px-4" onclick="saveFeeSettings()"><i class="fa-solid fa-save me-1"></i> Save All Settings</button>
+                      <button class="btn btn-orange-cta px-4 py-2" onclick="saveFeeSettings()"><i class="fa-solid fa-save me-1"></i> Save All Settings</button>
                   </div>
               </div>
             </div>
@@ -964,8 +945,8 @@
           <div id="committeeTab" class="content-tab d-none">
             <div class="card p-4">
               <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-users-gear me-2"></i>Managing Committee Members</h5>
-                <button class="btn btn-sm btn-success d-none" id="btnAddCommitteeMember" onclick="openCommitteeModal()"><i class="fa-solid fa-user-plus me-1"></i> Add Member</button>
+                <h5 class="fw-bold text-slate-900 m-0"><i class="fa-solid fa-users-gear text-success me-2"></i> Managing Committee Members</h5>
+                <button class="btn btn-sm btn-orange-cta d-none" id="btnAddCommitteeMember" onclick="openCommitteeModal()"><i class="fa-solid fa-user-plus me-1"></i> Add Member</button>
               </div>
               <div class="table-responsive">
                 <table class="table table-hover table-bordered align-middle">
@@ -989,54 +970,54 @@
           <!-- Promotion Tab -->
           <div id="promotionTab" class="content-tab d-none">
             <div class="card p-4">
-              <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-graduation-cap"></i> Annual Class Promotion</h5>
+              <h5 class="fw-bold text-slate-900 mb-3"><i class="fa-solid fa-graduation-cap text-success me-2"></i> Annual Class Promotion</h5>
               <div class="row g-3">
-                <div class="col-md-4"><label class="form-label">Current Class</label><select id="fromClass" class="form-select"><option value="1">Class 1</option><option value="2">Class 2</option><option value="3">Class 3</option></select></div>
-                <div class="col-md-4"><label class="form-label">Promote To</label><select id="toClass" class="form-select"><option value="2">Class 2</option><option value="3">Class 3</option><option value="Passed Out">Passed Out</option></select></div>
-                <div class="col-md-4 d-flex align-items-end"><button class="btn btn-warning w-100" onclick="promoteStudents()"><i class="fa-solid fa-arrow-up-right-dots me-1"></i> Promote Class</button></div>
+                <div class="col-md-4"><label class="form-label text-slate-700">Current Class</label><select id="fromClass" class="form-select"><option value="1">Class 1</option><option value="2">Class 2</option><option value="3">Class 3</option></select></div>
+                <div class="col-md-4"><label class="form-label text-slate-700">Promote To</label><select id="toClass" class="form-select"><option value="2">Class 2</option><option value="3">Class 3</option><option value="Passed Out">Passed Out</option></select></div>
+                <div class="col-md-4 d-flex align-items-end"><button class="btn btn-warning w-100 text-dark fw-bold" onclick="promoteStudents()"><i class="fa-solid fa-arrow-up-right-dots me-1"></i> Promote Class</button></div>
               </div>
             </div>
           </div>
 
-          <!-- Settings Tab -->
+          <!-- Settings Tab (With Student Sorting Order Feature) -->
           <div id="settingsTab" class="content-tab d-none">
             <div class="card p-4">
-              <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-gears"></i> Institution Settings</h5>
-              <div class="alert alert-info small">Manage custom settings and special funds for your institution.</div>
+              <h5 class="fw-bold text-slate-900 mb-3"><i class="fa-solid fa-gears text-success me-2"></i> Institution Settings</h5>
+              <div class="alert alert-info small">Manage custom settings, student sorting preference, and special funds for your institution.</div>
 
               <!-- Student Sorting Order Settings (Principal & Admin) -->
-<div class="mb-4 p-3 border rounded bg-light">
-  <label class="form-label fw-bold text-success"><i class="fa-solid fa-arrow-down-a-z me-1"></i> Student List Sorting Order (വിദ്യാർത്ഥികളുടെ ക്രമീകരണം)</label>
-  <p class="small text-muted mb-2">ഹാജർ, മാർക്ക് ലിസ്റ്റ്, ഫീസ് എന്നിവയിൽ കുട്ടികളുടെ പേരുകൾ ഏത് ക്രമത്തിലാണ് വരേണ്ടതെന്ന് തിരഞ്ഞെടുക്കുക.</p>
-  
-  <div class="row g-2 align-items-center">
-    <div class="col-md-8">
-      <select id="settingSortOrderSelect" class="form-select">
-        <option value="REG_NO">Admission / Reg No. Order (രജിസ്ട്രേഷൻ നമ്പർ ക്രമത്തിൽ)</option>
-        <option value="BOYS_FIRST">Boys First, then Girls (ആദ്യം ആൺകുട്ടികൾ, പിന്നീട് പെൺകുട്ടികൾ)</option>
-        <option value="GIRLS_FIRST">Girls First, then Boys (ആദ്യം പെൺകുട്ടികൾ, പിന്നീട് ആൺകുട്ടികൾ)</option>
-        <option value="NAME_ASC">Alphabetical (A to Z - അക്ഷരമാലാ ക്രമത്തിൽ)</option>
-      </select>
-    </div>
-    <div class="col-md-4">
-      <button type="button" class="btn btn-success w-100" onclick="saveSortOrderSetting()">
-        <i class="fa-solid fa-save me-1"></i> Save Order
-      </button>
-    </div>
-  </div>
-</div>
+              <div class="mb-4 p-3 border rounded bg-white shadow-sm">
+                <label class="form-label fw-bold text-slate-900"><i class="fa-solid fa-arrow-down-a-z text-orange-500 me-1"></i> Student List Sorting Order (വിദ്യാർത്ഥികളുടെ ക്രമീകരണം)</label>
+                <p class="small text-muted mb-2">ഹാജർ, മാർക്ക് ലിസ്റ്റ്, ഫീസ് എന്നിവയിൽ കുട്ടികളുടെ പേരുകൾ ഏത് ക്രമത്തിലാണ് വരേണ്ടതെന്ന് തിരഞ്ഞെടുക്കുക.</p>
+                
+                <div class="row g-2 align-items-center">
+                  <div class="col-md-8">
+                    <select id="settingSortOrderSelect" class="form-select">
+                      <option value="REG_NO">Admission / Reg No. Order (രജിസ്ട്രേഷൻ നമ്പർ ക്രമത്തിൽ)</option>
+                      <option value="BOYS_FIRST">Boys First, then Girls (ആദ്യം ആൺകുട്ടികൾ, പിന്നീട് പെൺകുട്ടികൾ)</option>
+                      <option value="GIRLS_FIRST">Girls First, then Boys (ആദ്യം പെൺകുട്ടികൾ, പിന്നീട് ആൺകുട്ടികൾ)</option>
+                      <option value="NAME_ASC">Alphabetical (A to Z - അക്ഷരമാലാ ക്രമത്തിൽ)</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                    <button type="button" class="btn btn-orange-cta w-100 py-2" onclick="saveSortOrderSetting()">
+                      <i class="fa-solid fa-save me-1"></i> Save Order
+                    </button>
+                  </div>
+                </div>
+              </div>
               
               <div class="mb-4 p-3 border rounded bg-light">
-                <label class="form-label fw-bold"><i class="fa-solid fa-image me-1"></i> Institution Photo & Caption</label>
+                <label class="form-label fw-bold text-slate-800"><i class="fa-solid fa-image text-success me-1"></i> Institution Photo & Caption</label>
                 <p class="small text-muted mb-2">സ്ഥാപനത്തിന്റെ പ്രധാന ഫോട്ടോയും അടിക്കുറിപ്പും നൽകുക.</p>
                 
                 <div class="row g-2 mb-3">
                   <div class="col-md-6">
-                    <label class="form-label small">Choose Photo</label>
+                    <label class="form-label small text-slate-700">Choose Photo</label>
                     <input type="file" id="instPhoto1File" class="form-control form-control-sm mb-1" accept="image/*">
                   </div>
                   <div class="col-md-6">
-                    <label class="form-label small">Caption</label>
+                    <label class="form-label small text-slate-700">Caption</label>
                     <input type="text" id="instCaption1" class="form-control form-control-sm text-uppercase" placeholder="Enter Photo Caption">
                   </div>
                 </div>
@@ -1046,19 +1027,19 @@
                   <img id="instPhotoPreviewImg" src="" alt="Institution Photo" style="max-height: 120px; border-radius: 8px; border: 1px solid #ccc; padding: 2px;">
                 </div>
 
-                <button type="button" class="btn btn-success btn-sm px-4" onclick="saveSinglePhotoSetting()"><i class="fa-solid fa-save me-1"></i> Save Photo</button>
+                <button type="button" class="btn btn-orange-cta btn-sm px-4" onclick="saveSinglePhotoSetting()"><i class="fa-solid fa-save me-1"></i> Save Photo</button>
               </div>
 
               <div class="mb-4 p-3 border rounded bg-light">
-                <label class="form-label fw-bold">Special Fund Categories (Comma Separated)</label>
+                <label class="form-label fw-bold text-slate-800">Special Fund Categories (Comma Separated)</label>
                 <div class="input-group">
                   <input type="text" id="settingSpecialFundsInput" class="form-control" placeholder="e.g. BUILDING FUND, ANNUAL DAY">
-                  <button class="btn btn-success btn-sm px-3" onclick="saveSpecialFundsSetting()"><i class="fa-solid fa-save me-1"></i> Save</button>
+                  <button class="btn btn-orange-cta btn-sm px-3" onclick="saveSpecialFundsSetting()"><i class="fa-solid fa-save me-1"></i> Save</button>
                 </div>
               </div>
 
               <div class="mb-3 p-3 border rounded bg-light">
-                <label class="form-label fw-bold">Total Working Days (ഇതുവരെയുള്ള ആകെ പ്രവൃത്തി ദിവസങ്ങൾ)</label>
+                <label class="form-label fw-bold text-slate-800">Total Working Days (ഇതുവരെയുള്ള ആകെ പ്രവൃത്തി ദിവസങ്ങൾ)</label>
                 <div class="input-group">
                   <input type="number" id="settingTotalWorkingDays" class="form-control" placeholder="e.g. 65">
                   <button class="btn btn-primary btn-sm px-3" onclick="saveWorkingDaysSetting()"><i class="fa-solid fa-save me-1"></i> Save</button>
@@ -1079,7 +1060,7 @@
 
   <!-- PWA Install Floating Button -->
   <div id="pwaInstallContainer" class="d-none position-fixed bottom-0 end-0 p-3" style="z-index: 9999;">
-    <button id="btnInstallApp" class="btn btn-success shadow-lg rounded-pill px-4 py-2 fw-bold d-flex align-items-center gap-2">
+    <button id="btnInstallApp" class="btn btn-orange-cta shadow-lg rounded-pill px-4 py-2 fw-bold d-flex align-items-center gap-2">
       <i class="fa-solid fa-download"></i> Install App
     </button>
   </div>
